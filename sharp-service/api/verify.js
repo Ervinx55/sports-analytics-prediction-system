@@ -44,6 +44,18 @@ function addDays(dateLike, days) {
   return d;
 }
 
+function americanToDecimal(odds) {
+  const o = Number(odds);
+  if (!Number.isFinite(o) || o === 0) return null;
+  return o > 0 ? 1 + o / 100 : 1 + 100 / Math.abs(o);
+}
+
+function expectedValue(p, odds) {
+  const d = americanToDecimal(odds);
+  if (d === null || !Number.isFinite(p)) return null;
+  return p * d - 1;
+}
+
 function parseWindMph(wind = "") {
   const m = String(wind).match(/(\d+(?:\.\d+)?)\s*mph/i);
   return m ? Number(m[1]) : null;
@@ -108,18 +120,123 @@ function lineupFromFeed(feed, side) {
   const order = Array.isArray(teamBox.battingOrder)
     ? teamBox.battingOrder
     : [];
-  const players = feed?.gameData?.players || {};
-  const names = order.map((id) => players[`ID${id}`]?.fullName || String(id));
+  const gamePlayers = feed?.gameData?.players || {};
+  const boxPlayers = teamBox.players || {};
+  const battingOrder = order.map((id, index) => {
+    const box = boxPlayers[`ID${id}`] || {};
+    const season = box?.seasonStats?.batting || {};
+    return {
+      spot: index + 1,
+      id,
+      name:
+        gamePlayers[`ID${id}`]?.fullName ||
+        box?.person?.fullName ||
+        String(id),
+      ops: season.ops ?? null,
+      obp: season.obp ?? null,
+      slg: season.slg ?? null,
+      plateAppearances: season.plateAppearances ?? null,
+      gamesPlayed: season.gamesPlayed ?? null,
+    };
+  });
+
   return {
     confirmed: order.length >= 9,
     count: order.length,
-    battingOrder: names,
+    battingOrder,
+  };
+}
+
+function numberStat(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+function lineupStrength(lineup, teamBaseline) {
+  if (!lineup?.confirmed || !teamBaseline) {
+    return {
+      available: false,
+      reason: "confirmed nine-player lineup and team baseline required",
+    };
+  }
+
+  const teamOps = numberStat(teamBaseline.ops);
+  if (teamOps === null) {
+    return { available: false, reason: "team OPS unavailable" };
+  }
+
+  // Approximate relative PA opportunity by lineup slot.
+  const orderWeights = [1.12, 1.10, 1.08, 1.07, 1.04, 1.00, 0.96, 0.92, 0.88];
+  let weighted = 0;
+  let weightTotal = 0;
+  const players = [];
+
+  for (let i = 0; i < lineup.battingOrder.length; i++) {
+    const p = lineup.battingOrder[i];
+    const rawOps = numberStat(p.ops);
+    const pa = numberStat(p.plateAppearances) || 0;
+    const reliability = Math.max(0, Math.min(1, pa / 300));
+    // Small-sample hitters are regressed heavily toward the team baseline.
+    const regressedOps =
+      rawOps === null
+        ? teamOps
+        : teamOps + reliability * (rawOps - teamOps);
+    const w = orderWeights[i] || 0.85;
+    weighted += regressedOps * w;
+    weightTotal += w;
+    players.push({
+      ...p,
+      rawOps,
+      reliability: Number(reliability.toFixed(3)),
+      regressedOps: Number(regressedOps.toFixed(3)),
+      weight: w,
+    });
+  }
+
+  const weightedOps = weightTotal ? weighted / weightTotal : teamOps;
+  const deltaOps = weightedOps - teamOps;
+
+  // Conservative conversion: a +.050 OPS lineup versus team baseline is worth
+  // roughly +0.6 win-probability points. Per-team effect is capped at +/-1.25 pp.
+  const probabilityAdjustment = Math.max(
+    -0.0125,
+    Math.min(0.0125, deltaOps * 0.12)
+  );
+
+  return {
+    available: true,
+    teamSeasonOps: Number(teamOps.toFixed(3)),
+    weightedLineupOps: Number(weightedOps.toFixed(3)),
+    deltaOps: Number(deltaOps.toFixed(3)),
+    probabilityAdjustment: Number(probabilityAdjustment.toFixed(4)),
+    probabilityAdjustmentPctPoints: Number(
+      (probabilityAdjustment * 100).toFixed(2)
+    ),
+    players,
+    methodology:
+      "Confirmed batting order weighted by lineup slot; player season OPS is regressed toward team OPS based on plate appearances. Probability effect is conservative and capped at +/-1.25 points per team.",
   };
 }
 
 function sameStarter(expected, actual) {
   if (!expected?.id || !actual?.id) return false;
   return Number(expected.id) === Number(actual.id);
+}
+
+async function teamHittingBaseline(teamId) {
+  const data = await fetchJson(
+    `https://statsapi.mlb.com/api/v1/teams/${teamId}/stats?stats=season&group=hitting&season=2026`
+  );
+  const split = data?.stats?.[0]?.splits?.[0];
+  const stat = split?.stat || {};
+  return {
+    teamId,
+    ops: stat.ops ?? null,
+    obp: stat.obp ?? null,
+    slg: stat.slg ?? null,
+    runs: stat.runs ?? null,
+    plateAppearances: stat.plateAppearances ?? null,
+  };
 }
 
 async function priorFinalGames(teamId, targetTime) {
@@ -315,6 +432,7 @@ export default async function handler(req, res) {
 
     const gameCache = new Map();
     const bullpenCache = new Map();
+    const teamStatsCache = new Map();
 
     async function gameVerification(d) {
       const key = String(d.mlbGamePk || d.eventID);
@@ -345,13 +463,31 @@ export default async function handler(req, res) {
               );
             }
 
-            const [awayBullpen, homeBullpen] = await Promise.all([
-              bullpenCache.get(bullpenKeyAway),
-              bullpenCache.get(bullpenKeyHome),
-            ]);
+            if (!teamStatsCache.has(awayTeamId)) {
+              teamStatsCache.set(awayTeamId, teamHittingBaseline(awayTeamId));
+            }
+            if (!teamStatsCache.has(homeTeamId)) {
+              teamStatsCache.set(homeTeamId, teamHittingBaseline(homeTeamId));
+            }
+
+            const [awayBullpen, homeBullpen, awayTeamHitting, homeTeamHitting] =
+              await Promise.all([
+                bullpenCache.get(bullpenKeyAway),
+                bullpenCache.get(bullpenKeyHome),
+                teamStatsCache.get(awayTeamId),
+                teamStatsCache.get(homeTeamId),
+              ]);
 
             const awayLineup = lineupFromFeed(feed, "away");
             const homeLineup = lineupFromFeed(feed, "home");
+            const awayLineupStrength = lineupStrength(
+              awayLineup,
+              awayTeamHitting
+            );
+            const homeLineupStrength = lineupStrength(
+              homeLineup,
+              homeTeamHitting
+            );
             const officialStarters = feed?.gameData?.probablePitchers || {};
             const expectedStarters = d?.probablePitchers || {};
 
@@ -400,6 +536,10 @@ export default async function handler(req, res) {
                   homeLineup.confirmed,
                 away: awayLineup,
                 home: homeLineup,
+                strength: {
+                  away: awayLineupStrength,
+                  home: homeLineupStrength,
+                },
               },
               weather: assessWeather(feed?.gameData || {}),
               bullpen: {
@@ -433,11 +573,61 @@ export default async function handler(req, res) {
       const oppBullpen = v.bullpen[opponentSide(c.side)];
       const bpGate = bullpenGate(candidateBullpen, oppBullpen);
 
+      const candidateLineup =
+        v.lineups?.strength?.[c.side] || { available: false };
+      const opponentLineup =
+        v.lineups?.strength?.[opponentSide(c.side)] || { available: false };
+      const baseProb = Number(c.market.modelProbability);
+      const marketFairProb =
+        Number.isFinite(baseProb) && Number.isFinite(Number(c.market.edgePctPoints))
+          ? baseProb - Number(c.market.edgePctPoints) / 100
+          : null;
+
+      const lineupNetAdjustment =
+        candidateLineup.available && opponentLineup.available
+          ? candidateLineup.probabilityAdjustment -
+            opponentLineup.probabilityAdjustment
+          : 0;
+      const adjustedProbability = Math.max(
+        0.02,
+        Math.min(0.98, baseProb + lineupNetAdjustment)
+      );
+      const adjustedEdge =
+        marketFairProb === null ? null : adjustedProbability - marketFairProb;
+      const adjustedEv = expectedValue(
+        adjustedProbability,
+        c.market.bestOdds
+      );
+
       const blockers = [];
       const warnings = [];
       if (!v.status.passed) blockers.push("official game status is not clear to play");
       if (!v.starters.passed) blockers.push("official probable starters do not both match");
-      if (!v.lineups.passed) blockers.push("both starting lineups are not yet confirmed");
+      if (!v.lineups.passed) {
+        blockers.push("both starting lineups are not yet confirmed");
+      } else if (!candidateLineup.available || !opponentLineup.available) {
+        blockers.push("lineup strength could not be scored");
+      } else {
+        if (
+          adjustedEdge === null ||
+          adjustedEv === null ||
+          adjustedEdge < 0.025 ||
+          adjustedEv < 0.03
+        ) {
+          blockers.push(
+            "lineup-adjusted edge no longer meets the model PLAY threshold"
+          );
+        }
+        if (lineupNetAdjustment <= -0.01) {
+          warnings.push(
+            "confirmed lineups reduce candidate win probability by at least 1 point"
+          );
+        } else if (lineupNetAdjustment >= 0.01) {
+          warnings.push(
+            "confirmed lineups improve candidate win probability by at least 1 point"
+          );
+        }
+      }
       if (!v.weather.passed) blockers.push("weather check is not clear");
       if (!bpGate.passed) blockers.push(...bpGate.warnings);
       else warnings.push(...bpGate.warnings);
@@ -461,6 +651,27 @@ export default async function handler(req, res) {
           minAcceptableOddsFor2PctEV:
             c.market.minAcceptableOddsFor2PctEV,
         },
+        lineupAdjustment: {
+          candidate: candidateLineup,
+          opponent: opponentLineup,
+          netProbabilityAdjustment: Number(
+            lineupNetAdjustment.toFixed(4)
+          ),
+          netProbabilityAdjustmentPctPoints: Number(
+            (lineupNetAdjustment * 100).toFixed(2)
+          ),
+          adjustedModelProbability: Number(
+            adjustedProbability.toFixed(4)
+          ),
+          adjustedEdgePctPoints:
+            adjustedEdge === null
+              ? null
+              : Number((adjustedEdge * 100).toFixed(2)),
+          adjustedEvPct:
+            adjustedEv === null
+              ? null
+              : Number((adjustedEv * 100).toFixed(2)),
+        },
         verificationStatus: nonSharpPassed
           ? "READY_FOR_SHARP_CHECK"
           : "WATCH",
@@ -482,22 +693,24 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v2",
+      version: "Final Verification v3",
       date,
       method: {
         officialSource:
           "MLB Stats live feed for game status, starters, batting orders, venue/weather, and prior-game box scores",
         bullpen:
           "relief-pitch workload heuristic over the two most recent final games",
+        lineupStrength:
+          "confirmed batting orders are scored by batting-order-weighted season OPS, regressed toward team season OPS for small samples; each team effect is capped at +/-1.25 win-probability points",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both lineups, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup-adjusted edge, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
     });
   } catch (err) {
     return res.status(500).json({
-      error: "Final Verification v2 failed",
+      error: "Final Verification v3 failed",
       detail: err instanceof Error ? err.message : String(err),
     });
   }
