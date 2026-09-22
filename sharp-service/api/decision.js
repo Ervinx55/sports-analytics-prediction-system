@@ -251,9 +251,17 @@ export default async function handler(req, res) {
   try {
     const now = new Date();
     const date = String(req.query.date || now.toISOString().slice(0, 10));
+    const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
+    const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+    const boardParams = new URLSearchParams({
+      leagues: "MLB",
+      books: BOOKS.join(","),
+    });
+    if (startsAfter) boardParams.set("startsAfter", startsAfter);
+    if (startsBefore) boardParams.set("startsBefore", startsBefore);
 
     const [board, alerts, standings, schedule] = await Promise.all([
-      fetchJson(`${BOARD_URL}?leagues=MLB&books=${BOOKS.join(",")}`),
+      fetchJson(`${BOARD_URL}?${boardParams.toString()}`),
       fetchJson(`${ALERT_URL}?league=MLB&hours=36&minBooks=3`),
       fetchJson(
         "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason"
