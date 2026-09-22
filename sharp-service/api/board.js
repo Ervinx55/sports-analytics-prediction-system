@@ -247,7 +247,7 @@ export default async function handler(req, res) {
     : 100;
   const live = String(req.query.live ?? "");
   const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
-  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";\n  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";\n  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
 
   const results = await Promise.all(
     leagues.map((league) =>
