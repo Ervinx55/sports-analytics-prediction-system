@@ -218,6 +218,148 @@ function lineupStrength(lineup, teamBaseline) {
   };
 }
 
+
+async function hitterPlatoonSplits(playerIds) {
+  const ids = [...new Set((playerIds || []).filter(Boolean).map(Number))];
+  if (!ids.length) return new Map();
+
+  const hydrate =
+    "stats(group=hitting,type=statSplits,sitCodes=[vr,vl],season=2026)";
+  const data = await fetchJson(
+    `https://statsapi.mlb.com/api/v1/people?personIds=${ids.join(",")}&hydrate=${encodeURIComponent(hydrate)}`
+  );
+
+  const map = new Map();
+  for (const person of data?.people || []) {
+    const splits = person?.stats?.[0]?.splits || [];
+    const byCode = {};
+    for (const split of splits) {
+      const code = split?.split?.code;
+      if (!code) continue;
+      byCode[code] = {
+        ops: split?.stat?.ops ?? null,
+        obp: split?.stat?.obp ?? null,
+        slg: split?.stat?.slg ?? null,
+        plateAppearances: split?.stat?.plateAppearances ?? null,
+        atBats: split?.stat?.atBats ?? null,
+      };
+    }
+    map.set(Number(person.id), byCode);
+  }
+  return map;
+}
+
+function platoonLineupStrength(
+  lineup,
+  overallLineupStrength,
+  splitMap,
+  opposingStarterHand
+) {
+  if (!lineup?.confirmed || !overallLineupStrength?.available) {
+    return {
+      available: false,
+      reason: "confirmed lineup and overall lineup strength required",
+    };
+  }
+
+  const hand = String(opposingStarterHand || "").toUpperCase();
+  const splitCode = hand === "L" ? "vl" : hand === "R" ? "vr" : null;
+  if (!splitCode) {
+    return {
+      available: false,
+      reason: "opposing starter handedness unavailable",
+    };
+  }
+
+  const overallById = new Map(
+    (overallLineupStrength.players || []).map((p) => [Number(p.id), p])
+  );
+  const orderWeights = [1.12, 1.10, 1.08, 1.07, 1.04, 1.00, 0.96, 0.92, 0.88];
+  let weighted = 0;
+  let weightTotal = 0;
+  const players = [];
+
+  for (let i = 0; i < lineup.battingOrder.length; i++) {
+    const hitter = lineup.battingOrder[i];
+    const overall = overallById.get(Number(hitter.id));
+    const baselineOps =
+      numberStat(overall?.regressedOps) ??
+      numberStat(overallLineupStrength.weightedLineupOps);
+    const split = splitMap.get(Number(hitter.id))?.[splitCode] || null;
+    const rawSplitOps = numberStat(split?.ops);
+    const splitPA = numberStat(split?.plateAppearances) || 0;
+
+    // Full trust only after a substantial handedness sample.
+    const reliability = Math.max(0, Math.min(1, splitPA / 150));
+    const regressedSplitOps =
+      baselineOps === null
+        ? rawSplitOps
+        : rawSplitOps === null
+          ? baselineOps
+          : baselineOps + reliability * (rawSplitOps - baselineOps);
+
+    const w = orderWeights[i] || 0.85;
+    if (regressedSplitOps !== null) {
+      weighted += regressedSplitOps * w;
+      weightTotal += w;
+    }
+
+    players.push({
+      spot: hitter.spot,
+      id: hitter.id,
+      name: hitter.name,
+      opposingStarterHand: hand,
+      splitCode,
+      rawSplitOps,
+      splitPlateAppearances: splitPA,
+      splitReliability: Number(reliability.toFixed(3)),
+      overallRegressedOps: baselineOps,
+      regressedSplitOps:
+        regressedSplitOps === null
+          ? null
+          : Number(regressedSplitOps.toFixed(3)),
+      weight: w,
+    });
+  }
+
+  if (!weightTotal) {
+    return { available: false, reason: "platoon split data unavailable" };
+  }
+
+  const weightedPlatoonOps = weighted / weightTotal;
+  const weightedOverallOps = numberStat(
+    overallLineupStrength.weightedLineupOps
+  );
+  if (weightedOverallOps === null) {
+    return { available: false, reason: "overall weighted lineup OPS unavailable" };
+  }
+
+  const deltaOps = weightedPlatoonOps - weightedOverallOps;
+
+  // Platoon is incremental to the overall lineup adjustment, so keep it smaller.
+  // A +.050 matchup OPS delta is roughly +0.5 win-probability points.
+  const probabilityAdjustment = Math.max(
+    -0.01,
+    Math.min(0.01, deltaOps * 0.10)
+  );
+
+  return {
+    available: true,
+    opposingStarterHand: hand,
+    splitCode,
+    weightedOverallOps: Number(weightedOverallOps.toFixed(3)),
+    weightedPlatoonOps: Number(weightedPlatoonOps.toFixed(3)),
+    deltaOps: Number(deltaOps.toFixed(3)),
+    probabilityAdjustment: Number(probabilityAdjustment.toFixed(4)),
+    probabilityAdjustmentPctPoints: Number(
+      (probabilityAdjustment * 100).toFixed(2)
+    ),
+    players,
+    methodology:
+      "Hitter OPS vs the official opposing starter handedness is regressed toward each hitter's overall regressed OPS using split plate appearances, weighted by batting-order slot, and applied only as an incremental matchup adjustment capped at +/-1.0 win-probability point per team.",
+  };
+}
+
 function sameStarter(expected, actual) {
   if (!expected?.id || !actual?.id) return false;
   return Number(expected.id) === Number(actual.id);
@@ -491,6 +633,33 @@ export default async function handler(req, res) {
             const officialStarters = feed?.gameData?.probablePitchers || {};
             const expectedStarters = d?.probablePitchers || {};
 
+            const gamePlayers = feed?.gameData?.players || {};
+            const awayStarterHand =
+              gamePlayers[`ID${officialStarters?.away?.id}`]?.pitchHand?.code ||
+              null;
+            const homeStarterHand =
+              gamePlayers[`ID${officialStarters?.home?.id}`]?.pitchHand?.code ||
+              null;
+
+            const hitterIds = [
+              ...awayLineup.battingOrder.map((p) => p.id),
+              ...homeLineup.battingOrder.map((p) => p.id),
+            ];
+            const platoonSplits = await hitterPlatoonSplits(hitterIds);
+
+            const awayPlatoonStrength = platoonLineupStrength(
+              awayLineup,
+              awayLineupStrength,
+              platoonSplits,
+              homeStarterHand
+            );
+            const homePlatoonStrength = platoonLineupStrength(
+              homeLineup,
+              homeLineupStrength,
+              platoonSplits,
+              awayStarterHand
+            );
+
             const starterCheck = {
               away: {
                 expected: expectedStarters.away || null,
@@ -540,6 +709,10 @@ export default async function handler(req, res) {
                   away: awayLineupStrength,
                   home: homeLineupStrength,
                 },
+                platoon: {
+                  away: awayPlatoonStrength,
+                  home: homePlatoonStrength,
+                },
               },
               weather: assessWeather(feed?.gameData || {}),
               bullpen: {
@@ -583,14 +756,27 @@ export default async function handler(req, res) {
           ? baseProb - Number(c.market.edgePctPoints) / 100
           : null;
 
+      const candidatePlatoon =
+        v.lineups?.platoon?.[c.side] || { available: false };
+      const opponentPlatoon =
+        v.lineups?.platoon?.[opponentSide(c.side)] || { available: false };
+
       const lineupNetAdjustment =
         candidateLineup.available && opponentLineup.available
           ? candidateLineup.probabilityAdjustment -
             opponentLineup.probabilityAdjustment
           : 0;
+      const platoonNetAdjustment =
+        candidatePlatoon.available && opponentPlatoon.available
+          ? candidatePlatoon.probabilityAdjustment -
+            opponentPlatoon.probabilityAdjustment
+          : 0;
+      const totalLineupAdjustment =
+        lineupNetAdjustment + platoonNetAdjustment;
+
       const adjustedProbability = Math.max(
         0.02,
-        Math.min(0.98, baseProb + lineupNetAdjustment)
+        Math.min(0.98, baseProb + totalLineupAdjustment)
       );
       const adjustedEdge =
         marketFairProb === null ? null : adjustedProbability - marketFairProb;
@@ -607,6 +793,8 @@ export default async function handler(req, res) {
         blockers.push("both starting lineups are not yet confirmed");
       } else if (!candidateLineup.available || !opponentLineup.available) {
         blockers.push("lineup strength could not be scored");
+      } else if (!candidatePlatoon.available || !opponentPlatoon.available) {
+        blockers.push("platoon matchup strength could not be scored");
       } else {
         if (
           adjustedEdge === null ||
@@ -615,16 +803,16 @@ export default async function handler(req, res) {
           adjustedEv < 0.03
         ) {
           blockers.push(
-            "lineup-adjusted edge no longer meets the model PLAY threshold"
+            "lineup/platoon-adjusted edge no longer meets the model PLAY threshold"
           );
         }
-        if (lineupNetAdjustment <= -0.01) {
+        if (totalLineupAdjustment <= -0.01) {
           warnings.push(
-            "confirmed lineups reduce candidate win probability by at least 1 point"
+            "confirmed lineup plus platoon matchup reduces candidate win probability by at least 1 point"
           );
-        } else if (lineupNetAdjustment >= 0.01) {
+        } else if (totalLineupAdjustment >= 0.01) {
           warnings.push(
-            "confirmed lineups improve candidate win probability by at least 1 point"
+            "confirmed lineup plus platoon matchup improves candidate win probability by at least 1 point"
           );
         }
       }
@@ -654,11 +842,25 @@ export default async function handler(req, res) {
         lineupAdjustment: {
           candidate: candidateLineup,
           opponent: opponentLineup,
-          netProbabilityAdjustment: Number(
+          candidatePlatoon,
+          opponentPlatoon,
+          overallNetProbabilityAdjustment: Number(
             lineupNetAdjustment.toFixed(4)
           ),
-          netProbabilityAdjustmentPctPoints: Number(
+          overallNetProbabilityAdjustmentPctPoints: Number(
             (lineupNetAdjustment * 100).toFixed(2)
+          ),
+          platoonNetProbabilityAdjustment: Number(
+            platoonNetAdjustment.toFixed(4)
+          ),
+          platoonNetProbabilityAdjustmentPctPoints: Number(
+            (platoonNetAdjustment * 100).toFixed(2)
+          ),
+          totalNetProbabilityAdjustment: Number(
+            totalLineupAdjustment.toFixed(4)
+          ),
+          totalNetProbabilityAdjustmentPctPoints: Number(
+            (totalLineupAdjustment * 100).toFixed(2)
           ),
           adjustedModelProbability: Number(
             adjustedProbability.toFixed(4)
@@ -693,7 +895,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v3",
+      version: "Final Verification v4",
       date,
       method: {
         officialSource:
@@ -702,15 +904,17 @@ export default async function handler(req, res) {
           "relief-pitch workload heuristic over the two most recent final games",
         lineupStrength:
           "confirmed batting orders are scored by batting-order-weighted season OPS, regressed toward team season OPS for small samples; each team effect is capped at +/-1.25 win-probability points",
+        platoonMatchup:
+          "each confirmed hitter is re-scored versus the official opposing starter's handedness using MLB vr/vl splits, regressed toward overall hitter strength by split plate appearances; the incremental platoon effect is capped at +/-1.0 win-probability point per team",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup-adjusted edge, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup and platoon-adjusted edge, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
     });
   } catch (err) {
     return res.status(500).json({
-      error: "Final Verification v3 failed",
+      error: "Final Verification v4 failed",
       detail: err instanceof Error ? err.message : String(err),
     });
   }
