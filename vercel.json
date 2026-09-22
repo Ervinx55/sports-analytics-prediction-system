@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/sharp.js": {
+      "maxDuration": 30
+    }
+  }
+}
