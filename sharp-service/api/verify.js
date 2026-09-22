@@ -1,5 +1,7 @@
 const DECISION_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/decision";
+const PITCHMIX_URL =
+  "https://sports-analytics-prediction-system-tau.vercel.app/api/pitchmix";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -871,6 +873,19 @@ export default async function handler(req, res) {
               `https://statsapi.mlb.com/api/v1.1/game/${d.mlbGamePk}/feed/live`
             );
 
+            let pitchMix;
+            try {
+              pitchMix = await fetchJson(
+                `${PITCHMIX_URL}?gamePk=${d.mlbGamePk}`
+              );
+            } catch (err) {
+              pitchMix = {
+                available: false,
+                error:
+                  err instanceof Error ? err.message : String(err),
+              };
+            }
+
             const awayTeamId = Number(feed?.gameData?.teams?.away?.id);
             const homeTeamId = Number(feed?.gameData?.teams?.home?.id);
 
@@ -1025,6 +1040,7 @@ export default async function handler(req, res) {
                   home: homePlatoonStrength,
                 },
               },
+              pitchMix,
               weather: assessWeather(feed?.gameData || {}),
               bullpen: {
                 away: awayBullpen,
@@ -1127,8 +1143,29 @@ export default async function handler(req, res) {
         0.012
       );
 
+      const candidatePitchMix =
+        c.side === "away"
+          ? v.pitchMix?.awayOffenseVsHomeStarter
+          : v.pitchMix?.homeOffenseVsAwayStarter;
+      const opponentPitchMix =
+        c.side === "away"
+          ? v.pitchMix?.homeOffenseVsAwayStarter
+          : v.pitchMix?.awayOffenseVsHomeStarter;
+
+      const pitchMixNetAdjustment =
+        candidatePitchMix?.available && opponentPitchMix?.available
+          ? clamp(
+              candidatePitchMix.probabilityAdjustment -
+                opponentPitchMix.probabilityAdjustment,
+              -0.012,
+              0.012
+            )
+          : 0;
+
       const totalContextAdjustment =
-        totalLineupAdjustment + totalBullpenAdjustment;
+        totalLineupAdjustment +
+        totalBullpenAdjustment +
+        pitchMixNetAdjustment;
 
       const adjustedProbability = Math.max(
         0.02,
@@ -1159,7 +1196,7 @@ export default async function handler(req, res) {
           adjustedEv < 0.03
         ) {
           blockers.push(
-            "lineup/platoon-adjusted edge no longer meets the model PLAY threshold"
+            "final context-adjusted edge no longer meets the model PLAY threshold"
           );
         }
         if (totalLineupAdjustment <= -0.01) {
@@ -1171,6 +1208,23 @@ export default async function handler(req, res) {
             "confirmed lineup plus platoon matchup improves candidate win probability by at least 1 point"
           );
         }
+      }
+
+      if (
+        !candidatePitchMix?.available ||
+        !opponentPitchMix?.available
+      ) {
+        blockers.push("starter pitch-mix matchup could not be fully scored");
+      }
+
+      if (pitchMixNetAdjustment <= -0.005) {
+        warnings.push(
+          "starter pitch-mix matchup reduces candidate win probability by at least 0.5 points"
+        );
+      } else if (pitchMixNetAdjustment >= 0.005) {
+        warnings.push(
+          "starter pitch-mix matchup improves candidate win probability by at least 0.5 points"
+        );
       }
 
       if (
@@ -1254,6 +1308,27 @@ export default async function handler(req, res) {
               ? null
               : Number((adjustedEv * 100).toFixed(2)),
         },
+        pitchMixAdjustment: {
+          candidateOffenseVsOpponentStarter: candidatePitchMix || null,
+          opponentOffenseVsCandidateStarter: opponentPitchMix || null,
+          netProbabilityAdjustment: Number(
+            pitchMixNetAdjustment.toFixed(4)
+          ),
+          netProbabilityAdjustmentPctPoints: Number(
+            (pitchMixNetAdjustment * 100).toFixed(2)
+          ),
+          finalContextProbability: Number(
+            adjustedProbability.toFixed(4)
+          ),
+          finalContextEdgePctPoints:
+            adjustedEdge === null
+              ? null
+              : Number((adjustedEdge * 100).toFixed(2)),
+          finalContextEvPct:
+            adjustedEv === null
+              ? null
+              : Number((adjustedEv * 100).toFixed(2)),
+        },
         bullpenAdjustment: {
           candidateBullpenQuality,
           opponentBullpenQuality,
@@ -1312,7 +1387,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v5",
+      version: "Final Verification v6",
       date,
       method: {
         officialSource:
@@ -1327,15 +1402,17 @@ export default async function handler(req, res) {
           "available relievers are graded with ERA, WHIP and K-BB, weighted by saves/holds role and discounted for recent pitch workload/back-to-back use",
         bullpenHandedness:
           "the confirmed lineup is matched against the available bullpen's left/right composition using regressed vr/vl hitter splits; bullpen context is capped at +/-1.2 win-probability points in total",
+        pitchMix:
+          "Baseball Savant starter pitch usage is matched to confirmed hitters' Statcast xwOBA by pitch type, regressed toward pitch-type league baselines by pitches seen; the net pitch-mix effect is capped at +/-1.2 win-probability points",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon-adjusted edge, bullpen quality/handedness, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon, starter pitch-mix, bullpen quality/handedness, weather, and bullpen workload checks pass. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
     });
   } catch (err) {
     return res.status(500).json({
-      error: "Final Verification v5 failed",
+      error: "Final Verification v6 failed",
       detail: err instanceof Error ? err.message : String(err),
     });
   }
