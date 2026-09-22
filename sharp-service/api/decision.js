@@ -225,6 +225,23 @@ function classify(edge, ev, q, warnings) {
   return "PASS";
 }
 
+function finalDecision(modelDecision, context = {}) {
+  if (modelDecision !== "PLAY") return modelDecision;
+  // The endpoint itself cannot yet confirm direct sharp-book pricing,
+  // weather, or the final posted lineup. A raw model PLAY is therefore
+  // a candidate that must pass those external checks before promotion.
+  if (
+    !context.pitchersConfirmed ||
+    !context.sharpConfirmed ||
+    !context.weatherChecked ||
+    !context.lineupChecked ||
+    context.hasSevereMarketFlag
+  ) {
+    return "WATCH";
+  }
+  return "PLAY";
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -291,7 +308,17 @@ export default async function handler(req, res) {
       const g = gameByPair.get(`${awayKey}|${homeKey}`);
       if (!g) continue;
 
-      const statusOk = g?.status?.abstractGameState === "Preview";
+      const eventMs = Date.parse(e?.startsAt || "");
+      const gameMs = Date.parse(g?.gameDate || "");
+      const exactOccurrence =
+        Number.isFinite(eventMs) &&
+        Number.isFinite(gameMs) &&
+        Math.abs(eventMs - gameMs) <= 3 * 60 * 60 * 1000;
+      if (!exactOccurrence) continue;
+
+      const statusOk =
+        g?.status?.abstractGameState === "Preview" &&
+        e?.status?.display !== "PP";
       if (!statusOk) continue;
 
       const homeSt = stMap.get(homeKey);
@@ -406,11 +433,31 @@ export default async function handler(req, res) {
         },
         moneyline: {
           away: {
-            decision: classify(
+            modelDecision: classify(
               awayEdge,
               awayEv ?? -1,
               awayQ,
               warnings.filter((w) => w.type !== "data")
+            ),
+            decision: finalDecision(
+              classify(
+                awayEdge,
+                awayEv ?? -1,
+                awayQ,
+                warnings.filter((w) => w.type !== "data")
+              ),
+              {
+                pitchersConfirmed: Boolean(
+                  g?.teams?.away?.probablePitcher?.id &&
+                  g?.teams?.home?.probablePitcher?.id
+                ),
+                sharpConfirmed: false,
+                weatherChecked: false,
+                lineupChecked: false,
+                hasSevereMarketFlag: eventAlerts.some(
+                  (a) => a.severity === "high"
+                ),
+              }
             ),
             bestBook: awayBest.book,
             bestOdds: awayBest.odds,
@@ -421,11 +468,31 @@ export default async function handler(req, res) {
             dataQuality: awayQ,
           },
           home: {
-            decision: classify(
+            modelDecision: classify(
               homeEdge,
               homeEv ?? -1,
               homeQ,
               warnings.filter((w) => w.type !== "data")
+            ),
+            decision: finalDecision(
+              classify(
+                homeEdge,
+                homeEv ?? -1,
+                homeQ,
+                warnings.filter((w) => w.type !== "data")
+              ),
+              {
+                pitchersConfirmed: Boolean(
+                  g?.teams?.away?.probablePitcher?.id &&
+                  g?.teams?.home?.probablePitcher?.id
+                ),
+                sharpConfirmed: false,
+                weatherChecked: false,
+                lineupChecked: false,
+                hasSevereMarketFlag: eventAlerts.some(
+                  (a) => a.severity === "high"
+                ),
+              }
             ),
             bestBook: homeBest.book,
             bestOdds: homeBest.odds,
@@ -445,7 +512,7 @@ export default async function handler(req, res) {
       const sides = [x.moneyline.away, x.moneyline.home];
       return Math.max(
         ...sides.map((s) =>
-          (s.decision === "PLAY" ? 100 : s.decision === "WATCH" ? 50 : 0) +
+          (s.modelDecision === "PLAY" ? 100 : s.modelDecision === "WATCH" ? 50 : 0) +
           Math.max(0, s.evPct || 0) +
           Math.max(0, s.edgePctPoints || 0)
         )
@@ -462,8 +529,10 @@ export default async function handler(req, res) {
         marketBlend: "70% baseball projection / 30% no-vig market baseline",
         playoffLeverage:
           "modest adjustment capped at +/-0.75 probability points",
-        playRule:
-          "PLAY requires >=2.5 percentage-point model edge, >=3% EV, and >=0.70 data quality",
+        modelCandidateRule:
+          "Raw model PLAY requires >=2.5 percentage-point model edge, >=3% EV, and >=0.70 data quality",
+        finalGate:
+          "Raw PLAY stays WATCH until direct sharp-book price, weather, confirmed lineup, and game-status checks pass",
         limitations:
           "v1 does not yet automate weather, confirmed lineups, bullpen availability, or direct Pinnacle/Circa pricing",
       },
