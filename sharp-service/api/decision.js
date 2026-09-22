@@ -401,6 +401,7 @@ export default async function handler(req, res) {
 
       decisions.push({
         eventID: e.eventID,
+        mlbGamePk: g?.gamePk ?? null,
         startsAt: e.startsAt,
         matchup: {
           away: e.matchup?.away?.name,
@@ -408,11 +409,13 @@ export default async function handler(req, res) {
         },
         probablePitchers: {
           away: {
+            id: g?.teams?.away?.probablePitcher?.id ?? null,
             name: g?.teams?.away?.probablePitcher?.fullName || null,
             era: awayPitcher?.stat?.era ?? null,
             whip: awayPitcher?.stat?.whip ?? null,
           },
           home: {
+            id: g?.teams?.home?.probablePitcher?.id ?? null,
             name: g?.teams?.home?.probablePitcher?.fullName || null,
             era: homePitcher?.stat?.era ?? null,
             whip: homePitcher?.stat?.whip ?? null,
