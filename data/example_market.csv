@@ -1,0 +1,5 @@
+team,opponent,american_odds,opponent_odds,model_probability
+Houston,Seattle,-120,110,0.57
+Atlanta,Miami,135,-145,0.46
+Chicago,Detroit,-105,-105,0.53
+Los Angeles,San Diego,120,-130,0.47
