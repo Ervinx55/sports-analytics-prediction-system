@@ -116,6 +116,9 @@ function summarizeEvent(event) {
   const odds = event.odds || {};
   const home = event.teams?.home || {};
   const away = event.teams?.away || {};
+  const isSoccer = event.sportID === "SOCCER";
+  const periodPick = (gameOdd, regOdd) =>
+    isSoccer ? (regOdd || gameOdd) : (gameOdd || regOdd);
 
   const moneyline = {
     away: compactMarket(odds["points-away-game-ml-away"]),
@@ -124,42 +127,56 @@ function summarizeEvent(event) {
 
   const spread = {
     away: compactMarket(
-      odds["points-away-game-sp-away"] ||
-        odds["points-away-reg-sp-away"],
+      periodPick(
+        odds["points-away-game-sp-away"],
+        odds["points-away-reg-sp-away"]
+      ),
       "spread"
     ),
     home: compactMarket(
-      odds["points-home-game-sp-home"] ||
-        odds["points-home-reg-sp-home"],
+      periodPick(
+        odds["points-home-game-sp-home"],
+        odds["points-home-reg-sp-home"]
+      ),
       "spread"
     )
   };
 
   const total = {
     over: compactMarket(
-      odds["points-all-game-ou-over"] ||
-        odds["points-all-reg-ou-over"],
+      periodPick(
+        odds["points-all-game-ou-over"],
+        odds["points-all-reg-ou-over"]
+      ),
       "overUnder"
     ),
     under: compactMarket(
-      odds["points-all-game-ou-under"] ||
-        odds["points-all-reg-ou-under"],
+      periodPick(
+        odds["points-all-game-ou-under"],
+        odds["points-all-reg-ou-under"]
+      ),
       "overUnder"
     )
   };
 
   const threeWay = {
     away: compactMarket(
-      odds["points-away-game-ml3way-away"] ||
+      periodPick(
+        odds["points-away-game-ml3way-away"],
         odds["points-away-reg-ml3way-away"]
+      )
     ),
     draw: compactMarket(
-      odds["points-all-game-ml3way-draw"] ||
+      periodPick(
+        odds["points-all-game-ml3way-draw"],
         odds["points-all-reg-ml3way-draw"]
+      )
     ),
     home: compactMarket(
-      odds["points-home-game-ml3way-home"] ||
+      periodPick(
+        odds["points-home-game-ml3way-home"],
         odds["points-home-reg-ml3way-home"]
+      )
     )
   };
 
