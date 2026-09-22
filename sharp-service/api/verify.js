@@ -2,6 +2,8 @@ const DECISION_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/decision";
 const PITCHMIX_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/pitchmix";
+const RUNENV_URL =
+  "https://sports-analytics-prediction-system-tau.vercel.app/api/runenv";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -874,16 +876,37 @@ export default async function handler(req, res) {
             );
 
             let pitchMix;
+            let runEnvironment;
             try {
-              pitchMix = await fetchJson(
-                `${PITCHMIX_URL}?gamePk=${d.mlbGamePk}`
-              );
+              [pitchMix, runEnvironment] = await Promise.all([
+                fetchJson(
+                  `${PITCHMIX_URL}?gamePk=${d.mlbGamePk}`
+                ),
+                fetchJson(
+                  `${RUNENV_URL}?gamePk=${d.mlbGamePk}`
+                ),
+              ]);
             } catch (err) {
-              pitchMix = {
-                available: false,
-                error:
-                  err instanceof Error ? err.message : String(err),
-              };
+              const message =
+                err instanceof Error ? err.message : String(err);
+              if (!pitchMix) {
+                try {
+                  pitchMix = await fetchJson(
+                    `${PITCHMIX_URL}?gamePk=${d.mlbGamePk}`
+                  );
+                } catch {
+                  pitchMix = { available: false, error: message };
+                }
+              }
+              if (!runEnvironment) {
+                try {
+                  runEnvironment = await fetchJson(
+                    `${RUNENV_URL}?gamePk=${d.mlbGamePk}`
+                  );
+                } catch {
+                  runEnvironment = { available: false, error: message };
+                }
+              }
             }
 
             const awayTeamId = Number(feed?.gameData?.teams?.away?.id);
@@ -1041,6 +1064,7 @@ export default async function handler(req, res) {
                 },
               },
               pitchMix,
+              runEnvironment,
               weather: assessWeather(feed?.gameData || {}),
               bullpen: {
                 away: awayBullpen,
@@ -1162,10 +1186,26 @@ export default async function handler(req, res) {
             )
           : 0;
 
+      const runEnvironmentAdjustmentPctPoints =
+        c.side === "home"
+          ? numberStat(
+              v.runEnvironment?.moneylineEnvironment
+                ?.homeProbabilityAdjustmentPctPoints
+            )
+          : numberStat(
+              v.runEnvironment?.moneylineEnvironment
+                ?.awayProbabilityAdjustmentPctPoints
+            );
+      const runEnvironmentAdjustment =
+        runEnvironmentAdjustmentPctPoints === null
+          ? 0
+          : runEnvironmentAdjustmentPctPoints / 100;
+
       const totalContextAdjustment =
         totalLineupAdjustment +
         totalBullpenAdjustment +
-        pitchMixNetAdjustment;
+        pitchMixNetAdjustment +
+        runEnvironmentAdjustment;
 
       const adjustedProbability = Math.max(
         0.02,
@@ -1215,6 +1255,39 @@ export default async function handler(req, res) {
         !opponentPitchMix?.available
       ) {
         blockers.push("starter pitch-mix matchup could not be fully scored");
+      }
+
+      if (
+        !v.runEnvironment ||
+        v.runEnvironment?.version !== "Run Environment v1"
+      ) {
+        blockers.push("park/weather run-environment model is unavailable");
+      } else {
+        if (v.runEnvironment?.totalProjection?.marketSplit) {
+          warnings.push(
+            "total market is split across books; exact total number must be verified"
+          );
+        }
+        const totalDecision =
+          v.runEnvironment?.totalProjection?.decision;
+        if (
+          totalDecision === "OVER_CANDIDATE" ||
+          totalDecision === "UNDER_CANDIDATE"
+        ) {
+          warnings.push(
+            `run-environment model has a ${totalDecision.toLowerCase()} at the current total`
+          );
+        }
+      }
+
+      if (runEnvironmentAdjustment <= -0.005) {
+        warnings.push(
+          "park/weather run environment reduces candidate moneyline probability by at least 0.5 points"
+        );
+      } else if (runEnvironmentAdjustment >= 0.005) {
+        warnings.push(
+          "park/weather run environment improves candidate moneyline probability by at least 0.5 points"
+        );
       }
 
       if (pitchMixNetAdjustment <= -0.005) {
@@ -1308,6 +1381,27 @@ export default async function handler(req, res) {
               ? null
               : Number((adjustedEv * 100).toFixed(2)),
         },
+        runEnvironmentAdjustment: {
+          environment: v.runEnvironment?.environment || null,
+          totalProjection:
+            v.runEnvironment?.totalProjection || null,
+          moneylineEnvironment:
+            v.runEnvironment?.moneylineEnvironment || null,
+          probabilityAdjustment:
+            Number(runEnvironmentAdjustment.toFixed(4)),
+          probabilityAdjustmentPctPoints:
+            Number((runEnvironmentAdjustment * 100).toFixed(2)),
+          finalContextProbability:
+            Number(adjustedProbability.toFixed(4)),
+          finalContextEdgePctPoints:
+            adjustedEdge === null
+              ? null
+              : Number((adjustedEdge * 100).toFixed(2)),
+          finalContextEvPct:
+            adjustedEv === null
+              ? null
+              : Number((adjustedEv * 100).toFixed(2)),
+        },
         pitchMixAdjustment: {
           candidateOffenseVsOpponentStarter: candidatePitchMix || null,
           opponentOffenseVsCandidateStarter: opponentPitchMix || null,
@@ -1387,7 +1481,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v6",
+      version: "Final Verification v7",
       date,
       method: {
         officialSource:
@@ -1404,15 +1498,19 @@ export default async function handler(req, res) {
           "the confirmed lineup is matched against the available bullpen's left/right composition using regressed vr/vl hitter splits; bullpen context is capped at +/-1.2 win-probability points in total",
         pitchMix:
           "Baseball Savant starter pitch usage is matched to confirmed hitters' Statcast xwOBA by pitch type, regressed toward pitch-type league baselines by pitches seen; the net pitch-mix effect is capped at +/-1.2 win-probability points",
+        runEnvironment:
+          "Baseball Savant three-year Park Factor plus official MLB temperature, wind, roof type, and venue elevation produce a conservative run-environment multiplier. Elevation changes same-day weather sensitivity rather than being double-counted on top of Park Factor.",
+        totals:
+          "an independent team/starter scoring baseline is park/weather adjusted and then shrunk toward the live total market; split book totals are WATCH-only",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon, starter pitch-mix, bullpen quality/handedness, weather, and bullpen workload checks pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon, starter pitch-mix, park/weather run environment, bullpen quality/handedness, weather, and bullpen workload checks pass. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
     });
   } catch (err) {
     return res.status(500).json({
-      error: "Final Verification v6 failed",
+      error: "Final Verification v7 failed",
       detail: err instanceof Error ? err.message : String(err),
     });
   }
