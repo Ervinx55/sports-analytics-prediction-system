@@ -301,9 +301,11 @@ export default async function handler(req, res) {
     const home = feed?.gameData?.teams?.home;
     const starters = feed?.gameData?.probablePitchers || {};
     const startsAt = feed?.gameData?.datetime?.dateTime;
-    const date = startsAt
-      ? new Date(startsAt).toISOString().slice(0, 10)
-      : new Date().toISOString().slice(0, 10);
+    const date =
+      feed?.gameData?.datetime?.originalDate ||
+      (startsAt
+        ? new Date(startsAt).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10));
 
     const [
       awayHit,
@@ -334,7 +336,7 @@ export default async function handler(req, res) {
     const neutralTotal = awayRuns.neutralRuns + homeRuns.neutralRuns;
 
     const environment = environmentMultiplier(feed?.gameData || {});
-    const projectedTotal = clamp(
+    const rawEnvironmentTotal = clamp(
       neutralTotal * environment.totalMultiplier,
       5.0,
       14.5
@@ -358,6 +360,24 @@ export default async function handler(req, res) {
       num(totalOver?.consensus?.line) ??
       num(totalUnder?.consensus?.line);
 
+    const bookLines = [
+      ...Object.values(totalOver?.books || {}),
+      ...Object.values(totalUnder?.books || {}),
+    ]
+      .filter((x) => x && x.available !== false)
+      .map((x) => num(x.line))
+      .filter((x) => x !== null);
+    const uniqueBookLines = [...new Set(bookLines.map((x) => Number(x)))];
+    const marketSplit = uniqueBookLines.length > 1;
+
+    // Shrink the independent run model toward the live market before using it
+    // for betting decisions. This reduces overconfidence from a simple
+    // season-level scoring model while preserving park/weather information.
+    const projectedTotal =
+      marketLine === null
+        ? rawEnvironmentTotal
+        : 0.65 * rawEnvironmentTotal + 0.35 * marketLine;
+
     const overBest = bestOdds(totalOver?.books || {});
     const underBest = bestOdds(totalUnder?.books || {});
     const overProb = totalProbability(projectedTotal, marketLine, "over");
@@ -370,10 +390,21 @@ export default async function handler(req, res) {
     let totalLean = "PASS";
     if (marketLine !== null) {
       const diff = projectedTotal - marketLine;
-      if (diff >= 0.75 && (overEv ?? -1) >= 0.03) totalLean = "OVER_CANDIDATE";
-      else if (diff <= -0.75 && (underEv ?? -1) >= 0.03)
+      if (
+        !marketSplit &&
+        diff >= 0.65 &&
+        (overEv ?? -1) >= 0.04
+      ) {
+        totalLean = "OVER_CANDIDATE";
+      } else if (
+        !marketSplit &&
+        diff <= -0.65 &&
+        (underEv ?? -1) >= 0.04
+      ) {
         totalLean = "UNDER_CANDIDATE";
-      else if (Math.abs(diff) >= 0.4) totalLean = "WATCH";
+      } else if (Math.abs(diff) >= 0.35 || marketSplit) {
+        totalLean = "WATCH";
+      }
     }
 
     const gameDecision = (decision?.decisions || []).find(
@@ -433,8 +464,11 @@ export default async function handler(req, res) {
         neutralTotal: Number(neutralTotal.toFixed(2)),
       },
       totalProjection: {
+        rawEnvironmentTotal: Number(rawEnvironmentTotal.toFixed(2)),
         projectedTotal: Number(projectedTotal.toFixed(2)),
         marketLine,
+        marketSplit,
+        availableBookLines: uniqueBookLines.sort((a, b) => a - b),
         differenceRuns:
           marketLine === null
             ? null
@@ -467,6 +501,8 @@ export default async function handler(req, res) {
           "venue elevation from MLB is used to modestly scale same-day temperature/wind sensitivity; baseline altitude is not added again because Park Factor already captures it",
         roof:
           "outdoor weather adjustments are suppressed at dome/retractable venues unless roof status is explicitly known",
+        calibration:
+          "the independent park/weather total is shrunk 35% toward the live market before betting thresholds are applied; split total lines are never auto-promoted",
       },
     });
   } catch (err) {
