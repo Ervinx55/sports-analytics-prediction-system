@@ -843,9 +843,14 @@ export default async function handler(req, res) {
       req.query.date || new Date().toISOString().slice(0, 10)
     );
     const includeWatch = String(req.query.includeWatch || "false") === "true";
+    const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
+    const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+    const decisionParams = new URLSearchParams({ date });
+    if (startsAfter) decisionParams.set("startsAfter", startsAfter);
+    if (startsBefore) decisionParams.set("startsBefore", startsBefore);
 
     const decision = await fetchJson(
-      `${DECISION_URL}?date=${encodeURIComponent(date)}`
+      `${DECISION_URL}?${decisionParams.toString()}`
     );
 
     const candidates = [];
