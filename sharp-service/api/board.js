@@ -1,6 +1,7 @@
 const DEFAULT_LEAGUES = ["MLB"];
 
 const CORE_ODD_IDS = [
+  // Full-game markets (MLB/NFL/etc.)
   "points-away-game-ml-away",
   "points-home-game-ml-home",
   "points-away-game-sp-away",
@@ -9,7 +10,16 @@ const CORE_ODD_IDS = [
   "points-all-game-ou-under",
   "points-away-game-ml3way-away",
   "points-home-game-ml3way-home",
-  "points-all-game-ml3way-draw"
+  "points-all-game-ml3way-draw",
+
+  // Regulation markets (soccer)
+  "points-away-reg-sp-away",
+  "points-home-reg-sp-home",
+  "points-all-reg-ou-over",
+  "points-all-reg-ou-under",
+  "points-away-reg-ml3way-away",
+  "points-home-reg-ml3way-home",
+  "points-all-reg-ml3way-draw"
 ];
 
 function csv(value, fallback = []) {
@@ -113,19 +123,44 @@ function summarizeEvent(event) {
   };
 
   const spread = {
-    away: compactMarket(odds["points-away-game-sp-away"], "spread"),
-    home: compactMarket(odds["points-home-game-sp-home"], "spread")
+    away: compactMarket(
+      odds["points-away-game-sp-away"] ||
+        odds["points-away-reg-sp-away"],
+      "spread"
+    ),
+    home: compactMarket(
+      odds["points-home-game-sp-home"] ||
+        odds["points-home-reg-sp-home"],
+      "spread"
+    )
   };
 
   const total = {
-    over: compactMarket(odds["points-all-game-ou-over"], "overUnder"),
-    under: compactMarket(odds["points-all-game-ou-under"], "overUnder")
+    over: compactMarket(
+      odds["points-all-game-ou-over"] ||
+        odds["points-all-reg-ou-over"],
+      "overUnder"
+    ),
+    under: compactMarket(
+      odds["points-all-game-ou-under"] ||
+        odds["points-all-reg-ou-under"],
+      "overUnder"
+    )
   };
 
   const threeWay = {
-    away: compactMarket(odds["points-away-game-ml3way-away"]),
-    draw: compactMarket(odds["points-all-game-ml3way-draw"]),
-    home: compactMarket(odds["points-home-game-ml3way-home"])
+    away: compactMarket(
+      odds["points-away-game-ml3way-away"] ||
+        odds["points-away-reg-ml3way-away"]
+    ),
+    draw: compactMarket(
+      odds["points-all-game-ml3way-draw"] ||
+        odds["points-all-reg-ml3way-draw"]
+    ),
+    home: compactMarket(
+      odds["points-home-game-ml3way-home"] ||
+        odds["points-home-reg-ml3way-home"]
+    )
   };
 
   return {
