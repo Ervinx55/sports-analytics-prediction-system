@@ -176,6 +176,8 @@ async function fetchLeague({ league, books, limit, apiKey, live, startsAfter, st
 
   if (books.length) params.set("bookmakerID", books.join(","));
   if (live === "true" || live === "false") params.set("live", live);
+  if (startsAfter) params.set("startsAfter", startsAfter);
+  if (startsBefore) params.set("startsBefore", startsBefore);
 
   const response = await fetch(
     `https://api.sportsgameodds.com/v2/events?${params.toString()}`,
@@ -243,7 +245,9 @@ export default async function handler(req, res) {
   const limit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
     : 100;
-  const live = String(req.query.live ?? "");\n  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";\n  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+  const live = String(req.query.live ?? "");
+  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
+  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";\n  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";\n  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
 
   const results = await Promise.all(
     leagues.map((league) =>
@@ -266,6 +270,7 @@ export default async function handler(req, res) {
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
+    window: { startsAfter: startsAfter || null, startsBefore: startsBefore || null },
     unavailableLeagues: unavailable,
     eventCount: events.length,
     events
