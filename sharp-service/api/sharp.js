@@ -1,17 +1,6 @@
-const DEFAULT_BOOKS = [
-  "pinnacle",
-  "circa",
-  "bookmakereu",
-  "draftkings",
-  "fanduel",
-  "betmgm",
-  "caesars",
-  "kalshi"
-];
+const DEFAULT_LEAGUES = ["MLB", "NFL", "NBA", "NHL", "NCAAF", "NCAAB", "MLS"];
 
-const DEFAULT_LEAGUES = ["MLB", "NFL", "NBA", "WNBA", "NHL", "NCAAF", "NCAAB"];
-
-function csv(value, fallback) {
+function csv(value, fallback = []) {
   if (!value) return fallback;
   const text = Array.isArray(value) ? value[0] : value;
   return String(text)
@@ -24,13 +13,18 @@ function csv(value, fallback) {
 async function fetchLeague({ league, books, includeAltLines, limit, apiKey }) {
   const params = new URLSearchParams({
     leagueID: league,
-    bookmakerID: books.join(","),
     oddsAvailable: "true",
     includeOpenCloseOdds: "true",
     includeAltLines: includeAltLines ? "true" : "false",
     type: "match",
     limit: String(limit)
   });
+
+  // On the free tier, omit bookmakerID by default so SportsGameOdds
+  // automatically returns only the books the account is entitled to use.
+  if (books.length) {
+    params.set("bookmakerID", books.join(","));
+  }
 
   const upstream = await fetch(`https://api.sportsgameodds.com/v2/events?${params}`, {
     headers: {
@@ -87,7 +81,7 @@ export default async function handler(req, res) {
   }
 
   const leagues = csv(req.query.leagues, DEFAULT_LEAGUES);
-  const books = csv(req.query.books, DEFAULT_BOOKS);
+  const books = csv(req.query.books, []);
   const includeAltLines = String(req.query.alts || "0") === "1";
   const limitRaw = Number(req.query.limit || 100);
   const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(100, limitRaw)) : 100;
@@ -114,7 +108,7 @@ export default async function handler(req, res) {
       error: "No requested leagues were available from SportsGameOdds",
       fetchedAt: new Date().toISOString(),
       leagues,
-      books,
+      books: books.length ? books : "account-entitled bookmakers",
       unavailableLeagues
     });
   }
@@ -125,7 +119,7 @@ export default async function handler(req, res) {
     requestedLeagues: leagues,
     availableLeagues: availableLeagues.map((r) => r.league),
     unavailableLeagues,
-    books,
+    books: books.length ? books : "account-entitled bookmakers",
     includeAltLines,
     eventCount: data.length,
     data
