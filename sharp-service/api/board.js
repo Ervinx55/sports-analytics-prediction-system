@@ -163,7 +163,7 @@ function summarizeEvent(event) {
   };
 }
 
-async function fetchLeague({ league, books, limit, apiKey, live }) {
+async function fetchLeague({ league, books, limit, apiKey, live, startsAfter, startsBefore }) {
   const params = new URLSearchParams({
     leagueID: league,
     oddIDs: CORE_ODD_IDS.join(","),
@@ -243,11 +243,11 @@ export default async function handler(req, res) {
   const limit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
     : 100;
-  const live = String(req.query.live ?? "");
+  const live = String(req.query.live ?? "");\n  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";\n  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
 
   const results = await Promise.all(
     leagues.map((league) =>
-      fetchLeague({ league, books, limit, apiKey, live })
+      fetchLeague({ league, books, limit, apiKey, live, startsAfter, startsBefore })
     )
   );
 
