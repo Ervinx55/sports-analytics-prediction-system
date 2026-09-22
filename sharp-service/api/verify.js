@@ -512,6 +512,291 @@ async function bullpenUsage(teamId, targetTime) {
   };
 }
 
+
+function clamp(x, lo, hi) {
+  return Math.max(lo, Math.min(hi, x));
+}
+
+function recentRelieverWorkload(recentUsage) {
+  const latest = recentUsage?.recentGames?.[0] || null;
+  const second = recentUsage?.recentGames?.[1] || null;
+  const latestById = new Map(
+    (latest?.relievers || []).map((p) => [Number(p.id), Number(p.pitches || 0)])
+  );
+  const secondById = new Map(
+    (second?.relievers || []).map((p) => [Number(p.id), Number(p.pitches || 0)])
+  );
+  const b2b = new Set(
+    (recentUsage?.backToBackRelievers || []).map((p) => Number(p.id))
+  );
+
+  return { latest, second, latestById, secondById, b2b };
+}
+
+function relieverAvailability(id, recentUsage) {
+  const work = recentRelieverWorkload(recentUsage);
+  const latestPitches = work.latestById.get(Number(id)) || 0;
+  const secondPitches = work.secondById.get(Number(id)) || 0;
+  const latestHours = Number(work.latest?.hoursBeforeTarget ?? 999);
+  const secondHours = Number(work.second?.hoursBeforeTarget ?? 999);
+
+  let weight = 1;
+
+  if (latestHours <= 36) {
+    if (latestPitches >= 30) weight *= 0.35;
+    else if (latestPitches >= 20) weight *= 0.60;
+    else if (latestPitches >= 10) weight *= 0.85;
+  }
+
+  if (secondHours <= 60 && secondPitches >= 20) {
+    weight *= 0.85;
+  }
+
+  if (work.b2b.has(Number(id))) {
+    weight *= 0.70;
+  }
+
+  return {
+    weight: Number(clamp(weight, 0.2, 1).toFixed(3)),
+    latestPitches,
+    secondPitches,
+    backToBack: work.b2b.has(Number(id)),
+  };
+}
+
+function bullpenQualityProfile(feed, side, probableStarterId, recentUsage) {
+  const teamBox = feed?.liveData?.boxscore?.teams?.[side] || {};
+  const gamePlayers = feed?.gameData?.players || {};
+  const relievers = [];
+
+  for (const player of Object.values(teamBox.players || {})) {
+    const id = Number(player?.person?.id);
+    const pitching = player?.seasonStats?.pitching || {};
+    const position = player?.position?.abbreviation;
+
+    if (!id || position !== "P" || id === Number(probableStarterId)) continue;
+
+    const gamesPitched = Number(pitching.gamesPitched || 0);
+    const gamesStarted = Number(pitching.gamesStarted || 0);
+    if (gamesPitched < 10) continue;
+
+    // Keep true relievers and occasional openers/swingmen; exclude rotation starters.
+    const relieverRole =
+      gamesStarted <= 5 ||
+      (gamesPitched > 0 && gamesStarted / gamesPitched <= 0.25);
+    if (!relieverRole) continue;
+
+    const era = numberStat(pitching.era);
+    const whip = numberStat(pitching.whip);
+    const k9 = numberStat(pitching.strikeoutsPer9Inn);
+    const bb9 = numberStat(pitching.walksPer9Inn);
+    if (era === null || whip === null) continue;
+
+    const eraScore = clamp((4.20 - era) / 1.50, -1.5, 1.5);
+    const whipScore = clamp((1.30 - whip) / 0.25, -1.5, 1.5);
+    const kbb = k9 !== null && bb9 !== null ? k9 - bb9 : 4.0;
+    const kbbScore = clamp((kbb - 4.0) / 3.0, -1.5, 1.5);
+    const qualityIndex = clamp(
+      0.45 * eraScore + 0.35 * whipScore + 0.20 * kbbScore,
+      -1.5,
+      1.5
+    );
+
+    const holds = Number(pitching.holds || 0);
+    const saves = Number(pitching.saves || 0);
+    const roleWeight =
+      1 +
+      Math.min(
+        1.4,
+        (Math.min(saves, 35) / 35) * 0.9 +
+          (Math.min(holds, 30) / 30) * 0.6
+      );
+
+    const availability = relieverAvailability(id, recentUsage);
+    const effectiveWeight = roleWeight * availability.weight;
+    const hand = gamePlayers[`ID${id}`]?.pitchHand?.code || null;
+
+    relievers.push({
+      id,
+      name: player?.person?.fullName || String(id),
+      hand,
+      era,
+      whip,
+      k9,
+      bb9,
+      holds,
+      saves,
+      qualityIndex: Number(qualityIndex.toFixed(3)),
+      roleWeight: Number(roleWeight.toFixed(3)),
+      availability,
+      effectiveWeight: Number(effectiveWeight.toFixed(3)),
+    });
+  }
+
+  const usable = relievers.filter((r) => r.effectiveWeight > 0);
+  const weightTotal = usable.reduce((sum, r) => sum + r.effectiveWeight, 0);
+
+  if (!weightTotal) {
+    return {
+      available: false,
+      reason: "no usable relief-pitcher profile",
+      relievers,
+    };
+  }
+
+  const weightedQuality =
+    usable.reduce(
+      (sum, r) => sum + r.qualityIndex * r.effectiveWeight,
+      0
+    ) / weightTotal;
+
+  const leftWeight = usable
+    .filter((r) => r.hand === "L")
+    .reduce((sum, r) => sum + r.effectiveWeight, 0);
+  const rightWeight = usable
+    .filter((r) => r.hand === "R")
+    .reduce((sum, r) => sum + r.effectiveWeight, 0);
+  const knownHandWeight = leftWeight + rightWeight;
+
+  // Small team-level probability effect; final value is compared relatively.
+  const qualityProbabilityAdjustment = clamp(weightedQuality * 0.004, -0.006, 0.006);
+
+  return {
+    available: true,
+    weightedQualityIndex: Number(weightedQuality.toFixed(3)),
+    qualityProbabilityAdjustment: Number(
+      qualityProbabilityAdjustment.toFixed(4)
+    ),
+    qualityProbabilityAdjustmentPctPoints: Number(
+      (qualityProbabilityAdjustment * 100).toFixed(2)
+    ),
+    handMix: {
+      leftShare:
+        knownHandWeight > 0
+          ? Number((leftWeight / knownHandWeight).toFixed(3))
+          : null,
+      rightShare:
+        knownHandWeight > 0
+          ? Number((rightWeight / knownHandWeight).toFixed(3))
+          : null,
+    },
+    relievers: usable.sort(
+      (a, b) => b.effectiveWeight - a.effectiveWeight
+    ),
+    methodology:
+      "Reliever quality blends ERA, WHIP and K-BB rate, weights high-leverage roles by saves/holds, and discounts recent workload/back-to-back usage. Rotation starters are excluded.",
+  };
+}
+
+function lineupOpsVsHand(
+  lineup,
+  overallLineupStrength,
+  splitMap,
+  hand
+) {
+  if (!lineup?.confirmed || !overallLineupStrength?.available) return null;
+  const splitCode = hand === "L" ? "vl" : hand === "R" ? "vr" : null;
+  if (!splitCode) return null;
+
+  const overallById = new Map(
+    (overallLineupStrength.players || []).map((p) => [Number(p.id), p])
+  );
+  const orderWeights = [1.12, 1.10, 1.08, 1.07, 1.04, 1.00, 0.96, 0.92, 0.88];
+
+  let weighted = 0;
+  let weightTotal = 0;
+
+  for (let i = 0; i < lineup.battingOrder.length; i++) {
+    const hitter = lineup.battingOrder[i];
+    const overall = overallById.get(Number(hitter.id));
+    const baselineOps =
+      numberStat(overall?.regressedOps) ??
+      numberStat(overallLineupStrength.weightedLineupOps);
+    const split = splitMap.get(Number(hitter.id))?.[splitCode] || null;
+    const rawSplitOps = numberStat(split?.ops);
+    const splitPA = numberStat(split?.plateAppearances) || 0;
+    const reliability = clamp(splitPA / 150, 0, 1);
+    const regressed =
+      baselineOps === null
+        ? rawSplitOps
+        : rawSplitOps === null
+          ? baselineOps
+          : baselineOps + reliability * (rawSplitOps - baselineOps);
+
+    if (regressed !== null) {
+      const w = orderWeights[i] || 0.85;
+      weighted += regressed * w;
+      weightTotal += w;
+    }
+  }
+
+  return weightTotal ? weighted / weightTotal : null;
+}
+
+function lineupVsBullpenHandMix(
+  lineup,
+  overallLineupStrength,
+  splitMap,
+  bullpenProfile
+) {
+  if (
+    !lineup?.confirmed ||
+    !overallLineupStrength?.available ||
+    !bullpenProfile?.available
+  ) {
+    return {
+      available: false,
+      reason: "confirmed lineup, split data, and bullpen profile required",
+    };
+  }
+
+  const leftShare = numberStat(bullpenProfile?.handMix?.leftShare);
+  const rightShare = numberStat(bullpenProfile?.handMix?.rightShare);
+  if (leftShare === null || rightShare === null) {
+    return { available: false, reason: "bullpen handedness mix unavailable" };
+  }
+
+  const vsLeft = lineupOpsVsHand(
+    lineup,
+    overallLineupStrength,
+    splitMap,
+    "L"
+  );
+  const vsRight = lineupOpsVsHand(
+    lineup,
+    overallLineupStrength,
+    splitMap,
+    "R"
+  );
+  const overallOps = numberStat(overallLineupStrength.weightedLineupOps);
+
+  if (vsLeft === null || vsRight === null || overallOps === null) {
+    return { available: false, reason: "lineup platoon OPS unavailable" };
+  }
+
+  const expectedOps = leftShare * vsLeft + rightShare * vsRight;
+  const deltaOps = expectedOps - overallOps;
+
+  // Bullpen affects only part of the game, so cap this at +/-0.6 pp per offense.
+  const probabilityAdjustment = clamp(deltaOps * 0.06, -0.006, 0.006);
+
+  return {
+    available: true,
+    bullpenHandMix: { leftShare, rightShare },
+    lineupOpsVsLeft: Number(vsLeft.toFixed(3)),
+    lineupOpsVsRight: Number(vsRight.toFixed(3)),
+    expectedOpsVsBullpenMix: Number(expectedOps.toFixed(3)),
+    overallWeightedLineupOps: Number(overallOps.toFixed(3)),
+    deltaOps: Number(deltaOps.toFixed(3)),
+    probabilityAdjustment: Number(probabilityAdjustment.toFixed(4)),
+    probabilityAdjustmentPctPoints: Number(
+      (probabilityAdjustment * 100).toFixed(2)
+    ),
+    methodology:
+      "Expected lineup OPS versus the available bullpen's left/right mix, with split samples regressed toward overall hitter strength; effect is capped because bullpen innings are only part of the game.",
+  };
+}
+
 function candidateSideName(decision, side) {
   return side === "home"
     ? decision?.matchup?.home
@@ -660,6 +945,32 @@ export default async function handler(req, res) {
               awayStarterHand
             );
 
+            const awayBullpenQuality = bullpenQualityProfile(
+              feed,
+              "away",
+              officialStarters?.away?.id,
+              awayBullpen
+            );
+            const homeBullpenQuality = bullpenQualityProfile(
+              feed,
+              "home",
+              officialStarters?.home?.id,
+              homeBullpen
+            );
+
+            const awayOffenseVsHomeBullpen = lineupVsBullpenHandMix(
+              awayLineup,
+              awayLineupStrength,
+              platoonSplits,
+              homeBullpenQuality
+            );
+            const homeOffenseVsAwayBullpen = lineupVsBullpenHandMix(
+              homeLineup,
+              homeLineupStrength,
+              platoonSplits,
+              awayBullpenQuality
+            );
+
             const starterCheck = {
               away: {
                 expected: expectedStarters.away || null,
@@ -718,6 +1029,14 @@ export default async function handler(req, res) {
               bullpen: {
                 away: awayBullpen,
                 home: homeBullpen,
+                quality: {
+                  away: awayBullpenQuality,
+                  home: homeBullpenQuality,
+                },
+                matchup: {
+                  awayOffenseVsHomeBullpen,
+                  homeOffenseVsAwayBullpen,
+                },
               },
             };
           })()
@@ -774,9 +1093,46 @@ export default async function handler(req, res) {
       const totalLineupAdjustment =
         lineupNetAdjustment + platoonNetAdjustment;
 
+      const candidateBullpenQuality =
+        v.bullpen?.quality?.[c.side] || { available: false };
+      const opponentBullpenQuality =
+        v.bullpen?.quality?.[opponentSide(c.side)] || { available: false };
+
+      const candidateOffenseBullpenMatchup =
+        c.side === "away"
+          ? v.bullpen?.matchup?.awayOffenseVsHomeBullpen
+          : v.bullpen?.matchup?.homeOffenseVsAwayBullpen;
+      const opponentOffenseBullpenMatchup =
+        c.side === "away"
+          ? v.bullpen?.matchup?.homeOffenseVsAwayBullpen
+          : v.bullpen?.matchup?.awayOffenseVsHomeBullpen;
+
+      const bullpenQualityNetAdjustment =
+        candidateBullpenQuality.available &&
+        opponentBullpenQuality.available
+          ? candidateBullpenQuality.qualityProbabilityAdjustment -
+            opponentBullpenQuality.qualityProbabilityAdjustment
+          : 0;
+
+      const bullpenHandednessNetAdjustment =
+        candidateOffenseBullpenMatchup?.available &&
+        opponentOffenseBullpenMatchup?.available
+          ? candidateOffenseBullpenMatchup.probabilityAdjustment -
+            opponentOffenseBullpenMatchup.probabilityAdjustment
+          : 0;
+
+      const totalBullpenAdjustment = clamp(
+        bullpenQualityNetAdjustment + bullpenHandednessNetAdjustment,
+        -0.012,
+        0.012
+      );
+
+      const totalContextAdjustment =
+        totalLineupAdjustment + totalBullpenAdjustment;
+
       const adjustedProbability = Math.max(
         0.02,
-        Math.min(0.98, baseProb + totalLineupAdjustment)
+        Math.min(0.98, baseProb + totalContextAdjustment)
       );
       const adjustedEdge =
         marketFairProb === null ? null : adjustedProbability - marketFairProb;
@@ -816,6 +1172,30 @@ export default async function handler(req, res) {
           );
         }
       }
+
+      if (
+        !candidateBullpenQuality.available ||
+        !opponentBullpenQuality.available
+      ) {
+        blockers.push("bullpen quality profile could not be scored");
+      }
+      if (
+        !candidateOffenseBullpenMatchup?.available ||
+        !opponentOffenseBullpenMatchup?.available
+      ) {
+        blockers.push("bullpen handedness matchup could not be scored");
+      }
+
+      if (totalBullpenAdjustment <= -0.0075) {
+        warnings.push(
+          "bullpen quality/handedness matchup reduces candidate win probability by at least 0.75 points"
+        );
+      } else if (totalBullpenAdjustment >= 0.0075) {
+        warnings.push(
+          "bullpen quality/handedness matchup improves candidate win probability by at least 0.75 points"
+        );
+      }
+
       if (!v.weather.passed) blockers.push("weather check is not clear");
       if (!bpGate.passed) blockers.push(...bpGate.warnings);
       else warnings.push(...bpGate.warnings);
@@ -874,6 +1254,43 @@ export default async function handler(req, res) {
               ? null
               : Number((adjustedEv * 100).toFixed(2)),
         },
+        bullpenAdjustment: {
+          candidateBullpenQuality,
+          opponentBullpenQuality,
+          candidateOffenseVsOpponentBullpen:
+            candidateOffenseBullpenMatchup || null,
+          opponentOffenseVsCandidateBullpen:
+            opponentOffenseBullpenMatchup || null,
+          qualityNetProbabilityAdjustment: Number(
+            bullpenQualityNetAdjustment.toFixed(4)
+          ),
+          qualityNetProbabilityAdjustmentPctPoints: Number(
+            (bullpenQualityNetAdjustment * 100).toFixed(2)
+          ),
+          handednessNetProbabilityAdjustment: Number(
+            bullpenHandednessNetAdjustment.toFixed(4)
+          ),
+          handednessNetProbabilityAdjustmentPctPoints: Number(
+            (bullpenHandednessNetAdjustment * 100).toFixed(2)
+          ),
+          totalBullpenProbabilityAdjustment: Number(
+            totalBullpenAdjustment.toFixed(4)
+          ),
+          totalBullpenProbabilityAdjustmentPctPoints: Number(
+            (totalBullpenAdjustment * 100).toFixed(2)
+          ),
+          finalAdjustedModelProbability: Number(
+            adjustedProbability.toFixed(4)
+          ),
+          finalAdjustedEdgePctPoints:
+            adjustedEdge === null
+              ? null
+              : Number((adjustedEdge * 100).toFixed(2)),
+          finalAdjustedEvPct:
+            adjustedEv === null
+              ? null
+              : Number((adjustedEv * 100).toFixed(2)),
+        },
         verificationStatus: nonSharpPassed
           ? "READY_FOR_SHARP_CHECK"
           : "WATCH",
@@ -895,7 +1312,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v4",
+      version: "Final Verification v5",
       date,
       method: {
         officialSource:
@@ -906,15 +1323,19 @@ export default async function handler(req, res) {
           "confirmed batting orders are scored by batting-order-weighted season OPS, regressed toward team season OPS for small samples; each team effect is capped at +/-1.25 win-probability points",
         platoonMatchup:
           "each confirmed hitter is re-scored versus the official opposing starter's handedness using MLB vr/vl splits, regressed toward overall hitter strength by split plate appearances; the incremental platoon effect is capped at +/-1.0 win-probability point per team",
+        bullpenQuality:
+          "available relievers are graded with ERA, WHIP and K-BB, weighted by saves/holds role and discounted for recent pitch workload/back-to-back use",
+        bullpenHandedness:
+          "the confirmed lineup is matched against the available bullpen's left/right composition using regressed vr/vl hitter splits; bullpen context is capped at +/-1.2 win-probability points in total",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup and platoon-adjusted edge, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon-adjusted edge, bullpen quality/handedness, weather, and bullpen workload pass. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
     });
   } catch (err) {
     return res.status(500).json({
-      error: "Final Verification v4 failed",
+      error: "Final Verification v5 failed",
       detail: err instanceof Error ? err.message : String(err),
     });
   }
