@@ -107,7 +107,7 @@ CREATE OR REPLACE FUNCTION public.compute_outcome_attribution_v1(p_outcome text,
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_out text := upper(coalesce(p_outcome,'UNKNOWN'));
   v_dec text := upper(coalesce(p_decision_status,'UNKNOWN'));
@@ -210,7 +210,7 @@ begin
     'fusionConflict',p_fusion_conflict
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_outcome_attribution_v1(p_outcome text, p_decision_status text, p_clv_signal text, p_context_changed boolean, p_data_quality_problem boolean, p_sharp_warning boolean, p_fusion_state text, p_fusion_conflict text) from public, anon, authenticated;
 grant execute on function public.compute_outcome_attribution_v1(p_outcome text, p_decision_status text, p_clv_signal text, p_context_changed boolean, p_data_quality_problem boolean, p_sharp_warning boolean, p_fusion_state text, p_fusion_conflict text) to service_role;
 
@@ -219,7 +219,7 @@ CREATE OR REPLACE FUNCTION public.refresh_decision_outcome_attribution()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   v_eval jsonb;
@@ -421,7 +421,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_decision_outcome_attribution() from public, anon, authenticated;
 grant execute on function public.refresh_decision_outcome_attribution() to service_role;
 
@@ -430,9 +430,9 @@ CREATE OR REPLACE FUNCTION public.trigger_decision_outcome_attribution()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
   select public.refresh_decision_outcome_attribution();
-$function$
+$function$;
 revoke execute on function public.trigger_decision_outcome_attribution() from public, anon, authenticated;
 grant execute on function public.trigger_decision_outcome_attribution() to service_role;
 
