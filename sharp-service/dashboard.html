@@ -273,7 +273,8 @@
   <section class="section" id="results">
     <div class="section-title"><h2>Results & Decision Tracking</h2><p>MLB final-state check every 5 minutes</p></div>
 
-    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+    <div class="metrics" style="grid-template-columns:repeat(5,1fr)">
+      <div class="metric"><div class="label">Overall Plays</div><div class="value" id="rOverallPlay">—</div><div class="hint">team + props W-L-P</div></div>
       <div class="metric"><div class="label">Team Plays</div><div class="value" id="rTeamPlay">—</div><div class="hint">W-L-P record</div></div>
       <div class="metric"><div class="label">Team Passes</div><div class="value" id="rTeamPass">—</div><div class="hint">good pass / missed win</div></div>
       <div class="metric"><div class="label">Prop Plays</div><div class="value" id="rPropPlay">—</div><div class="hint">W-L-P record</div></div>
@@ -284,6 +285,20 @@
       <div class="reason" style="margin-top:0">
         <strong>GOOD PASS</strong> = we passed and the wager lost. <strong>MISSED WIN</strong> = we passed but the wager would have won. Once a tracked game reaches its scheduled start, the system checks official MLB status every 5 minutes until it is Final, then grades every tracked PLAY and PASS.
       </div>
+    </div>
+
+    <div class="section-title"><h2>All PLAY Results</h2><p>team markets + player props</p></div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Wins</div>
+      <div id="allPlayWins"><div class="empty">No PLAY wins yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Losses</div>
+      <div id="allPlayLosses"><div class="empty">No PLAY losses yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Pushes</div>
+      <div id="allPlayPushes"><div class="empty">No PLAY pushes yet.</div></div>
     </div>
 
     <div class="section-title"><h2>Team Market PLAY Results</h2><p>moneyline · run line · totals</p></div>
@@ -1085,6 +1100,53 @@
       </div>`).join("");
   }
 
+  function renderCombinedPlayRows(rows, emptyText){
+    if(!rows?.length) return '<div class="empty">'+esc(emptyText)+'</div>';
+    return rows
+      .slice()
+      .sort((a,b)=>Date.parse(b.starts_at||"")-Date.parse(a.starts_at||""))
+      .slice(0,100)
+      .map(r=>{
+        if(r.__kind==="prop"){
+          return `
+            <div class="card" style="box-shadow:none;margin:7px 0">
+              <div class="candidate-head">
+                <div>
+                  <div class="match">${esc(r.label)}</div>
+                  <div class="pick">PLAYER PROP · ${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
+                </div>
+                <span class="badge play">${esc(r.outcome||"—")}</span>
+              </div>
+              <div class="grid4">
+                <div class="stat"><div class="k">Type</div><div class="v">PROP</div></div>
+                <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
+                <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+                <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+              </div>
+              <div class="why play">${esc(propResultWhy(r))}</div>
+            </div>`;
+        }
+
+        return `
+          <div class="card" style="box-shadow:none;margin:7px 0">
+            <div class="candidate-head">
+              <div>
+                <div class="match">${esc(r.market_label)}</div>
+                <div class="pick">TEAM MARKET · ${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
+              </div>
+              <span class="badge play">${esc(r.outcome||"—")}</span>
+            </div>
+            <div class="grid4">
+              <div class="stat"><div class="k">Type</div><div class="v">${esc(String(r.market_type||"TEAM").toUpperCase())}</div></div>
+              <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
+              <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+              <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+            </div>
+            <div class="why play">${esc(teamResultWhy(r))}</div>
+          </div>`;
+      }).join("");
+  }
+
   function renderDecisionResults(data){
     const summary=data?.summary||{};
     const team=summary.team||{};
@@ -1094,6 +1156,7 @@
     const tgood=team.passRecord?.goodPasses??0, tmiss=team.passRecord?.missedWins??0;
     const pgood=props.passRecord?.goodPasses??0, pmiss=props.passRecord?.missedWins??0;
 
+    $("rOverallPlay").textContent=(tw+pw)+"-"+(tl+pl)+"-"+(tp+pp);
     $("rTeamPlay").textContent=tw+"-"+tl+"-"+tp;
     $("rTeamPass").textContent=tgood+" / "+tmiss;
     $("rPropPlay").textContent=pw+"-"+pl+"-"+pp;
@@ -1127,6 +1190,23 @@
     const propRows=data?.props||[];
     const propPlay=propRows.filter(r=>r.decisionStatus==="PLAY");
     const propPass=propRows.filter(r=>r.decisionStatus==="PASS");
+
+    const allPlay=[
+      ...teamPlay.map(r=>({...r,__kind:"team"})),
+      ...propPlay.map(r=>({...r,__kind:"prop"}))
+    ];
+    $("allPlayWins").innerHTML=renderCombinedPlayRows(
+      allPlay.filter(r=>r.outcome==="W"),
+      "No PLAY wins yet."
+    );
+    $("allPlayLosses").innerHTML=renderCombinedPlayRows(
+      allPlay.filter(r=>r.outcome==="L"),
+      "No PLAY losses yet."
+    );
+    $("allPlayPushes").innerHTML=renderCombinedPlayRows(
+      allPlay.filter(r=>r.outcome==="PUSH"),
+      "No PLAY pushes yet."
+    );
 
     $("propPlayWins").innerHTML=renderPropResultRows(
       propPlay.filter(r=>r.outcome==="W"),
@@ -1223,7 +1303,7 @@
       $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      for(const id of ["teamPlayWins","teamPlayLosses","teamPlayPushes","teamGoodPasses","teamMissedWins","propPlayWins","propPlayLosses","propPlayPushes","propGoodPasses","propMissedWins"]){
+      for(const id of ["allPlayWins","allPlayLosses","allPlayPushes","teamPlayWins","teamPlayLosses","teamPlayPushes","teamGoodPasses","teamMissedWins","propPlayWins","propPlayLosses","propPlayPushes","propGoodPasses","propMissedWins"]){
         $(id).innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       }
     }finally{
