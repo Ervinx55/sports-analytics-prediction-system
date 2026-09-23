@@ -65,6 +65,9 @@
     .stat{background:rgba(5,15,29,.52);border:1px solid rgba(50,77,113,.55);border-radius:11px;padding:9px}
     .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
     .stat .v{font-size:15px;font-weight:800;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}
+    .prob-pair{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-top:3px}
+    .prob-pair .model{font-size:15px;font-weight:850;color:var(--text)}
+    .prob-pair .market{font-size:12px;font-weight:750;color:var(--muted)}
     .reason{margin-top:10px;font-size:12px;color:#c7d5e8;line-height:1.45}
     .reason strong{color:var(--amber)}
     details{margin-top:10px;border-top:1px solid rgba(57,82,117,.5);padding-top:10px}
@@ -128,7 +131,7 @@
     <div style="font-size:12px;line-height:1.5;color:var(--muted)">
       <strong style="color:var(--text)">pp = percentage points.</strong>
       Example: 61.5% model probability vs 55.3% market probability = <strong style="color:var(--green)">+6.2 pp</strong>.
-      This is different from a percent change.
+      This is different from a percent change. <strong style="color:var(--text)">M = Model probability</strong> and <strong style="color:var(--text)">Mk = no-vig Market probability</strong>.
     </div>
   </div>
 
@@ -337,8 +340,11 @@
                   ${statusBadge(m)}
                 </div>
                 <div>
-                  <div class="small">Model</div>
-                  <strong>${fmtPct(m.model_probability)}</strong>
+                  <div class="small">Model / Market</div>
+                  <div class="prob-pair">
+                    <span class="model">M ${fmtPct(m.model_probability)}</span>
+                    <span class="market">Mk ${fmtPct(m.market_fair_probability)}</span>
+                  </div>
                 </div>
                 <div class="hide-mobile">
                   <div class="small">Edge</div>
@@ -453,7 +459,7 @@
         </div>
         <div class="grid4">
           <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
-          <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(g.model_probability)}</div></div>
+          <div class="stat"><div class="k">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(g.model_probability)}</span><span class="market">Mk ${fmtPct(g.market_fair_probability)}</span></div></div>
           <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
@@ -590,7 +596,7 @@
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
-            <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(p.model_probability)}</div><div class="small">raw ${fmtPct(p.raw_independent_probability)}</div></div>
+            <div class="stat"><div class="k">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(p.model_probability)}</span><span class="market">Mk ${fmtPct(p.market_fair_probability)}</span></div><div class="small">raw independent ${fmtPct(p.raw_independent_probability)}</div></div>
             <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div><div class="small">vs exact-line no-vig</div></div>
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
@@ -620,10 +626,10 @@
         <div class="list-row">
           <div>
             <div class="main">${esc(p.label)}</div>
-            <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))}</div>
+            <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
           </div>
           <div><div class="small">Decision</div>${statusBadge(p)}</div>
-          <div><div class="small">Price</div><strong>${fmtOdds(p.best_odds)}</strong></div>
+          <div><div class="small">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(p.model_probability)}</span><span class="market">Mk ${fmtPct(p.market_fair_probability)}</span></div></div>
           <div class="hide-mobile"><div class="small">Edge</div><strong class="${Number(p.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(p.edge_pct_points)}</strong></div>
           <div class="hide-mobile"><div class="small">EV</div><strong class="${Number(p.ev_pct)>=0?"positive":"negative"}">${p.ev_pct==null?"—":(Number(p.ev_pct)>=0?"+":"")+Number(p.ev_pct).toFixed(2)+"%"}</strong></div>
         </div>`).join("")+'</div>';
