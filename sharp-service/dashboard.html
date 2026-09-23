@@ -157,37 +157,53 @@
   </section>
 
   <section class="section" id="plays">
-    <div class="section-title"><h2>Plays</h2><p>only sharp-gate qualified wagers</p></div>
+    <div class="section-title"><h2>Plays</h2><p>every currently qualified wager</p></div>
 
     <div class="card">
       <div class="candidate-head">
         <div>
-          <div class="match">Singles</div>
-          <div class="pick">Only PLAY wagers appear here.</div>
+          <div class="match">Team Market Plays</div>
+          <div class="pick">Moneylines, run lines, and totals that are labeled PLAY.</div>
         </div>
         <span class="badge play" id="singleCountBadge">0 QUALIFIED</span>
       </div>
       <div id="singlePlayList" style="margin-top:10px">
-        <div class="empty">No singles have cleared the complete sharp gate yet.</div>
+        <div class="empty">No team-market plays are labeled PLAY right now.</div>
       </div>
     </div>
 
     <div class="card">
       <div class="candidate-head">
         <div>
-          <div class="match">Parlays</div>
-          <div class="pick">Built only from qualified singles on different games.</div>
+          <div class="match">Player Prop Plays</div>
+          <div class="pick">Kept separate from team markets and ranked by the prop model.</div>
+        </div>
+        <span class="badge play" id="playsPropCountBadge">0 QUALIFIED</span>
+      </div>
+      <div id="playsPropList" style="margin-top:10px">
+        <div class="empty">No player props are labeled PLAY right now.</div>
+      </div>
+      <div class="reason">
+        <strong>Prop standard:</strong> these are qualified by the separate player-prop model. They are not mixed with the team-market sharp-gate process.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="candidate-head">
+        <div>
+          <div class="match">Team Market Parlays</div>
+          <div class="pick">Built only from qualified team-market singles on different games.</div>
         </div>
         <span class="badge neutral">2-LEG DEFAULT</span>
       </div>
       <div id="parlayList" style="margin-top:10px">
-        <div class="empty">A parlay requires at least two qualified singles.</div>
+        <div class="empty">A team-market parlay requires at least two qualified singles.</div>
       </div>
     </div>
 
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        <strong>Parlay rule:</strong> no PENDING legs, no PASS legs, no same-game combinations, and no forced parlay when fewer than two PLAY singles qualify. Combined probability/EV are estimates that assume the legs are independent.
+        <strong>Separation rule:</strong> player props never get mixed into team-market parlays here. No PENDING or PASS legs are used, and no same-game team-market combinations are forced. Combined parlay probability/EV are estimates that assume the legs are independent.
       </div>
     </div>
   </section>
@@ -510,6 +526,37 @@
       </div>`).join("");
   }
 
+  function renderPropPlaysInPlays(card){
+    const props=[...(card?.plays||[])].sort((a,b)=>
+      Number(b.ev_pct??-999)-Number(a.ev_pct??-999)
+    );
+
+    $("playsPropCountBadge").textContent=props.length+" QUALIFIED";
+
+    if(!props.length){
+      $("playsPropList").innerHTML='<div class="empty">No player props are labeled PLAY right now.</div>';
+      return;
+    }
+
+    $("playsPropList").innerHTML=props.map((p,i)=>`
+      <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(170,140,255,.42)">
+        <div class="candidate-head">
+          <div>
+            <div class="match">#${i+1} · ${esc(p.label)}</div>
+            <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
+          </div>
+          <span class="badge play">PROP PLAY</span>
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
+          <div class="stat"><div class="k">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(p.model_probability)}</span><span class="market">Mk ${fmtPct(p.market_fair_probability)}</span></div></div>
+          <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
+        </div>
+        <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)} · ${esc(p.reason||"Qualified by the player-prop model.")}</div>
+      </div>`).join("");
+  }
+
   function renderFinalPlays(rows){
     if(!rows?.length){
       $("finalPlayList").innerHTML='<div class="empty">No wager has cleared the complete sharp gate yet.</div>';
@@ -734,6 +781,7 @@
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
     renderMarketCard(data.marketCard||{});
     renderPlays(data.marketCard||{});
+    renderPropPlaysInPlays(data.playerProps||{});
     renderPlayerProps(data.playerProps||{});
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
@@ -760,6 +808,7 @@
       $("healthText").textContent="Dashboard connection failed";
       $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
