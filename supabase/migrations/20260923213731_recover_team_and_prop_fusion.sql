@@ -131,7 +131,7 @@ CREATE OR REPLACE FUNCTION public.compute_decision_fusion_v1(p_non_sharp_status 
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_non text := upper(coalesce(p_non_sharp_status,''));
   v_unc text := upper(coalesce(p_uncertainty_class,'INCOMPLETE'));
@@ -417,7 +417,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) from public, anon, authenticated;
 grant execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) to service_role;
 
@@ -426,7 +426,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_decision_fusion_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   v_eval jsonb;
@@ -591,7 +591,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_market_decision_fusion_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_market_decision_fusion_shadow() to service_role;
 
@@ -600,9 +600,9 @@ CREATE OR REPLACE FUNCTION public.trigger_market_decision_fusion()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
   select public.refresh_market_decision_fusion_shadow();
-$function$
+$function$;
 revoke execute on function public.trigger_market_decision_fusion() from public, anon, authenticated;
 grant execute on function public.trigger_market_decision_fusion() to service_role;
 
@@ -611,7 +611,7 @@ CREATE OR REPLACE FUNCTION public.compute_player_prop_fusion_v1(p_upstream_statu
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_up text := upper(coalesce(p_upstream_status,'PENDING'));
   v_role text := upper(coalesce(p_player_role,
@@ -932,7 +932,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) from public, anon, authenticated;
 grant execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) to service_role;
 
@@ -941,7 +941,7 @@ CREATE OR REPLACE FUNCTION public.refresh_player_prop_decision_fusion_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   v_eval jsonb;
@@ -1090,7 +1090,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_player_prop_decision_fusion_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_player_prop_decision_fusion_shadow() to service_role;
 
@@ -1099,9 +1099,9 @@ CREATE OR REPLACE FUNCTION public.trigger_player_prop_decision_fusion()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
   select public.refresh_player_prop_decision_fusion_shadow();
-$function$
+$function$;
 revoke execute on function public.trigger_player_prop_decision_fusion() from public, anon, authenticated;
 grant execute on function public.trigger_player_prop_decision_fusion() to service_role;
 
