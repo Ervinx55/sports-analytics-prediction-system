@@ -42,3 +42,85 @@ begin
   end loop;
 end;
 $function$;
+
+
+-- Application scheduler functions that existed in the hosted project before the
+-- recorded migration history began. These signature-compatible stubs exist
+-- only so the historical hardening migrations can revoke/grant EXECUTE.
+-- Later catch-up migrations replace them with the exact current definitions.
+
+create or replace function public.trigger_closing_snapshot()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_league_snapshot(
+  p_league text,
+  p_label text,
+  p_window_hours integer
+)
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_market_snapshot(p_label text)
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_model_audit()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_model_grading()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_player_prop_capture()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_player_prop_grading()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
+
+create or replace function public.trigger_team_market_grading()
+returns bigint
+language sql
+security definer
+set search_path to 'pg_catalog','public'
+as $function$
+  select 0::bigint;
+$function$;
