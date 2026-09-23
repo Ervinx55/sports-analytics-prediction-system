@@ -33,7 +33,7 @@
     .healthline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;margin:3px 0 14px}
     .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(79,209,139,.65)}
     .dot.bad{background:var(--red)}
-    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+    .metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
     .metric{background:linear-gradient(180deg,rgba(19,34,56,.94),rgba(13,27,46,.94));
       border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:var(--shadow)}
     .metric .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.55px}
@@ -114,6 +114,7 @@
   <div class="metrics">
     <div class="metric"><div class="label">Active</div><div class="value" id="mActive">—</div><div class="hint">audited candidates</div></div>
     <div class="metric"><div class="label">Sharp Ready</div><div class="value" id="mReady">—</div><div class="hint">final gate pending</div></div>
+    <div class="metric"><div class="label">Final Plays</div><div class="value" id="mFinal">—</div><div class="hint">cleared sharp gate</div></div>
     <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
     <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
   </div>
@@ -121,12 +122,15 @@
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
     <button class="tab" data-tab="market">Market</button>
+    <button class="tab" data-tab="sharp">Sharp Gate</button>
     <button class="tab" data-tab="results">Results & CLV</button>
     <button class="tab" data-tab="calibration">Calibration</button>
     <button class="tab" data-tab="system">System</button>
   </div>
 
   <section class="section active" id="today">
+    <div class="section-title"><h2>Final Plays</h2><p>must clear the sharp gate</p></div>
+    <div id="finalPlayList"><div class="empty loading">Loading final plays…</div></div>
     <div class="section-title"><h2>Today’s Board</h2><p id="todayStamp"></p></div>
     <div id="candidateList"><div class="empty loading">Loading audited candidates…</div></div>
   </section>
@@ -140,6 +144,18 @@
     <div class="card">
       <div style="font-weight:800;margin-bottom:8px">Largest Recent Moves</div>
       <div id="movementList"><div class="empty">Loading movement…</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="sharp">
+    <div class="section-title"><h2>Sharp Gate</h2><p>BookMaker · Pinnacle · Circa</p></div>
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">Latest Checks</div>
+      <div id="sharpLatest"><div class="empty">No sharp checks stored yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">History</div>
+      <div id="sharpHistory"><div class="empty">No sharp history yet.</div></div>
     </div>
   </section>
 
@@ -237,6 +253,78 @@
     }).join("");
   }
 
+  function gateBadge(status){
+    if(status==="FINAL_PLAY") return '<span class="badge play">FINAL PLAY</span>';
+    if(status==="PASS") return '<span class="badge pass">PASS</span>';
+    return '<span class="badge watch">WATCH</span>';
+  }
+
+  function renderFinalPlays(rows){
+    if(!rows?.length){
+      $("finalPlayList").innerHTML='<div class="empty">No wager has cleared the complete sharp gate yet.</div>';
+      return;
+    }
+    $("finalPlayList").innerHTML=rows.slice(0,10).map(g=>`
+      <div class="card" style="border-color:rgba(77,226,208,.55)">
+        <div class="candidate-head">
+          <div>
+            <div class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</div>
+            <div class="pick"><strong>${esc(g.side_name)}</strong> · ${fmtOdds(g.mainstream_odds)} ${esc(g.mainstream_book||"")}</div>
+          </div>
+          ${gateBadge(g.final_status)}
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Model</div><div class="v">${fmtPct(g.model_probability)}</div></div>
+          <div class="stat"><div class="k">BookMaker Fair</div><div class="v">${fmtPct(g.bookmaker_candidate_fair_probability)}</div></div>
+          <div class="stat"><div class="k">Model vs BM</div><div class="v positive">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
+          <div class="stat"><div class="k">Threshold</div><div class="v">${fmtOdds(g.playable_threshold)}</div></div>
+        </div>
+        <div class="reason">${esc(g.reason||"Sharp gate cleared.")}</div>
+      </div>`).join("");
+  }
+
+  function renderSharpGate(gate){
+    const latest=gate?.latest||[];
+    const history=gate?.history||[];
+    renderFinalPlays(gate?.finalPlays||[]);
+
+    if(!latest.length){
+      $("sharpLatest").innerHTML='<div class="empty">No sharp checks stored yet.</div>';
+    } else {
+      $("sharpLatest").innerHTML=latest.map(g=>`
+        <div class="card" style="box-shadow:none;margin:7px 0">
+          <div class="candidate-head">
+            <div>
+              <div class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</div>
+              <div class="pick">${esc(g.side_name)} · checked ${fmtTime(g.checked_at)}</div>
+            </div>
+            ${gateBadge(g.final_status)}
+          </div>
+          <div class="grid4">
+            <div class="stat"><div class="k">Mainstream</div><div class="v">${fmtOdds(g.mainstream_odds)}</div><div class="small">${esc(g.mainstream_book||"—")}</div></div>
+            <div class="stat"><div class="k">Model</div><div class="v">${fmtPct(g.model_probability)}</div></div>
+            <div class="stat"><div class="k">BookMaker Fair</div><div class="v">${fmtPct(g.bookmaker_candidate_fair_probability)}</div></div>
+            <div class="stat"><div class="k">Model vs BM</div><div class="v ${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
+          </div>
+          <div class="reason"><strong>Pinnacle:</strong> ${esc(g.pinnacle_status||"unavailable")} · <strong>Circa:</strong> ${esc(g.circa_status||"unavailable")}</div>
+          <div class="reason">${esc(g.reason||"")}</div>
+        </div>`).join("");
+    }
+
+    if(!history.length){
+      $("sharpHistory").innerHTML='<div class="empty">No sharp history yet.</div>';
+    } else {
+      $("sharpHistory").innerHTML=history.slice(0,30).map(g=>`
+        <div class="list-row">
+          <div><div class="main">${esc(g.side_name)}</div><div class="small">${fmtTime(g.checked_at)} · ${esc(g.away_team)} @ ${esc(g.home_team)}</div></div>
+          <div><div class="small">Status</div><strong>${esc(g.final_status)}</strong></div>
+          <div><div class="small">BookMaker</div><strong>${fmtPct(g.bookmaker_candidate_fair_probability)}</strong></div>
+          <div class="hide-mobile"><div class="small">Model Edge</div><strong class="${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</strong></div>
+          <div class="hide-mobile"><div class="small">Price</div><strong>${fmtOdds(g.mainstream_odds)}</strong></div>
+        </div>`).join("");
+    }
+  }
+
   function renderAlerts(rows){
     if(!rows?.length){ $("alertList").innerHTML='<div class="empty">No current qualifying alerts.</div>'; return; }
     $("alertList").innerHTML=rows.slice(0,12).map(a=>{
@@ -306,7 +394,7 @@
       <div><strong>Weights:</strong> ${sys?.frozenWeights?"Frozen for audit":"Adjustable"}</div>
       <div><strong>Latest audit:</strong> ${fmtTime(sys?.latestAuditAt)}</div>
       <div><strong>Latest market snapshot:</strong> ${fmtTime(sys?.latestSnapshotAt)}</div>
-      <div style="margin-top:8px;color:var(--muted)">Sharp Gate Watch runs separately and can promote a READY candidate only after direct/secondary sharp confirmation. Its browser-extracted prices are not yet stored as dashboard history.</div>
+      <div style="margin-top:8px;color:var(--muted)">Sharp Gate Watch runs separately and can promote a READY candidate only after direct/secondary sharp confirmation. Sharp-check decisions are now stored persistently and shown in the Sharp Gate tab.</div>
     `;
   }
 
@@ -315,10 +403,12 @@
     const s=data.summary||{};
     $("mActive").textContent=s.activeCandidates??0;
     $("mReady").textContent=s.readyForSharp??0;
+    $("mFinal").textContent=s.finalPlays??0;
     $("mGrades").textContent=s.grades??0;
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
     renderCandidates(data.candidates||[]);
+    renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderResults(data.grades||[]);
