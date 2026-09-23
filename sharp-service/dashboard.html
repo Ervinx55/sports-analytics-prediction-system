@@ -531,8 +531,6 @@
   function renderSharpGate(gate){
     const latest=gate?.latest||[];
     const history=gate?.history||[];
-    renderFinalPlays(gate?.finalPlays||[]);
-
     if(!latest.length){
       $("sharpLatest").innerHTML='<div class="empty">No sharp checks stored yet.</div>';
     } else {
