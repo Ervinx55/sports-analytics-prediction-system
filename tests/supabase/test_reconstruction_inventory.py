@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -69,3 +70,40 @@ def test_historical_migration_inventory_is_exact():
         )
         assert item["path"] == expected_path
         assert (ROOT / expected_path).exists()
+
+
+EXPECTED_EDGE_FUNCTION_COUNT = 49
+
+
+def test_edge_function_recovery_is_complete_and_configured():
+    manifest = json.loads(
+        (ROOT / "supabase" / "manifests" / "edge-functions.json").read_text()
+    )
+    items = manifest["items"]
+    assert len(items) == EXPECTED_EDGE_FUNCTION_COUNT
+
+    slugs = [item["slug"] for item in items]
+    assert len(slugs) == len(set(slugs))
+
+    functions_dir = ROOT / "supabase" / "functions"
+    dirs = sorted(
+        p.name
+        for p in functions_dir.iterdir()
+        if p.is_dir() and not p.name.startswith("_")
+    )
+    assert sorted(slugs) == dirs
+
+    config = tomllib.loads((ROOT / "supabase" / "config.toml").read_text())
+    configured = config.get("functions", {})
+
+    for item in items:
+        assert item["status"] == "ACTIVE"
+        assert item["bundle_sha256"]
+        assert item["files"]
+        assert item["slug"] in configured
+        assert configured[item["slug"]]["verify_jwt"] is item["verify_jwt"]
+
+        for file_entry in item["files"]:
+            path = ROOT / file_entry["path"]
+            assert path.exists()
+            assert file_entry["sha256"]
