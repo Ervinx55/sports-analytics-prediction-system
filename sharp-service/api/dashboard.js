@@ -82,6 +82,9 @@ export default async function handler(req, res) {
     playerPropClvCalibration: `${BASE}/player-prop-clv-calibration?days=90`,
     parlayCorrelation: `${BASE}/parlay-correlation-status?sport=${encodeURIComponent(sport)}`,
     parlayCorrelationCalibration: `${BASE}/parlay-correlation-calibration?days=90`,
+    decisionTimingCalibration: `${BASE}/decision-timing-calibration?days=90`,
+    modelGovernance: `${BASE}/model-governance-status`,
+    outcomeAttribution: `${BASE}/outcome-attribution-status?days=30`,
     sharpSourceHealth: `${BASE}/sharp-source-health`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
@@ -90,7 +93,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, sharpSourceHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, sharpSourceHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -105,6 +108,9 @@ export default async function handler(req, res) {
       fetchJson(urls.playerPropClvCalibration),
       fetchJson(urls.parlayCorrelation),
       fetchJson(urls.parlayCorrelationCalibration),
+      fetchJson(urls.decisionTimingCalibration),
+      fetchJson(urls.modelGovernance),
+      fetchJson(urls.outcomeAttribution),
       fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
@@ -125,6 +131,9 @@ export default async function handler(req, res) {
     playerPropClvCalibration: settled(playerPropClvCalibration),
     parlayCorrelation: settled(parlayCorrelation),
     parlayCorrelationCalibration: settled(parlayCorrelationCalibration),
+    decisionTimingCalibration: settled(decisionTimingCalibration),
+    modelGovernance: settled(modelGovernance),
+    outcomeAttribution: settled(outcomeAttribution),
     sharpSourceHealth: settled(sharpSourceHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
@@ -199,6 +208,9 @@ export default async function handler(req, res) {
     playerPropFusionCalibration: sources.playerPropFusionCalibration.data || null,
     playerPropClvCalibration: sources.playerPropClvCalibration.data || null,
     parlayCorrelationCalibration: sources.parlayCorrelationCalibration.data || null,
+    decisionTimingCalibration: sources.decisionTimingCalibration.data || null,
+    modelGovernance: sources.modelGovernance.data || null,
+    outcomeAttribution: sources.outcomeAttribution.data || null,
     parlayCorrelation: sources.parlayCorrelation.data || {
       summary: { pairs: 0, recommendedIndependentPairs: 0, sameGameAuditPairs: 0, blockedPairs: 0 },
       recommended: [],

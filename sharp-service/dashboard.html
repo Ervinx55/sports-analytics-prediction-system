@@ -686,6 +686,26 @@
       </div>`;
   }
 
+  function timingPanel(x){
+    const t=x?.decisionTiming;
+    if(!t) return "";
+    const labels={
+      GT_180:"3h+",
+      "120_180":"2–3h",
+      "60_120":"1–2h",
+      "30_60":"30–60m",
+      "20_30":"20–30m",
+      LT_20:"<20m"
+    };
+    const bucket=labels[t.timing_bucket]||t.timing_bucket||"—";
+    const mins=t.minutes_to_start==null?"—":Number(t.minutes_to_start).toFixed(0)+"m";
+    return `
+      <div class="why pending" style="margin-top:8px">
+        <strong>TIMING · ${esc(bucket)}</strong> · ${esc(mins)} to start · <strong>COLLECTING</strong>
+        <div class="small" style="margin-top:4px">Timing is descriptive only until this bucket has enough matched closing-market samples. No BET NOW / WAIT recommendation is active.</div>
+      </div>`;
+  }
+
   function clvPanel(p){
     const x=p?.marketClv;
     if(!x) return "";
@@ -757,6 +777,7 @@
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
                   ${fusionPanel(m)}
+                  ${timingPanel(m)}
                   <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
                 </div>
                 <div class="market-decision-panel">
@@ -874,6 +895,7 @@
           </div>
           <div class="why play">${esc(marketWhy(g))}</div>
           ${fusionPanel(g)}
+          ${timingPanel(g)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
           <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
         </div>`).join("");
@@ -938,6 +960,7 @@
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
         ${fusionPanel(p)}
+        ${timingPanel(p)}
         ${clvPanel(p)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
@@ -1038,6 +1061,7 @@
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
           ${fusionPanel(p)}
+        ${timingPanel(p)}
           ${clvPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
           <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
@@ -1056,6 +1080,7 @@
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
           ${fusionPanel(p)}
+        ${timingPanel(p)}
           ${clvPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         </div>`).join("");
@@ -1072,6 +1097,7 @@
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
             ${fusionPanel(p)}
+        ${timingPanel(p)}
             ${clvPanel(p)}
             <div class="small" style="margin-top:4px"><strong>STATS:</strong> ${esc(propStats(p))}</div>
           </div>
@@ -1170,6 +1196,24 @@
     return propWhy({...r,status:r?.decisionStatus==="PLAY"?"PLAY":"PASS"});
   }
 
+  function attributionPanel(r){
+    const a=r?.attribution;
+    if(!a) return "";
+    const grade=String(a.process_grade||"UNRESOLVED");
+    const tone=grade==="STRONG_PROCESS"||grade==="PASS_VALIDATED"?"play":
+      grade==="WEAK_PROCESS"||grade==="INVALIDATED"?"pass":"pending";
+    const extras=[];
+    if(a.clv_signal) extras.push("CLV "+a.clv_signal);
+    if(a.clv_value!=null) extras.push((a.clv_metric||"value")+" "+Number(a.clv_value).toFixed(2));
+    if(a.timing_bucket) extras.push("timing "+a.timing_bucket);
+    return `
+      <div class="why ${tone}" style="margin-top:8px">
+        <strong>PROCESS · ${esc(a.primary_attribution||"UNRESOLVED")}</strong> · ${esc(grade)}
+        <div style="margin-top:4px">${esc(a.explanation||"")}</div>
+        ${extras.length?'<div class="small" style="margin-top:4px">'+esc(extras.join(" · "))+'</div>':""}
+      </div>`;
+  }
+
   function renderTeamResultRows(rows, emptyText){
     if(!rows?.length) return '<div class="empty">'+esc(emptyText)+'</div>';
     return rows.slice(0,100).map(r=>`
@@ -1188,6 +1232,7 @@
           <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
         </div>
         <div class="why ${resultWhyClass(r)}">${esc(teamResultWhy(r))}</div>
+        ${attributionPanel(r)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(r))}</div>
       </div>`).join("");
   }
@@ -1210,6 +1255,7 @@
           <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
         </div>
         <div class="why ${resultWhyClass(r)}">${esc(propResultWhy(r))}</div>
+        ${attributionPanel(r)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(r))}</div>
       </div>`).join("");
   }
@@ -1238,6 +1284,7 @@
                 <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
               </div>
               <div class="why ${resultWhyClass(r)}">${esc(propResultWhy(r))}</div>
+              ${attributionPanel(r)}
             </div>`;
         }
 
@@ -1257,6 +1304,7 @@
               <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
             </div>
             <div class="why ${resultWhyClass(r)}">${esc(teamResultWhy(r))}</div>
+            ${attributionPanel(r)}
           </div>`;
       }).join("");
   }
@@ -1352,7 +1400,7 @@
     );
   }
 
-  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal, propClvCal, parlayCal){
+  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal, propClvCal, parlayCal, timingCal, modelGov, outcomeAttr){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
@@ -1362,6 +1410,9 @@
     const propFusionCodes=propFusionCal?.byConflictCode||{};
     const propClvStats=propClvCal||{};
     const parlayRelations=parlayCal?.byRelationClass||{};
+    const timingBuckets=timingCal?.byBucket||{};
+    const governanceOverall=modelGov?.overall||[];
+    const attributionCounts=outcomeAttr?.summary?.byPrimaryAttribution||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1370,6 +1421,26 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const timingCard=(label,key)=>{
+      const m=timingBuckets[key]||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${m.usableClose??0} closes</div>
+          <div class="hint">Team CLV ${m.averageTeamClvPp==null?"—":fmtPP(m.averageTeamClvPp)} · Prop line CLV ${m.averagePropLineClvUnits==null?"—":Number(m.averagePropLineClvUnits).toFixed(2)}</div>
+          <div class="hint">${esc(m.sampleStatus||"INSUFFICIENT_SAMPLE")} · ${m.snapshots??0} snapshots</div>
+        </div>`;
+    };
+    const governanceCard=(m)=>{
+      const delta=m.delta_brier==null?"—":Number(m.delta_brier).toFixed(4);
+      return `
+        <div class="metric">
+          <div class="label">${esc((m.role||"MODEL")+" · "+(m.variant||"PRIMARY"))}</div>
+          <div class="value" style="font-size:17px">${esc(m.model_family||"")} · ${m.graded_count??0} graded</div>
+          <div class="hint">Brier ${m.brier_score==null?"—":Number(m.brier_score).toFixed(4)} · Log loss ${m.log_loss==null?"—":Number(m.log_loss).toFixed(4)} · ΔBrier ${delta}</div>
+          <div class="hint">${esc(m.governance_state||"COLLECTING")} · closes ${m.close_count??0}</div>
         </div>`;
     };
     const parlayCard=(label,key)=>{
@@ -1492,6 +1563,34 @@
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>CLV rule:</strong> positive line CLV means our ticket had the better number at close; when the line is unchanged, positive price/fair-probability CLV means the market moved toward our side after the decision. CLV measures process quality, not whether one wager won.</div>
       </div>
+      <div class="section-title" style="margin-top:18px"><h2>Decision Timing Calibration</h2><p>closing-market quality by time-to-start bucket</p></div>
+      <div class="cal-grid">
+        ${timingCard("3h+","GT_180")}
+        ${timingCard("2–3 Hours","120_180")}
+        ${timingCard("1–2 Hours","60_120")}
+        ${timingCard("30–60 Minutes","30_60")}
+        ${timingCard("20–30 Minutes","20_30")}
+        ${timingCard("Final 20 Minutes","LT_20")}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Timing policy:</strong> COLLECTING only. No timing bucket can generate BET NOW / WAIT until it has at least 100 usable closing-market observations.</div>
+      </div>
+      <div class="section-title" style="margin-top:18px"><h2>Model Governance</h2><p>reference vs diagnostics / challengers</p></div>
+      <div class="cal-grid">
+        ${governanceOverall.length?governanceOverall.map(governanceCard).join(""):'<div class="empty">No governance evaluation yet.</div>'}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Promotion policy:</strong> automatic promotion is disabled. Calibration, closing-market sample, category stability, and explicit human review are required.</div>
+      </div>
+      <div class="section-title" style="margin-top:18px"><h2>Outcome Attribution</h2><p>separate process quality from the final score</p></div>
+      <div class="cal-grid">
+        <div class="metric"><div class="label">Good Process / Bad Outcome</div><div class="value" style="font-size:20px">${attributionCounts.GOOD_PROCESS_BAD_OUTCOME??0}</div></div>
+        <div class="metric"><div class="label">Market Moved Against</div><div class="value" style="font-size:20px">${attributionCounts.MARKET_MOVED_AGAINST_DECISION??0}</div></div>
+        <div class="metric"><div class="label">Context Invalidated</div><div class="value" style="font-size:20px">${attributionCounts.CONTEXT_INVALIDATED_AFTER_DECISION??0}</div></div>
+        <div class="metric"><div class="label">Win / Negative Process</div><div class="value" style="font-size:20px">${attributionCounts.WIN_WITH_NEGATIVE_PROCESS??0}</div></div>
+        <div class="metric"><div class="label">Good Passes</div><div class="value" style="font-size:20px">${attributionCounts.GOOD_PASS??0}</div></div>
+        <div class="metric"><div class="label">Missed Wins</div><div class="value" style="font-size:20px">${attributionCounts.MISSED_WIN??0}</div></div>
+      </div>
       <div class="section-title" style="margin-top:18px"><h2>Parlay Correlation Calibration</h2><p>empirical joint outcomes vs independence estimate</p></div>
       <div class="cal-grid">
         ${parlayCard("Cross-Game Low Known Correlation","CROSS_GAME_LOW_KNOWN_CORRELATION")}
@@ -1518,7 +1617,7 @@
       </div>`;
   }
 
-  function renderSystem(sys,sharpHealth){
+  function renderSystem(sys,sharpHealth,modelGov){
     const h=sys?.sourceHealth||{};
     $("sourceHealth").innerHTML=Object.entries(h).map(([name,v])=>`
       <div class="source"><span class="name">${esc(name)}</span><span class="${v.ok?"ok":"badtext"}">${v.ok?"ONLINE":"ERROR"}</span></div>
@@ -1541,6 +1640,7 @@
       <div><strong>Latest audit:</strong> ${fmtTime(sys?.latestAuditAt)}</div>
       <div><strong>Latest market snapshot:</strong> ${fmtTime(sys?.latestSnapshotAt)}</div>
       <div><strong>Sharp refresh:</strong> every ${sharpHealth?.refreshCadenceMinutes??5} minutes</div>
+      <div><strong>Governance:</strong> auto-promotion ${modelGov?.automaticPromotion===false?"DISABLED":"—"} · ${modelGov?.summary?.references??0} references · ${modelGov?.summary?.challengers??0} challengers · ${modelGov?.summary?.diagnostics??0} diagnostics</div>
       <div style="margin-top:8px;color:var(--muted)">BookMaker is captured directly from its public MLB odds feed. Circa is secondary/public coverage when VSiN exposes the matchup. Pinnacle remains reserved for authorized API access; automated scraping is disabled.</div>
     `;
   }
@@ -1562,8 +1662,8 @@
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration);
-    renderSystem(data.system,data.sharpSourceHealth);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration,data.decisionTimingCalibration,data.modelGovernance,data.outcomeAttribution);
+    renderSystem(data.system,data.sharpSourceHealth,data.modelGovernance);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
     $("healthDot").classList.toggle("bad",bad);
