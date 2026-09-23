@@ -2,6 +2,19 @@
   "functions": {
     "api/sharp.js": {
       "maxDuration": 30
+    },
+    "api/dashboard.js": {
+      "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
+    },
+    {
+      "source": "/dashboard/",
+      "destination": "/dashboard.html"
+    }
+  ]
 }
