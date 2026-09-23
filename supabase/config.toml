@@ -36,3 +36,21 @@ verify_jwt = true
 
 [functions.grade-player-props]
 verify_jwt = true
+
+[functions.player-prop-card]
+verify_jwt = false
+
+[functions.grade-team-markets]
+verify_jwt = true
+
+[functions.decision-results]
+verify_jwt = false
+
+[functions.evaluate-sharp-gate]
+verify_jwt = true
+
+[functions.market-calibration]
+verify_jwt = false
+
+[functions.refresh-sharp-sources]
+verify_jwt = true

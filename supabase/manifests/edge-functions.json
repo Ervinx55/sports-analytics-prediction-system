@@ -192,6 +192,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "player-prop-card",
+      "version": 6,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "3b109640c4765a8a02a09fc4ddbe9d60aed356660f9c06586416a561a97a3938",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/player-prop-card/index.ts",
+          "name": "index.ts",
+          "sha256": "32c9a21b95b1a1f3f8733e7e6489abb5fd7db65834b0ee91bfe39df40c984e98"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "grade-team-markets",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "a86195334bc0f54b76afaca08e2a0aa01015d7531402ebf93a1c3a5f03e5c076",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-team-markets/index.ts",
+          "name": "index.ts",
+          "sha256": "520fc208b7bd41c482c163d014b3a56a9bae3834cfd890c429c4206cac73ef35"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-results",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "d19efc4c15fe80db496c0f1e975dab5acd22fb7e048d9c1f2019f16c05f8d108",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-results/index.ts",
+          "name": "index.ts",
+          "sha256": "9c84475e9bad038d7208f6c58aa6597ddd9603be84bcb6a75c4b344bfc7aa961"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "evaluate-sharp-gate",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "3a97ded1ebaec2220283de84b5b7078b0ac744f2f9e0245b2d3bfad0e2f81537",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/evaluate-sharp-gate/index.ts",
+          "name": "index.ts",
+          "sha256": "ca4e98772128ebe67d4c60751bcac0f8aeaec83c5418615739ca89f7f54591d1"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-calibration",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b0195704af2ee7fb553e27f69d38cbcba6b62e531f02e38ce906622df1f908b9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "c9fd91f82a04f4278d5f0bd12ff346813b21b4eff8a8350aa6a16733c519d518"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-sharp-sources",
+      "version": 4,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "89ad4e51c28d3a32c4db4cd75216fb44d153681cc3caa4aab6e6c00b5f58831f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-sharp-sources/index.ts",
+          "name": "index.ts",
+          "sha256": "10f01469e0b2bb20ea935efcc51feab0316524905d7b100b62f3f2a522a1cdd3"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }
