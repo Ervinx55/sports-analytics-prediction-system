@@ -142,7 +142,7 @@
       "version": "20260923213725",
       "name": "recover_uncertainty_and_market_policy",
       "path": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql",
-      "sha256": "1354f3079a91af23e31a11a763b68ece68e62fb2dcf9a9f075296d92702a191e",
+      "sha256": "34b0c49df001a795a215bda71353069e4dc034acc08348883b856ad71aa9b594",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -151,7 +151,7 @@
       "version": "20260923213727",
       "name": "recover_price_sensitivity",
       "path": "supabase/migrations/20260923213727_recover_price_sensitivity.sql",
-      "sha256": "fced62139344e4b4deac7df8d08bb5781ba126140b6ee40b75c0ca012038f12a",
+      "sha256": "07e58428e5a7a0739c377a5c9891f437d56930fd2fed6434b1b5cbeb003f4db4",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -160,7 +160,7 @@
       "version": "20260923213728",
       "name": "recover_verification_and_weather",
       "path": "supabase/migrations/20260923213728_recover_verification_and_weather.sql",
-      "sha256": "6a05fbf870f409ca78c86b40a2e435802ef570d2a596210badd1580738247b75",
+      "sha256": "0a587c582250871e9fc06c78f3afce6617836c3eb2d90a5135244e41c504d64d",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
