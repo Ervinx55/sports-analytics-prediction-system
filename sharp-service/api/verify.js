@@ -832,6 +832,40 @@ function bullpenGate(candidateBullpen, opponentBullpen) {
   return { passed, warnings };
 }
 
+const TEMPORARY_VERIFICATION_BLOCKERS = new Set([
+  "missing official MLB game identifier",
+  "official probable starters do not both match",
+  "both starting lineups are not yet confirmed",
+  "lineup strength could not be scored",
+  "platoon matchup strength could not be scored",
+  "starter pitch-mix matchup could not be fully scored",
+  "park/weather run-environment model is unavailable",
+  "bullpen quality profile could not be scored",
+  "bullpen handedness matchup could not be scored",
+  "weather check is not clear",
+]);
+
+function minutesUntil(startsAt) {
+  const start = Date.parse(startsAt || "");
+  if (!Number.isFinite(start)) return null;
+  return (start - Date.now()) / 60000;
+}
+
+function verificationLifecycle(blockers, startsAt) {
+  if (!blockers.length) return "READY_FOR_SHARP_CHECK";
+
+  const hardBlockers = blockers.filter(
+    (reason) => !TEMPORARY_VERIFICATION_BLOCKERS.has(reason)
+  );
+  if (hardBlockers.length) return "PASS";
+
+  const mins = minutesUntil(startsAt);
+  // Missing required information is only temporary. In the final 20-minute
+  // window it becomes a PASS rather than lingering indefinitely.
+  if (mins !== null && mins <= 20) return "PASS";
+  return "PENDING";
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -1099,7 +1133,10 @@ export default async function handler(req, res) {
           matchup: d?.matchup,
           side: candidateSideName(d, c.side),
           modelDecision: c.market.modelDecision,
-          verificationStatus: "WATCH",
+          verificationStatus: verificationLifecycle(
+            ["missing official MLB game identifier"],
+            d?.startsAt
+          ),
           blockingReasons: ["missing official MLB game identifier"],
         });
         continue;
@@ -1465,9 +1502,10 @@ export default async function handler(req, res) {
               ? null
               : Number((adjustedEv * 100).toFixed(2)),
         },
-        verificationStatus: nonSharpPassed
-          ? "READY_FOR_SHARP_CHECK"
-          : "WATCH",
+        verificationStatus: verificationLifecycle(
+          blockers,
+          d.startsAt
+        ),
         sharpConfirmationRequired: true,
         nonSharpPassed,
         blockingReasons: blockers,
@@ -1481,12 +1519,13 @@ export default async function handler(req, res) {
       readyForSharpCheck: results.filter(
         (x) => x.verificationStatus === "READY_FOR_SHARP_CHECK"
       ).length,
-      watch: results.filter((x) => x.verificationStatus === "WATCH").length,
+      pending: results.filter((x) => x.verificationStatus === "PENDING").length,
+      pass: results.filter((x) => x.verificationStatus === "PASS").length,
     };
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "Final Verification v7",
+      version: "Final Verification v7.1",
       date,
       method: {
         officialSource:
@@ -1506,9 +1545,9 @@ export default async function handler(req, res) {
         runEnvironment:
           "Baseball Savant three-year Park Factor plus official MLB temperature, wind, roof type, and venue elevation produce a conservative run-environment multiplier. Elevation changes same-day weather sensitivity rather than being double-counted on top of Park Factor.",
         totals:
-          "an independent team/starter scoring baseline is park/weather adjusted and then shrunk toward the live total market; split book totals are WATCH-only",
+          "an independent team/starter scoring baseline is park/weather adjusted and then shrunk toward the live total market; split book totals are not auto-promoted",
         finalRule:
-          "A model PLAY can only reach READY_FOR_SHARP_CHECK when official status, starters, both confirmed lineups, lineup/platoon, starter pitch-mix, park/weather run environment, bullpen quality/handedness, weather, and bullpen workload checks pass. Direct sharp-book confirmation is still required before a final PLAY.",
+          "Lifecycle is PENDING -> READY_FOR_SHARP_CHECK -> FINAL_PLAY/PASS. Threshold failures and hard blockers become PASS immediately. Missing required information remains PENDING only until the final 20-minute window, then becomes PASS. Direct sharp-book confirmation is still required before a final PLAY.",
       },
       summary,
       candidates: results,
