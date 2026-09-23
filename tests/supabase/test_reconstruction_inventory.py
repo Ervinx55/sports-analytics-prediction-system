@@ -107,3 +107,34 @@ def test_edge_function_recovery_is_complete_and_configured():
             path = ROOT / file_entry["path"]
             assert path.exists()
             assert file_entry["sha256"]
+
+
+def test_production_inventory_shape_is_non_secret_and_complete():
+    inv = json.loads(
+        (ROOT / "supabase" / "manifests" / "production-inventory.json").read_text()
+    )
+    for key in ("tables", "views", "functions", "indexes", "extensions", "rls", "grants"):
+        assert key in inv
+        assert isinstance(inv[key], list)
+
+    assert inv.get("project_ref") == "yeoxroijaptomomshdii"
+    assert inv.get("captured_at")
+
+
+def test_cron_inventory_is_redacted_and_complete():
+    cron = json.loads(
+        (ROOT / "supabase" / "manifests" / "cron-jobs.json").read_text()
+    )
+    assert cron.get("project_ref") == "yeoxroijaptomomshdii"
+    assert cron.get("captured_at")
+    assert isinstance(cron.get("items"), list)
+
+    for item in cron["items"]:
+        assert item["jobname"]
+        assert item["schedule"]
+        assert isinstance(item["active"], bool)
+        assert item["command_sha256"]
+        serialized = json.dumps(item)
+        assert "snapshot_publishable_key" not in serialized
+        assert "snapshot_project_url" not in serialized
+        assert "Authorization" not in serialized
