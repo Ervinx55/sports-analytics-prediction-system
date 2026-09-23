@@ -480,6 +480,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-weather-park-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b0b44d7b54aeb569844cac9d88cda3115774248bc25c120551e2f99ea87e61b9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-weather-park-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "3fd22d1dca325500b5ddcf58d0d1721226415374325c32292194ba4dab307c92"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-sharp-disagreement-shadow",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "3503491c34c185ea7f1577d2b498c17a7ef8e3270b4ada1d46bebee8eb5550bb",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-sharp-disagreement-shadow/index.ts",
+          "name": "index.ts",
+          "sha256": "005461fb74db13bc0116c9474fec6630a263a599e4d84b740d5d0ce2775b573a"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-disagreement-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "d17d2500c07ba962ef4c68848114d812efc13905a850351091fd7134a1ca4e10",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-disagreement-status/index.ts",
+          "name": "index.ts",
+          "sha256": "54c45bc44601b6782751d134690243ea6f6d85ac828098f77f63851f29e2e7fb"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-disagreement-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "4752d71532771afd0bed70231c81576f23042c6bba5c138bff09d4069dcb579c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-disagreement-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "b87305eb32efb7ccbaff29efd123930e5242f8fc832b710640d8c7b93451a826"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-fusion-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "deec29ad9e087e52202d7a6baad413afbcb2eeb74779194e46adace56b0f4d03",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-fusion-status/index.ts",
+          "name": "index.ts",
+          "sha256": "2fe9f806267df8acb590bd8ecd6145727f7ab53c72b6d7d65c73b0c58912e294"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-fusion-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "5b752aa4698726b6d11ba3e2737c6cf88239f07deee0efc7e56b90360f47f306",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-fusion-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "c0e9293c56427e1cfae8a312db74aa5bce50b26f2d1a6bf9c8e374030e11df67"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }

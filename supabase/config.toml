@@ -90,3 +90,21 @@ verify_jwt = true
 
 [functions.mlb-weather-park-status]
 verify_jwt = false
+
+[functions.mlb-weather-park-calibration]
+verify_jwt = false
+
+[functions.refresh-sharp-disagreement-shadow]
+verify_jwt = true
+
+[functions.sharp-disagreement-status]
+verify_jwt = false
+
+[functions.sharp-disagreement-calibration]
+verify_jwt = false
+
+[functions.decision-fusion-status]
+verify_jwt = false
+
+[functions.decision-fusion-calibration]
+verify_jwt = false
