@@ -19,15 +19,25 @@ jobs:
         run: supabase --version
       - name: Generate migration names
         run: |
+          sleep 1
           supabase migration new recover_uncertainty_and_market_policy
+          sleep 1
           supabase migration new recover_price_sensitivity
+          sleep 1
           supabase migration new recover_verification_and_weather
+          sleep 1
           supabase migration new recover_sharp_disagreement
+          sleep 1
           supabase migration new recover_team_and_prop_fusion
+          sleep 1
           supabase migration new recover_player_prop_clv
+          sleep 1
           supabase migration new recover_parlay_correlation_and_timing
+          sleep 1
           supabase migration new recover_model_governance_and_attribution
+          sleep 1
           supabase migration new recover_pipeline_health
+          sleep 1
           supabase migration new recover_posthistory_security_and_cron
           echo "GENERATED_MIGRATIONS"
           find supabase/migrations -maxdepth 1 -type f -name '*.sql' | sort | tail -n 10
