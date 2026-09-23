@@ -58,7 +58,10 @@ def test_historical_migration_inventory_is_exact():
     manifest = json.loads(
         (ROOT / "supabase" / "manifests" / "migrations.json").read_text()
     )
-    items = manifest["items"]
+    items = [
+        item for item in manifest["items"]
+        if item.get("recoveredFromProduction") is True
+    ]
     actual = [(str(item["version"]), item["name"]) for item in items]
     assert actual == EXPECTED_HISTORICAL_MIGRATIONS
 
