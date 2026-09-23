@@ -184,3 +184,9 @@ def test_catchup_tables_and_views_keep_security_controls():
             assert "enable row level security" in sql
         if any(identity.startswith("view:") for identity in identities):
             assert "security_invoker = true" in sql
+
+
+def test_normal_ci_runs_full_supabase_reconstruction_checks():
+    workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text()
+    assert "pytest -q" in workflow
+    assert "python scripts/supabase/validate_reconstruction.py --check-secrets ." in workflow
