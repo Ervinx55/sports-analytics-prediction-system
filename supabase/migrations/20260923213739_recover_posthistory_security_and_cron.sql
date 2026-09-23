@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION public.trigger_model_audit()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('model_audit','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_model_audit() from public, anon, authenticated;
 grant execute on function public.trigger_model_audit() to service_role;
 
@@ -19,7 +19,7 @@ CREATE OR REPLACE FUNCTION public.trigger_player_prop_capture()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('player_prop_capture','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_player_prop_capture() from public, anon, authenticated;
 grant execute on function public.trigger_player_prop_capture() to service_role;
 
@@ -30,7 +30,7 @@ CREATE OR REPLACE FUNCTION public.trigger_sharp_source_refresh()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('sharp_sources','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_sharp_source_refresh() from public, anon, authenticated;
 grant execute on function public.trigger_sharp_source_refresh() to service_role;
 
@@ -41,7 +41,7 @@ CREATE OR REPLACE FUNCTION public.trigger_team_market_grading()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('team_grading','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_team_market_grading() from public, anon, authenticated;
 grant execute on function public.trigger_team_market_grading() to service_role;
 
@@ -52,7 +52,7 @@ CREATE OR REPLACE FUNCTION public.trigger_player_prop_grading()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('prop_grading','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_player_prop_grading() from public, anon, authenticated;
 grant execute on function public.trigger_player_prop_grading() to service_role;
 
@@ -63,7 +63,7 @@ CREATE OR REPLACE FUNCTION public.trigger_sharp_clv_capture()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('sharp_clv','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_sharp_clv_capture() from public, anon, authenticated;
 grant execute on function public.trigger_sharp_clv_capture() to service_role;
 
@@ -74,7 +74,7 @@ CREATE OR REPLACE FUNCTION public.trigger_mlb_verification_gate()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('verification_gate','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_mlb_verification_gate() from public, anon, authenticated;
 grant execute on function public.trigger_mlb_verification_gate() to service_role;
 
@@ -85,7 +85,7 @@ CREATE OR REPLACE FUNCTION public.trigger_mlb_weather_park()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('weather_park','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_mlb_weather_park() from public, anon, authenticated;
 grant execute on function public.trigger_mlb_weather_park() to service_role;
 
@@ -96,7 +96,7 @@ CREATE OR REPLACE FUNCTION public.trigger_model_governance_refresh()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('model_governance','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_model_governance_refresh() from public, anon, authenticated;
 grant execute on function public.trigger_model_governance_refresh() to service_role;
 
@@ -107,7 +107,7 @@ CREATE OR REPLACE FUNCTION public.trigger_player_prop_clv_refresh()
  SET search_path TO 'pg_catalog', 'public'
 AS $function$
   select public.enqueue_pipeline_http_v1('prop_clv','{}'::jsonb);
-$function$
+$function$;
 revoke execute on function public.trigger_player_prop_clv_refresh() from public, anon, authenticated;
 grant execute on function public.trigger_player_prop_clv_refresh() to service_role;
 
@@ -136,7 +136,7 @@ AS $function$
     body := '{"hours":48}'::jsonb,
     timeout_milliseconds := 60000
   );
-$function$
+$function$;
 revoke execute on function public.trigger_sharp_disagreement_shadow() from public, anon, authenticated;
 grant execute on function public.trigger_sharp_disagreement_shadow() to service_role;
 

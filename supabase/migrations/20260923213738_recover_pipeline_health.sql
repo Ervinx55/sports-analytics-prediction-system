@@ -99,7 +99,7 @@ begin
 
   return v_request_id;
 end;
-$function$
+$function$;
 revoke execute on function public.enqueue_pipeline_http_v1(p_component_key text, p_body jsonb) from public, anon, authenticated;
 grant execute on function public.enqueue_pipeline_http_v1(p_component_key text, p_body jsonb) to service_role;
 
@@ -148,7 +148,7 @@ begin
   get diagnostics v_marked = row_count;
   return v_count+v_marked;
 end;
-$function$
+$function$;
 revoke execute on function public.reconcile_pipeline_http_requests_v1() from public, anon, authenticated;
 grant execute on function public.reconcile_pipeline_http_requests_v1() to service_role;
 
@@ -261,7 +261,7 @@ begin
 
   return v_result;
 end;
-$function$
+$function$;
 revoke execute on function public.pipeline_health_snapshot_v1() from public, anon, authenticated;
 grant execute on function public.pipeline_health_snapshot_v1() to service_role;
 
