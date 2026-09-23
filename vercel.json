@@ -1,4 +1,10 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "master": false
+    }
+  },
   "functions": {
     "api/sharp.js": {
       "maxDuration": 30
