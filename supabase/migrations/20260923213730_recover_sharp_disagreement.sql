@@ -1,4 +1,7 @@
--- Reconstructed from production catalog on 2026-09-23.\n-- Catch-up source for fresh environments; do not replay blindly on current production.\n\ncreate table if not exists public.sharp_disagreement_shadow (
+-- Reconstructed from production catalog on 2026-09-23.
+-- Catch-up source for fresh environments; do not replay blindly on current production.
+
+create table if not exists public.sharp_disagreement_shadow (
   sharp_gate_id bigint not null,
   evaluated_at timestamp with time zone default now() not null,
   sport text not null,
@@ -33,7 +36,17 @@
   constraint sharp_disagreement_shadow_confidence_check CHECK (confidence >= 0::numeric AND confidence <= 1::numeric),
   constraint sharp_disagreement_shadow_sharp_gate_id_fkey FOREIGN KEY (sharp_gate_id) REFERENCES sharp_gate_history(id) ON DELETE CASCADE,
   constraint sharp_disagreement_shadow_pkey PRIMARY KEY (sharp_gate_id)
-);\nalter table public.sharp_disagreement_shadow enable row level security;\nrevoke all on table public.sharp_disagreement_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.sharp_disagreement_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS sharp_disagreement_classification_idx ON public.sharp_disagreement_shadow USING btree (classification, evaluated_at DESC);\n\nCREATE INDEX IF NOT EXISTS sharp_disagreement_market_idx ON public.sharp_disagreement_shadow USING btree (sport, event_id, market_type, market_side, market_line, evaluated_at DESC);\n\ncreate or replace view public.sharp_disagreement_latest with (security_invoker = true) as\nSELECT d.sharp_gate_id,
+);
+alter table public.sharp_disagreement_shadow enable row level security;
+revoke all on table public.sharp_disagreement_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.sharp_disagreement_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS sharp_disagreement_classification_idx ON public.sharp_disagreement_shadow USING btree (classification, evaluated_at DESC);
+
+CREATE INDEX IF NOT EXISTS sharp_disagreement_market_idx ON public.sharp_disagreement_shadow USING btree (sport, event_id, market_type, market_side, market_line, evaluated_at DESC);
+
+create or replace view public.sharp_disagreement_latest with (security_invoker = true) as
+SELECT d.sharp_gate_id,
     d.evaluated_at,
     d.sport,
     d.event_id,
@@ -64,4 +77,7 @@
     d.shadow_only,
     d.affects_decision
    FROM sharp_disagreement_shadow d
-     JOIN sharp_gate_latest g ON g.id = d.sharp_gate_id;\n;\nrevoke all on table public.sharp_disagreement_latest from public, anon, authenticated;\ngrant select on table public.sharp_disagreement_latest to service_role;\n
+     JOIN sharp_gate_latest g ON g.id = d.sharp_gate_id;
+;
+revoke all on table public.sharp_disagreement_latest from public, anon, authenticated;
+grant select on table public.sharp_disagreement_latest to service_role;
