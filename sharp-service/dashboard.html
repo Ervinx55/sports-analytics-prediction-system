@@ -518,6 +518,15 @@
       if(env?.weather?.wind) parts.push(String(env.weather.wind));
     }
 
+    const wx=m?.weatherParkImpact||null;
+    if(wx){
+      if(wx.run_multiplier!=null) parts.push("weather/park runs "+Number(wx.run_multiplier).toFixed(3)+"x");
+      if(wx.hr_multiplier!=null) parts.push("HR env "+Number(wx.hr_multiplier).toFixed(3)+"x");
+      if(wx.hits_tb_multiplier!=null) parts.push("hits/TB env "+Number(wx.hits_tb_multiplier).toFixed(3)+"x");
+      if(wx.delay_risk) parts.push("delay risk "+String(wx.delay_risk));
+      if(wx.weather_change_after_model) parts.push("shadow REMODEL: material weather change");
+    }
+
     return parts.length ? parts.join(" · ") : "Stat context will populate on the next model audit.";
   }
 
@@ -557,6 +566,18 @@
       if(i.projectedAB!=null) parts.push(Number(i.projectedAB).toFixed(2)+" projected AB");
       if(i.opponentStarterHitsPer9!=null) parts.push("opposing starter "+Number(i.opponentStarterHitsPer9).toFixed(2)+" H/9");
       if(p.model_mean!=null) parts.push("model mean "+Number(p.model_mean).toFixed(2)+" TB");
+    }
+
+    const wx=p?.weatherParkImpact||null;
+    if(wx){
+      if(wx.impact_direction) parts.push("weather/park "+String(wx.impact_direction).toLowerCase());
+      if(wx.impact_multiplier!=null) parts.push("env multiplier "+Number(wx.impact_multiplier).toFixed(3)+"x");
+      if(wx.delay_risk) parts.push("delay risk "+String(wx.delay_risk));
+      const wraw=wx.raw||{};
+      if(p?.stat_id==="pitching_strikeouts" && wraw.starterDurabilityMultiplier!=null){
+        parts.push("starter durability "+Number(wraw.starterDurabilityMultiplier).toFixed(3)+"x");
+      }
+      if(wx.weather_change_after_model) parts.push("shadow REMODEL: material weather change");
     }
 
     return parts.length ? parts.join(" · ") : "Stat inputs unavailable for this stored observation.";
