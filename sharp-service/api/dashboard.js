@@ -73,9 +73,12 @@ export default async function handler(req, res) {
     sharpGate: `${BASE}/sharp-gate-history?sport=${encodeURIComponent(
       sport
     )}&limit=50`,
+    marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
+      sport
+    )}&hours=12`,
   };
 
-  const [audit, calibration, results, movement, alerts, sharpGate] =
+  const [audit, calibration, results, movement, alerts, sharpGate, marketCard] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -83,6 +86,7 @@ export default async function handler(req, res) {
       fetchJson(urls.movement),
       fetchJson(urls.alerts),
       fetchJson(urls.sharpGate),
+      fetchJson(urls.marketCard),
     ]);
 
   const sources = {
@@ -92,6 +96,7 @@ export default async function handler(req, res) {
     movement: settled(movement),
     alerts: settled(alerts),
     sharpGate: settled(sharpGate),
+    marketCard: settled(marketCard),
   };
 
   const sourceHealth = Object.fromEntries(
@@ -142,7 +147,15 @@ export default async function handler(req, res) {
       alerts: alertList.length,
       movements: movementList.length,
       finalPlays:
-        sources.sharpGate.data?.summary?.finalPlayCount ?? 0,
+        sources.marketCard.data?.summary?.play ??
+        sources.sharpGate.data?.summary?.finalPlayCount ??
+        0,
+      pending:
+        sources.marketCard.data?.summary?.pending ?? 0,
+      pass:
+        sources.marketCard.data?.summary?.pass ?? 0,
+      gradedMarkets:
+        sources.marketCard.data?.summary?.markets ?? 0,
       sharpGateChecks:
         sources.sharpGate.data?.summary?.historyCount ?? 0,
     },
@@ -157,6 +170,13 @@ export default async function handler(req, res) {
       history: [],
       finalPlays: [],
       summary: { latestCount: 0, historyCount: 0, finalPlayCount: 0 },
+    },
+    marketCard: sources.marketCard.data || {
+      summary: { markets: 0, play: 0, pending: 0, pass: 0 },
+      markets: [],
+      plays: [],
+      pending: [],
+      passes: [],
     },
     system: {
       sourceHealth,
