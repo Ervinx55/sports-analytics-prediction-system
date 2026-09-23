@@ -672,6 +672,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "parlay-correlation-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "e4e724cbf8980ded949613b9256bb96e72e9cdf19f1934f4dad6468c8a835bec",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/parlay-correlation-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "f0efbbc3930418b70e0d436da1ff782082326d271d302a9cd4c8a1d878086ce0"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-timing-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "c47a91582a9566a8d7623ea44fe5b1aeecc7c31ec8daf46b2c60f179c7e0d4c7",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-timing-status/index.ts",
+          "name": "index.ts",
+          "sha256": "075cbda5252e4d8a97f35adbb440030a834b10f2b0906af19451b777874c5d0b"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-timing-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "231191bcc9a4586aef396c9cee1da2e24d88122b924e31b957b10ba14d87e70a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-timing-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "2d59972bbf1c03c76d82a245b7b0ec0a9a7c21dd8acba678b54b10187f688b2f"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-model-governance",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "052842df22893e226f34ec9fb20f58131ca4cc0ef8a9180490a78cef17a00161",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-model-governance/index.ts",
+          "name": "index.ts",
+          "sha256": "04d5a82ccda48f37cd46b04bfb00805146a818ab2fbee376b67a63b078ff7816"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "model-governance-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "fd2c04a5b8c07331eb823b550d3c744dfdfa1835f71e4bf8682ab30f662f10b2",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/model-governance-status/index.ts",
+          "name": "index.ts",
+          "sha256": "9ad7b0a4c1ce128ddad4f57181676673e18f65375f14b8996db97c08f12460e9"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "outcome-attribution-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "39acbdc58da219d74b8725080b84662fac2d470f7ae242b2fffac18838e7dc2c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/outcome-attribution-status/index.ts",
+          "name": "index.ts",
+          "sha256": "6d6ad2a1a6b8719861ccb873e45057dc6cc0a35abd2d994bb6d2f786c3251bc6"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }

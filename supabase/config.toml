@@ -126,3 +126,21 @@ verify_jwt = false
 
 [functions.parlay-correlation-status]
 verify_jwt = false
+
+[functions.parlay-correlation-calibration]
+verify_jwt = false
+
+[functions.decision-timing-status]
+verify_jwt = false
+
+[functions.decision-timing-calibration]
+verify_jwt = false
+
+[functions.refresh-model-governance]
+verify_jwt = true
+
+[functions.model-governance-status]
+verify_jwt = false
+
+[functions.outcome-attribution-status]
+verify_jwt = false
