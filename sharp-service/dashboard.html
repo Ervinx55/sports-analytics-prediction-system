@@ -828,16 +828,90 @@
       </div>`).join("");
   }
 
-  function renderResults(grades){
-    if(!grades?.length){ $("resultsList").innerHTML='<div class="empty">No graded decisions yet. This will populate automatically after tracked games finish.</div>'; return; }
-    $("resultsList").innerHTML='<div class="card">'+grades.slice(0,30).map(g=>`
-      <div class="list-row">
-        <div><div class="main">${esc(g.away_team)} @ ${esc(g.home_team)}</div><div class="small">${esc(g.side_name)} · ${fmtTime(g.starts_at)}</div></div>
-        <div><div class="small">Result</div><strong class="${g.won?"positive":"negative"}">${g.result|| (g.won?"W":"L")}</strong></div>
-        <div><div class="small">Model</div><strong>${fmtPct(g.final_probability)}</strong></div>
-        <div class="hide-mobile"><div class="small">Close</div><strong>${fmtOdds(g.closing_odds)}</strong></div>
-        <div class="hide-mobile"><div class="small">CLV</div><strong class="${Number(g.clv_implied_pp)>=0?"positive":"negative"}">${fmtPP(g.clv_implied_pp)}</strong></div>
-      </div>`).join("")+'</div>';
+  function resultClass(label){
+    if(label==="W" || label==="GOOD PASS") return "positive";
+    if(label==="L" || label==="MISSED WIN") return "negative";
+    return "";
+  }
+
+  function teamResultWhy(r){
+    if(r?.decisionStatus==="PLAY"){
+      const parts=[
+        "model "+fmtPct(r.model_probability)+" vs market "+fmtPct(r.market_fair_probability),
+        fmtPP(r.edge_pct_points)+" edge"
+      ];
+      if(r.ev_pct!=null) parts.push("EV "+(Number(r.ev_pct)>=0?"+":"")+Number(r.ev_pct).toFixed(2)+"%");
+      parts.push("final sharp gate cleared");
+      return "WHY PLAY: "+parts.join(" · ");
+    }
+    return marketWhy({...r,status:"PASS"});
+  }
+
+  function propResultWhy(r){
+    return propWhy({...r,status:r?.decisionStatus==="PLAY"?"PLAY":"PASS"});
+  }
+
+  function renderDecisionResults(data){
+    const summary=data?.summary||{};
+    const team=summary.team||{};
+    const props=summary.props||{};
+    const tw=team.playRecord?.wins??0, tl=team.playRecord?.losses??0, tp=team.playRecord?.pushes??0;
+    const pw=props.playRecord?.wins??0, pl=props.playRecord?.losses??0, pp=props.playRecord?.pushes??0;
+    const tgood=team.passRecord?.goodPasses??0, tmiss=team.passRecord?.missedWins??0;
+    const pgood=props.passRecord?.goodPasses??0, pmiss=props.passRecord?.missedWins??0;
+
+    $("rTeamPlay").textContent=tw+"-"+tl+"-"+tp;
+    $("rTeamPass").textContent=tgood+" / "+tmiss;
+    $("rPropPlay").textContent=pw+"-"+pl+"-"+pp;
+    $("rPropPass").textContent=pgood+" / "+pmiss;
+
+    const teamRows=data?.team||[];
+    if(!teamRows.length){
+      $("teamDecisionResults").innerHTML='<div class="empty">No completed team-market decisions yet. The grader runs automatically after games become final.</div>';
+    } else {
+      $("teamDecisionResults").innerHTML=teamRows.slice(0,100).map(r=>`
+        <div class="card" style="box-shadow:none">
+          <div class="candidate-head">
+            <div>
+              <div class="match">${esc(r.market_label)}</div>
+              <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
+            </div>
+            <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.decisionStatus)}</span>
+          </div>
+          <div class="grid4">
+            <div class="stat"><div class="k">Result</div><div class="v ${resultClass(r.resultLabel)}">${esc(r.resultLabel||r.outcome||"—")}</div></div>
+            <div class="stat"><div class="k">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(r.model_probability)}</span><span class="market">Mk ${fmtPct(r.market_fair_probability)}</span></div></div>
+            <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+          </div>
+          <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(teamResultWhy(r))}</div>
+          ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This passed wager would have won; review whether the filter was too strict without assuming one result proves the rule was wrong.":r.resultLabel==="GOOD PASS"?"The pass avoided a losing wager; this is evidence in favor of the filter, but still only one observation.":"The passed wager pushed.")+'</div>' : ''}
+        </div>`).join("");
+    }
+
+    const propRows=data?.props||[];
+    if(!propRows.length){
+      $("propDecisionResults").innerHTML='<div class="empty">No completed player-prop decisions yet. Prop results are graded automatically after games finish.</div>';
+    } else {
+      $("propDecisionResults").innerHTML=propRows.slice(0,100).map(r=>`
+        <div class="card" style="box-shadow:none">
+          <div class="candidate-head">
+            <div>
+              <div class="match">${esc(r.label)}</div>
+              <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
+            </div>
+            <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.decisionStatus)}</span>
+          </div>
+          <div class="grid4">
+            <div class="stat"><div class="k">Result</div><div class="v ${resultClass(r.resultLabel)}">${esc(r.resultLabel||r.outcome||"—")}</div></div>
+            <div class="stat"><div class="k">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(r.model_probability)}</span><span class="market">Mk ${fmtPct(r.market_fair_probability)}</span></div></div>
+            <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+          </div>
+          <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(propResultWhy(r))}</div>
+          ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This prop would have won despite being filtered out. It is logged as a missed win for later threshold analysis.":r.resultLabel==="GOOD PASS"?"The filter avoided a losing prop.":"The passed prop pushed.")+'</div>' : ''}
+        </div>`).join("");
+    }
   }
 
   function renderCalibration(c){
@@ -890,7 +964,7 @@
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
-    renderResults(data.grades||[]);
+    renderDecisionResults(data.decisionResults||{});
     renderCalibration(data.calibration);
     renderSystem(data.system);
     const health=Object.values(data.system?.sourceHealth||{});
@@ -913,6 +987,8 @@
       $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      $("teamDecisionResults").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      $("propDecisionResults").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
