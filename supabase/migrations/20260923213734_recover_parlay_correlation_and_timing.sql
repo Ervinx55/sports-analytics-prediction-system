@@ -106,7 +106,7 @@ CREATE OR REPLACE FUNCTION public.compute_parlay_correlation_v1(p_leg_a jsonb, p
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   a_kind text := upper(coalesce(p_leg_a->>'kind',''));
   b_kind text := upper(coalesce(p_leg_b->>'kind',''));
@@ -448,7 +448,7 @@ CREATE OR REPLACE FUNCTION public.refresh_parlay_correlation_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   r record;
   v_rel jsonb;
@@ -697,7 +697,7 @@ CREATE OR REPLACE FUNCTION public.trigger_parlay_correlation_shadow()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
   select public.refresh_parlay_correlation_shadow();
 $function$;
 revoke execute on function public.trigger_parlay_correlation_shadow() from public, anon, authenticated;
@@ -708,7 +708,7 @@ CREATE OR REPLACE FUNCTION public.decision_timing_bucket_v1(p_starts_at timestam
  LANGUAGE plpgsql
  IMMUTABLE STRICT
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_minutes numeric;
 begin
@@ -731,7 +731,7 @@ CREATE OR REPLACE FUNCTION public.refresh_decision_timing_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   v_team integer := 0;
   v_prop integer := 0;
@@ -890,7 +890,7 @@ CREATE OR REPLACE FUNCTION public.trigger_decision_timing_shadow()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
   select public.refresh_decision_timing_shadow();
 $function$;
 revoke execute on function public.trigger_decision_timing_shadow() from public, anon, authenticated;

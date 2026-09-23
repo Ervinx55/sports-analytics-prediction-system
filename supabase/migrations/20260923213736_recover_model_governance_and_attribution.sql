@@ -107,7 +107,7 @@ CREATE OR REPLACE FUNCTION public.compute_outcome_attribution_v1(p_outcome text,
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_out text := upper(coalesce(p_outcome,'UNKNOWN'));
   v_dec text := upper(coalesce(p_decision_status,'UNKNOWN'));
@@ -219,7 +219,7 @@ CREATE OR REPLACE FUNCTION public.refresh_decision_outcome_attribution()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   r record;
   v_eval jsonb;
@@ -430,7 +430,7 @@ CREATE OR REPLACE FUNCTION public.trigger_decision_outcome_attribution()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
   select public.refresh_decision_outcome_attribution();
 $function$;
 revoke execute on function public.trigger_decision_outcome_attribution() from public, anon, authenticated;

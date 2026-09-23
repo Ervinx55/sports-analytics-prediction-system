@@ -142,7 +142,7 @@
       "version": "20260923213725",
       "name": "recover_uncertainty_and_market_policy",
       "path": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql",
-      "sha256": "34b0c49df001a795a215bda71353069e4dc034acc08348883b856ad71aa9b594",
+      "sha256": "afe41bb82cbc4b6e83056008f7b5a6fd67322a4453431c3640942be320791b7c",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -151,7 +151,7 @@
       "version": "20260923213727",
       "name": "recover_price_sensitivity",
       "path": "supabase/migrations/20260923213727_recover_price_sensitivity.sql",
-      "sha256": "07e58428e5a7a0739c377a5c9891f437d56930fd2fed6434b1b5cbeb003f4db4",
+      "sha256": "1c1d08457262d495b4ed02a393dc11505e19d378df6d35d5b358b972fe5b8079",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -160,7 +160,7 @@
       "version": "20260923213728",
       "name": "recover_verification_and_weather",
       "path": "supabase/migrations/20260923213728_recover_verification_and_weather.sql",
-      "sha256": "0a587c582250871e9fc06c78f3afce6617836c3eb2d90a5135244e41c504d64d",
+      "sha256": "fe96da199e6bad820754a09ceb0a531525fba45ea30ab5b1cede25bb542c26c8",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -178,7 +178,7 @@
       "version": "20260923213731",
       "name": "recover_team_and_prop_fusion",
       "path": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql",
-      "sha256": "3b15a8ad54873a7dab6cd7278138c77c91e01de1384f8ed4f1203bca4d3f110b",
+      "sha256": "088605f019d92a616eaf7ed7a9d30b2b9b83af92b63f49222713c7075eb8755f",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -187,7 +187,7 @@
       "version": "20260923213733",
       "name": "recover_player_prop_clv",
       "path": "supabase/migrations/20260923213733_recover_player_prop_clv.sql",
-      "sha256": "a641aa481d1d10b4b2cea796dce229a48b624f0b21ba4e24c2937938e6511ced",
+      "sha256": "3332b7abb434c93e995131e9b740e3bf102f7df32fdfd5bbb9cd41a0335725d9",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -196,7 +196,7 @@
       "version": "20260923213734",
       "name": "recover_parlay_correlation_and_timing",
       "path": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql",
-      "sha256": "1abf3821c403d3523565d5dffefd50f9da67f3364801f85217f50d7d8e94f172",
+      "sha256": "f4df382bb2eb4f83369896a2d46362fda8ef638f244866881a3cea57ebaba019",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -205,7 +205,7 @@
       "version": "20260923213736",
       "name": "recover_model_governance_and_attribution",
       "path": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql",
-      "sha256": "c78d18f3b716b9bad464573d3b7dea3bb7475a1aeb00c1cbbf8ab4e79dea2af6",
+      "sha256": "71f5bd70e23dfea08bfe4e52bbbe533b1c012216b683720f4c559a3ab29f71da",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null

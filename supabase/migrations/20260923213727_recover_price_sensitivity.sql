@@ -53,7 +53,7 @@ CREATE OR REPLACE FUNCTION public.compute_price_sensitivity_v1(p_market_type tex
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_type text := lower(coalesce(p_market_type,''));
   v_push numeric := greatest(0,least(0.40,coalesce(p_push_probability,0)));
@@ -228,7 +228,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_price_sensitivity_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   r record;
   p record;

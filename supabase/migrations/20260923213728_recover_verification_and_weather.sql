@@ -256,7 +256,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_mlb_verification_history()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   n bigint;
 begin
@@ -274,7 +274,7 @@ CREATE OR REPLACE FUNCTION public.compute_weather_park_impact_v1(p_park_factor n
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_pf numeric := coalesce(p_park_factor,100);
   v_park numeric := greatest(0.88,least(1.14,v_pf/100.0));
@@ -476,7 +476,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_mlb_weather_park_history()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare n bigint;
 begin
   delete from public.mlb_weather_park_snapshots

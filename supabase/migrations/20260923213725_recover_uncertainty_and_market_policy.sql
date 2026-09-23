@@ -108,7 +108,7 @@ CREATE OR REPLACE FUNCTION public.compute_market_uncertainty_v1(p_market_type te
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_market_type text := lower(coalesce(p_market_type,''));
   v_status text := upper(coalesce(p_non_sharp_status,''));
@@ -266,7 +266,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_uncertainty_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   r record;
   v_calc jsonb;
@@ -456,7 +456,7 @@ CREATE OR REPLACE FUNCTION public.compute_market_policy_v1(p_market_type text, p
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$;
+AS $function$
 declare
   v_type text := lower(coalesce(p_market_type,''));
   v_status text := upper(coalesce(p_non_sharp_status,''));
@@ -617,7 +617,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_policy_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$;
+AS $function$
 declare
   r record;
   p record;
