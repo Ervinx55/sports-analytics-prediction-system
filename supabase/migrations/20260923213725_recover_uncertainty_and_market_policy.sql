@@ -1,4 +1,7 @@
--- Reconstructed from production catalog on 2026-09-23.\n-- Catch-up source for fresh environments; do not replay blindly on current production.\n\ncreate table if not exists public.market_uncertainty_shadow (
+-- Reconstructed from production catalog on 2026-09-23.
+-- Catch-up source for fresh environments; do not replay blindly on current production.
+
+create table if not exists public.market_uncertainty_shadow (
   observation_id bigint not null,
   calculated_at timestamp with time zone default now() not null,
   evaluator_version text default 'uncertainty-v1'::text not null,
@@ -31,7 +34,18 @@
   source_captured_at timestamp with time zone,
   constraint market_uncertainty_shadow_observation_id_fkey FOREIGN KEY (observation_id) REFERENCES market_grade_observations(id) ON DELETE CASCADE,
   constraint market_uncertainty_shadow_pkey PRIMARY KEY (observation_id)
-);\nalter table public.market_uncertainty_shadow enable row level security;\nrevoke all on table public.market_uncertainty_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.market_uncertainty_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS market_uncertainty_shadow_classification_idx ON public.market_uncertainty_shadow USING btree (sport, classification, calculated_at DESC);\n\nCREATE INDEX IF NOT EXISTS market_uncertainty_shadow_event_idx ON public.market_uncertainty_shadow USING btree (sport, event_id, market_type, market_side, line);\n\nCREATE INDEX IF NOT EXISTS market_uncertainty_shadow_source_capture_idx ON public.market_uncertainty_shadow USING btree (sport, source_captured_at DESC);\n\ncreate table if not exists public.market_policy_registry (
+);
+alter table public.market_uncertainty_shadow enable row level security;
+revoke all on table public.market_uncertainty_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.market_uncertainty_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS market_uncertainty_shadow_classification_idx ON public.market_uncertainty_shadow USING btree (sport, classification, calculated_at DESC);
+
+CREATE INDEX IF NOT EXISTS market_uncertainty_shadow_event_idx ON public.market_uncertainty_shadow USING btree (sport, event_id, market_type, market_side, line);
+
+CREATE INDEX IF NOT EXISTS market_uncertainty_shadow_source_capture_idx ON public.market_uncertainty_shadow USING btree (sport, source_captured_at DESC);
+
+create table if not exists public.market_policy_registry (
   policy_id text not null,
   policy_version text default 'market-policy-v1'::text not null,
   market_type text not null,
@@ -45,7 +59,12 @@
   created_at timestamp with time zone default now() not null,
   constraint market_policy_registry_market_type_check CHECK (market_type = ANY (ARRAY['moneyline'::text, 'spread'::text, 'total'::text])),
   constraint market_policy_registry_pkey PRIMARY KEY (policy_id)
-);\nalter table public.market_policy_registry enable row level security;\nrevoke all on table public.market_policy_registry from public, anon, authenticated;\ngrant select, insert, update, delete on table public.market_policy_registry to service_role;\n\ncreate table if not exists public.market_policy_shadow_results (
+);
+alter table public.market_policy_registry enable row level security;
+revoke all on table public.market_policy_registry from public, anon, authenticated;
+grant select, insert, update, delete on table public.market_policy_registry to service_role;
+
+create table if not exists public.market_policy_shadow_results (
   observation_id bigint not null,
   policy_id text not null,
   evaluated_at timestamp with time zone default now() not null,
@@ -73,7 +92,18 @@
   constraint market_policy_shadow_results_observation_id_fkey FOREIGN KEY (observation_id) REFERENCES market_grade_observations(id) ON DELETE CASCADE,
   constraint market_policy_shadow_results_policy_id_fkey FOREIGN KEY (policy_id) REFERENCES market_policy_registry(policy_id) ON DELETE CASCADE,
   constraint market_policy_shadow_results_pkey PRIMARY KEY (observation_id, policy_id)
-);\nalter table public.market_policy_shadow_results enable row level security;\nrevoke all on table public.market_policy_shadow_results from public, anon, authenticated;\ngrant select, insert, update, delete on table public.market_policy_shadow_results to service_role;\n\nCREATE INDEX IF NOT EXISTS market_policy_shadow_results_event_idx ON public.market_policy_shadow_results USING btree (sport, event_id, market_type, market_side, line);\n\nCREATE INDEX IF NOT EXISTS market_policy_shadow_results_policy_idx ON public.market_policy_shadow_results USING btree (policy_id, evaluated_at DESC);\n\nCREATE INDEX IF NOT EXISTS market_policy_shadow_results_source_idx ON public.market_policy_shadow_results USING btree (policy_id, source_captured_at DESC);\n\nCREATE OR REPLACE FUNCTION public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb)
+);
+alter table public.market_policy_shadow_results enable row level security;
+revoke all on table public.market_policy_shadow_results from public, anon, authenticated;
+grant select, insert, update, delete on table public.market_policy_shadow_results to service_role;
+
+CREATE INDEX IF NOT EXISTS market_policy_shadow_results_event_idx ON public.market_policy_shadow_results USING btree (sport, event_id, market_type, market_side, line);
+
+CREATE INDEX IF NOT EXISTS market_policy_shadow_results_policy_idx ON public.market_policy_shadow_results USING btree (policy_id, evaluated_at DESC);
+
+CREATE INDEX IF NOT EXISTS market_policy_shadow_results_source_idx ON public.market_policy_shadow_results USING btree (policy_id, source_captured_at DESC);
+
+CREATE OR REPLACE FUNCTION public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -227,7 +257,11 @@ begin
     )
   );
 end;
-$function$\nrevoke execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) from public, anon, authenticated;\ngrant execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_market_uncertainty_shadow()
+$function$
+revoke execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) from public, anon, authenticated;
+grant execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_market_uncertainty_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -413,7 +447,11 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_market_uncertainty_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_market_uncertainty_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb)
+$function$
+revoke execute on function public.refresh_market_uncertainty_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_market_uncertainty_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -570,7 +608,11 @@ begin
     )
   );
 end;
-$function$\nrevoke execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) from public, anon, authenticated;\ngrant execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_market_policy_shadow()
+$function$
+revoke execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) from public, anon, authenticated;
+grant execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_market_policy_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -692,7 +734,12 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_market_policy_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_market_policy_shadow() to service_role;\n\ncreate or replace view public.market_uncertainty_latest with (security_invoker = true) as\nSELECT u.observation_id,
+$function$
+revoke execute on function public.refresh_market_policy_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_market_policy_shadow() to service_role;
+
+create or replace view public.market_uncertainty_latest with (security_invoker = true) as
+SELECT u.observation_id,
     u.calculated_at,
     u.evaluator_version,
     u.sport,
@@ -723,7 +770,13 @@ $function$\nrevoke execute on function public.refresh_market_policy_shadow() fro
     u.raw,
     u.source_captured_at
    FROM market_uncertainty_shadow u
-     JOIN market_grade_latest g ON g.id = u.observation_id;\n;\nrevoke all on table public.market_uncertainty_latest from public, anon, authenticated;\ngrant select on table public.market_uncertainty_latest to service_role;\n\ncreate or replace view public.market_policy_grade_latest with (security_invoker = true) as\nWITH result_ranked AS (
+     JOIN market_grade_latest g ON g.id = u.observation_id;
+;
+revoke all on table public.market_uncertainty_latest from public, anon, authenticated;
+grant select on table public.market_uncertainty_latest to service_role;
+
+create or replace view public.market_policy_grade_latest with (security_invoker = true) as
+WITH result_ranked AS (
          SELECT tr.observation_id,
             tr.event_id,
             tr.game_pk,
@@ -829,7 +882,13 @@ $function$\nrevoke execute on function public.refresh_market_policy_shadow() fro
      JOIN market_grade_observations o ON o.id = p.observation_id
      LEFT JOIN market_uncertainty_shadow u ON u.observation_id = p.observation_id
      LEFT JOIN sharp_market_clv clv ON clv.observation_id = p.observation_id
-     LEFT JOIN results res ON res.event_id = p.event_id AND res.market_type = p.market_type AND res.market_side = p.market_side AND (res.line IS NULL AND p.line IS NULL OR abs(res.line - p.line) < 0.001);\n;\nrevoke all on table public.market_policy_grade_latest from public, anon, authenticated;\ngrant select on table public.market_policy_grade_latest to service_role;\n\ncreate or replace view public.market_policy_final_pregame with (security_invoker = true) as\nWITH ranked AS (
+     LEFT JOIN results res ON res.event_id = p.event_id AND res.market_type = p.market_type AND res.market_side = p.market_side AND (res.line IS NULL AND p.line IS NULL OR abs(res.line - p.line) < 0.001);
+;
+revoke all on table public.market_policy_grade_latest from public, anon, authenticated;
+grant select on table public.market_policy_grade_latest to service_role;
+
+create or replace view public.market_policy_final_pregame with (security_invoker = true) as
+WITH ranked AS (
          SELECT r_1.observation_id,
             r_1.policy_id,
             r_1.evaluated_at,
@@ -890,4 +949,11 @@ $function$\nrevoke execute on function public.refresh_market_policy_shadow() fro
             ELSE reason_code
         END AS final_reason_code
    FROM ranked r
-  WHERE rn = 1;\n;\nrevoke all on table public.market_policy_final_pregame from public, anon, authenticated;\ngrant select on table public.market_policy_final_pregame to service_role;\n\ninsert into public.market_policy_registry\nselect * from jsonb_populate_recordset(null::public.market_policy_registry, '[{"notes":"Primary moneyline challenger.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.25,"minSharpDataQuality":0.6,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2},"policy_id":"ML_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser shadow challenger.","active":true,"config":{"minEvPct":2,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"minSharpDataQuality":0.5,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":1.5},"policy_id":"ML_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction moneyline challenger.","active":true,"config":{"minEvPct":3.5,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3},"policy_id":"ML_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary run-line challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4,"rejectMarketSplit":true,"maxPushProbability":0.06,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2.75},"policy_id":"RL_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser run-line challenger with push control.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"maxPushProbability":0.08,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2},"policy_id":"RL_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction run-line challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"rejectMarketSplit":true,"maxPushProbability":0.04,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3.5},"policy_id":"RL_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary totals challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":3,"requireRunEnvironment":true},"policy_id":"TOT_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser totals challenger; still requires exact-market integrity and run environment.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"rejectMarketSplit":true,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2.5,"requireRunEnvironment":true},"policy_id":"TOT_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction totals challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":4,"rejectMarketSplit":true,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":4,"requireRunEnvironment":true},"policy_id":"TOT_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false}]'::jsonb)\non conflict do nothing;\n
+  WHERE rn = 1;
+;
+revoke all on table public.market_policy_final_pregame from public, anon, authenticated;
+grant select on table public.market_policy_final_pregame to service_role;
+
+insert into public.market_policy_registry
+select * from jsonb_populate_recordset(null::public.market_policy_registry, '[{"notes":"Primary moneyline challenger.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.25,"minSharpDataQuality":0.6,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2},"policy_id":"ML_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser shadow challenger.","active":true,"config":{"minEvPct":2,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"minSharpDataQuality":0.5,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":1.5},"policy_id":"ML_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction moneyline challenger.","active":true,"config":{"minEvPct":3.5,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3},"policy_id":"ML_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary run-line challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4,"rejectMarketSplit":true,"maxPushProbability":0.06,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2.75},"policy_id":"RL_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser run-line challenger with push control.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"maxPushProbability":0.08,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2},"policy_id":"RL_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction run-line challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"rejectMarketSplit":true,"maxPushProbability":0.04,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3.5},"policy_id":"RL_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary totals challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":3,"requireRunEnvironment":true},"policy_id":"TOT_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser totals challenger; still requires exact-market integrity and run environment.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"rejectMarketSplit":true,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2.5,"requireRunEnvironment":true},"policy_id":"TOT_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction totals challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":4,"rejectMarketSplit":true,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":4,"requireRunEnvironment":true},"policy_id":"TOT_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false}]'::jsonb)
+on conflict do nothing;
