@@ -96,6 +96,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "latest-model-audit",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "83591df79172b7c9a6a412507c56fd4250e0152d5b07d3439a75dae12d54eb5f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/latest-model-audit/index.ts",
+          "name": "index.ts",
+          "sha256": "a558549150da8b5395a219c34c72628f969363834541d45a5fc5eb22a8ec5012"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "dashboard-results",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "6b46319769b906353236d09cf4761a8438c6802a4a1c22a8936ce718da2814b2",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/dashboard-results/index.ts",
+          "name": "index.ts",
+          "sha256": "c20f3dd8defa12f3c6f3cf030e74db77bf3717d12e2b881ff5183a63a43fe4e1"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-gate-history",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "89b41728935e850523d2b168f60ea38f7f68e9816c201f528d83e5e7ff95dec6",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-gate-history/index.ts",
+          "name": "index.ts",
+          "sha256": "305da46c2031b2b3da2c0343d68c57f8ecf38ac98d581707bfc4d18cc8b278fe"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-card",
+      "version": 8,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "7e07db6acf0d2525dc9012f4391503d83287cd5765a69dfa1c877901a832d99c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-card/index.ts",
+          "name": "index.ts",
+          "sha256": "f43c2543b44432db34f5cca625129655f44602fd566ee0610f7ba58a184d4d85"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "capture-player-props",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "25b5ca52b963de5df3f38b6314cdeb97404089e24bf315fc5c8e2ad65225d67f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "ec9ec3158c76ba27dfe79d59e0a4f8f84aabe163868595e7c6c0d7f80b512cc0"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "grade-player-props",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "0659019156b720156c7954106eb912cee5688151d7460af33eb05069aec3977e",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "d83901207fe2a7a9527478c5dd982c09b18053f5d35d1e635ef5cfdf259c9e13"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }

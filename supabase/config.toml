@@ -18,3 +18,21 @@ verify_jwt = true
 
 [functions.model-calibration]
 verify_jwt = false
+
+[functions.latest-model-audit]
+verify_jwt = false
+
+[functions.dashboard-results]
+verify_jwt = false
+
+[functions.sharp-gate-history]
+verify_jwt = false
+
+[functions.market-card]
+verify_jwt = false
+
+[functions.capture-player-props]
+verify_jwt = true
+
+[functions.grade-player-props]
+verify_jwt = true
