@@ -63,9 +63,9 @@
     .neutral{color:#e9f0ff;background:#2b3f5f}
     .result-win{color:#04190e;background:var(--green)}
     .result-loss{color:#2a070a;background:var(--red)}
-    .result-push{color:#eef3fb;background:#59687c}
-    .result-pass-good{color:#eef3fb;background:#46556b}
-    .result-pass-missed{color:#2a1700;background:var(--amber)}
+    .result-push{color:#2a1700;background:var(--amber)}
+    .result-pass-good{color:#04190e;background:var(--green)}
+    .result-pass-missed{color:#2a070a;background:var(--red)}
     .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
     .stat{background:rgba(5,15,29,.52);border:1px solid rgba(50,77,113,.55);border-radius:11px;padding:9px}
     .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
@@ -84,6 +84,9 @@
     .why.play{border-left:4px solid var(--green);background:rgba(79,209,139,.14);color:#f3fff8}
     .why.pass{border-left:4px solid var(--red);background:rgba(255,111,120,.14);color:#fff5f6}
     .why.pending{border-left:4px solid var(--amber);background:rgba(255,189,74,.14);color:#fffaf0}
+    .why.outcome-win{border-left:4px solid var(--green);background:rgba(79,209,139,.14);color:#f3fff8}
+    .why.outcome-loss{border-left:4px solid var(--red);background:rgba(255,111,120,.14);color:#fff5f6}
+    .why.outcome-push{border-left:4px solid var(--amber);background:rgba(255,189,74,.14);color:#fffaf0}
     details{margin-top:10px;border-top:1px solid rgba(57,82,117,.5);padding-top:10px}
     summary{color:var(--blue);font-size:12px;font-weight:750;cursor:pointer}
     .adjustments{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
@@ -1045,6 +1048,17 @@
     return "";
   }
 
+  function resultWhyClass(r){
+    if(r?.decisionStatus==="PASS"){
+      if(r?.passEvaluation==="GOOD_PASS") return "outcome-win";
+      if(r?.passEvaluation==="MISSED_WIN") return "outcome-loss";
+      return "outcome-push";
+    }
+    if(r?.outcome==="W") return "outcome-win";
+    if(r?.outcome==="L") return "outcome-loss";
+    return "outcome-push";
+  }
+
   function resultBadgeClass(r){
     if(r?.decisionStatus==="PASS"){
       if(r?.passEvaluation==="GOOD_PASS") return "result-pass-good";
@@ -1090,7 +1104,7 @@
           <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
         </div>
-        <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(teamResultWhy(r))}</div>
+        <div class="why ${resultWhyClass(r)}">${esc(teamResultWhy(r))}</div>
         <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(r))}</div>
       </div>`).join("");
   }
@@ -1112,7 +1126,7 @@
           <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
         </div>
-        <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(propResultWhy(r))}</div>
+        <div class="why ${resultWhyClass(r)}">${esc(propResultWhy(r))}</div>
         <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(r))}</div>
       </div>`).join("");
   }
@@ -1140,7 +1154,7 @@
                 <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
                 <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
               </div>
-              <div class="why play">${esc(propResultWhy(r))}</div>
+              <div class="why ${resultWhyClass(r)}">${esc(propResultWhy(r))}</div>
             </div>`;
         }
 
@@ -1159,7 +1173,7 @@
               <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
               <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
             </div>
-            <div class="why play">${esc(teamResultWhy(r))}</div>
+            <div class="why ${resultWhyClass(r)}">${esc(teamResultWhy(r))}</div>
           </div>`;
       }).join("");
   }
