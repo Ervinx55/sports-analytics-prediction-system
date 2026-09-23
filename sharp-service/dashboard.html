@@ -661,6 +661,31 @@
     return status==="PLAY"?"play":status==="PENDING"?"pending":"pass";
   }
 
+  function fusionClass(state){
+    if(state==="PLAY_CANDIDATE") return "play";
+    if(state==="PASS" || state==="REMODEL") return "pass";
+    return "pending";
+  }
+
+  function fusionPanel(m){
+    const f=m?.decisionFusion;
+    if(!f) return "";
+    const blockers=Array.isArray(f.blockers)?f.blockers:[];
+    const warnings=Array.isArray(f.warnings)?f.warnings:[];
+    const supports=Array.isArray(f.supports)?f.supports:[];
+    const score=f.alignment_score==null?"—":Number(f.alignment_score).toFixed(0)+"/100";
+    return `
+      <div class="why ${fusionClass(f.fusion_state)}" style="margin-top:8px">
+        <strong>FUSION · ${esc(f.headline||f.fusion_state||"SHADOW")}</strong>
+        · ${esc(f.fusion_state||"—")} · alignment ${esc(score)}
+        <div style="margin-top:4px">${esc(f.explanation||"")}</div>
+        ${blockers.length?'<div style="margin-top:4px"><strong>BLOCKERS:</strong> '+blockers.map(esc).join(" · ")+'</div>':""}
+        ${warnings.length?'<div style="margin-top:4px"><strong>WARNINGS:</strong> '+warnings.map(esc).join(" · ")+'</div>':""}
+        ${supports.length?'<div style="margin-top:4px"><strong>SUPPORTS:</strong> '+supports.map(esc).join(" · ")+'</div>':""}
+        <div class="small" style="margin-top:4px">Shadow only · ${esc(f.conflict_code||"")}</div>
+      </div>`;
+  }
+
   function renderMarketCard(card){
     const rows=card?.markets||[];
     if(!rows.length){
@@ -700,6 +725,7 @@
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
+                  ${fusionPanel(m)}
                   <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
                 </div>
                 <div class="market-decision-panel">
@@ -823,6 +849,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(marketWhy(g))}</div>
+        ${fusionPanel(g)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
         <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
       </div>`).join("");
@@ -1306,12 +1333,13 @@
     );
   }
 
-  function renderCalibration(c, marketCal, sharpDiagCal){
+  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
     const types=marketCal?.byMarketType||{};
     const sharpClasses=sharpDiagCal?.byClassification||{};
+    const fusionCodes=fusionCal?.byConflictCode||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1320,6 +1348,16 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const fusionCard=(label,key)=>{
+      const m=fusionCodes[key]||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${m.graded??0} graded</div>
+          <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · CLV ${m.averageMarketToCloseClvPp==null?"—":fmtPP(m.averageMarketToCloseClvPp)}</div>
+          <div class="hint">${esc(m.sampleStatus||"INSUFFICIENT_SAMPLE")} · ${m.rows??0} captured</div>
         </div>`;
     };
     const sharpDiagCard=(label,key)=>{
@@ -1354,6 +1392,22 @@
       </div>
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>Pass review:</strong> ${marketCal?.passReview?.goodPasses??0} good passes · ${marketCal?.passReview?.missedWins??0} missed wins · ${marketCal?.passReview?.hardPasses??0} hard passes. Keep thresholds frozen until the sample is large enough to distinguish signal from short-term variance.</div>
+      </div>
+      <div class="section-title" style="margin-top:18px"><h2>Decision Fusion Calibration</h2><p>conflict resolver vs outcomes and closing value</p></div>
+      <div class="cal-grid">
+        ${fusionCard("All Signals Aligned","ALL_MAJOR_SHADOW_SIGNALS_ALIGNED")}
+        ${fusionCard("Model Likes It — Price Gone","MODEL_LIKES_IT_PRICE_GONE")}
+        ${fusionCard("Fragile Edge","FRAGILE_EDGE")}
+        ${fusionCard("Wait For Better Price","POSITIVE_EV_BELOW_BUY_TARGET")}
+        ${fusionCard("Context Remodel","CONTEXT_CHANGED_REMODEL")}
+        ${fusionCard("Weather Remodel","WEATHER_CHANGED_REMODEL")}
+        ${fusionCard("Sharp Price Discovery","SHARP_PRICE_DISCOVERY")}
+        ${fusionCard("Real Sharp Conflict","REAL_SHARP_CONFLICT")}
+        ${fusionCard("Sharp Gate Pass","PRODUCTION_SHARP_GATE_PASS")}
+        ${fusionCard("Inputs Incomplete","INPUTS_INCOMPLETE")}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Fusion policy:</strong> explanatory only. A conflict code needs at least 100 graded observations plus stable closing-line behavior before it can be considered for production decision logic.</div>
       </div>
       <div class="section-title" style="margin-top:18px"><h2>Sharp Disagreement Calibration</h2><p>shadow diagnosis vs closing value</p></div>
       <div class="cal-grid">
@@ -1414,7 +1468,7 @@
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration);
     renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
