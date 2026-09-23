@@ -108,7 +108,7 @@ CREATE OR REPLACE FUNCTION public.compute_market_uncertainty_v1(p_market_type te
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_market_type text := lower(coalesce(p_market_type,''));
   v_status text := upper(coalesce(p_non_sharp_status,''));
@@ -257,7 +257,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) from public, anon, authenticated;
 grant execute on function public.compute_market_uncertainty_v1(p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb) to service_role;
 
@@ -266,7 +266,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_uncertainty_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   v_calc jsonb;
@@ -447,7 +447,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_market_uncertainty_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_market_uncertainty_shadow() to service_role;
 
@@ -456,7 +456,7 @@ CREATE OR REPLACE FUNCTION public.compute_market_policy_v1(p_market_type text, p
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_type text := lower(coalesce(p_market_type,''));
   v_status text := upper(coalesce(p_non_sharp_status,''));
@@ -608,7 +608,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) from public, anon, authenticated;
 grant execute on function public.compute_market_policy_v1(p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb) to service_role;
 
@@ -617,7 +617,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_policy_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   p record;
@@ -734,7 +734,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_market_policy_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_market_policy_shadow() to service_role;
 
