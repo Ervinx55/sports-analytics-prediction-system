@@ -77,6 +77,7 @@ export default async function handler(req, res) {
       sport
     )}&limit=50`,
     sharpDisagreementCalibration: `${BASE}/sharp-disagreement-calibration?days=90`,
+    decisionFusionCalibration: `${BASE}/decision-fusion-calibration?days=90`,
     sharpSourceHealth: `${BASE}/sharp-source-health`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
@@ -85,7 +86,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, sharpSourceHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, sharpSourceHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -95,6 +96,7 @@ export default async function handler(req, res) {
       fetchJson(urls.alerts),
       fetchJson(urls.sharpGate),
       fetchJson(urls.sharpDisagreementCalibration),
+      fetchJson(urls.decisionFusionCalibration),
       fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
@@ -110,6 +112,7 @@ export default async function handler(req, res) {
     alerts: settled(alerts),
     sharpGate: settled(sharpGate),
     sharpDisagreementCalibration: settled(sharpDisagreementCalibration),
+    decisionFusionCalibration: settled(decisionFusionCalibration),
     sharpSourceHealth: settled(sharpSourceHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
@@ -180,6 +183,7 @@ export default async function handler(req, res) {
     calibration: sources.calibration.data || null,
     marketCalibration: sources.marketCalibration.data || null,
     sharpDisagreementCalibration: sources.sharpDisagreementCalibration.data || null,
+    decisionFusionCalibration: sources.decisionFusionCalibration.data || null,
     grades: sources.results.data?.grades || [],
     results: sources.results.data?.results || [],
     movements: movementList,
