@@ -333,6 +333,136 @@
     return '<span class="badge neutral">'+esc(s)+'</span>';
   }
 
+  function teamAuditContext(m){
+    const candidates=DATA?.candidates||[];
+    const exact=candidates.find(c=>
+      c.event_id===m.event_id &&
+      (m.market_type==="total" || c.side_key===m.market_side)
+    );
+    return exact || candidates.find(c=>c.event_id===m.event_id) || null;
+  }
+
+  function n3(x){
+    const n=Number(x);
+    return Number.isFinite(n)?n.toFixed(3):null;
+  }
+
+  function n2(x){
+    const n=Number(x);
+    return Number.isFinite(n)?n.toFixed(2):null;
+  }
+
+  function marketStats(m){
+    const stored=m?.raw?.explanationStats||null;
+    const c=teamAuditContext(m);
+    const raw=c?.raw||{};
+    const lineup=stored?.lineup || raw.lineupAdjustment || {};
+    const bullpen=stored?.bullpen || raw.bullpenAdjustment || {};
+    const pitch=stored?.pitchMix || raw.pitchMixAdjustment || {};
+    const run=stored?.runEnvironment || raw.runEnvironmentAdjustment || {};
+    const parts=[];
+
+    const cOps=n3(
+      stored ? lineup?.candidateWeightedOps :
+      lineup?.candidate?.weightedLineupOps
+    );
+    const oOps=n3(
+      stored ? lineup?.opponentWeightedOps :
+      lineup?.opponent?.weightedLineupOps
+    );
+    if(cOps&&oOps) parts.push("lineup OPS "+cOps+" vs "+oOps);
+
+    const cPlat=n3(
+      stored ? lineup?.candidatePlatoonOps :
+      lineup?.candidatePlatoon?.weightedPlatoonOps
+    );
+    const oPlat=n3(
+      stored ? lineup?.opponentPlatoonOps :
+      lineup?.opponentPlatoon?.weightedPlatoonOps
+    );
+    if(cPlat&&oPlat) parts.push("platoon OPS "+cPlat+" vs "+oPlat);
+
+    const cBull=n2(
+      stored ? bullpen?.candidateQualityIndex :
+      bullpen?.candidateBullpenQuality?.weightedQualityIndex
+    );
+    const oBull=n2(
+      stored ? bullpen?.opponentQualityIndex :
+      bullpen?.opponentBullpenQuality?.weightedQualityIndex
+    );
+    if(cBull&&oBull) parts.push("bullpen quality "+cBull+" vs "+oBull);
+
+    const pitchAdj=n2(
+      stored ? pitch?.netAdjustmentPctPoints :
+      pitch?.netProbabilityAdjustmentPctPoints
+    );
+    if(pitchAdj) parts.push("pitch-mix "+(Number(pitchAdj)>=0?"+":"")+pitchAdj+" pp");
+
+    if(stored){
+      const away=n2(run?.projectedAwayRuns), home=n2(run?.projectedHomeRuns);
+      if(away&&home) parts.push("projected runs "+away+"-"+home);
+      if(run?.projectedTotal!=null) parts.push("projected total "+Number(run.projectedTotal).toFixed(2));
+      if(run?.parkFactor!=null) parts.push("park factor "+run.parkFactor);
+      if(run?.tempF!=null) parts.push(run.tempF+"°F");
+      if(run?.wind) parts.push(String(run.wind));
+    } else {
+      const sp=run?.spreadProjection;
+      if(sp){
+        const away=n2(sp.projectedAwayRuns), home=n2(sp.projectedHomeRuns);
+        if(away&&home) parts.push("projected runs "+away+"-"+home);
+      }
+      const tp=run?.totalProjection;
+      if(tp?.projectedTotal!=null) parts.push("projected total "+Number(tp.projectedTotal).toFixed(2));
+      const env=run?.environment;
+      if(env?.parkFactor!=null) parts.push("park factor "+env.parkFactor);
+      if(env?.weather?.tempF!=null) parts.push(env.weather.tempF+"°F");
+      if(env?.weather?.wind) parts.push(String(env.weather.wind));
+    }
+
+    return parts.length ? parts.join(" · ") : "Stat context will populate on the next model audit.";
+  }
+
+  function propStats(p){
+    const i=p?.raw?.projection?.inputs||{};
+    const parts=[];
+
+    if(p?.stat_id==="pitching_strikeouts"){
+      if(i.strikeouts!=null&&i.battersFaced!=null){
+        const rate=Number(i.kPerBF);
+        parts.push(
+          i.strikeouts+" K / "+i.battersFaced+" BF"+
+          (Number.isFinite(rate)?" ("+(rate*100).toFixed(1)+"% K/BF)":"")
+        );
+      }
+      if(i.gamesStarted!=null) parts.push(i.gamesStarted+" starts");
+      if(i.opponentKRate!=null) parts.push("opponent lineup K% "+(Number(i.opponentKRate)*100).toFixed(1)+"%");
+      if(i.pitchesPerStart!=null) parts.push(Number(i.pitchesPerStart).toFixed(1)+" pitches/start");
+      if(p.model_mean!=null) parts.push("model mean "+Number(p.model_mean).toFixed(2)+" K");
+    } else if(p?.stat_id==="batting_hits"){
+      if(i.seasonHits!=null&&i.atBats!=null){
+        parts.push(i.seasonHits+" H / "+i.atBats+" AB ("+(Number(i.seasonHits)/Number(i.atBats)).toFixed(3)+")");
+      }
+      if(i.lineupSpot!=null) parts.push("batting #"+i.lineupSpot);
+      if(i.projectedAB!=null) parts.push(Number(i.projectedAB).toFixed(2)+" projected AB");
+      if(i.opponentStarterHitsPer9!=null) parts.push("opposing starter "+Number(i.opponentStarterHitsPer9).toFixed(2)+" H/9");
+      if(p.model_mean!=null) parts.push("model mean "+Number(p.model_mean).toFixed(2)+" hits");
+    } else if(p?.stat_id==="batting_totalBases"){
+      if(i.seasonHits!=null) parts.push(i.seasonHits+" H");
+      const xb=[];
+      if(i.seasonDoubles!=null) xb.push(i.seasonDoubles+" 2B");
+      if(i.seasonTriples!=null) xb.push(i.seasonTriples+" 3B");
+      if(i.seasonHomeRuns!=null) xb.push(i.seasonHomeRuns+" HR");
+      if(xb.length) parts.push(xb.join(", "));
+      if(i.atBats!=null) parts.push(i.atBats+" AB");
+      if(i.lineupSpot!=null) parts.push("batting #"+i.lineupSpot);
+      if(i.projectedAB!=null) parts.push(Number(i.projectedAB).toFixed(2)+" projected AB");
+      if(i.opponentStarterHitsPer9!=null) parts.push("opposing starter "+Number(i.opponentStarterHitsPer9).toFixed(2)+" H/9");
+      if(p.model_mean!=null) parts.push("model mean "+Number(p.model_mean).toFixed(2)+" TB");
+    }
+
+    return parts.length ? parts.join(" · ") : "Stat inputs unavailable for this stored observation.";
+  }
+
   function marketWhy(m){
     const status=m?.status||"PASS";
     const reason=String(m?.reason||"").trim();
@@ -450,6 +580,7 @@
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
+                  <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
                 </div>
                 <div>
                   <div class="small">Decision</div>
@@ -580,6 +711,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(marketWhy(g))}</div>
+        <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
         <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
       </div>`).join("");
 
@@ -655,6 +787,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
+        <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
       </div>`).join("");
   }
@@ -750,6 +883,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
+          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
           <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
         </div>`).join("");
     }
@@ -765,6 +899,7 @@
             <span class="badge watch">PENDING</span>
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
+          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         </div>`).join("");
     }
 
@@ -778,6 +913,7 @@
             <div class="main">${esc(p.label)}</div>
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
+            <div class="small" style="margin-top:4px"><strong>STATS:</strong> ${esc(propStats(p))}</div>
           </div>
           <div><div class="small">Decision</div>${statusBadge(p)}</div>
           <div><div class="small">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(p.model_probability)}</span><span class="market">Mk ${fmtPct(p.market_fair_probability)}</span></div></div>
@@ -885,6 +1021,7 @@
             <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
           </div>
           <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(teamResultWhy(r))}</div>
+          <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(r))}</div>
           ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This passed wager would have won; review whether the filter was too strict without assuming one result proves the rule was wrong.":r.resultLabel==="GOOD PASS"?"The pass avoided a losing wager; this is evidence in favor of the filter, but still only one observation.":"The passed wager pushed.")+'</div>' : ''}
         </div>`).join("");
     }
@@ -909,6 +1046,7 @@
             <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
           </div>
           <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(propResultWhy(r))}</div>
+          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(r))}</div>
           ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This prop would have won despite being filtered out. It is logged as a missed win for later threshold analysis.":r.resultLabel==="GOOD PASS"?"The filter avoided a losing prop.":"The passed prop pushed.")+'</div>' : ''}
         </div>`).join("");
     }
