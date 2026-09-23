@@ -20,306 +20,6 @@
   },
   "items": [
     {
-      "group": "uncertainty",
-      "identity": "table:public.market_uncertainty_shadow",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "uncertainty",
-      "identity": "view:public.market_uncertainty_latest",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "uncertainty",
-      "identity": "function:public.compute_market_uncertainty_v1",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "uncertainty",
-      "identity": "function:public.refresh_market_uncertainty_shadow",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "table:public.market_policy_registry",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "table:public.market_policy_shadow_results",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "view:public.market_policy_grade_latest",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "view:public.market_policy_final_pregame",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "function:public.compute_market_policy_v1",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "market_policy",
-      "identity": "function:public.refresh_market_policy_shadow",
-      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
-    },
-    {
-      "group": "price_sensitivity",
-      "identity": "table:public.market_price_sensitivity_shadow",
-      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
-    },
-    {
-      "group": "price_sensitivity",
-      "identity": "view:public.market_price_sensitivity_latest",
-      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
-    },
-    {
-      "group": "price_sensitivity",
-      "identity": "view:public.market_price_wait_analysis",
-      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
-    },
-    {
-      "group": "price_sensitivity",
-      "identity": "function:public.compute_price_sensitivity_v1",
-      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
-    },
-    {
-      "group": "price_sensitivity",
-      "identity": "function:public.refresh_market_price_sensitivity_shadow",
-      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "table:public.mlb_verification_snapshots",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "table:public.team_market_verification_shadow",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "table:public.player_prop_verification_shadow",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "view:public.mlb_verification_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "view:public.team_market_verification_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "view:public.player_prop_verification_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "function:public.cleanup_mlb_verification_history",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "verification",
-      "identity": "function:public.trigger_mlb_verification_gate",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "table:public.mlb_roof_status_overrides",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "table:public.mlb_weather_park_snapshots",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "table:public.team_market_weather_shadow",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "table:public.player_prop_weather_shadow",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "view:public.mlb_weather_park_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "view:public.mlb_weather_park_final_pregame",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "view:public.team_market_weather_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "view:public.player_prop_weather_latest",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "function:public.compute_weather_park_impact_v1",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "function:public.cleanup_mlb_weather_park_history",
-      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
-    },
-    {
-      "group": "weather_park",
-      "identity": "function:public.trigger_mlb_weather_park",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "sharp_disagreement",
-      "identity": "table:public.sharp_disagreement_shadow",
-      "represented_by": "supabase/migrations/20260923213730_recover_sharp_disagreement.sql"
-    },
-    {
-      "group": "sharp_disagreement",
-      "identity": "view:public.sharp_disagreement_latest",
-      "represented_by": "supabase/migrations/20260923213730_recover_sharp_disagreement.sql"
-    },
-    {
-      "group": "sharp_disagreement",
-      "identity": "function:public.trigger_sharp_disagreement_shadow",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "team_fusion",
-      "identity": "table:public.market_decision_fusion_shadow",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "team_fusion",
-      "identity": "view:public.market_decision_fusion_latest",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "team_fusion",
-      "identity": "function:public.compute_decision_fusion_v1",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "team_fusion",
-      "identity": "function:public.refresh_market_decision_fusion_shadow",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "team_fusion",
-      "identity": "function:public.trigger_market_decision_fusion",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_fusion",
-      "identity": "table:public.player_prop_decision_fusion_shadow",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_fusion",
-      "identity": "view:public.player_prop_decision_fusion_latest",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_fusion",
-      "identity": "function:public.compute_player_prop_fusion_v1",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_fusion",
-      "identity": "function:public.refresh_player_prop_decision_fusion_shadow",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_fusion",
-      "identity": "function:public.trigger_player_prop_decision_fusion",
-      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "table:public.player_prop_market_quotes",
-      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "table:public.player_prop_clv",
-      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "view:public.player_prop_clv_latest",
-      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "function:public.american_to_decimal_v1",
-      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "function:public.decimal_to_american_v1",
-      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
-    },
-    {
-      "group": "prop_clv",
-      "identity": "function:public.trigger_player_prop_clv_refresh",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "parlay_correlation",
-      "identity": "table:public.parlay_correlation_shadow",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "parlay_correlation",
-      "identity": "view:public.parlay_correlation_latest",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "parlay_correlation",
-      "identity": "function:public.compute_parlay_correlation_v1",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "parlay_correlation",
-      "identity": "function:public.refresh_parlay_correlation_shadow",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "parlay_correlation",
-      "identity": "function:public.trigger_parlay_correlation_shadow",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "decision_timing",
-      "identity": "table:public.decision_timing_shadow",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
-      "group": "decision_timing",
-      "identity": "view:public.decision_timing_latest",
-      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
-    },
-    {
       "group": "decision_timing",
       "identity": "function:public.decision_timing_bucket_v1",
       "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
@@ -335,9 +35,49 @@
       "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
     },
     {
+      "group": "decision_timing",
+      "identity": "table:public.decision_timing_shadow",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "decision_timing",
+      "identity": "view:public.decision_timing_latest",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "function:public.compute_market_policy_v1",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "function:public.refresh_market_policy_shadow",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "table:public.market_policy_registry",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "table:public.market_policy_shadow_results",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "view:public.market_policy_final_pregame",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "market_policy",
+      "identity": "view:public.market_policy_grade_latest",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
       "group": "model_governance",
-      "identity": "table:public.model_governance_registry",
-      "represented_by": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql"
+      "identity": "function:public.trigger_model_governance_refresh",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
       "group": "model_governance",
@@ -346,17 +86,12 @@
     },
     {
       "group": "model_governance",
-      "identity": "view:public.model_governance_latest",
+      "identity": "table:public.model_governance_registry",
       "represented_by": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql"
     },
     {
       "group": "model_governance",
-      "identity": "function:public.trigger_model_governance_refresh",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "outcome_attribution",
-      "identity": "table:public.decision_outcome_attribution",
+      "identity": "view:public.model_governance_latest",
       "represented_by": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql"
     },
     {
@@ -375,6 +110,51 @@
       "represented_by": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql"
     },
     {
+      "group": "outcome_attribution",
+      "identity": "table:public.decision_outcome_attribution",
+      "represented_by": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql"
+    },
+    {
+      "group": "parlay_correlation",
+      "identity": "function:public.compute_parlay_correlation_v1",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "parlay_correlation",
+      "identity": "function:public.refresh_parlay_correlation_shadow",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "parlay_correlation",
+      "identity": "function:public.trigger_parlay_correlation_shadow",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "parlay_correlation",
+      "identity": "table:public.parlay_correlation_shadow",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "parlay_correlation",
+      "identity": "view:public.parlay_correlation_latest",
+      "represented_by": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql"
+    },
+    {
+      "group": "pipeline_health",
+      "identity": "function:public.enqueue_pipeline_http_v1",
+      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+    },
+    {
+      "group": "pipeline_health",
+      "identity": "function:public.pipeline_health_snapshot_v1",
+      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+    },
+    {
+      "group": "pipeline_health",
+      "identity": "function:public.reconcile_pipeline_http_requests_v1",
+      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+    },
+    {
       "group": "pipeline_health",
       "identity": "table:public.pipeline_component_registry",
       "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
@@ -390,23 +170,33 @@
       "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
     },
     {
-      "group": "pipeline_health",
-      "identity": "function:public.enqueue_pipeline_http_v1",
-      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+      "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_closing_snapshot",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
-      "group": "pipeline_health",
-      "identity": "function:public.reconcile_pipeline_http_requests_v1",
-      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+      "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_league_snapshot",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
-      "group": "pipeline_health",
-      "identity": "function:public.pipeline_health_snapshot_v1",
-      "represented_by": "supabase/migrations/20260923213738_recover_pipeline_health.sql"
+      "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_market_snapshot",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
       "group": "posthistory_security_cron",
       "identity": "function:public.trigger_model_audit",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_model_governance_refresh",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_model_grading",
       "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
@@ -416,12 +206,7 @@
     },
     {
       "group": "posthistory_security_cron",
-      "identity": "function:public.trigger_sharp_source_refresh",
-      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
-    },
-    {
-      "group": "posthistory_security_cron",
-      "identity": "function:public.trigger_team_market_grading",
+      "identity": "function:public.trigger_player_prop_clv_refresh",
       "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
@@ -436,13 +221,248 @@
     },
     {
       "group": "posthistory_security_cron",
-      "identity": "function:public.trigger_model_governance_refresh",
+      "identity": "function:public.trigger_sharp_source_refresh",
       "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
     },
     {
       "group": "posthistory_security_cron",
+      "identity": "function:public.trigger_team_market_grading",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "price_sensitivity",
+      "identity": "function:public.compute_price_sensitivity_v1",
+      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
+    },
+    {
+      "group": "price_sensitivity",
+      "identity": "function:public.refresh_market_price_sensitivity_shadow",
+      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
+    },
+    {
+      "group": "price_sensitivity",
+      "identity": "table:public.market_price_sensitivity_shadow",
+      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
+    },
+    {
+      "group": "price_sensitivity",
+      "identity": "view:public.market_price_sensitivity_latest",
+      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
+    },
+    {
+      "group": "price_sensitivity",
+      "identity": "view:public.market_price_wait_analysis",
+      "represented_by": "supabase/migrations/20260923213727_recover_price_sensitivity.sql"
+    },
+    {
+      "group": "prop_clv",
+      "identity": "function:public.american_to_decimal_v1",
+      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
+    },
+    {
+      "group": "prop_clv",
+      "identity": "function:public.decimal_to_american_v1",
+      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
+    },
+    {
+      "group": "prop_clv",
       "identity": "function:public.trigger_player_prop_clv_refresh",
       "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "prop_clv",
+      "identity": "table:public.player_prop_clv",
+      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
+    },
+    {
+      "group": "prop_clv",
+      "identity": "table:public.player_prop_market_quotes",
+      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
+    },
+    {
+      "group": "prop_clv",
+      "identity": "view:public.player_prop_clv_latest",
+      "represented_by": "supabase/migrations/20260923213733_recover_player_prop_clv.sql"
+    },
+    {
+      "group": "prop_fusion",
+      "identity": "function:public.compute_player_prop_fusion_v1",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "prop_fusion",
+      "identity": "function:public.refresh_player_prop_decision_fusion_shadow",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "prop_fusion",
+      "identity": "function:public.trigger_player_prop_decision_fusion",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "prop_fusion",
+      "identity": "table:public.player_prop_decision_fusion_shadow",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "prop_fusion",
+      "identity": "view:public.player_prop_decision_fusion_latest",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "sharp_disagreement",
+      "identity": "function:public.trigger_sharp_disagreement_shadow",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "sharp_disagreement",
+      "identity": "table:public.sharp_disagreement_shadow",
+      "represented_by": "supabase/migrations/20260923213730_recover_sharp_disagreement.sql"
+    },
+    {
+      "group": "sharp_disagreement",
+      "identity": "view:public.sharp_disagreement_latest",
+      "represented_by": "supabase/migrations/20260923213730_recover_sharp_disagreement.sql"
+    },
+    {
+      "group": "team_fusion",
+      "identity": "function:public.compute_decision_fusion_v1",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "team_fusion",
+      "identity": "function:public.refresh_market_decision_fusion_shadow",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "team_fusion",
+      "identity": "function:public.trigger_market_decision_fusion",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "team_fusion",
+      "identity": "table:public.market_decision_fusion_shadow",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "team_fusion",
+      "identity": "view:public.market_decision_fusion_latest",
+      "represented_by": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql"
+    },
+    {
+      "group": "uncertainty",
+      "identity": "function:public.compute_market_uncertainty_v1",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "uncertainty",
+      "identity": "function:public.refresh_market_uncertainty_shadow",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "uncertainty",
+      "identity": "table:public.market_uncertainty_shadow",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "uncertainty",
+      "identity": "view:public.market_uncertainty_latest",
+      "represented_by": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "function:public.cleanup_mlb_verification_history",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "function:public.trigger_mlb_verification_gate",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "table:public.mlb_verification_snapshots",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "table:public.player_prop_verification_shadow",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "table:public.team_market_verification_shadow",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "view:public.mlb_verification_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "view:public.player_prop_verification_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "verification",
+      "identity": "view:public.team_market_verification_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "function:public.cleanup_mlb_weather_park_history",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "function:public.compute_weather_park_impact_v1",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "function:public.trigger_mlb_weather_park",
+      "represented_by": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "table:public.mlb_roof_status_overrides",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "table:public.mlb_weather_park_snapshots",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "table:public.player_prop_weather_shadow",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "table:public.team_market_weather_shadow",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "view:public.mlb_weather_park_final_pregame",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "view:public.mlb_weather_park_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "view:public.player_prop_weather_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
+    },
+    {
+      "group": "weather_park",
+      "identity": "view:public.team_market_weather_latest",
+      "represented_by": "supabase/migrations/20260923213728_recover_verification_and_weather.sql"
     }
   ]
 }

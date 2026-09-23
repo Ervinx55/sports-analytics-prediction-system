@@ -147,7 +147,7 @@ def test_catchup_objects_are_fully_assigned():
     manifest = json.loads(
         (ROOT / "supabase" / "manifests" / "catchup-objects.json").read_text()
     )
-    assert len(manifest["items"]) == 85
+    assert len(manifest["items"]) == 89
     for item in manifest["items"]:
         represented = item.get("represented_by")
         assert represented

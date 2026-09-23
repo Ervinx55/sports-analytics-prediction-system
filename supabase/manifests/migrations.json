@@ -223,7 +223,7 @@
       "version": "20260923213739",
       "name": "recover_posthistory_security_and_cron",
       "path": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql",
-      "sha256": "9389bdff643b0103a32e29b81d06cc25fc85af2aab376e8d67f18022c9d3c170",
+      "sha256": "7edbe3cf4acf30e9400aa569d69b0b9756e174931650b4cdf8432da51d6a2fc0",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null

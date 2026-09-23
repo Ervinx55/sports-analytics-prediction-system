@@ -140,6 +140,169 @@ $function$;
 revoke execute on function public.trigger_sharp_disagreement_shadow() from public, anon, authenticated;
 grant execute on function public.trigger_sharp_disagreement_shadow() to service_role;
 
+
+CREATE OR REPLACE FUNCTION public.trigger_closing_snapshot()
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions', 'net', 'vault', 'pg_catalog'
+AS $function$
+  select net.http_post(
+    url := (
+      select decrypted_secret
+      from vault.decrypted_secrets
+      where name = 'snapshot_project_url'
+      limit 1
+    ) || '/functions/v1/capture-market-snapshot',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'apikey',(
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      ),
+      'Authorization','Bearer ' || (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      )
+    ),
+    body := jsonb_build_object(
+      'label','closing-window',
+      'leagues',jsonb_build_array('MLB'),
+      'books',jsonb_build_array('draftkings','fanduel','betmgm','caesars'),
+      'startsAfter', now()::text,
+      'startsBefore', (now() + interval '75 minutes')::text
+    ),
+    timeout_milliseconds := 60000
+  );
+$function$;
+revoke execute on function public.trigger_closing_snapshot() from public, anon, authenticated;
+grant execute on function public.trigger_closing_snapshot() to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_league_snapshot(p_league text, p_label text, p_window_hours integer)
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions', 'net', 'vault', 'pg_catalog'
+AS $function$
+  select net.http_post(
+    url := (
+      select decrypted_secret
+      from vault.decrypted_secrets
+      where name = 'snapshot_project_url'
+      limit 1
+    ) || '/functions/v1/capture-market-snapshot',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'apikey',(
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      ),
+      'Authorization','Bearer ' || (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      )
+    ),
+    body := jsonb_build_object(
+      'label', p_label,
+      'leagues', jsonb_build_array(p_league),
+      'books', jsonb_build_array('draftkings','fanduel','betmgm','caesars'),
+      'startsAfter', now()::text,
+      'startsBefore', (now() + make_interval(hours => p_window_hours))::text
+    ),
+    timeout_milliseconds := 60000
+  );
+$function$;
+revoke execute on function public.trigger_league_snapshot(p_league text, p_label text, p_window_hours integer) from public, anon, authenticated;
+grant execute on function public.trigger_league_snapshot(p_league text, p_label text, p_window_hours integer) to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_market_snapshot(p_label text)
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions', 'net', 'vault', 'pg_catalog'
+AS $function$
+  select net.http_post(
+    url := (
+      select decrypted_secret
+      from vault.decrypted_secrets
+      where name = 'snapshot_project_url'
+      limit 1
+    ) || '/functions/v1/capture-market-snapshot',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'apikey',(
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      ),
+      'Authorization','Bearer ' || (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      )
+    ),
+    body := jsonb_build_object(
+      'label', p_label,
+      'leagues', jsonb_build_array('MLB'),
+      'books', jsonb_build_array('draftkings','fanduel','betmgm','caesars'),
+      'startsAfter',
+        (date_trunc('day', now() at time zone 'America/Chicago')
+          at time zone 'America/Chicago')::text,
+      'startsBefore',
+        ((date_trunc('day', now() at time zone 'America/Chicago') + interval '1 day')
+          at time zone 'America/Chicago')::text
+    ),
+    timeout_milliseconds := 30000
+  );
+$function$;
+revoke execute on function public.trigger_market_snapshot(p_label text) from public, anon, authenticated;
+grant execute on function public.trigger_market_snapshot(p_label text) to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_model_grading()
+ RETURNS bigint
+ LANGUAGE sql
+ SECURITY DEFINER
+ SET search_path TO 'public', 'extensions', 'net', 'vault', 'pg_catalog'
+AS $function$
+  select net.http_post(
+    url := (
+      select decrypted_secret
+      from vault.decrypted_secrets
+      where name = 'snapshot_project_url'
+      limit 1
+    ) || '/functions/v1/grade-model-audit',
+    headers := jsonb_build_object(
+      'Content-Type','application/json',
+      'apikey',(
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      ),
+      'Authorization','Bearer ' || (
+        select decrypted_secret
+        from vault.decrypted_secrets
+        where name = 'snapshot_publishable_key'
+        limit 1
+      )
+    ),
+    body := '{}'::jsonb,
+    timeout_milliseconds := 60000
+  );
+$function$;
+revoke execute on function public.trigger_model_grading() from public, anon, authenticated;
+grant execute on function public.trigger_model_grading() to service_role;
+
 -- Normalize cron to the exact current production schedule. No literal API keys/JWTs are stored.
 select cron.unschedule(jobid) from cron.job where jobname='decision-outcome-attribution-10min';
 select cron.schedule('decision-outcome-attribution-10min','12-59/10 * * * *',$cron$select public.trigger_decision_outcome_attribution();$cron$);
