@@ -135,6 +135,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
     <button class="tab" data-tab="plays">Plays</button>
+    <button class="tab" data-tab="props">Player Props</button>
     <button class="tab" data-tab="market">Market</button>
     <button class="tab" data-tab="sharp">Sharp Gate</button>
     <button class="tab" data-tab="results">Results & CLV</button>
@@ -186,6 +187,35 @@
         <strong>Parlay rule:</strong> no PENDING legs, no PASS legs, no same-game combinations, and no forced parlay when fewer than two PLAY singles qualify. Combined probability/EV are estimates that assume the legs are independent.
       </div>
     </div>
+  </section>
+
+  <section class="section" id="props">
+    <div class="section-title"><h2>Player Props</h2><p>separate MLB prop model</p></div>
+
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric"><div class="label">Props</div><div class="value" id="pTotal">—</div><div class="hint">graded exact-line wagers</div></div>
+      <div class="metric"><div class="label">Plays</div><div class="value" id="pPlay">—</div><div class="hint">model qualified</div></div>
+      <div class="metric"><div class="label">Pending</div><div class="value" id="pPending">—</div><div class="hint">waiting on lineup/role</div></div>
+      <div class="metric"><div class="label">Pass</div><div class="value" id="pPass">—</div><div class="hint">did not qualify</div></div>
+    </div>
+
+    <div class="card" style="box-shadow:none">
+      <div class="reason" style="margin-top:0">
+        <strong>Separate model:</strong> pitcher strikeouts, batter hits, and batter total bases are graded independently from team markets. Every sportsbook line is treated as a different wager. PLAY requires confirmed role/lineup, strong sample quality, exact-line two-sided market coverage, at least +6 pp model edge, and at least +6% modeled EV after shrinking toward the market.
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Prop Plays</h2><p>qualified singles only</p></div>
+    <div id="propPlayList"><div class="empty">No prop plays currently qualify.</div></div>
+
+    <div class="section-title"><h2>Pending Props</h2><p>must resolve before final window</p></div>
+    <div id="propPendingList"><div class="empty">No prop markets are pending.</div></div>
+
+    <div class="section-title"><h2>All Prop Grades</h2><p>PLAY / PENDING / PASS</p></div>
+    <div id="propGradeList"><div class="empty">No prop grades loaded yet.</div></div>
+
+    <div class="section-title"><h2>Recent Prop Results</h2><p>automatic postgame grading</p></div>
+    <div id="propResultsList"><div class="empty">No graded prop results yet.</div></div>
   </section>
 
   <section class="section" id="market">
@@ -540,6 +570,82 @@
     }
   }
 
+  function renderPlayerProps(card){
+    const summary=card?.summary||{};
+    $("pTotal").textContent=summary.gradedProps??0;
+    $("pPlay").textContent=summary.play??0;
+    $("pPending").textContent=summary.pending??0;
+    $("pPass").textContent=summary.pass??0;
+
+    const playRows=card?.plays||[];
+    if(!playRows.length){
+      $("propPlayList").innerHTML='<div class="empty">No prop plays currently qualify.</div>';
+    } else {
+      $("propPlayList").innerHTML=playRows.slice(0,25).map((p,i)=>`
+        <div class="card" style="border-color:rgba(77,226,208,.45)">
+          <div class="candidate-head">
+            <div>
+              <div class="match">#${i+1} · ${esc(p.label)}</div>
+              <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
+            </div>
+            <span class="badge play">PLAY</span>
+          </div>
+          <div class="grid4">
+            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
+            <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(p.model_probability)}</div><div class="small">raw ${fmtPct(p.raw_independent_probability)}</div></div>
+            <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div><div class="small">vs exact-line no-vig</div></div>
+            <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
+          </div>
+          <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"} · ${esc(p.reason||"")}</div>
+        </div>`).join("");
+    }
+
+    const pending=card?.pending||[];
+    if(!pending.length){
+      $("propPendingList").innerHTML='<div class="empty">No prop markets are pending.</div>';
+    } else {
+      $("propPendingList").innerHTML=pending.slice(0,25).map(p=>`
+        <div class="card" style="box-shadow:none">
+          <div class="candidate-head">
+            <div><div class="match">${esc(p.label)}</div><div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div></div>
+            <span class="badge watch">PENDING</span>
+          </div>
+          <div class="reason">${esc(p.reason||"Waiting for required information.")}</div>
+        </div>`).join("");
+    }
+
+    const rows=card?.props||[];
+    if(!rows.length){
+      $("propGradeList").innerHTML='<div class="empty">No prop grades loaded yet.</div>';
+    } else {
+      $("propGradeList").innerHTML='<div class="card">'+rows.slice(0,80).map(p=>`
+        <div class="list-row">
+          <div>
+            <div class="main">${esc(p.label)}</div>
+            <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))}</div>
+          </div>
+          <div><div class="small">Decision</div>${statusBadge(p)}</div>
+          <div><div class="small">Price</div><strong>${fmtOdds(p.best_odds)}</strong></div>
+          <div class="hide-mobile"><div class="small">Edge</div><strong class="${Number(p.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(p.edge_pct_points)}</strong></div>
+          <div class="hide-mobile"><div class="small">EV</div><strong class="${Number(p.ev_pct)>=0?"positive":"negative"}">${p.ev_pct==null?"—":(Number(p.ev_pct)>=0?"+":"")+Number(p.ev_pct).toFixed(2)+"%"}</strong></div>
+        </div>`).join("")+'</div>';
+    }
+
+    const results=card?.recentResults||[];
+    if(!results.length){
+      $("propResultsList").innerHTML='<div class="empty">No graded prop results yet. This fills automatically after tracked games finish.</div>';
+    } else {
+      $("propResultsList").innerHTML='<div class="card">'+results.slice(0,40).map(r=>`
+        <div class="list-row">
+          <div><div class="main">${esc(r.observation?.label||r.stat_id)}</div><div class="small">Actual: ${r.actual_value??"—"} · line ${r.line}</div></div>
+          <div><div class="small">Result</div><strong class="${r.outcome==="W"?"positive":r.outcome==="L"?"negative":""}">${esc(r.outcome||"—")}</strong></div>
+          <div><div class="small">Side</div><strong>${esc(String(r.side||"").toUpperCase())}</strong></div>
+          <div class="hide-mobile"><div class="small">Price</div><strong>${fmtOdds(r.observation?.best_odds)}</strong></div>
+          <div class="hide-mobile"><div class="small">Model</div><strong>${fmtPct(r.observation?.model_probability)}</strong></div>
+        </div>`).join("")+'</div>';
+    }
+  }
+
   function renderAlerts(rows){
     if(!rows?.length){ $("alertList").innerHTML='<div class="empty">No current qualifying alerts.</div>'; return; }
     $("alertList").innerHTML=rows.slice(0,12).map(a=>{
@@ -624,6 +730,7 @@
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
     renderMarketCard(data.marketCard||{});
     renderPlays(data.marketCard||{});
+    renderPlayerProps(data.playerProps||{});
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
@@ -648,6 +755,7 @@
       $("healthDot").classList.add("bad");
       $("healthText").textContent="Dashboard connection failed";
       $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
