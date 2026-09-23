@@ -950,6 +950,7 @@
             <div class="stat"><div class="k">Model vs Sharp</div><div class="v ${Number(g.model_vs_sharp_pp??g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_sharp_pp??g.model_vs_bookmaker_pp)}</div><div class="small">DQ ${g.sharp_data_quality==null?"—":Number(g.sharp_data_quality).toFixed(2)}</div></div>
           </div>
           <div class="reason"><strong>Gate mode:</strong> ${esc(g.gate_mode||"legacy")} · <strong>Agreement:</strong> ${fmtPP(g.sharp_consensus_spread_pp??g.sharp_disagreement_pp)}</div>
+          <div class="reason"><strong>Sharp diagnosis:</strong> ${esc(g.disagreementDiagnosis?.classification||"—")} · <strong>Confidence:</strong> ${g.disagreementDiagnosis?.confidence==null?"—":(Number(g.disagreementDiagnosis.confidence)*100).toFixed(0)+"%"} · ${esc(g.disagreementDiagnosis?.reason||"Awaiting diagnosis.")}</div>
           <div class="reason"><strong>Pinnacle:</strong> ${esc(g.pinnacle_status||"unavailable")} · <strong>Circa:</strong> ${esc(g.circa_status||"unavailable")}</div>
           <div class="reason">${esc(g.reason||"")}</div>
         </div>`).join("");
@@ -960,7 +961,7 @@
     } else {
       $("sharpHistory").innerHTML=history.slice(0,30).map(g=>`
         <div class="list-row">
-          <div><div class="main">${esc(g.side_name||g.market_side||"")}</div><div class="small">${fmtTime(g.checked_at)} · ${esc(g.away_team)} @ ${esc(g.home_team)} · ${esc(g.gate_mode||"legacy")}</div></div>
+          <div><div class="main">${esc(g.side_name||g.market_side||"")}</div><div class="small">${fmtTime(g.checked_at)} · ${esc(g.away_team)} @ ${esc(g.home_team)} · ${esc(g.gate_mode||"legacy")} · ${esc(g.disagreementDiagnosis?.classification||"NO_DIAGNOSIS")}</div></div>
           <div><div class="small">Status</div><strong>${esc(g.final_status)}</strong></div>
           <div><div class="small">Sharp</div><strong>${fmtPct(g.sharp_consensus_probability??g.bookmaker_candidate_fair_probability)}</strong></div>
           <div class="hide-mobile"><div class="small">Model vs Sharp</div><strong class="${Number(g.model_vs_sharp_pp??g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_sharp_pp??g.model_vs_bookmaker_pp)}</strong></div>
@@ -1305,11 +1306,12 @@
     );
   }
 
-  function renderCalibration(c, marketCal){
+  function renderCalibration(c, marketCal, sharpDiagCal){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
     const types=marketCal?.byMarketType||{};
+    const sharpClasses=sharpDiagCal?.byClassification||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1318,6 +1320,16 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const sharpDiagCard=(label,key)=>{
+      const m=sharpClasses[key]||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${m.matchedClvRows??0} matched</div>
+          <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · CLV ${m.averageMarketToCloseClvPp==null?"—":fmtPP(m.averageMarketToCloseClvPp)}</div>
+          <div class="hint">${esc(m.sampleStatus||"INSUFFICIENT_SAMPLE")} · confidence ${m.averageConfidence==null?"—":(Number(m.averageConfidence)*100).toFixed(0)+"%"}</div>
         </div>`;
     };
     $("calibrationPanel").innerHTML=`
@@ -1342,6 +1354,19 @@
       </div>
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>Pass review:</strong> ${marketCal?.passReview?.goodPasses??0} good passes · ${marketCal?.passReview?.missedWins??0} missed wins · ${marketCal?.passReview?.hardPasses??0} hard passes. Keep thresholds frozen until the sample is large enough to distinguish signal from short-term variance.</div>
+      </div>
+      <div class="section-title" style="margin-top:18px"><h2>Sharp Disagreement Calibration</h2><p>shadow diagnosis vs closing value</p></div>
+      <div class="cal-grid">
+        ${sharpDiagCard("Consensus OK","CONSENSUS_OK")}
+        ${sharpDiagCard("Stale Price","STALE_PRICE")}
+        ${sharpDiagCard("Market Moving","MARKET_MOVING")}
+        ${sharpDiagCard("Real Disagreement","REAL_SHARP_DISAGREEMENT")}
+        ${sharpDiagCard("Source Quality","SOURCE_QUALITY_PROBLEM")}
+        ${sharpDiagCard("Insufficient Sources","INSUFFICIENT_SOURCES")}
+        ${sharpDiagCard("Disagreement Watch","DISAGREEMENT_WATCH")}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Policy:</strong> sharp disagreement labels remain descriptive only. No class can change PLAY/PASS until it has enough matched closing-line observations to evaluate stability.</div>
       </div>`;
   }
 
@@ -1389,7 +1414,7 @@
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration);
     renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
