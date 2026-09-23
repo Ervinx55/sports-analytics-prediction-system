@@ -178,7 +178,7 @@
       "version": "20260923213731",
       "name": "recover_team_and_prop_fusion",
       "path": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql",
-      "sha256": "7f63229053afb8595319cd943d3f1f8e90f14f926708e456c402c0e5bfdcf320",
+      "sha256": "a9f85541145062b1a41fff654564ca33b390049009617729808b91996105971d",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -187,7 +187,7 @@
       "version": "20260923213733",
       "name": "recover_player_prop_clv",
       "path": "supabase/migrations/20260923213733_recover_player_prop_clv.sql",
-      "sha256": "8982514a207e7c351c4d5cab3004b57b97e12b82b8d9157697103fed4bcde31a",
+      "sha256": "982bf92e6e90009bec26a974194a3e052750f7c5d1676818c4bc4def7f1cca39",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -196,7 +196,7 @@
       "version": "20260923213734",
       "name": "recover_parlay_correlation_and_timing",
       "path": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql",
-      "sha256": "04f687e3248a6b7c5629fe517c0da10e73073ee65f128681d35d1593dd46823c",
+      "sha256": "5a90716fff9cb5666af75629d71e336d9809e2bc2a44c4726ad8c45a9e1d2088",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -205,7 +205,7 @@
       "version": "20260923213736",
       "name": "recover_model_governance_and_attribution",
       "path": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql",
-      "sha256": "f25c0469c583e0d85e7b2c78a41139f2eb1eeceb143ffd8ce521badc3befde88",
+      "sha256": "49471d48f16dfffee87c337b10d34912ddca4b7f60ecb480ccb8c00d8698f2b3",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
