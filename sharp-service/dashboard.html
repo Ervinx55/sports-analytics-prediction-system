@@ -70,6 +70,10 @@
     .prob-pair .market{font-size:12px;font-weight:750;color:var(--muted)}
     .reason{margin-top:10px;font-size:12px;color:#c7d5e8;line-height:1.45}
     .reason strong{color:var(--amber)}
+    .why{margin-top:7px;padding:8px 10px;border-radius:10px;font-size:11px;line-height:1.45;background:rgba(6,16,29,.55)}
+    .why.play{border-left:3px solid var(--green)}
+    .why.pass{border-left:3px solid var(--red)}
+    .why.pending{border-left:3px solid var(--amber)}
     details{margin-top:10px;border-top:1px solid rgba(57,82,117,.5);padding-top:10px}
     summary{color:var(--blue);font-size:12px;font-weight:750;cursor:pointer}
     .adjustments{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
@@ -141,7 +145,7 @@
     <button class="tab" data-tab="props">Player Props</button>
     <button class="tab" data-tab="market">Market</button>
     <button class="tab" data-tab="sharp">Sharp Gate</button>
-    <button class="tab" data-tab="results">Results & CLV</button>
+    <button class="tab" data-tab="results">Results</button>
     <button class="tab" data-tab="calibration">Calibration</button>
     <button class="tab" data-tab="system">System</button>
   </div>
@@ -262,8 +266,26 @@
   </section>
 
   <section class="section" id="results">
-    <div class="section-title"><h2>Results & CLV</h2><p>one row per latest graded decision</p></div>
-    <div id="resultsList"><div class="empty">No graded decisions yet.</div></div>
+    <div class="section-title"><h2>Results & Decision Tracking</h2><p>PLAY results + counterfactual PASS results</p></div>
+
+    <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
+      <div class="metric"><div class="label">Team Plays</div><div class="value" id="rTeamPlay">—</div><div class="hint">W-L-P record</div></div>
+      <div class="metric"><div class="label">Team Passes</div><div class="value" id="rTeamPass">—</div><div class="hint">good pass / missed win</div></div>
+      <div class="metric"><div class="label">Prop Plays</div><div class="value" id="rPropPlay">—</div><div class="hint">W-L-P record</div></div>
+      <div class="metric"><div class="label">Prop Passes</div><div class="value" id="rPropPass">—</div><div class="hint">good pass / missed win</div></div>
+    </div>
+
+    <div class="card" style="box-shadow:none">
+      <div class="reason" style="margin-top:0">
+        <strong>GOOD PASS</strong> = we passed and the wager lost. <strong>MISSED WIN</strong> = we passed but the wager would have won. This lets us audit both the bets we approved and the opportunities our filters rejected.
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Team Market Decisions</h2><p>moneyline · run line · totals</p></div>
+    <div id="teamDecisionResults"><div class="empty">No completed team-market decisions yet.</div></div>
+
+    <div class="section-title"><h2>Player Prop Decisions</h2><p>plays and passes tracked separately</p></div>
+    <div id="propDecisionResults"><div class="empty">No completed prop decisions yet.</div></div>
   </section>
 
   <section class="section" id="calibration">
