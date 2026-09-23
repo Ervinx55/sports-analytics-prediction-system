@@ -1,4 +1,142 @@
 {
   "recoveryBaseline": "2026-09-23",
-  "items": []
+  "source": "supabase_migrations.schema_migrations",
+  "items": [
+    {
+      "version": "20260922210537",
+      "name": "enable_snapshot_scheduler_extensions",
+      "path": "supabase/migrations/20260922210537_enable_snapshot_scheduler_extensions.sql",
+      "sha256": "3f079779deb614c4ff0512636b6d15c8f29effbdec1ee83ee8cc2c6857a00351",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260922210637",
+      "name": "create_market_snapshot_tables",
+      "path": "supabase/migrations/20260922210637_create_market_snapshot_tables.sql",
+      "sha256": "f6b769b991741ca0ce2cee8cffa12e68344656d3a8a0337111926355a18d18b5",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260922234532",
+      "name": "create_model_audit_and_grading_ledger",
+      "path": "supabase/migrations/20260922234532_create_model_audit_and_grading_ledger.sql",
+      "sha256": "83c1f7e15f6f79b9d56433715fd393f8cf09ad63d5c15ad1445c94799e657b54",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260922234613",
+      "name": "extend_candidate_grade_clv_fields",
+      "path": "supabase/migrations/20260922234613_extend_candidate_grade_clv_fields.sql",
+      "sha256": "8284b3f04b94f6510ddc204281f90afff16186b3d29bc67f28b4ef98cbccd793",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260922235011",
+      "name": "create_model_calibration_view",
+      "path": "supabase/migrations/20260922235011_create_model_calibration_view.sql",
+      "sha256": "6b5ad9ba671081bddd01216b628654d13b872d3c3a999ab5f2d58ba1acfa187e",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923003108",
+      "name": "create_sharp_gate_history",
+      "path": "supabase/migrations/20260923003108_create_sharp_gate_history.sql",
+      "sha256": "d716fc32f3af0fc7d005eec47c13c65a959ba48324412223da2ab6f789f76d5a",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923005752",
+      "name": "create_market_grade_observations_and_expand_sharp_history",
+      "path": "supabase/migrations/20260923005752_create_market_grade_observations_and_expand_sharp_history.sql",
+      "sha256": "03d67bf0fdfbbcd8780c16f59bb2f561aae14bc42a6d667bd3f26e6c639672f4",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923012236",
+      "name": "create_player_prop_audit_and_results",
+      "path": "supabase/migrations/20260923012236_create_player_prop_audit_and_results.sql",
+      "sha256": "02d97642a7a193c91b272e2c8a8841e256530ae0fa8def6d74a6e4b3452e7c27",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923034936",
+      "name": "create_team_market_results_ledger",
+      "path": "supabase/migrations/20260923034936_create_team_market_results_ledger.sql",
+      "sha256": "2a1774a68a8ea51f1778f3a876820656dc8abf30ee3679a68a31d7c992fdf331",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923060509",
+      "name": "upgrade_sharp_gate_reliability_v2",
+      "path": "supabase/migrations/20260923060509_upgrade_sharp_gate_reliability_v2.sql",
+      "sha256": "e15f45ab79b75c4d4b6460ed002f196bbb3ab66b53e684ec052f7cf02e15f792",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923061150",
+      "name": "harden_analytics_backend_access",
+      "path": "supabase/migrations/20260923061150_harden_analytics_backend_access.sql",
+      "sha256": "61b6b33df7ea58e844ff58617be71ce688a55734560ee67f8b442b90dbbca605",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923061220",
+      "name": "lock_down_internal_rpc_functions",
+      "path": "supabase/migrations/20260923061220_lock_down_internal_rpc_functions.sql",
+      "sha256": "8358a6bc38a534bb94425f9dad16f1f316fb52c88c1a1c2d02bf2ea4f3a3237e",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923061948",
+      "name": "add_sharp_source_quote_pipeline",
+      "path": "supabase/migrations/20260923061948_add_sharp_source_quote_pipeline.sql",
+      "sha256": "13fe5ab971dd028472daacbb786bb56d13228428d83e78d676ab007770649e1f",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923062037",
+      "name": "schedule_sharp_source_refresh",
+      "path": "supabase/migrations/20260923062037_schedule_sharp_source_refresh.sql",
+      "sha256": "0d99086daf08477103cb1787ce6af2f2f0351d8f3c24f2dbf2a6e3fb52314e95",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923062439",
+      "name": "retain_sharp_quote_history_14_days",
+      "path": "supabase/migrations/20260923062439_retain_sharp_quote_history_14_days.sql",
+      "sha256": "59147b361b5d2ebf79e4bdf70ba9ee0a5ef708abf0d981a03937e18eba021270",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923063003",
+      "name": "add_sharp_market_clv_tracking",
+      "path": "supabase/migrations/20260923063003_add_sharp_market_clv_tracking.sql",
+      "sha256": "cfb6a0e6007840b1a927b92e80dbc4629c7c04df5f46ed6d1c2c2064eff2a0be",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20260923063049",
+      "name": "schedule_sharp_clv_capture",
+      "path": "supabase/migrations/20260923063049_schedule_sharp_clv_capture.sql",
+      "sha256": "01c25e45872312e7479b584e484b1347d4e565facb92169fc5da8823314a8a01",
+      "recoveredFromProduction": true,
+      "statementCount": 1
+    }
+  ]
 }
