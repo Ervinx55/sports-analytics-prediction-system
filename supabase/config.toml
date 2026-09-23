@@ -1,3 +1,5 @@
+project_id = "sports-analytics-prediction-system"
+
 # Supabase reconstruction configuration.
 # Per-function sections are recovered from production in Task 3.
 
