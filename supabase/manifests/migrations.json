@@ -137,6 +137,96 @@
       "sha256": "01c25e45872312e7479b584e484b1347d4e565facb92169fc5da8823314a8a01",
       "recoveredFromProduction": true,
       "statementCount": 1
+    },
+    {
+      "version": "20260923213725",
+      "name": "recover_uncertainty_and_market_policy",
+      "path": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql",
+      "sha256": "192c3686f4298e83d77f162d53c27705534bd185041407fd4387b846727fe63b",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213727",
+      "name": "recover_price_sensitivity",
+      "path": "supabase/migrations/20260923213727_recover_price_sensitivity.sql",
+      "sha256": "8dba32ccbe34aac6550c09c3cc917ae8229477ad7508bf82ae54ec8224b95389",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213728",
+      "name": "recover_verification_and_weather",
+      "path": "supabase/migrations/20260923213728_recover_verification_and_weather.sql",
+      "sha256": "b837cbb506d30297239681b6f1174c78319728d3d2d41cb990057c2a27389600",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213730",
+      "name": "recover_sharp_disagreement",
+      "path": "supabase/migrations/20260923213730_recover_sharp_disagreement.sql",
+      "sha256": "8b403d78b1a5af6c6992bf264ed5c0ee6f119e26b72a3f4a8d058767b9fa8929",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213731",
+      "name": "recover_team_and_prop_fusion",
+      "path": "supabase/migrations/20260923213731_recover_team_and_prop_fusion.sql",
+      "sha256": "7f63229053afb8595319cd943d3f1f8e90f14f926708e456c402c0e5bfdcf320",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213733",
+      "name": "recover_player_prop_clv",
+      "path": "supabase/migrations/20260923213733_recover_player_prop_clv.sql",
+      "sha256": "8982514a207e7c351c4d5cab3004b57b97e12b82b8d9157697103fed4bcde31a",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213734",
+      "name": "recover_parlay_correlation_and_timing",
+      "path": "supabase/migrations/20260923213734_recover_parlay_correlation_and_timing.sql",
+      "sha256": "04f687e3248a6b7c5629fe517c0da10e73073ee65f128681d35d1593dd46823c",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213736",
+      "name": "recover_model_governance_and_attribution",
+      "path": "supabase/migrations/20260923213736_recover_model_governance_and_attribution.sql",
+      "sha256": "f25c0469c583e0d85e7b2c78a41139f2eb1eeceb143ffd8ce521badc3befde88",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213738",
+      "name": "recover_pipeline_health",
+      "path": "supabase/migrations/20260923213738_recover_pipeline_health.sql",
+      "sha256": "450d3d2f1d8f1fdcd77abebcc8a5a1347dd6985c678cb676551d0623b56367b8",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260923213739",
+      "name": "recover_posthistory_security_and_cron",
+      "path": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql",
+      "sha256": "67e834338d8fa218908de464b2c7dded9b33ef4c2f57054f9e0398474d2904a4",
+      "recoveredFromProduction": false,
+      "catchup": true,
+      "statementCount": null
     }
   ]
 }

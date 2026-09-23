@@ -138,3 +138,46 @@ def test_cron_inventory_is_redacted_and_complete():
         assert "snapshot_publishable_key" not in serialized
         assert "snapshot_project_url" not in serialized
         assert "Authorization" not in serialized
+
+
+def test_catchup_objects_are_fully_assigned():
+    manifest = json.loads(
+        (ROOT / "supabase" / "manifests" / "catchup-objects.json").read_text()
+    )
+    assert len(manifest["items"]) == 85
+    for item in manifest["items"]:
+        represented = item.get("represented_by")
+        assert represented
+        assert (ROOT / represented).exists()
+
+
+def test_catchup_migration_chain_is_unique_and_hardened():
+    manifest = json.loads(
+        (ROOT / "supabase" / "manifests" / "migrations.json").read_text()
+    )
+    catchup = [item for item in manifest["items"] if item.get("catchup")]
+    assert len(catchup) == 10
+    assert len({item["version"] for item in catchup}) == 10
+
+    for item in catchup:
+        sql = (ROOT / item["path"]).read_text()
+        assert "revoke " in sql.lower()
+        assert "service_role" in sql
+        assert "sb_secret_" not in sql
+        assert "sb_publishable_" not in sql
+
+
+def test_catchup_tables_and_views_keep_security_controls():
+    manifest = json.loads(
+        (ROOT / "supabase" / "manifests" / "catchup-objects.json").read_text()
+    )
+    by_file = {}
+    for item in manifest["items"]:
+        by_file.setdefault(item["represented_by"], []).append(item["identity"])
+
+    for path, identities in by_file.items():
+        sql = (ROOT / path).read_text().lower()
+        if any(identity.startswith("table:") for identity in identities):
+            assert "enable row level security" in sql
+        if any(identity.startswith("view:") for identity in identities):
+            assert "security_invoker = true" in sql
