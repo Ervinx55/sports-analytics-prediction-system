@@ -85,6 +85,7 @@ export default async function handler(req, res) {
     decisionTimingCalibration: `${BASE}/decision-timing-calibration?days=90`,
     modelGovernance: `${BASE}/model-governance-status`,
     outcomeAttribution: `${BASE}/outcome-attribution-status?days=30`,
+    pipelineHealth: `${BASE}/pipeline-health-status`,
     sharpSourceHealth: `${BASE}/sharp-source-health`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, sharpSourceHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -111,6 +112,7 @@ export default async function handler(req, res) {
       fetchJson(urls.decisionTimingCalibration),
       fetchJson(urls.modelGovernance),
       fetchJson(urls.outcomeAttribution),
+      fetchJson(urls.pipelineHealth),
       fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
@@ -134,6 +136,7 @@ export default async function handler(req, res) {
     decisionTimingCalibration: settled(decisionTimingCalibration),
     modelGovernance: settled(modelGovernance),
     outcomeAttribution: settled(outcomeAttribution),
+    pipelineHealth: settled(pipelineHealth),
     sharpSourceHealth: settled(sharpSourceHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
@@ -211,6 +214,12 @@ export default async function handler(req, res) {
     decisionTimingCalibration: sources.decisionTimingCalibration.data || null,
     modelGovernance: sources.modelGovernance.data || null,
     outcomeAttribution: sources.outcomeAttribution.data || null,
+    pipelineHealth: sources.pipelineHealth.data || {
+      overallStatus: "UNKNOWN",
+      summary: { components: 0, healthy: 0, warming: 0, degraded: 0, criticalComponents: 0, criticalDegraded: 0 },
+      components: [],
+      criticalIssues: []
+    },
     parlayCorrelation: sources.parlayCorrelation.data || {
       summary: { pairs: 0, recommendedIndependentPairs: 0, sameGameAuditPairs: 0, blockedPairs: 0 },
       recommended: [],

@@ -1617,7 +1617,7 @@
       </div>`;
   }
 
-  function renderSystem(sys,sharpHealth,modelGov){
+  function renderSystem(sys,sharpHealth,modelGov,pipelineHealth){
     const h=sys?.sourceHealth||{};
     $("sourceHealth").innerHTML=Object.entries(h).map(([name,v])=>`
       <div class="source"><span class="name">${esc(name)}</span><span class="${v.ok?"ok":"badtext"}">${v.ok?"ONLINE":"ERROR"}</span></div>
@@ -1634,6 +1634,27 @@
     }).join("");
     if(sharpRows) $("sourceHealth").innerHTML += sharpRows;
 
+    const ph=pipelineHealth||{};
+    const ps=String(ph.overallStatus||"UNKNOWN");
+    const pTone=ps==="HEALTHY"?"ok":ps==="DEGRADED"?"badtext":"";
+    $("sourceHealth").innerHTML += `
+      <div style="margin:12px 0 6px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em"><strong>Pipeline Health</strong></div>
+      <div class="source"><span class="name">Pipeline Overall</span><span class="${pTone}">${esc(ps)}</span></div>
+    `;
+    for(const c of ph.components||[]){
+      const status=String(c.health_status||"UNKNOWN");
+      const cls=status==="HEALTHY"?"ok":
+        ["WARMING_UP","HTTP_PENDING"].includes(status)?"":"badtext";
+      const age=c.runner_type==="HTTP"
+        ? (c.http_age_minutes==null?"":` · HTTP ${Number(c.http_age_minutes).toFixed(0)}m`)
+        : (c.cron_age_minutes==null?"":` · cron ${Number(c.cron_age_minutes).toFixed(0)}m`);
+      $("sourceHealth").innerHTML += `
+        <div class="source">
+          <span class="name">${esc(c.display_name||c.component_key||"Pipeline")}</span>
+          <span class="${cls}">${esc(status)}${esc(age)}</span>
+        </div>`;
+    }
+
     $("modelState").innerHTML=`
       <div><strong>Model:</strong> ${esc(sys?.modelVersion||"—")}</div>
       <div><strong>Weights:</strong> ${sys?.frozenWeights?"Frozen for audit":"Adjustable"}</div>
@@ -1641,6 +1662,7 @@
       <div><strong>Latest market snapshot:</strong> ${fmtTime(sys?.latestSnapshotAt)}</div>
       <div><strong>Sharp refresh:</strong> every ${sharpHealth?.refreshCadenceMinutes??5} minutes</div>
       <div><strong>Governance:</strong> auto-promotion ${modelGov?.automaticPromotion===false?"DISABLED":"—"} · ${modelGov?.summary?.references??0} references · ${modelGov?.summary?.challengers??0} challengers · ${modelGov?.summary?.diagnostics??0} diagnostics</div>
+      <div><strong>Pipeline:</strong> ${esc(pipelineHealth?.overallStatus||"UNKNOWN")} · healthy ${pipelineHealth?.summary?.healthy??0} · warming ${pipelineHealth?.summary?.warming??0} · degraded ${pipelineHealth?.summary?.degraded??0} · critical degraded ${pipelineHealth?.summary?.criticalDegraded??0}</div>
       <div style="margin-top:8px;color:var(--muted)">BookMaker is captured directly from its public MLB odds feed. Circa is secondary/public coverage when VSiN exposes the matchup. Pinnacle remains reserved for authorized API access; automated scraping is disabled.</div>
     `;
   }
@@ -1663,11 +1685,19 @@
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
     renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration,data.decisionTimingCalibration,data.modelGovernance,data.outcomeAttribution);
-    renderSystem(data.system,data.sharpSourceHealth,data.modelGovernance);
+    renderSystem(data.system,data.sharpSourceHealth,data.modelGovernance,data.pipelineHealth);
     const health=Object.values(data.system?.sourceHealth||{});
-    const bad=health.some(x=>!x.ok);
+    const sourceBad=health.some(x=>!x.ok);
+    const pipelineState=String(data.pipelineHealth?.overallStatus||"UNKNOWN");
+    const pipelineBad=pipelineState==="DEGRADED";
+    const pipelineWarming=pipelineState==="WARMING_UP";
+    const bad=sourceBad||pipelineBad;
     $("healthDot").classList.toggle("bad",bad);
-    $("healthText").textContent=bad ? "Some data sources are degraded" : "Live system connected";
+    $("healthText").textContent=bad
+      ? "Some data sources or pipeline components are degraded"
+      : pipelineWarming
+        ? "Pipeline monitoring warming up"
+        : "Live system connected";
   }
 
   async function fetchDashboardData(){
