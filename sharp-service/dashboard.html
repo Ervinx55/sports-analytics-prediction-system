@@ -119,6 +119,14 @@
     <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
   </div>
 
+  <div class="card" style="padding:10px 12px;margin-bottom:12px;box-shadow:none">
+    <div style="font-size:12px;line-height:1.5;color:var(--muted)">
+      <strong style="color:var(--text)">pp = percentage points.</strong>
+      Example: 61.5% model probability vs 55.3% market probability = <strong style="color:var(--green)">+6.2 pp</strong>.
+      This is different from a percent change.
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
     <button class="tab" data-tab="market">Market</button>
@@ -232,7 +240,7 @@
         <div class="grid4">
           <div class="stat"><div class="k">Best Price</div><div class="v">${fmtOdds(c.best_odds)}</div><div class="small">${esc(c.best_book||"—")}</div></div>
           <div class="stat"><div class="k">Final Prob.</div><div class="v">${fmtPct(c.final_probability)}</div></div>
-          <div class="stat"><div class="k">Edge</div><div class="v ${Number(c.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(c.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Edge (pp)</div><div class="v ${Number(c.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(c.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(c.ev_pct)>=0?"positive":"negative"}">${c.ev_pct==null?"—":(Number(c.ev_pct)>=0?"+":"")+Number(c.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         ${blockers.length ? '<div class="reason"><strong>Blocked:</strong> '+blockers.map(esc).join(" · ")+'</div>' : ''}
@@ -276,7 +284,7 @@
         <div class="grid4">
           <div class="stat"><div class="k">Model</div><div class="v">${fmtPct(g.model_probability)}</div></div>
           <div class="stat"><div class="k">BookMaker Fair</div><div class="v">${fmtPct(g.bookmaker_candidate_fair_probability)}</div></div>
-          <div class="stat"><div class="k">Model vs BM</div><div class="v positive">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
+          <div class="stat"><div class="k">Model vs BM (pp)</div><div class="v positive">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
           <div class="stat"><div class="k">Threshold</div><div class="v">${fmtOdds(g.playable_threshold)}</div></div>
         </div>
         <div class="reason">${esc(g.reason||"Sharp gate cleared.")}</div>
@@ -304,7 +312,7 @@
             <div class="stat"><div class="k">Mainstream</div><div class="v">${fmtOdds(g.mainstream_odds)}</div><div class="small">${esc(g.mainstream_book||"—")}</div></div>
             <div class="stat"><div class="k">Model</div><div class="v">${fmtPct(g.model_probability)}</div></div>
             <div class="stat"><div class="k">BookMaker Fair</div><div class="v">${fmtPct(g.bookmaker_candidate_fair_probability)}</div></div>
-            <div class="stat"><div class="k">Model vs BM</div><div class="v ${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
+            <div class="stat"><div class="k">Model vs BM (pp)</div><div class="v ${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
           </div>
           <div class="reason"><strong>Pinnacle:</strong> ${esc(g.pinnacle_status||"unavailable")} · <strong>Circa:</strong> ${esc(g.circa_status||"unavailable")}</div>
           <div class="reason">${esc(g.reason||"")}</div>
@@ -319,7 +327,7 @@
           <div><div class="main">${esc(g.side_name)}</div><div class="small">${fmtTime(g.checked_at)} · ${esc(g.away_team)} @ ${esc(g.home_team)}</div></div>
           <div><div class="small">Status</div><strong>${esc(g.final_status)}</strong></div>
           <div><div class="small">BookMaker</div><strong>${fmtPct(g.bookmaker_candidate_fair_probability)}</strong></div>
-          <div class="hide-mobile"><div class="small">Model Edge</div><strong class="${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</strong></div>
+          <div class="hide-mobile"><div class="small">Model Edge (pp)</div><strong class="${Number(g.model_vs_bookmaker_pp)>=1?"positive":"negative"}">${fmtPP(g.model_vs_bookmaker_pp)}</strong></div>
           <div class="hide-mobile"><div class="small">Price</div><strong>${fmtOdds(g.mainstream_odds)}</strong></div>
         </div>`).join("");
     }
