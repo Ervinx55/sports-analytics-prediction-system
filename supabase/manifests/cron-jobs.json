@@ -212,5 +212,10 @@
       "schedule": "25 13 * * *",
       "command_sha256": "76a3c9bc78f3dcc1ff2e4bd581319da1d488ee8bfba9d43e487e3b9ad834e4e3"
     }
-  ]
+  ],
+  "final_verified_at": "2026-09-23T23:25:32Z",
+  "authority_verification": {
+    "status": "MATCH",
+    "job_count": 35
+  }
 }

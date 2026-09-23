@@ -117,3 +117,16 @@ Python, pandas, NumPy, Streamlit, pytest
 ## Responsible use
 
 This repository is an educational analytics project. Model outputs are uncertain estimates, not guarantees.
+
+## Backend source of truth (Supabase)
+
+The version-controlled Supabase backend now lives under `supabase/`. Database migrations, Edge Function source, per-function `verify_jwt` configuration, cron/security inventories, and reconstruction verification tooling are maintained in Git.
+
+Key references:
+
+- [Supabase hybrid reconstruction design](docs/architecture/2026-09-23-supabase-hybrid-reconstruction-design.md)
+- [Supabase hybrid reconstruction implementation plan](docs/superpowers/plans/2026-09-23-supabase-hybrid-reconstruction.md)
+- [Supabase recovery and deployment operations guide](docs/operations/supabase-recovery-and-deploy.md)
+
+Future Supabase database changes must be represented by migrations, and Edge Function changes must be committed with their configuration before or alongside deployment. Production-only Dashboard/SQL edits are not considered authoritative until they are recovered into Git.
+

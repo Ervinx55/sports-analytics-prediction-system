@@ -2049,5 +2049,18 @@
       "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
       "object_identity": "public.team_market_weather_shadow"
     }
-  ]
+  ],
+  "final_verified_at": "2026-09-23T23:25:32Z",
+  "authority_verification": {
+    "final_verified_at": "2026-09-23T23:25:32Z",
+    "verification_status": "CLEAN",
+    "schema_inventory": "MATCH",
+    "historical_migrations": "17/17",
+    "edge_functions": "49/49",
+    "isolated_rebuild": "PASS",
+    "test_and_secret_scan": "PASS",
+    "security_advisor": "INFO_ONLY_NO_WARN_OR_ERROR",
+    "live_endpoint_smoke": "PASS",
+    "known_operational_issue": "player_prop_capture and prop_clv currently receive upstream /api/props HTTP 429 rate-limit responses; separate from reconstruction drift"
+  }
 }

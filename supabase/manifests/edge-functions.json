@@ -785,5 +785,11 @@
       ],
       "recovered_at": "2026-09-23"
     }
-  ]
+  ],
+  "final_verified_at": "2026-09-23T23:25:32Z",
+  "authority_verification": {
+    "status": "MATCH",
+    "active_functions": 49,
+    "metadata_and_bundle_sha_match": true
+  }
 }
