@@ -117,9 +117,9 @@
   </div>
 
   <div class="metrics">
-    <div class="metric"><div class="label">Active</div><div class="value" id="mActive">—</div><div class="hint">audited candidates</div></div>
-    <div class="metric"><div class="label">Sharp Ready</div><div class="value" id="mReady">—</div><div class="hint">final gate pending</div></div>
-    <div class="metric"><div class="label">Final Plays</div><div class="value" id="mFinal">—</div><div class="hint">cleared sharp gate</div></div>
+    <div class="metric"><div class="label">Markets</div><div class="value" id="mActive">—</div><div class="hint">graded today</div></div>
+    <div class="metric"><div class="label">Pending</div><div class="value" id="mReady">—</div><div class="hint">waiting on final input</div></div>
+    <div class="metric"><div class="label">Plays</div><div class="value" id="mFinal">—</div><div class="hint">fully cleared</div></div>
     <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
     <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
   </div>
@@ -143,10 +143,13 @@
   </div>
 
   <section class="section active" id="today">
-    <div class="section-title"><h2>Final Plays</h2><p>must clear the sharp gate</p></div>
-    <div id="finalPlayList"><div class="empty loading">Loading final plays…</div></div>
-    <div class="section-title"><h2>Today’s Board</h2><p id="todayStamp"></p></div>
-    <div id="candidateList"><div class="empty loading">Loading audited candidates…</div></div>
+    <div class="section-title"><h2>Final Market Card</h2><p id="todayStamp"></p></div>
+    <div class="card" style="box-shadow:none">
+      <div class="reason" style="margin-top:0">
+        Every listed market resolves to <strong>PLAY</strong>, <strong>PASS</strong>, or <strong>PENDING</strong>. PENDING only means a required input or final sharp check is still outstanding; it cannot remain pending inside the final 20-minute pregame window.
+      </div>
+    </div>
+    <div id="marketCardList"><div class="empty loading">Loading moneylines, totals, and run lines…</div></div>
   </section>
 
   <section class="section" id="plays">
@@ -156,7 +159,7 @@
       <div class="candidate-head">
         <div>
           <div class="match">Singles</div>
-          <div class="pick">Only FINAL PLAY wagers appear here.</div>
+          <div class="pick">Only PLAY wagers appear here.</div>
         </div>
         <span class="badge play" id="singleCountBadge">0 QUALIFIED</span>
       </div>
@@ -180,7 +183,7 @@
 
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        <strong>Parlay rule:</strong> no WATCH legs, no PASS legs, no same-game combinations, and no forced parlay when fewer than two FINAL PLAY singles qualify. Combined probability/EV are estimates that assume the legs are independent.
+        <strong>Parlay rule:</strong> no PENDING legs, no PASS legs, no same-game combinations, and no forced parlay when fewer than two PLAY singles qualify. Combined probability/EV are estimates that assume the legs are independent.
       </div>
     </div>
   </section>
@@ -252,12 +255,73 @@
   }));
 
   function statusBadge(c){
-    const s = c.verification_status || c.model_decision || "UNKNOWN";
-    if(s==="READY_FOR_SHARP_CHECK") return '<span class="badge ready">READY FOR SHARP</span>';
-    if(s==="WATCH") return '<span class="badge watch">WATCH</span>';
-    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">FINAL PLAY</span>';
+    const s = c.status || c.verification_status || c.model_decision || "UNKNOWN";
+    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">PLAY</span>';
+    if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING</span>';
     if(s==="PASS") return '<span class="badge pass">PASS</span>';
     return '<span class="badge neutral">'+esc(s)+'</span>';
+  }
+
+  function renderMarketCard(card){
+    const rows=card?.markets||[];
+    if(!rows.length){
+      $("marketCardList").innerHTML='<div class="empty">No graded markets are available yet.</div>';
+      return;
+    }
+
+    const groups=new Map();
+    for(const m of rows){
+      const key=m.event_id||((m.away_team||"")+"|"+(m.home_team||""));
+      if(!groups.has(key)) groups.set(key,[]);
+      groups.get(key).push(m);
+    }
+
+    const statusRank={PLAY:0,PENDING:1,PASS:2};
+    const typeRank={moneyline:0,spread:1,total:2};
+
+    $("marketCardList").innerHTML=[...groups.values()].map(group=>{
+      group.sort((a,b)=>
+        (statusRank[a.status]??9)-(statusRank[b.status]??9) ||
+        (typeRank[a.market_type]??9)-(typeRank[b.market_type]??9)
+      );
+      const g=group[0];
+      return `
+        <div class="card">
+          <div class="candidate-head">
+            <div>
+              <div class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</div>
+              <div class="pick">${fmtTime(g.starts_at)}</div>
+            </div>
+            <span class="badge neutral">${group.length} MARKETS</span>
+          </div>
+          <div style="margin-top:10px">
+            ${group.map(m=>`
+              <div class="list-row">
+                <div>
+                  <div class="main">${esc(m.market_label)}</div>
+                  <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
+                  <div class="small" style="margin-top:4px">${esc(m.reason||"")}</div>
+                </div>
+                <div>
+                  <div class="small">Decision</div>
+                  ${statusBadge(m)}
+                </div>
+                <div>
+                  <div class="small">Model</div>
+                  <strong>${fmtPct(m.model_probability)}</strong>
+                </div>
+                <div class="hide-mobile">
+                  <div class="small">Edge</div>
+                  <strong class="${Number(m.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(m.edge_pct_points)}</strong>
+                </div>
+                <div class="hide-mobile">
+                  <div class="small">EV</div>
+                  <strong class="${Number(m.ev_pct)>=0?"positive":"negative"}">${m.ev_pct==null?"—":(Number(m.ev_pct)>=0?"+":"")+Number(m.ev_pct).toFixed(2)+"%"}</strong>
+                </div>
+              </div>`).join("")}
+          </div>
+        </div>`;
+    }).join("");
   }
 
   function renderCandidates(rows){
@@ -311,7 +375,7 @@
   function gateBadge(status){
     if(status==="FINAL_PLAY") return '<span class="badge play">FINAL PLAY</span>';
     if(status==="PASS") return '<span class="badge pass">PASS</span>';
-    return '<span class="badge watch">WATCH</span>';
+    return '<span class="badge watch">PENDING</span>';
   }
 
   function americanToDecimal(odds){
@@ -333,66 +397,53 @@
     return p*d-1;
   }
 
-  function renderPlays(gate){
-    const singles=[...(gate?.finalPlays||[])].filter(g=>g.final_status==="FINAL_PLAY");
+  function renderPlays(card){
+    const singles=[...(card?.plays||[])];
 
     $("singleCountBadge").textContent=singles.length+" QUALIFIED";
 
     if(!singles.length){
-      $("singlePlayList").innerHTML='<div class="empty">No singles have cleared the complete sharp gate yet.</div>';
-      $("parlayList").innerHTML='<div class="empty">A parlay requires at least two qualified singles.</div>';
+      $("singlePlayList").innerHTML='<div class="empty">No singles are labeled PLAY right now.</div>';
+      $("parlayList").innerHTML='<div class="empty">A parlay requires at least two qualified PLAY singles.</div>';
       return;
     }
 
-    const ranked=[...singles].sort((a,b)=>{
-      const ea=playEv(a.model_probability,a.mainstream_odds) ?? -999;
-      const eb=playEv(b.model_probability,b.mainstream_odds) ?? -999;
-      return eb-ea;
-    });
+    const ranked=[...singles].sort((a,b)=>
+      Number(b.ev_pct??-999)-Number(a.ev_pct??-999)
+    );
 
-    $("singlePlayList").innerHTML=ranked.map((g,i)=>{
-      const ev=playEv(g.model_probability,g.mainstream_odds);
-      return `
-        <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
-          <div class="candidate-head">
-            <div>
-              <div class="match">#${i+1} · ${esc(g.side_name)}</div>
-              <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
-            </div>
-            <span class="badge play">SINGLE</span>
+    $("singlePlayList").innerHTML=ranked.map((g,i)=>`
+      <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
+        <div class="candidate-head">
+          <div>
+            <div class="match">#${i+1} · ${esc(g.market_label)}</div>
+            <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
           </div>
-          <div class="grid4">
-            <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.mainstream_odds)}</div><div class="small">${esc(g.mainstream_book||"—")}</div></div>
-            <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(g.model_probability)}</div></div>
-            <div class="stat"><div class="k">vs BookMaker (pp)</div><div class="v positive">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
-            <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(ev)>=0?"positive":"negative"}">${ev==null?"—":(ev>=0?"+":"")+(ev*100).toFixed(2)+"%"}</div></div>
-          </div>
-          <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)} · ${esc(g.reason||"Cleared the sharp gate.")}</div>
-        </div>`;
-    }).join("");
+          <span class="badge play">PLAY</span>
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
+          <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(g.model_probability)}</div></div>
+          <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
+        </div>
+        <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)} · ${esc(g.reason||"Cleared all gates.")}</div>
+      </div>`).join("");
 
     const pairs=[];
     for(let i=0;i<ranked.length;i++){
       for(let j=i+1;j<ranked.length;j++){
         const a=ranked[i], b=ranked[j];
         if(a.event_id && b.event_id && a.event_id===b.event_id) continue;
-
-        const da=americanToDecimal(a.mainstream_odds);
-        const db=americanToDecimal(b.mainstream_odds);
+        const da=americanToDecimal(a.best_odds);
+        const db=americanToDecimal(b.best_odds);
         const pa=Number(a.model_probability);
         const pb=Number(b.model_probability);
         if(!da || !db || !Number.isFinite(pa) || !Number.isFinite(pb)) continue;
-
         const dec=da*db;
         const combinedProb=pa*pb;
         const ev=combinedProb*dec-1;
-        pairs.push({
-          a,b,
-          decimal:dec,
-          odds:decimalToAmerican(dec),
-          probability:combinedProb,
-          ev
-        });
+        pairs.push({a,b,odds:decimalToAmerican(dec),probability:combinedProb,ev});
       }
     }
 
@@ -400,7 +451,7 @@
     const playablePairs=pairs.filter(x=>x.ev>0).slice(0,5);
 
     if(!playablePairs.length){
-      $("parlayList").innerHTML='<div class="empty">No positive-EV 2-leg parlay qualifies from the current FINAL PLAY singles.</div>';
+      $("parlayList").innerHTML='<div class="empty">No positive-EV 2-leg parlay qualifies from the current PLAY singles.</div>';
       return;
     }
 
@@ -409,17 +460,17 @@
         <div class="candidate-head">
           <div>
             <div class="match">Parlay #${i+1}</div>
-            <div class="pick">${esc(p.a.side_name)} + ${esc(p.b.side_name)}</div>
+            <div class="pick">${esc(p.a.market_label)} + ${esc(p.b.market_label)}</div>
           </div>
           <span class="badge neutral">${fmtOdds(p.odds)}</span>
         </div>
         <div class="grid4">
-          <div class="stat"><div class="k">Leg 1</div><div class="v">${esc(p.a.side_name)}</div><div class="small">${fmtOdds(p.a.mainstream_odds)}</div></div>
-          <div class="stat"><div class="k">Leg 2</div><div class="v">${esc(p.b.side_name)}</div><div class="small">${fmtOdds(p.b.mainstream_odds)}</div></div>
+          <div class="stat"><div class="k">Leg 1</div><div class="v">${esc(p.a.market_label)}</div><div class="small">${fmtOdds(p.a.best_odds)}</div></div>
+          <div class="stat"><div class="k">Leg 2</div><div class="v">${esc(p.b.market_label)}</div><div class="small">${fmtOdds(p.b.best_odds)}</div></div>
           <div class="stat"><div class="k">Combined Prob.</div><div class="v">${fmtPct(p.probability)}</div></div>
           <div class="stat"><div class="k">Approx. EV</div><div class="v ${p.ev>=0?"positive":"negative"}">${(p.ev>=0?"+":"")+(p.ev*100).toFixed(2)+"%"}</div></div>
         </div>
-        <div class="reason">Approximate combined probability assumes independent games. If either single falls below its playable threshold, this parlay is no longer qualified.</div>
+        <div class="reason">Approximate combined probability assumes independent games. If either leg stops being PLAY, this parlay is no longer qualified.</div>
       </div>`).join("");
   }
 
@@ -448,7 +499,6 @@
   }
 
   function renderSharpGate(gate){
-    renderPlays(gate);
     const latest=gate?.latest||[];
     const history=gate?.history||[];
     renderFinalPlays(gate?.finalPlays||[]);
@@ -566,13 +616,14 @@
   function render(data){
     DATA=data;
     const s=data.summary||{};
-    $("mActive").textContent=s.activeCandidates??0;
-    $("mReady").textContent=s.readyForSharp??0;
+    $("mActive").textContent=s.gradedMarkets??data.marketCard?.summary?.markets??0;
+    $("mReady").textContent=s.pending??data.marketCard?.summary?.pending??0;
     $("mFinal").textContent=s.finalPlays??0;
     $("mGrades").textContent=s.grades??0;
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
-    renderCandidates(data.candidates||[]);
+    renderMarketCard(data.marketCard||{});
+    renderPlays(data.marketCard||{});
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
@@ -596,7 +647,7 @@
     }catch(err){
       $("healthDot").classList.add("bad");
       $("healthText").textContent="Dashboard connection failed";
-      $("candidateList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
