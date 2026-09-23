@@ -333,6 +333,84 @@
     return '<span class="badge neutral">'+esc(s)+'</span>';
   }
 
+  function marketWhy(m){
+    const status=m?.status||"PASS";
+    const reason=String(m?.reason||"").trim();
+    const edge=Number(m?.edge_pct_points);
+    const ev=Number(m?.ev_pct);
+    const parts=[];
+
+    if(status==="PLAY"){
+      parts.push(
+        "Model "+fmtPct(m.model_probability)+
+        " vs market "+fmtPct(m.market_fair_probability)+
+        " ("+fmtPP(m.edge_pct_points)+")"
+      );
+      if(Number.isFinite(ev)) parts.push("modeled EV "+(ev>=0?"+":"")+ev.toFixed(2)+"%");
+      if(reason) parts.push(reason);
+      return "WHY PLAY: "+parts.join(" · ");
+    }
+
+    if(status==="PENDING"){
+      return "WHY PENDING: "+(reason||"A required input or final sharp check is still outstanding.");
+    }
+
+    if(m?.market_type==="spread"){
+      if(m?.raw?.marketSplit) parts.push("books are split on the exact run line");
+      if(Number.isFinite(edge) && edge < 2.5) parts.push("edge "+fmtPP(edge)+" is below the +2.50 pp minimum");
+      if(Number.isFinite(ev) && ev < 3) parts.push("EV "+(ev>=0?"+":"")+ev.toFixed(2)+"% is below the +3.00% minimum");
+    } else if(m?.market_type==="total"){
+      if(m?.raw?.marketSplit) parts.push("books disagree on the exact total number");
+      const diff=Number(m?.raw?.differenceRuns);
+      if(Number.isFinite(diff) && Math.abs(diff) < 0.65){
+        parts.push("projection is only "+Math.abs(diff).toFixed(2)+" runs from the market line; threshold is 0.65");
+      }
+      if(Number.isFinite(ev) && ev < 4) parts.push("EV "+(ev>=0?"+":"")+ev.toFixed(2)+"% is below the +4.00% total threshold");
+    } else if(m?.market_type==="moneyline"){
+      if(Number.isFinite(edge) && edge < 2.5) parts.push("edge "+fmtPP(edge)+" is below the +2.50 pp model threshold");
+      if(Number.isFinite(ev) && ev < 3) parts.push("EV "+(ev>=0?"+":"")+ev.toFixed(2)+"% is below the +3.00% model threshold");
+    }
+
+    if(reason && !parts.some(x=>reason.includes(x))) parts.push(reason);
+    return "WHY PASS: "+(parts.length?parts.join(" · "):"The wager did not clear the model's required edge, EV, price, data-quality, or verification gates.");
+  }
+
+  function propWhy(p){
+    const status=p?.status||"PASS";
+    const reason=String(p?.reason||"").trim();
+    const edge=Number(p?.edge_pct_points);
+    const ev=Number(p?.ev_pct);
+    const dq=Number(p?.data_quality);
+    const exact=Number(p?.exact_line_book_count);
+    const paired=Number(p?.paired_books);
+    const parts=[];
+
+    if(status==="PLAY"){
+      parts.push("model "+fmtPct(p.model_probability)+" vs market "+fmtPct(p.market_fair_probability)+" ("+fmtPP(p.edge_pct_points)+")");
+      if(Number.isFinite(ev)) parts.push("EV +"+ev.toFixed(2)+"%");
+      if(Number.isFinite(dq)) parts.push("data quality "+dq.toFixed(2));
+      if(Number.isFinite(exact)) parts.push(exact+" books on the exact line");
+      return "WHY PLAY: "+parts.join(" · ");
+    }
+
+    if(status==="PENDING"){
+      return "WHY PENDING: "+(reason||"Waiting on a confirmed role, lineup, or exact-line market.");
+    }
+
+    if(Number.isFinite(paired) && paired < 1) parts.push("no exact-line two-sided book pair for a reliable no-vig market percentage");
+    if(Number.isFinite(exact) && exact < 2) parts.push("fewer than 2 books offer the selected exact line");
+    if(Number.isFinite(dq) && dq < 0.75) parts.push("data quality "+dq.toFixed(2)+" is below the 0.75 minimum");
+    if(Number.isFinite(edge) && edge < 6) parts.push("edge "+fmtPP(edge)+" is below the +6.00 pp prop threshold");
+    if(Number.isFinite(ev) && ev < 6) parts.push("EV "+(ev>=0?"+":"")+ev.toFixed(2)+"% is below the +6.00% prop threshold");
+    if(reason && !/model edge\/EV\/data-quality threshold not met/i.test(reason)) parts.push(reason);
+
+    return "WHY PASS: "+(parts.length?parts.join(" · "):(reason||"The prop did not clear the model's role, sample, market-coverage, edge, EV, or data-quality requirements."));
+  }
+
+  function whyClass(status){
+    return status==="PLAY"?"play":status==="PENDING"?"pending":"pass";
+  }
+
   function renderMarketCard(card){
     const rows=card?.markets||[];
     if(!rows.length){
@@ -371,7 +449,7 @@
                 <div>
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
-                  <div class="small" style="margin-top:4px">${esc(m.reason||"")}</div>
+                  <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
                 </div>
                 <div>
                   <div class="small">Decision</div>
@@ -501,7 +579,8 @@
           <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
-        <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)} · ${esc(g.reason||"Cleared all gates.")}</div>
+        <div class="why play">${esc(marketWhy(g))}</div>
+        <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
       </div>`).join("");
 
     const pairs=[];
@@ -575,7 +654,8 @@
           <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div></div>
           <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
-        <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)} · ${esc(p.reason||"Qualified by the player-prop model.")}</div>
+        <div class="why play">${esc(propWhy(p))}</div>
+        <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
       </div>`).join("");
   }
 
@@ -669,7 +749,8 @@
             <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div><div class="small">vs exact-line no-vig</div></div>
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
-          <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"} · ${esc(p.reason||"")}</div>
+          <div class="why play">${esc(propWhy(p))}</div>
+          <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
         </div>`).join("");
     }
 
@@ -683,7 +764,7 @@
             <div><div class="match">${esc(p.label)}</div><div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div></div>
             <span class="badge watch">PENDING</span>
           </div>
-          <div class="reason">${esc(p.reason||"Waiting for required information.")}</div>
+          <div class="why pending">${esc(propWhy(p))}</div>
         </div>`).join("");
     }
 
@@ -696,6 +777,7 @@
           <div>
             <div class="main">${esc(p.label)}</div>
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
+            <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
           </div>
           <div><div class="small">Decision</div>${statusBadge(p)}</div>
           <div><div class="small">Model / Market</div><div class="prob-pair"><span class="model">M ${fmtPct(p.model_probability)}</span><span class="market">Mk ${fmtPct(p.market_fair_probability)}</span></div></div>
