@@ -106,7 +106,7 @@ CREATE OR REPLACE FUNCTION public.compute_parlay_correlation_v1(p_leg_a jsonb, p
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   a_kind text := upper(coalesce(p_leg_a->>'kind',''));
   b_kind text := upper(coalesce(p_leg_b->>'kind',''));
@@ -439,7 +439,7 @@ begin
     'calibrationNeeded',action<>'BLOCK'
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) from public, anon, authenticated;
 grant execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) to service_role;
 
@@ -448,7 +448,7 @@ CREATE OR REPLACE FUNCTION public.refresh_parlay_correlation_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   v_rel jsonb;
@@ -688,7 +688,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_parlay_correlation_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_parlay_correlation_shadow() to service_role;
 
@@ -697,9 +697,9 @@ CREATE OR REPLACE FUNCTION public.trigger_parlay_correlation_shadow()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
   select public.refresh_parlay_correlation_shadow();
-$function$
+$function$;
 revoke execute on function public.trigger_parlay_correlation_shadow() from public, anon, authenticated;
 grant execute on function public.trigger_parlay_correlation_shadow() to service_role;
 
@@ -708,7 +708,7 @@ CREATE OR REPLACE FUNCTION public.decision_timing_bucket_v1(p_starts_at timestam
  LANGUAGE plpgsql
  IMMUTABLE STRICT
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_minutes numeric;
 begin
@@ -722,7 +722,7 @@ begin
   else return 'GT_180';
   end if;
 end;
-$function$
+$function$;
 revoke execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) from public, anon, authenticated;
 grant execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) to service_role;
 
@@ -731,7 +731,7 @@ CREATE OR REPLACE FUNCTION public.refresh_decision_timing_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   v_team integer := 0;
   v_prop integer := 0;
@@ -881,7 +881,7 @@ begin
   get diagnostics v_prop = row_count;
   return v_team+v_prop;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_decision_timing_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_decision_timing_shadow() to service_role;
 
@@ -890,9 +890,9 @@ CREATE OR REPLACE FUNCTION public.trigger_decision_timing_shadow()
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
   select public.refresh_decision_timing_shadow();
-$function$
+$function$;
 revoke execute on function public.trigger_decision_timing_shadow() from public, anon, authenticated;
 grant execute on function public.trigger_decision_timing_shadow() to service_role;
 
