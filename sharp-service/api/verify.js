@@ -1427,6 +1427,8 @@ export default async function handler(req, res) {
           environment: v.runEnvironment?.environment || null,
           totalProjection:
             v.runEnvironment?.totalProjection || null,
+          spreadProjection:
+            v.runEnvironment?.spreadProjection || null,
           moneylineEnvironment:
             v.runEnvironment?.moneylineEnvironment || null,
           probabilityAdjustment:
