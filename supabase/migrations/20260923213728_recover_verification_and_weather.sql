@@ -256,7 +256,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_mlb_verification_history()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   n bigint;
 begin
@@ -265,7 +265,7 @@ begin
   get diagnostics n = row_count;
   return n;
 end;
-$function$
+$function$;
 revoke execute on function public.cleanup_mlb_verification_history() from public, anon, authenticated;
 grant execute on function public.cleanup_mlb_verification_history() to service_role;
 
@@ -274,7 +274,7 @@ CREATE OR REPLACE FUNCTION public.compute_weather_park_impact_v1(p_park_factor n
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_pf numeric := coalesce(p_park_factor,100);
   v_park numeric := greatest(0.88,least(1.14,v_pf/100.0));
@@ -467,7 +467,7 @@ begin
     'warnings',v_warnings
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_weather_park_impact_v1(p_park_factor numeric, p_park_factor_known boolean, p_temp_f numeric, p_humidity_pct numeric, p_wind_mph numeric, p_wind_class text, p_roof_type text, p_roof_status text, p_precip_probability_pct numeric, p_precip_inches numeric, p_condition text, p_elevation_ft numeric) from public, anon, authenticated;
 grant execute on function public.compute_weather_park_impact_v1(p_park_factor numeric, p_park_factor_known boolean, p_temp_f numeric, p_humidity_pct numeric, p_wind_mph numeric, p_wind_class text, p_roof_type text, p_roof_status text, p_precip_probability_pct numeric, p_precip_inches numeric, p_condition text, p_elevation_ft numeric) to service_role;
 
@@ -476,7 +476,7 @@ CREATE OR REPLACE FUNCTION public.cleanup_mlb_weather_park_history()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare n bigint;
 begin
   delete from public.mlb_weather_park_snapshots
@@ -484,7 +484,7 @@ begin
   get diagnostics n = row_count;
   return n;
 end;
-$function$
+$function$;
 revoke execute on function public.cleanup_mlb_weather_park_history() from public, anon, authenticated;
 grant execute on function public.cleanup_mlb_weather_park_history() to service_role;
 
