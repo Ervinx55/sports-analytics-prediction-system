@@ -76,6 +76,7 @@ export default async function handler(req, res) {
     sharpGate: `${BASE}/sharp-gate-history?sport=${encodeURIComponent(
       sport
     )}&limit=50`,
+    sharpSourceHealth: `${BASE}/sharp-source-health`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
     )}&hours=12`,
@@ -83,7 +84,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpSourceHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -92,6 +93,7 @@ export default async function handler(req, res) {
       fetchJson(urls.movement),
       fetchJson(urls.alerts),
       fetchJson(urls.sharpGate),
+      fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
       fetchJson(urls.decisionResults),
@@ -105,6 +107,7 @@ export default async function handler(req, res) {
     movement: settled(movement),
     alerts: settled(alerts),
     sharpGate: settled(sharpGate),
+    sharpSourceHealth: settled(sharpSourceHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
     decisionResults: settled(decisionResults),
@@ -177,6 +180,10 @@ export default async function handler(req, res) {
     results: sources.results.data?.results || [],
     movements: movementList,
     alerts: alertList,
+    sharpSourceHealth: sources.sharpSourceHealth.data || {
+      refreshCadenceMinutes: 5,
+      sources: {}
+    },
     sharpGate: sources.sharpGate.data || {
       latest: [],
       history: [],
