@@ -53,7 +53,7 @@ CREATE OR REPLACE FUNCTION public.compute_price_sensitivity_v1(p_market_type tex
  LANGUAGE plpgsql
  IMMUTABLE
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
 declare
   v_type text := lower(coalesce(p_market_type,''));
   v_push numeric := greatest(0,least(0.40,coalesce(p_push_probability,0)));
@@ -219,7 +219,7 @@ begin
     end
   );
 end;
-$function$
+$function$;
 revoke execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) from public, anon, authenticated;
 grant execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) to service_role;
 
@@ -228,7 +228,7 @@ CREATE OR REPLACE FUNCTION public.refresh_market_price_sensitivity_shadow()
  LANGUAGE plpgsql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
-AS $function$
+AS $function$;
 declare
   r record;
   p record;
@@ -405,7 +405,7 @@ begin
 
   return v_count;
 end;
-$function$
+$function$;
 revoke execute on function public.refresh_market_price_sensitivity_shadow() from public, anon, authenticated;
 grant execute on function public.refresh_market_price_sensitivity_shadow() to service_role;
 
