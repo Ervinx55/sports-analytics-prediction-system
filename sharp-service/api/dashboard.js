@@ -76,9 +76,10 @@ export default async function handler(req, res) {
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
     )}&hours=12`,
+    playerProps: `${BASE}/player-prop-card?hours=12`,
   };
 
-  const [audit, calibration, results, movement, alerts, sharpGate, marketCard] =
+  const [audit, calibration, results, movement, alerts, sharpGate, marketCard, playerProps] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -87,6 +88,7 @@ export default async function handler(req, res) {
       fetchJson(urls.alerts),
       fetchJson(urls.sharpGate),
       fetchJson(urls.marketCard),
+      fetchJson(urls.playerProps),
     ]);
 
   const sources = {
@@ -97,6 +99,7 @@ export default async function handler(req, res) {
     alerts: settled(alerts),
     sharpGate: settled(sharpGate),
     marketCard: settled(marketCard),
+    playerProps: settled(playerProps),
   };
 
   const sourceHealth = Object.fromEntries(
@@ -177,6 +180,14 @@ export default async function handler(req, res) {
       plays: [],
       pending: [],
       passes: [],
+    },
+    playerProps: sources.playerProps.data || {
+      summary: { gradedProps: 0, play: 0, pending: 0, pass: 0 },
+      plays: [],
+      pending: [],
+      passes: [],
+      props: [],
+      recentResults: [],
     },
     system: {
       sourceHealth,
