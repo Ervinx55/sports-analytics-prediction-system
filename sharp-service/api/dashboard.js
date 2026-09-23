@@ -77,9 +77,10 @@ export default async function handler(req, res) {
       sport
     )}&hours=12`,
     playerProps: `${BASE}/player-prop-card?hours=12`,
+    decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, results, movement, alerts, sharpGate, marketCard, playerProps] =
+  const [audit, calibration, results, movement, alerts, sharpGate, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -89,6 +90,7 @@ export default async function handler(req, res) {
       fetchJson(urls.sharpGate),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
+      fetchJson(urls.decisionResults),
     ]);
 
   const sources = {
@@ -100,6 +102,7 @@ export default async function handler(req, res) {
     sharpGate: settled(sharpGate),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
+    decisionResults: settled(decisionResults),
   };
 
   const sourceHealth = Object.fromEntries(
@@ -188,6 +191,14 @@ export default async function handler(req, res) {
       passes: [],
       props: [],
       recentResults: [],
+    },
+    decisionResults: sources.decisionResults.data || {
+      summary: {
+        team: { total: 0, plays: 0, passes: 0, playRecord: { wins: 0, losses: 0, pushes: 0 }, passRecord: { goodPasses: 0, missedWins: 0, pushedPasses: 0 } },
+        props: { total: 0, plays: 0, passes: 0, playRecord: { wins: 0, losses: 0, pushes: 0 }, passRecord: { goodPasses: 0, missedWins: 0, pushedPasses: 0 } }
+      },
+      team: [],
+      props: [],
     },
     system: {
       sourceHealth,
