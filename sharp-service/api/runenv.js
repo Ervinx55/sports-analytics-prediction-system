@@ -465,6 +465,35 @@ export default async function handler(req, res) {
     const underBest = bestOdds(totalUnder?.books || {});
     const overProb = totalProbability(projectedTotal, marketLine, "over");
     const underProb = totalProbability(projectedTotal, marketLine, "under");
+
+    const totalPairComparable =
+      !marketSplit &&
+      marketLine !== null &&
+      num(totalOver?.consensus?.line) !== null &&
+      num(totalUnder?.consensus?.line) !== null &&
+      Math.abs(
+        num(totalOver?.consensus?.line) -
+          num(totalUnder?.consensus?.line)
+      ) <= 1e-9;
+
+    const marketOverFair = totalPairComparable
+      ? noVigProbability(
+          totalOver?.consensus?.odds,
+          totalUnder?.consensus?.odds
+        )
+      : null;
+    const marketUnderFair =
+      marketOverFair === null ? null : 1 - marketOverFair;
+
+    const overEdge =
+      overProb === null || marketOverFair === null
+        ? null
+        : overProb - marketOverFair;
+    const underEdge =
+      underProb === null || marketUnderFair === null
+        ? null
+        : underProb - marketUnderFair;
+
     const overEv =
       overBest.odds === null ? null : expectedValue(overProb, overBest.odds);
     const underEv =
@@ -689,6 +718,10 @@ export default async function handler(req, res) {
         over: {
           probability:
             overProb === null ? null : Number(overProb.toFixed(4)),
+          marketFairProbability:
+            marketOverFair === null ? null : Number(marketOverFair.toFixed(4)),
+          edgePctPoints:
+            overEdge === null ? null : Number((overEdge * 100).toFixed(2)),
           bestBook: overBest.book,
           bestOdds: overBest.odds,
           evPct:
@@ -697,6 +730,10 @@ export default async function handler(req, res) {
         under: {
           probability:
             underProb === null ? null : Number(underProb.toFixed(4)),
+          marketFairProbability:
+            marketUnderFair === null ? null : Number(marketUnderFair.toFixed(4)),
+          edgePctPoints:
+            underEdge === null ? null : Number((underEdge * 100).toFixed(2)),
           bestBook: underBest.book,
           bestOdds: underBest.odds,
           evPct:
