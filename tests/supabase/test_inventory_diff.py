@@ -62,3 +62,34 @@ def test_grant_hash_compares_semantics_not_display_order():
         "grants": [{"grant_sha256": "same", "object_identity": "public.a", "object_type": "TABLE"}],
     }
     assert compare_inventory(expected, actual) == {"missing": [], "unexpected": [], "changed": []}
+
+
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+
+
+def test_production_drift_workflow_is_read_only_and_pinned():
+    path = ROOT / ".github" / "workflows" / "supabase-drift.yml"
+    assert path.exists()
+    workflow = path.read_text()
+    lowered = workflow.lower()
+
+    assert "workflow_dispatch" in workflow
+    assert "schedule:" in workflow
+    assert "version: 2.98.2" in workflow
+    assert "version: latest" not in workflow
+    assert "python scripts/supabase/production_drift.py" in workflow
+
+    assert "SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}" in workflow
+    assert "SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}" in workflow
+    assert "SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}" in workflow
+
+    forbidden = (
+        "supabase db push",
+        "supabase functions deploy",
+        "supabase db reset --linked",
+        "apply_migration",
+    )
+    for token in forbidden:
+        assert token not in lowered
