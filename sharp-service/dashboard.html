@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#08111f" />
+  <title>Edge Lab Dashboard</title>
+  <style>
+    :root{
+      --bg:#07101d;--panel:#0e1a2c;--panel2:#132238;--text:#edf4ff;--muted:#8fa4bf;
+      --line:#223654;--blue:#55a7ff;--cyan:#4de2d0;--green:#4fd18b;--amber:#ffbd4a;
+      --red:#ff6f78;--purple:#aa8cff;--shadow:0 16px 40px rgba(0,0,0,.25);
+    }
+    *{box-sizing:border-box}
+    html{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif}
+    body{margin:0;background:
+      radial-gradient(900px 420px at 50% -120px,rgba(52,122,224,.22),transparent 70%),
+      var(--bg);min-height:100vh}
+    button{font:inherit}
+    .app{max-width:1180px;margin:0 auto;padding:18px 14px 96px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .brand{display:flex;align-items:center;gap:11px}
+    .logo{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;
+      background:linear-gradient(145deg,#2c78ff,#52dcca);font-weight:900;color:#04101c;
+      box-shadow:0 8px 30px rgba(69,154,255,.26)}
+    h1{font-size:21px;margin:0;letter-spacing:-.3px}
+    .sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .refresh{border:1px solid var(--line);background:rgba(19,34,56,.85);color:var(--text);
+      border-radius:12px;padding:10px 13px;font-weight:700}
+    .refresh:active{transform:scale(.98)}
+    .healthline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;margin:3px 0 14px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px rgba(79,209,139,.65)}
+    .dot.bad{background:var(--red)}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+    .metric{background:linear-gradient(180deg,rgba(19,34,56,.94),rgba(13,27,46,.94));
+      border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:var(--shadow)}
+    .metric .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.55px}
+    .metric .value{font-size:24px;font-weight:850;margin-top:5px}
+    .metric .hint{font-size:11px;color:var(--muted);margin-top:4px}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 12px;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{white-space:nowrap;border:1px solid var(--line);color:var(--muted);
+      background:rgba(13,27,46,.8);padding:9px 12px;border-radius:999px;font-weight:750;font-size:13px}
+    .tab.active{color:#06111e;background:linear-gradient(135deg,var(--blue),var(--cyan));border-color:transparent}
+    .section{display:none}.section.active{display:block}
+    .section-title{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin:10px 1px 10px}
+    .section-title h2{font-size:17px;margin:0}.section-title p{margin:0;color:var(--muted);font-size:11px}
+    .card{background:linear-gradient(180deg,rgba(18,34,57,.96),rgba(11,23,40,.96));
+      border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow)}
+    .candidate-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+    .match{font-weight:800;font-size:15px;line-height:1.35}.pick{font-size:12px;color:var(--muted);margin-top:4px}
+    .badge{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:6px 9px;
+      font-size:10px;font-weight:900;letter-spacing:.35px;white-space:nowrap;border:1px solid transparent}
+    .ready{color:#04190e;background:var(--green)}.watch{color:#261800;background:var(--amber)}
+    .pass{color:#2a070a;background:var(--red)}.play{color:#001d1a;background:var(--cyan)}
+    .neutral{color:#e9f0ff;background:#2b3f5f}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
+    .stat{background:rgba(5,15,29,.52);border:1px solid rgba(50,77,113,.55);border-radius:11px;padding:9px}
+    .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+    .stat .v{font-size:15px;font-weight:800;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}
+    .reason{margin-top:10px;font-size:12px;color:#c7d5e8;line-height:1.45}
+    .reason strong{color:var(--amber)}
+    details{margin-top:10px;border-top:1px solid rgba(57,82,117,.5);padding-top:10px}
+    summary{color:var(--blue);font-size:12px;font-weight:750;cursor:pointer}
+    .adjustments{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+    .adj{background:rgba(6,16,29,.52);border-radius:10px;padding:8px;text-align:center}
+    .adj .n{font-size:9px;color:var(--muted)}.adj .x{font-size:12px;font-weight:800;margin-top:3px}
+    .total-box{margin-top:10px;padding:10px;border-radius:11px;background:rgba(6,16,29,.52);font-size:12px}
+    .list-row{display:grid;grid-template-columns:minmax(155px,1.5fr) repeat(4,minmax(72px,.7fr));gap:8px;
+      padding:10px 0;border-bottom:1px solid rgba(45,68,99,.5);align-items:center;font-size:12px}
+    .list-row:last-child{border-bottom:0}.list-row .main{font-weight:750}.list-row .small{font-size:10px;color:var(--muted)}
+    .alert{border-left:3px solid var(--amber)}.alert.high{border-left-color:var(--red)}
+    .empty{padding:24px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:14px}
+    .cal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .progress{height:9px;border-radius:999px;background:#14243a;overflow:hidden;margin-top:9px}
+    .progress > span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:999px}
+    .health-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+    .source{display:flex;justify-content:space-between;align-items:center;padding:11px;border:1px solid var(--line);border-radius:12px;background:rgba(11,23,40,.65)}
+    .source .name{font-weight:750;font-size:12px}.ok{color:var(--green)}.badtext{color:var(--red)}
+    .footer{margin-top:22px;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
+    .loading{animation:pulse 1.25s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}
+    @media(max-width:760px){
+      .app{padding:14px 10px 88px}
+      .metrics{grid-template-columns:repeat(2,1fr)}
+      .grid4{grid-template-columns:repeat(2,1fr)}
+      .adjustments{grid-template-columns:repeat(3,1fr)}
+      .cal-grid{grid-template-columns:1fr 1fr}
+      .list-row{grid-template-columns:minmax(130px,1.4fr) repeat(2,minmax(70px,.7fr))}
+      .list-row .hide-mobile{display:none}
+      h1{font-size:19px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">
+      <div class="logo">EL</div>
+      <div>
+        <h1>Edge Lab</h1>
+        <div class="sub">Sports Analytics Command Center</div>
+      </div>
+    </div>
+    <button class="refresh" id="refreshBtn">Refresh</button>
+  </div>
+
+  <div class="healthline">
+    <span class="dot" id="healthDot"></span>
+    <span id="healthText">Connecting to live system…</span>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="label">Active</div><div class="value" id="mActive">—</div><div class="hint">audited candidates</div></div>
+    <div class="metric"><div class="label">Sharp Ready</div><div class="value" id="mReady">—</div><div class="hint">final gate pending</div></div>
+    <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
+    <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="today">Today</button>
+    <button class="tab" data-tab="market">Market</button>
+    <button class="tab" data-tab="results">Results & CLV</button>
+    <button class="tab" data-tab="calibration">Calibration</button>
+    <button class="tab" data-tab="system">System</button>
+  </div>
+
+  <section class="section active" id="today">
+    <div class="section-title"><h2>Today’s Board</h2><p id="todayStamp"></p></div>
+    <div id="candidateList"><div class="empty loading">Loading audited candidates…</div></div>
+  </section>
+
+  <section class="section" id="market">
+    <div class="section-title"><h2>Market Intelligence</h2><p>stored movement + automated flags</p></div>
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">Alerts</div>
+      <div id="alertList"><div class="empty">Loading alerts…</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:800;margin-bottom:8px">Largest Recent Moves</div>
+      <div id="movementList"><div class="empty">Loading movement…</div></div>
+    </div>
+  </section>
+
+  <section class="section" id="results">
+    <div class="section-title"><h2>Results & CLV</h2><p>one row per latest graded decision</p></div>
+    <div id="resultsList"><div class="empty">No graded decisions yet.</div></div>
+  </section>
+
+  <section class="section" id="calibration">
+    <div class="section-title"><h2>Calibration</h2><p>weights frozen during audit</p></div>
+    <div id="calibrationPanel"></div>
+  </section>
+
+  <section class="section" id="system">
+    <div class="section-title"><h2>System Health</h2><p>live data-source status</p></div>
+    <div class="card">
+      <div class="health-grid" id="sourceHealth"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:800">Model State</div>
+      <div id="modelState" class="reason"></div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Analytics are estimates, not guarantees. FINAL PLAY requires the separate sharp-confirmation gate; the dashboard never upgrades a wager on its own.
+  </div>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const fmtPct = (x, digits=1) => x == null ? "—" : (Number(x)*100).toFixed(digits)+"%";
+  const fmtPP = (x) => x == null ? "—" : (Number(x)>=0?"+":"")+Number(x).toFixed(2)+" pp";
+  const fmtOdds = (x) => x == null ? "—" : (Number(x)>0?"+":"")+Number(x);
+  const fmtTime = (x) => !x ? "—" : new Date(x).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+  let DATA = null;
+
+  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+    $(btn.dataset.tab).classList.add("active");
+  }));
+
+  function statusBadge(c){
+    const s = c.verification_status || c.model_decision || "UNKNOWN";
+    if(s==="READY_FOR_SHARP_CHECK") return '<span class="badge ready">READY FOR SHARP</span>';
+    if(s==="WATCH") return '<span class="badge watch">WATCH</span>';
+    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">FINAL PLAY</span>';
+    if(s==="PASS") return '<span class="badge pass">PASS</span>';
+    return '<span class="badge neutral">'+esc(s)+'</span>';
+  }
+
+  function renderCandidates(rows){
+    if(!rows?.length){ $("candidateList").innerHTML='<div class="empty">No active audited candidates.</div>'; return; }
+    const sorted=[...rows].sort((a,b)=>{
+      const rank={READY_FOR_SHARP_CHECK:0,WATCH:1,PASS:2};
+      return (rank[a.verification_status]??9)-(rank[b.verification_status]??9);
+    });
+    $("candidateList").innerHTML=sorted.map(c=>{
+      const total=c.raw?.runEnvironmentAdjustment?.totalProjection;
+      const blockers=(c.blockers||[]);
+      const warnings=(c.warnings||[]);
+      return `
+      <div class="card">
+        <div class="candidate-head">
+          <div>
+            <div class="match">${esc(c.away_team)} @ ${esc(c.home_team)}</div>
+            <div class="pick">Model side: <strong>${esc(c.side_name)}</strong> · ${fmtTime(c.starts_at)}</div>
+          </div>
+          ${statusBadge(c)}
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Best Price</div><div class="v">${fmtOdds(c.best_odds)}</div><div class="small">${esc(c.best_book||"—")}</div></div>
+          <div class="stat"><div class="k">Final Prob.</div><div class="v">${fmtPct(c.final_probability)}</div></div>
+          <div class="stat"><div class="k">Edge</div><div class="v ${Number(c.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(c.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(c.ev_pct)>=0?"positive":"negative"}">${c.ev_pct==null?"—":(Number(c.ev_pct)>=0?"+":"")+Number(c.ev_pct).toFixed(2)+"%"}</div></div>
+        </div>
+        ${blockers.length ? '<div class="reason"><strong>Blocked:</strong> '+blockers.map(esc).join(" · ")+'</div>' : ''}
+        ${warnings.length ? '<div class="reason"><strong>Warnings:</strong> '+warnings.map(esc).join(" · ")+'</div>' : ''}
+        <details>
+          <summary>Model adjustments & total</summary>
+          <div class="adjustments">
+            <div class="adj"><div class="n">Lineup</div><div class="x">${fmtPP(c.lineup_adjustment_pp)}</div></div>
+            <div class="adj"><div class="n">Platoon</div><div class="x">${fmtPP(c.platoon_adjustment_pp)}</div></div>
+            <div class="adj"><div class="n">Pitch Mix</div><div class="x">${fmtPP(c.pitchmix_adjustment_pp)}</div></div>
+            <div class="adj"><div class="n">Bullpen</div><div class="x">${fmtPP(c.bullpen_adjustment_pp)}</div></div>
+            <div class="adj"><div class="n">Park/Weather</div><div class="x">${fmtPP(c.runenv_adjustment_pp)}</div></div>
+          </div>
+          ${total ? `<div class="total-box"><strong>Total:</strong> projected ${total.projectedTotal ?? "—"} vs market ${total.marketLine ?? "—"} · <strong>${esc(total.decision||"—")}</strong>${total.marketSplit?" · split market":""}</div>` : ""}
+          <div class="total-box"><strong>Playable threshold:</strong> ${fmtOdds(c.playable_threshold)} · <strong>Base probability:</strong> ${fmtPct(c.base_probability)}</div>
+        </details>
+      </div>`;
+    }).join("");
+  }
+
+  function renderAlerts(rows){
+    if(!rows?.length){ $("alertList").innerHTML='<div class="empty">No current qualifying alerts.</div>'; return; }
+    $("alertList").innerHTML=rows.slice(0,12).map(a=>{
+      const sev=(a.severity||a.level||"").toLowerCase();
+      const matchup=a.matchup ? `${a.matchup.away||""} @ ${a.matchup.home||""}` : (a.eventID||"Market alert");
+      const kind=a.type||a.alertType||a.kind||"market flag";
+      const desc=a.reason||a.message||a.note||"";
+      return `<div class="card alert ${sev==="high"?"high":""}" style="box-shadow:none;margin:7px 0">
+        <div class="candidate-head"><div><div class="match">${esc(matchup)}</div><div class="pick">${esc(kind)}</div></div><span class="badge ${sev==="high"?"pass":"watch"}">${esc(sev||"FLAG")}</span></div>
+        ${desc?'<div class="reason">'+esc(desc)+'</div>':""}
+      </div>`;
+    }).join("");
+  }
+
+  function renderMovements(rows){
+    if(!rows?.length){ $("movementList").innerHTML='<div class="empty">No stored movement yet.</div>'; return; }
+    const sorted=[...rows].sort((a,b)=>Math.abs(Number(b.movement?.impliedProbabilityPctPoints||0))-Math.abs(Number(a.movement?.impliedProbabilityPctPoints||0))).slice(0,15);
+    $("movementList").innerHTML=sorted.map(m=>`
+      <div class="list-row">
+        <div><div class="main">${esc(m.matchup?.away)} @ ${esc(m.matchup?.home)}</div><div class="small">${esc(m.book)} · ${esc(m.market)} ${esc(m.side)}</div></div>
+        <div><div class="small">Open</div><strong>${m.first?.line ?? ""} ${fmtOdds(m.first?.odds)}</strong></div>
+        <div><div class="small">Latest</div><strong>${m.latest?.line ?? ""} ${fmtOdds(m.latest?.odds)}</strong></div>
+        <div class="hide-mobile"><div class="small">Prob Move</div><strong class="${Number(m.movement?.impliedProbabilityPctPoints)>=0?"positive":"negative"}">${fmtPP(m.movement?.impliedProbabilityPctPoints)}</strong></div>
+        <div class="hide-mobile"><div class="small">Snaps</div><strong>${m.movement?.snapshots ?? "—"}</strong></div>
+      </div>`).join("");
+  }
+
+  function renderResults(grades){
+    if(!grades?.length){ $("resultsList").innerHTML='<div class="empty">No graded decisions yet. This will populate automatically after tracked games finish.</div>'; return; }
+    $("resultsList").innerHTML='<div class="card">'+grades.slice(0,30).map(g=>`
+      <div class="list-row">
+        <div><div class="main">${esc(g.away_team)} @ ${esc(g.home_team)}</div><div class="small">${esc(g.side_name)} · ${fmtTime(g.starts_at)}</div></div>
+        <div><div class="small">Result</div><strong class="${g.won?"positive":"negative"}">${g.result|| (g.won?"W":"L")}</strong></div>
+        <div><div class="small">Model</div><strong>${fmtPct(g.final_probability)}</strong></div>
+        <div class="hide-mobile"><div class="small">Close</div><strong>${fmtOdds(g.closing_odds)}</strong></div>
+        <div class="hide-mobile"><div class="small">CLV</div><strong class="${Number(g.clv_implied_pp)>=0?"positive":"negative"}">${fmtPP(g.clv_implied_pp)}</strong></div>
+      </div>`).join("")+'</div>';
+  }
+
+  function renderCalibration(c){
+    const x=c?.allCandidates || {};
+    const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
+    const pct=Math.min(100, target?sample/target*100:0);
+    $("calibrationPanel").innerHTML=`
+      <div class="card">
+        <div class="candidate-head"><div><div class="match">MLB-v7 Audit</div><div class="pick">${esc(x.status||"insufficient_sample")}</div></div><span class="badge neutral">FROZEN WEIGHTS</span></div>
+        <div class="progress"><span style="width:${pct}%"></span></div>
+        <div class="reason">${sample} / ${target} graded decisions toward the primary calibration sample.</div>
+      </div>
+      <div class="cal-grid">
+        <div class="metric"><div class="label">Win Rate</div><div class="value" style="font-size:20px">${fmtPct(x.winRate)}</div></div>
+        <div class="metric"><div class="label">ROI</div><div class="value" style="font-size:20px">${x.roiPct==null?"—":Number(x.roiPct).toFixed(1)+"%"}</div></div>
+        <div class="metric"><div class="label">Brier</div><div class="value" style="font-size:20px">${x.brierScore??"—"}</div></div>
+        <div class="metric"><div class="label">Log Loss</div><div class="value" style="font-size:20px">${x.logLoss??"—"}</div></div>
+        <div class="metric"><div class="label">Avg CLV</div><div class="value" style="font-size:20px">${fmtPP(x.averageClvImpliedPctPoints)}</div></div>
+        <div class="metric"><div class="label">Model vs Close</div><div class="value" style="font-size:20px">${fmtPP(x.averageModelVsClosePctPoints)}</div></div>
+      </div>`;
+  }
+
+  function renderSystem(sys){
+    const h=sys?.sourceHealth||{};
+    $("sourceHealth").innerHTML=Object.entries(h).map(([name,v])=>`
+      <div class="source"><span class="name">${esc(name)}</span><span class="${v.ok?"ok":"badtext"}">${v.ok?"ONLINE":"ERROR"}</span></div>
+    `).join("");
+    $("modelState").innerHTML=`
+      <div><strong>Model:</strong> ${esc(sys?.modelVersion||"—")}</div>
+      <div><strong>Weights:</strong> ${sys?.frozenWeights?"Frozen for audit":"Adjustable"}</div>
+      <div><strong>Latest audit:</strong> ${fmtTime(sys?.latestAuditAt)}</div>
+      <div><strong>Latest market snapshot:</strong> ${fmtTime(sys?.latestSnapshotAt)}</div>
+      <div style="margin-top:8px;color:var(--muted)">Sharp Gate Watch runs separately and can promote a READY candidate only after direct/secondary sharp confirmation. Its browser-extracted prices are not yet stored as dashboard history.</div>
+    `;
+  }
+
+  function render(data){
+    DATA=data;
+    const s=data.summary||{};
+    $("mActive").textContent=s.activeCandidates??0;
+    $("mReady").textContent=s.readyForSharp??0;
+    $("mGrades").textContent=s.grades??0;
+    $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
+    $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+    renderCandidates(data.candidates||[]);
+    renderAlerts(data.alerts||[]);
+    renderMovements(data.movements||[]);
+    renderResults(data.grades||[]);
+    renderCalibration(data.calibration);
+    renderSystem(data.system);
+    const health=Object.values(data.system?.sourceHealth||{});
+    const bad=health.some(x=>!x.ok);
+    $("healthDot").classList.toggle("bad",bad);
+    $("healthText").textContent=bad ? "Some data sources are degraded" : "Live system connected";
+  }
+
+  async function load(){
+    $("refreshBtn").disabled=true;
+    $("refreshBtn").textContent="Loading…";
+    try{
+      const r=await fetch("/api/dashboard?sport=MLB&hours=36&t="+Date.now(),{cache:"no-store"});
+      if(!r.ok) throw new Error("Dashboard API returned "+r.status);
+      const data=await r.json();
+      render(data);
+    }catch(err){
+      $("healthDot").classList.add("bad");
+      $("healthText").textContent="Dashboard connection failed";
+      $("candidateList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+    }finally{
+      $("refreshBtn").disabled=false;
+      $("refreshBtn").textContent="Refresh";
+    }
+  }
+  $("refreshBtn").addEventListener("click",load);
+  load();
+  setInterval(load,120000);
+</script>
+</body>
+</html>
