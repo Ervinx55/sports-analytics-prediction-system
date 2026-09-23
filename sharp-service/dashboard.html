@@ -271,7 +271,7 @@
   </section>
 
   <section class="section" id="results">
-    <div class="section-title"><h2>Results & Decision Tracking</h2><p>PLAY results + counterfactual PASS results</p></div>
+    <div class="section-title"><h2>Results & Decision Tracking</h2><p>MLB final-state check every 5 minutes</p></div>
 
     <div class="metrics" style="grid-template-columns:repeat(4,1fr)">
       <div class="metric"><div class="label">Team Plays</div><div class="value" id="rTeamPlay">—</div><div class="hint">W-L-P record</div></div>
@@ -282,7 +282,7 @@
 
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        <strong>GOOD PASS</strong> = we passed and the wager lost. <strong>MISSED WIN</strong> = we passed but the wager would have won. This lets us audit both the bets we approved and the opportunities our filters rejected.
+        <strong>GOOD PASS</strong> = we passed and the wager lost. <strong>MISSED WIN</strong> = we passed but the wager would have won. Once a tracked game reaches its scheduled start, the system checks official MLB status every 5 minutes until it is Final, then grades every tracked PLAY and PASS.
       </div>
     </div>
 
@@ -1146,7 +1146,7 @@
   }
   $("refreshBtn").addEventListener("click",load);
   load();
-  setInterval(load,120000);
+  setInterval(load,60000);
 </script>
 </body>
 </html>
