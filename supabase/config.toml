@@ -72,3 +72,21 @@ verify_jwt = false
 
 [functions.market-policy-calibration]
 verify_jwt = false
+
+[functions.price-sensitivity]
+verify_jwt = false
+
+[functions.refresh-mlb-verification-gate]
+verify_jwt = true
+
+[functions.mlb-verification-status]
+verify_jwt = false
+
+[functions.mlb-verification-calibration]
+verify_jwt = false
+
+[functions.refresh-mlb-weather-park]
+verify_jwt = true
+
+[functions.mlb-weather-park-status]
+verify_jwt = false

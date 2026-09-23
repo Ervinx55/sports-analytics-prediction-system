@@ -384,6 +384,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "price-sensitivity",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b21e52c131386c8d465c14b20dc18c7d83dc8ae780a82018aea3ddda94384535",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/price-sensitivity/index.ts",
+          "name": "index.ts",
+          "sha256": "6872b54981c6bb45836b5c3fb1edd8ba4c6c46b8c84889b7664d63414b11b6f5"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-mlb-verification-gate",
+      "version": 5,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "51e51f7eda9430f15499ef2f648e29fd854a2545d4033c712a4d8b11428ab915",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-mlb-verification-gate/index.ts",
+          "name": "index.ts",
+          "sha256": "ecf4c8e4fb89ec4df0cc4b7494b35ce16f635a51c4637d8735099c64571f9ac3"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-verification-status",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "e54eb1005f8e869fe3278dd5cb0df8f7fb0b0ae5c561c735c645617ff63bdf03",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-verification-status/index.ts",
+          "name": "index.ts",
+          "sha256": "f09942df39e487f8d6de4684dc52c2309d3fa14a2e162eac660c89e5751677ea"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-verification-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "32454e52ea2b98112b8293904c2ffc2b4aa84246e4c811c1ecfe396d44491e66",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-verification-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "013b8ce8b7bfe470f5f137c23255a6cf22ffaed87f8b2037ae1fd0b17f405159"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-mlb-weather-park",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "aedff2262017969736d580b2b6f8c3041265d6ebcb665274dd33b4c4083e40b4",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-mlb-weather-park/index.ts",
+          "name": "index.ts",
+          "sha256": "709117e8a8487dd57275b885553fb99d4ef9ea24b5c8a1633d453b2386df1dbd"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-weather-park-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "cbdfa086b53d1393ea416dc6699fa1a2bf5b247706b1d0f92e68f6ef1996fd45",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-weather-park-status/index.ts",
+          "name": "index.ts",
+          "sha256": "23dadb8f30ea4c6523cc397bb518a25a93a751b586ea0b20699724b629512fca"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }
