@@ -291,7 +291,7 @@
 
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        <strong>GOOD PASS</strong> = we passed and the wager lost. <strong>MISSED WIN</strong> = we passed but the wager would have won. Once a tracked game reaches its scheduled start, the system checks official MLB status every 5 minutes until it is Final, then grades every tracked PLAY and PASS.
+        <strong>GOOD PASS</strong> = a real near-candidate failed a gate and then lost. <strong>MISSED WIN</strong> = a real near-candidate failed a gate but would have won. <strong>HARD PASS</strong> = it was never close enough to qualify; its outcome is still tracked, but it is not counted as a missed opportunity. Equivalent Hits 0.5 / Total Bases 0.5 props are counted once. Once a tracked game starts, the system checks official MLB status every 5 minutes until Final and grades every tracked decision.
       </div>
     </div>
 
@@ -332,6 +332,10 @@
       <div style="font-weight:850;margin-bottom:8px">Missed Wins</div>
       <div id="teamMissedWins"><div class="empty">No missed wins graded yet.</div></div>
     </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Hard Pass Outcomes</div>
+      <div id="teamHardPasses"><div class="empty">No hard-pass outcomes graded yet.</div></div>
+    </div>
 
     <div class="section-title"><h2>Player Prop PLAY Results</h2><p>separate prop model</p></div>
     <div class="card">
@@ -355,6 +359,10 @@
     <div class="card">
       <div style="font-weight:850;margin-bottom:8px">Missed Wins</div>
       <div id="propMissedWins"><div class="empty">No missed prop wins graded yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Hard Pass Outcomes</div>
+      <div id="propHardPasses"><div class="empty">No hard-pass prop outcomes graded yet.</div></div>
     </div>
   </section>
 
@@ -1217,6 +1225,10 @@
       teamPass.filter(r=>r.passEvaluation==="MISSED_WIN"),
       "No missed wins graded yet."
     );
+    $("teamHardPasses").innerHTML=renderTeamResultRows(
+      teamPass.filter(r=>String(r.passEvaluation||"").startsWith("HARD_PASS_")),
+      "No hard-pass outcomes graded yet."
+    );
 
     const propRows=data?.props||[];
     const propPlay=propRows.filter(r=>r.decisionStatus==="PLAY");
@@ -1258,6 +1270,10 @@
     $("propMissedWins").innerHTML=renderPropResultRows(
       propPass.filter(r=>r.passEvaluation==="MISSED_WIN"),
       "No missed prop wins graded yet."
+    );
+    $("propHardPasses").innerHTML=renderPropResultRows(
+      propPass.filter(r=>String(r.passEvaluation||"").startsWith("HARD_PASS_")),
+      "No hard-pass prop outcomes graded yet."
     );
   }
 
