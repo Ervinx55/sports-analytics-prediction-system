@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -55,6 +56,21 @@ def _function_dirs(root: Path) -> list[Path]:
     if not base.exists():
         return []
     return sorted(p for p in base.iterdir() if p.is_dir() and not p.name.startswith("_"))
+
+
+def check_secrets(root: Path) -> list[str]:
+    errors: list[str] = []
+    for path in _tracked_recovery_files(root):
+        try:
+            text = path.read_text(errors="ignore")
+        except OSError as exc:
+            errors.append(f"cannot read {path}: {exc}")
+            continue
+        for pattern in SECRET_PATTERNS:
+            if pattern.search(text):
+                errors.append(f"possible secret in {path.relative_to(root)}")
+                break
+    return errors
 
 
 def validate_repository(root: Path) -> list[str]:
@@ -113,15 +129,21 @@ def validate_repository(root: Path) -> list[str]:
                 elif expected_hash and _sha256(path) != expected_hash:
                     errors.append(f"{manifest_name}: sha256 mismatch {path_value}")
 
-    for path in _tracked_recovery_files(root):
-        try:
-            text = path.read_text(errors="ignore")
-        except OSError as exc:
-            errors.append(f"cannot read {path}: {exc}")
-            continue
-        for pattern in SECRET_PATTERNS:
-            if pattern.search(text):
-                errors.append(f"possible secret in {path.relative_to(root)}")
-                break
-
+    errors.extend(check_secrets(root))
     return errors
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Validate Supabase reconstruction source")
+    parser.add_argument("--check-secrets", action="store_true", help="run only secret-pattern checks")
+    parser.add_argument("root", nargs="?", default=".")
+    args = parser.parse_args()
+    root = Path(args.root).resolve()
+    errors = check_secrets(root) if args.check_secrets else validate_repository(root)
+    for error in errors:
+        print(error)
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

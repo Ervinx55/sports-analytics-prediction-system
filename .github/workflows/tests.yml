@@ -21,6 +21,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Scan Supabase reconstruction source for secrets
+        run: python scripts/supabase/validate_reconstruction.py --check-secrets .
+
       - name: Run tests
         env:
           PYTHONPATH: .
