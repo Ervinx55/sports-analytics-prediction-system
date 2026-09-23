@@ -1,4 +1,7 @@
--- Reconstructed from production catalog on 2026-09-23.\n-- Catch-up source for fresh environments; do not replay blindly on current production.\n\ncreate table if not exists public.market_decision_fusion_shadow (
+-- Reconstructed from production catalog on 2026-09-23.
+-- Catch-up source for fresh environments; do not replay blindly on current production.
+
+create table if not exists public.market_decision_fusion_shadow (
   observation_id bigint not null,
   evaluated_at timestamp with time zone default now() not null,
   source_captured_at timestamp with time zone not null,
@@ -46,7 +49,18 @@
   constraint market_decision_fusion_shadow_observation_id_fkey FOREIGN KEY (observation_id) REFERENCES market_grade_observations(id) ON DELETE CASCADE,
   constraint market_decision_fusion_shadow_sharp_gate_id_fkey FOREIGN KEY (sharp_gate_id) REFERENCES sharp_gate_history(id) ON DELETE SET NULL,
   constraint market_decision_fusion_shadow_pkey PRIMARY KEY (observation_id)
-);\nalter table public.market_decision_fusion_shadow enable row level security;\nrevoke all on table public.market_decision_fusion_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.market_decision_fusion_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS market_decision_fusion_event_idx ON public.market_decision_fusion_shadow USING btree (sport, event_id, market_type, market_side, line, evaluated_at DESC);\n\nCREATE INDEX IF NOT EXISTS market_decision_fusion_sharp_gate_idx ON public.market_decision_fusion_shadow USING btree (sharp_gate_id);\n\nCREATE INDEX IF NOT EXISTS market_decision_fusion_state_idx ON public.market_decision_fusion_shadow USING btree (fusion_state, evaluated_at DESC);\n\ncreate table if not exists public.player_prop_decision_fusion_shadow (
+);
+alter table public.market_decision_fusion_shadow enable row level security;
+revoke all on table public.market_decision_fusion_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.market_decision_fusion_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS market_decision_fusion_event_idx ON public.market_decision_fusion_shadow USING btree (sport, event_id, market_type, market_side, line, evaluated_at DESC);
+
+CREATE INDEX IF NOT EXISTS market_decision_fusion_sharp_gate_idx ON public.market_decision_fusion_shadow USING btree (sharp_gate_id);
+
+CREATE INDEX IF NOT EXISTS market_decision_fusion_state_idx ON public.market_decision_fusion_shadow USING btree (fusion_state, evaluated_at DESC);
+
+create table if not exists public.player_prop_decision_fusion_shadow (
   observation_id bigint not null,
   evaluated_at timestamp with time zone default now() not null,
   source_captured_at timestamp with time zone not null,
@@ -103,7 +117,16 @@
   constraint player_prop_decision_fusion_shadow_fusion_state_check CHECK (fusion_state = ANY (ARRAY['PLAY_CANDIDATE'::text, 'WATCH'::text, 'WAIT'::text, 'REMODEL'::text, 'PASS'::text])),
   constraint player_prop_decision_fusion_shadow_observation_id_fkey FOREIGN KEY (observation_id) REFERENCES player_prop_observations(id) ON DELETE CASCADE,
   constraint player_prop_decision_fusion_shadow_pkey PRIMARY KEY (observation_id)
-);\nalter table public.player_prop_decision_fusion_shadow enable row level security;\nrevoke all on table public.player_prop_decision_fusion_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.player_prop_decision_fusion_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS player_prop_fusion_event_idx ON public.player_prop_decision_fusion_shadow USING btree (sport, event_id, player_name, stat_id, side, line, evaluated_at DESC);\n\nCREATE INDEX IF NOT EXISTS player_prop_fusion_state_idx ON public.player_prop_decision_fusion_shadow USING btree (fusion_state, evaluated_at DESC);\n\nCREATE OR REPLACE FUNCTION public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric)
+);
+alter table public.player_prop_decision_fusion_shadow enable row level security;
+revoke all on table public.player_prop_decision_fusion_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.player_prop_decision_fusion_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS player_prop_fusion_event_idx ON public.player_prop_decision_fusion_shadow USING btree (sport, event_id, player_name, stat_id, side, line, evaluated_at DESC);
+
+CREATE INDEX IF NOT EXISTS player_prop_fusion_state_idx ON public.player_prop_decision_fusion_shadow USING btree (fusion_state, evaluated_at DESC);
+
+CREATE OR REPLACE FUNCTION public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -394,7 +417,11 @@ begin
     )
   );
 end;
-$function$\nrevoke execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) from public, anon, authenticated;\ngrant execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_market_decision_fusion_shadow()
+$function$
+revoke execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) from public, anon, authenticated;
+grant execute on function public.compute_decision_fusion_v1(p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_market_decision_fusion_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -564,14 +591,22 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_market_decision_fusion_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_market_decision_fusion_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.trigger_market_decision_fusion()
+$function$
+revoke execute on function public.refresh_market_decision_fusion_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_market_decision_fusion_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_market_decision_fusion()
  RETURNS integer
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
 AS $function$
   select public.refresh_market_decision_fusion_shadow();
-$function$\nrevoke execute on function public.trigger_market_decision_fusion() from public, anon, authenticated;\ngrant execute on function public.trigger_market_decision_fusion() to service_role;\n\nCREATE OR REPLACE FUNCTION public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text)
+$function$
+revoke execute on function public.trigger_market_decision_fusion() from public, anon, authenticated;
+grant execute on function public.trigger_market_decision_fusion() to service_role;
+
+CREATE OR REPLACE FUNCTION public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -897,7 +932,11 @@ begin
     )
   );
 end;
-$function$\nrevoke execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) from public, anon, authenticated;\ngrant execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_player_prop_decision_fusion_shadow()
+$function$
+revoke execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) from public, anon, authenticated;
+grant execute on function public.compute_player_prop_fusion_v1(p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_player_prop_decision_fusion_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -1051,14 +1090,23 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_player_prop_decision_fusion_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_player_prop_decision_fusion_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.trigger_player_prop_decision_fusion()
+$function$
+revoke execute on function public.refresh_player_prop_decision_fusion_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_player_prop_decision_fusion_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_player_prop_decision_fusion()
  RETURNS integer
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
 AS $function$
   select public.refresh_player_prop_decision_fusion_shadow();
-$function$\nrevoke execute on function public.trigger_player_prop_decision_fusion() from public, anon, authenticated;\ngrant execute on function public.trigger_player_prop_decision_fusion() to service_role;\n\ncreate or replace view public.market_decision_fusion_latest with (security_invoker = true) as\nSELECT f.observation_id,
+$function$
+revoke execute on function public.trigger_player_prop_decision_fusion() from public, anon, authenticated;
+grant execute on function public.trigger_player_prop_decision_fusion() to service_role;
+
+create or replace view public.market_decision_fusion_latest with (security_invoker = true) as
+SELECT f.observation_id,
     f.evaluated_at,
     f.source_captured_at,
     f.sport,
@@ -1101,7 +1149,13 @@ $function$\nrevoke execute on function public.trigger_player_prop_decision_fusio
     f.shadow_only,
     f.affects_decision
    FROM market_decision_fusion_shadow f
-     JOIN market_grade_latest g ON g.id = f.observation_id;\n;\nrevoke all on table public.market_decision_fusion_latest from public, anon, authenticated;\ngrant select on table public.market_decision_fusion_latest to service_role;\n\ncreate or replace view public.player_prop_decision_fusion_latest with (security_invoker = true) as\nSELECT f.observation_id,
+     JOIN market_grade_latest g ON g.id = f.observation_id;
+;
+revoke all on table public.market_decision_fusion_latest from public, anon, authenticated;
+grant select on table public.market_decision_fusion_latest to service_role;
+
+create or replace view public.player_prop_decision_fusion_latest with (security_invoker = true) as
+SELECT f.observation_id,
     f.evaluated_at,
     f.source_captured_at,
     f.sport,
@@ -1154,4 +1208,7 @@ $function$\nrevoke execute on function public.trigger_player_prop_decision_fusio
     f.shadow_only,
     f.affects_decision
    FROM player_prop_decision_fusion_shadow f
-     JOIN player_prop_latest p ON p.id = f.observation_id;\n;\nrevoke all on table public.player_prop_decision_fusion_latest from public, anon, authenticated;\ngrant select on table public.player_prop_decision_fusion_latest to service_role;\n
+     JOIN player_prop_latest p ON p.id = f.observation_id;
+;
+revoke all on table public.player_prop_decision_fusion_latest from public, anon, authenticated;
+grant select on table public.player_prop_decision_fusion_latest to service_role;
