@@ -1,4 +1,7 @@
--- Reconstructed from production catalog on 2026-09-23.\n-- Catch-up source for fresh environments; do not replay blindly on current production.\n\ncreate table if not exists public.market_price_sensitivity_shadow (
+-- Reconstructed from production catalog on 2026-09-23.
+-- Catch-up source for fresh environments; do not replay blindly on current production.
+
+create table if not exists public.market_price_sensitivity_shadow (
   observation_id bigint not null,
   policy_id text not null,
   source_captured_at timestamp with time zone not null,
@@ -36,7 +39,16 @@
   constraint market_price_sensitivity_shadow_observation_id_fkey FOREIGN KEY (observation_id) REFERENCES market_grade_observations(id) ON DELETE CASCADE,
   constraint market_price_sensitivity_shadow_policy_id_fkey FOREIGN KEY (policy_id) REFERENCES market_policy_registry(policy_id) ON DELETE CASCADE,
   constraint market_price_sensitivity_shadow_pkey PRIMARY KEY (observation_id, policy_id)
-);\nalter table public.market_price_sensitivity_shadow enable row level security;\nrevoke all on table public.market_price_sensitivity_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.market_price_sensitivity_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS market_price_sensitivity_shadow_event_idx ON public.market_price_sensitivity_shadow USING btree (sport, event_id, market_type, market_side, line, source_captured_at DESC);\n\nCREATE INDEX IF NOT EXISTS market_price_sensitivity_shadow_policy_idx ON public.market_price_sensitivity_shadow USING btree (policy_id, source_captured_at DESC);\n\nCREATE OR REPLACE FUNCTION public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric)
+);
+alter table public.market_price_sensitivity_shadow enable row level security;
+revoke all on table public.market_price_sensitivity_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.market_price_sensitivity_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS market_price_sensitivity_shadow_event_idx ON public.market_price_sensitivity_shadow USING btree (sport, event_id, market_type, market_side, line, source_captured_at DESC);
+
+CREATE INDEX IF NOT EXISTS market_price_sensitivity_shadow_policy_idx ON public.market_price_sensitivity_shadow USING btree (policy_id, source_captured_at DESC);
+
+CREATE OR REPLACE FUNCTION public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -207,7 +219,11 @@ begin
     end
   );
 end;
-$function$\nrevoke execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) from public, anon, authenticated;\ngrant execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_market_price_sensitivity_shadow()
+$function$
+revoke execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) from public, anon, authenticated;
+grant execute on function public.compute_price_sensitivity_v1(p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_market_price_sensitivity_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -389,7 +405,12 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_market_price_sensitivity_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_market_price_sensitivity_shadow() to service_role;\n\ncreate or replace view public.market_price_sensitivity_latest with (security_invoker = true) as\nSELECT p.observation_id,
+$function$
+revoke execute on function public.refresh_market_price_sensitivity_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_market_price_sensitivity_shadow() to service_role;
+
+create or replace view public.market_price_sensitivity_latest with (security_invoker = true) as
+SELECT p.observation_id,
     p.policy_id,
     p.source_captured_at,
     p.evaluated_at,
@@ -423,7 +444,13 @@ $function$\nrevoke execute on function public.refresh_market_price_sensitivity_s
     p.reason_code,
     p.raw
    FROM market_price_sensitivity_shadow p
-     JOIN market_grade_latest g ON g.id = p.observation_id;\n;\nrevoke all on table public.market_price_sensitivity_latest from public, anon, authenticated;\ngrant select on table public.market_price_sensitivity_latest to service_role;\n\ncreate or replace view public.market_price_wait_analysis with (security_invoker = true) as\nWITH base AS (
+     JOIN market_grade_latest g ON g.id = p.observation_id;
+;
+revoke all on table public.market_price_sensitivity_latest from public, anon, authenticated;
+grant select on table public.market_price_sensitivity_latest to service_role;
+
+create or replace view public.market_price_wait_analysis with (security_invoker = true) as
+WITH base AS (
          SELECT p.observation_id,
             p.policy_id,
             p.source_captured_at,
@@ -566,4 +593,7 @@ $function$\nrevoke execute on function public.refresh_market_price_sensitivity_s
             WHEN buy_snapshot_count > 0 THEN 'BUY_WINDOW_CLOSED'::text
             ELSE 'NEVER_BUY'::text
         END AS buy_window_result
-   FROM agg a;\n;\nrevoke all on table public.market_price_wait_analysis from public, anon, authenticated;\ngrant select on table public.market_price_wait_analysis to service_role;\n
+   FROM agg a;
+;
+revoke all on table public.market_price_wait_analysis from public, anon, authenticated;
+grant select on table public.market_price_wait_analysis to service_role;
