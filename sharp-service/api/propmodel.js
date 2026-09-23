@@ -79,6 +79,84 @@ function poissonArray(lambda, max = 30) {
   return out;
 }
 
+function normalizeDistribution(dist) {
+  const sum = dist.reduce((a, b) => a + b, 0);
+  return sum > 0 ? dist.map((x) => x / sum) : dist;
+}
+
+function convolve(a, b) {
+  const out = Array(a.length + b.length - 1).fill(0);
+  for (let i = 0; i < a.length; i++) {
+    for (let j = 0; j < b.length; j++) {
+      out[i + j] += a[i] * b[j];
+    }
+  }
+  return out;
+}
+
+function repeatedDistribution(single, n) {
+  let out = [1];
+  for (let i = 0; i < n; i++) out = convolve(out, single);
+  return normalizeDistribution(out);
+}
+
+function mixedAtBatDistribution(single, expectedAB) {
+  const lo = Math.max(1, Math.floor(expectedAB));
+  const hi = lo + 1;
+  const frac = clamp(expectedAB - lo, 0, 1);
+  const a = repeatedDistribution(single, lo);
+  const b = repeatedDistribution(single, hi);
+  const len = Math.max(a.length, b.length);
+  const out = Array(len).fill(0);
+  for (let i = 0; i < len; i++) {
+    out[i] =
+      (1 - frac) * (a[i] || 0) +
+      frac * (b[i] || 0);
+  }
+  return normalizeDistribution(out);
+}
+
+function distributionSideProbability(dist, line, side) {
+  if (!Array.isArray(dist) || !dist.length || line === null) return null;
+  let win = 0;
+  let push = 0;
+  let loss = 0;
+  const isInteger = Math.abs(line - Math.round(line)) < 1e-9;
+  for (let k = 0; k < dist.length; k++) {
+    const p = dist[k];
+    const diff = k - line;
+    if (side === "over") {
+      if (diff > 1e-9) win += p;
+      else if (isInteger && Math.abs(diff) <= 1e-9) push += p;
+      else loss += p;
+    } else {
+      if (diff < -1e-9) win += p;
+      else if (isInteger && Math.abs(diff) <= 1e-9) push += p;
+      else loss += p;
+    }
+  }
+  const total = win + push + loss;
+  return total > 0
+    ? { win: win / total, push: push / total, loss: loss / total }
+    : null;
+}
+
+function blendWithMarket(dist, marketFair, weight = 0.65) {
+  if (!dist) return null;
+  if (marketFair === null) return dist;
+  const nonPush = Math.max(0, 1 - dist.push);
+  if (nonPush <= 0) return dist;
+  const rawConditional = dist.win / nonPush;
+  const blendedConditional =
+    weight * rawConditional + (1 - weight) * marketFair;
+  return {
+    win: nonPush * blendedConditional,
+    push: dist.push,
+    loss: nonPush * (1 - blendedConditional),
+    rawWin: dist.win
+  };
+}
+
 function poissonSideProbability(lambda, line, side) {
   const probs = poissonArray(lambda, Math.max(30, Math.ceil(lambda + 10 * Math.sqrt(lambda + 1))));
   if (!probs.length || line === null) return null;
@@ -339,13 +417,20 @@ function battingProjection(feed, player, side, statID) {
   const pa = num(season.plateAppearances);
   const ab = num(season.atBats);
   const hits = num(season.hits);
+  const doubles = num(season.doubles);
+  const triples = num(season.triples);
+  const homeRuns = num(season.homeRuns);
   const totalBases = num(season.totalBases);
+
   if (
     pa === null ||
     ab === null ||
     ab <= 0 ||
     pa < 100 ||
     hits === null ||
+    doubles === null ||
+    triples === null ||
+    homeRuns === null ||
     totalBases === null
   ) {
     return {
@@ -365,35 +450,65 @@ function battingProjection(feed, player, side, statID) {
   const pitcherFactor =
     h9 === null
       ? 1
-      : clamp(1 + 0.35 * (h9 / LEAGUE_H9 - 1), 0.9, 1.1);
+      : clamp(1 + 0.30 * (h9 / LEAGUE_H9 - 1), 0.92, 1.08);
 
   const paBySpot = [4.72, 4.62, 4.53, 4.45, 4.36, 4.27, 4.16, 4.05, 3.94];
   const projectedPA = paBySpot[(lineup.spot || 9) - 1] || 4.0;
   const abPerPA = clamp(ab / pa, 0.72, 0.95);
-  const projectedAB = projectedPA * abPerPA;
-  const reliability = clamp(pa / 450, 0, 1);
+  const projectedAB = clamp(projectedPA * abPerPA, 3.0, 4.6);
+  const reliability = clamp(pa / 500, 0, 1);
 
-  let perAB;
-  let leaguePerAB;
+  const singles = Math.max(0, hits - doubles - triples - homeRuns);
+
+  let singleAB;
   if (statID === "batting_hits") {
-    perAB = hits / ab;
-    leaguePerAB = 0.245;
+    const rawHitRate = hits / ab;
+    const regressed =
+      reliability * rawHitRate + (1 - reliability) * 0.245;
+    const pHit = clamp(regressed * pitcherFactor, 0.14, 0.38);
+    singleAB = [1 - pHit, pHit];
   } else {
-    perAB = totalBases / ab;
-    leaguePerAB = 0.405;
+    const leagueRates = {
+      single: 0.160,
+      double: 0.045,
+      triple: 0.004,
+      homeRun: 0.031
+    };
+    let p1 =
+      (reliability * (singles / ab) +
+        (1 - reliability) * leagueRates.single) *
+      pitcherFactor;
+    let p2 =
+      (reliability * (doubles / ab) +
+        (1 - reliability) * leagueRates.double) *
+      pitcherFactor;
+    let p3 =
+      (reliability * (triples / ab) +
+        (1 - reliability) * leagueRates.triple) *
+      pitcherFactor;
+    let p4 =
+      (reliability * (homeRuns / ab) +
+        (1 - reliability) * leagueRates.homeRun) *
+      pitcherFactor;
+
+    const hitProb = p1 + p2 + p3 + p4;
+    if (hitProb > 0.42) {
+      const scale = 0.42 / hitProb;
+      p1 *= scale;
+      p2 *= scale;
+      p3 *= scale;
+      p4 *= scale;
+    }
+    singleAB = [1 - p1 - p2 - p3 - p4, p1, p2, p3, p4];
   }
 
-  const regressedPerAB =
-    reliability * perAB + (1 - reliability) * leaguePerAB;
-  const lambda = clamp(
-    regressedPerAB * projectedAB * pitcherFactor,
-    statID === "batting_hits" ? 0.25 : 0.4,
-    statID === "batting_hits" ? 2.2 : 4.5
-  );
+  const distribution = mixedAtBatDistribution(singleAB, projectedAB);
+  const mean = distribution.reduce((sum, p, k) => sum + p * k, 0);
 
   return {
     available: true,
-    lambda,
+    distribution,
+    lambda: mean,
     reliability,
     inputs: {
       lineupSpot: lineup.spot,
@@ -401,15 +516,19 @@ function battingProjection(feed, player, side, statID) {
       atBats: ab,
       projectedPA: Number(projectedPA.toFixed(2)),
       projectedAB: Number(projectedAB.toFixed(2)),
-      ratePerAB: Number(perAB.toFixed(4)),
-      regressedRatePerAB: Number(regressedPerAB.toFixed(4)),
+      seasonHits: hits,
+      seasonTotalBases: totalBases,
+      seasonSingles: singles,
+      seasonDoubles: doubles,
+      seasonTriples: triples,
+      seasonHomeRuns: homeRuns,
       opponentStarterHitsPer9: h9,
       opponentPitcherFactor: Number(pitcherFactor.toFixed(3))
     },
     methodology:
       statID === "batting_hits"
-        ? "Confirmed batting-order opportunity × regressed season hit rate per at-bat, with a small opposing-starter hits-per-nine adjustment."
-        : "Confirmed batting-order opportunity × regressed season total-bases rate per at-bat, with a small opposing-starter hits-per-nine adjustment."
+        ? "Confirmed batting-order opportunity with a regressed per-at-bat hit probability; game hits are modeled from the mixed 3/4/5-at-bat binomial distribution."
+        : "Confirmed batting-order opportunity with regressed per-at-bat single/double/triple/home-run rates; total bases are modeled by convolving the hitter's base-outcome distribution across expected at-bats."
   };
 }
 
@@ -442,11 +561,11 @@ function candidateStatus({
   }
 
   if (
-    projection.reliability < 0.65 ||
+    projection.reliability < 0.75 ||
     edge === null ||
     ev === null ||
-    edge < 0.05 ||
-    ev < 0.05
+    edge < 0.06 ||
+    ev < 0.06
   ) {
     return {
       status: "PASS",
@@ -457,7 +576,7 @@ function candidateStatus({
   return {
     status: "PLAY",
     reason:
-      "confirmed role/lineup, sufficient sample, exact-line market coverage, >=5 pp edge and >=5% modeled EV"
+      "confirmed role/lineup, strong sample, exact-line market coverage, >=6 pp edge and >=6% modeled EV after market shrinkage"
   };
 }
 
@@ -576,20 +695,27 @@ export default async function handler(req, res) {
 
         for (const line of lines) {
           const exact = exactLineMarket(prop, line);
-          const overDist = projection.available
-            ? poissonSideProbability(projection.lambda, line, "over")
+          const rawOverDist = projection.available
+            ? prop.statID === "pitching_strikeouts"
+              ? poissonSideProbability(projection.lambda, line, "over")
+              : distributionSideProbability(projection.distribution, line, "over")
             : null;
-          const underDist = projection.available
-            ? poissonSideProbability(projection.lambda, line, "under")
+          const rawUnderDist = projection.available
+            ? prop.statID === "pitching_strikeouts"
+              ? poissonSideProbability(projection.lambda, line, "under")
+              : distributionSideProbability(projection.distribution, line, "under")
             : null;
 
           for (const marketSide of ["over", "under"]) {
-            const dist = marketSide === "over" ? overDist : underDist;
+            const rawDist =
+              marketSide === "over" ? rawOverDist : rawUnderDist;
             const marketFair =
               marketSide === "over" ? exact.overFair : exact.underFair;
             const best =
               marketSide === "over" ? exact.overBest : exact.underBest;
+            const dist = blendWithMarket(rawDist, marketFair, 0.65);
             const modelProb = dist?.win ?? null;
+            const rawModelProb = rawDist?.win ?? null;
             const edge =
               modelProb === null || marketFair === null
                 ? null
@@ -639,6 +765,10 @@ export default async function handler(req, res) {
                 modelProb === null
                   ? null
                   : Number(modelProb.toFixed(4)),
+              rawIndependentProbability:
+                rawModelProb === null
+                  ? null
+                  : Number(rawModelProb.toFixed(4)),
               pushProbability:
                 dist === null
                   ? null
@@ -681,20 +811,20 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "MLB Player Props Model v1",
+      version: "MLB Player Props Model v1.1",
       date,
       finalWindowMinutes: FINAL_WINDOW_MINUTES,
       method: {
         pitcherStrikeouts:
           "Poisson count model from official starter season K/BF and BF/start, adjusted for confirmed opposing-lineup K rate and regressed toward league average.",
         batterHits:
-          "Poisson count approximation from confirmed batting-order opportunity and regressed season hits/AB, with a conservative opponent-starter H/9 adjustment.",
+          "Mixed-at-bat binomial distribution from confirmed batting-order opportunity and regressed season hit probability per AB, with a conservative opponent-starter H/9 adjustment.",
         batterTotalBases:
-          "Poisson count approximation from confirmed batting-order opportunity and regressed season total bases/AB, with a conservative opponent-starter H/9 adjustment.",
+          "Mixed-at-bat compound distribution from regressed single/double/triple/home-run rates, with a conservative opponent-starter H/9 adjustment.",
         market:
           "Every sportsbook line is treated as a distinct wager. No-vig fair probability is calculated only from exact-line two-sided book pairs.",
         playRule:
-          "PLAY requires sufficient official sample/role confirmation, >=1 exact-line two-sided book pair, >=2 books offering the selected side at that exact line, data quality >=0.65, model edge >=5 percentage points and modeled EV >=5%.",
+          "PLAY requires sufficient official sample/role confirmation, >=1 exact-line two-sided book pair, >=2 books offering the selected side at that exact line, data quality >=0.75, model edge >=6 percentage points and modeled EV >=6% after shrinking independent probability 35% toward the exact-line no-vig market.",
         lifecycle:
           "Missing required information is PENDING only until 20 minutes before first pitch; then it becomes PASS."
       },
