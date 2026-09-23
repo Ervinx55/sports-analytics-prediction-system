@@ -61,6 +61,9 @@ export default async function handler(req, res) {
     calibration: `${BASE}/model-calibration?sport=${encodeURIComponent(
       sport
     )}`,
+    marketCalibration: `${BASE}/market-calibration?sport=${encodeURIComponent(
+      sport
+    )}&days=90`,
     results: `${BASE}/dashboard-results?sport=${encodeURIComponent(
       sport
     )}&limit=50`,
@@ -80,10 +83,11 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, results, movement, alerts, sharpGate, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
+      fetchJson(urls.marketCalibration),
       fetchJson(urls.results),
       fetchJson(urls.movement),
       fetchJson(urls.alerts),
@@ -96,6 +100,7 @@ export default async function handler(req, res) {
   const sources = {
     audit: settled(audit),
     calibration: settled(calibration),
+    marketCalibration: settled(marketCalibration),
     results: settled(results),
     movement: settled(movement),
     alerts: settled(alerts),
@@ -167,6 +172,7 @@ export default async function handler(req, res) {
     },
     candidates: activeCandidates,
     calibration: sources.calibration.data || null,
+    marketCalibration: sources.marketCalibration.data || null,
     grades: sources.results.data?.grades || [],
     results: sources.results.data?.results || [],
     movements: movementList,
