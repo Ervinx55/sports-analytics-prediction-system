@@ -142,7 +142,7 @@
       "version": "20260923213725",
       "name": "recover_uncertainty_and_market_policy",
       "path": "supabase/migrations/20260923213725_recover_uncertainty_and_market_policy.sql",
-      "sha256": "afe41bb82cbc4b6e83056008f7b5a6fd67322a4453431c3640942be320791b7c",
+      "sha256": "da9c7aa6e67a3551429ee1eecc9d166bcedce3f0a9dca5de68c6b054d0e581dc",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null

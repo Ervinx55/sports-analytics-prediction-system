@@ -775,6 +775,73 @@ SELECT u.observation_id,
 revoke all on table public.market_uncertainty_latest from public, anon, authenticated;
 grant select on table public.market_uncertainty_latest to service_role;
 
+create or replace view public.market_policy_final_pregame with (security_invoker = true) as
+WITH ranked AS (
+         SELECT r_1.observation_id,
+            r_1.policy_id,
+            r_1.evaluated_at,
+            r_1.evaluator_version,
+            r_1.sport,
+            r_1.event_id,
+            r_1.starts_at,
+            r_1.market_type,
+            r_1.market_side,
+            r_1.market_label,
+            r_1.line,
+            r_1.decision,
+            r_1.reason_code,
+            r_1.reason,
+            r_1.robust_market_edge_pp,
+            r_1.robust_sharp_edge_pp,
+            r_1.ev_pct,
+            r_1.uncertainty_pp,
+            r_1.sharp_data_quality,
+            r_1.sharp_source_count,
+            r_1.config_snapshot,
+            r_1.inputs,
+            r_1.source_captured_at,
+            row_number() OVER (PARTITION BY r_1.policy_id, r_1.sport, r_1.event_id, r_1.market_type, r_1.market_side, (COALESCE(r_1.line::text, ''::text)) ORDER BY r_1.source_captured_at DESC NULLS LAST, r_1.observation_id DESC) AS rn
+           FROM market_policy_shadow_results r_1
+          WHERE r_1.source_captured_at IS NOT NULL AND (r_1.starts_at IS NULL OR r_1.source_captured_at <= r_1.starts_at)
+        )
+ SELECT observation_id,
+    policy_id,
+    evaluated_at,
+    evaluator_version,
+    sport,
+    event_id,
+    starts_at,
+    market_type,
+    market_side,
+    market_label,
+    line,
+    decision,
+    reason_code,
+    reason,
+    robust_market_edge_pp,
+    robust_sharp_edge_pp,
+    ev_pct,
+    uncertainty_pp,
+    sharp_data_quality,
+    sharp_source_count,
+    config_snapshot,
+    inputs,
+    source_captured_at,
+    rn,
+        CASE
+            WHEN decision = 'PENDING'::text THEN 'PASS'::text
+            ELSE decision
+        END AS final_shadow_decision,
+        CASE
+            WHEN decision = 'PENDING'::text THEN 'PENDING_AT_DEADLINE'::text
+            ELSE reason_code
+        END AS final_reason_code
+   FROM ranked r
+  WHERE rn = 1;
+;
+revoke all on table public.market_policy_final_pregame from public, anon, authenticated;
+grant select on table public.market_policy_final_pregame to service_role;
+
 create or replace view public.market_policy_grade_latest with (security_invoker = true) as
 WITH result_ranked AS (
          SELECT tr.observation_id,
@@ -886,73 +953,6 @@ WITH result_ranked AS (
 ;
 revoke all on table public.market_policy_grade_latest from public, anon, authenticated;
 grant select on table public.market_policy_grade_latest to service_role;
-
-create or replace view public.market_policy_final_pregame with (security_invoker = true) as
-WITH ranked AS (
-         SELECT r_1.observation_id,
-            r_1.policy_id,
-            r_1.evaluated_at,
-            r_1.evaluator_version,
-            r_1.sport,
-            r_1.event_id,
-            r_1.starts_at,
-            r_1.market_type,
-            r_1.market_side,
-            r_1.market_label,
-            r_1.line,
-            r_1.decision,
-            r_1.reason_code,
-            r_1.reason,
-            r_1.robust_market_edge_pp,
-            r_1.robust_sharp_edge_pp,
-            r_1.ev_pct,
-            r_1.uncertainty_pp,
-            r_1.sharp_data_quality,
-            r_1.sharp_source_count,
-            r_1.config_snapshot,
-            r_1.inputs,
-            r_1.source_captured_at,
-            row_number() OVER (PARTITION BY r_1.policy_id, r_1.sport, r_1.event_id, r_1.market_type, r_1.market_side, (COALESCE(r_1.line::text, ''::text)) ORDER BY r_1.source_captured_at DESC NULLS LAST, r_1.observation_id DESC) AS rn
-           FROM market_policy_shadow_results r_1
-          WHERE r_1.source_captured_at IS NOT NULL AND (r_1.starts_at IS NULL OR r_1.source_captured_at <= r_1.starts_at)
-        )
- SELECT observation_id,
-    policy_id,
-    evaluated_at,
-    evaluator_version,
-    sport,
-    event_id,
-    starts_at,
-    market_type,
-    market_side,
-    market_label,
-    line,
-    decision,
-    reason_code,
-    reason,
-    robust_market_edge_pp,
-    robust_sharp_edge_pp,
-    ev_pct,
-    uncertainty_pp,
-    sharp_data_quality,
-    sharp_source_count,
-    config_snapshot,
-    inputs,
-    source_captured_at,
-    rn,
-        CASE
-            WHEN decision = 'PENDING'::text THEN 'PASS'::text
-            ELSE decision
-        END AS final_shadow_decision,
-        CASE
-            WHEN decision = 'PENDING'::text THEN 'PENDING_AT_DEADLINE'::text
-            ELSE reason_code
-        END AS final_reason_code
-   FROM ranked r
-  WHERE rn = 1;
-;
-revoke all on table public.market_policy_final_pregame from public, anon, authenticated;
-grant select on table public.market_policy_final_pregame to service_role;
 
 insert into public.market_policy_registry
 select * from jsonb_populate_recordset(null::public.market_policy_registry, '[{"notes":"Primary moneyline challenger.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.25,"minSharpDataQuality":0.6,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2},"policy_id":"ML_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser shadow challenger.","active":true,"config":{"minEvPct":2,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"minSharpDataQuality":0.5,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":1.5},"policy_id":"ML_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction moneyline challenger.","active":true,"config":{"minEvPct":3.5,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3},"policy_id":"ML_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"moneyline","shadow_only":true,"display_name":"Moneyline Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary run-line challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4,"rejectMarketSplit":true,"maxPushProbability":0.06,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":2.75},"policy_id":"RL_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser run-line challenger with push control.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"maxPushProbability":0.08,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2},"policy_id":"RL_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction run-line challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":3.75,"rejectMarketSplit":true,"maxPushProbability":0.04,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":3.5},"policy_id":"RL_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"spread","shadow_only":true,"display_name":"Run Line Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Primary totals challenger.","active":true,"config":{"minEvPct":3,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.5,"rejectMarketSplit":true,"minSharpDataQuality":0.65,"minRobustSharpEdgePp":1,"minRobustMarketEdgePp":3,"requireRunEnvironment":true},"policy_id":"TOT_BALANCED","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Balanced","policy_family":"BALANCED","policy_version":"market-policy-v1","affects_decision":false},{"notes":"Looser totals challenger; still requires exact-market integrity and run environment.","active":true,"config":{"minEvPct":2.5,"requireSharp":true,"minSharpSources":1,"maxUncertaintyPp":4.75,"rejectMarketSplit":true,"minSharpDataQuality":0.55,"minRobustSharpEdgePp":0.5,"minRobustMarketEdgePp":2.5,"requireRunEnvironment":true},"policy_id":"TOT_EXPLORE","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Explore","policy_family":"EXPLORE","policy_version":"market-policy-v1","affects_decision":false},{"notes":"High-conviction totals challenger.","active":true,"config":{"minEvPct":4,"requireSharp":true,"minSharpSources":2,"maxUncertaintyPp":4,"rejectMarketSplit":true,"minSharpDataQuality":0.7,"minRobustSharpEdgePp":1.5,"minRobustMarketEdgePp":4,"requireRunEnvironment":true},"policy_id":"TOT_STRICT","created_at":"2026-09-23T06:56:16.737633+00:00","market_type":"total","shadow_only":true,"display_name":"Total Strict","policy_family":"STRICT","policy_version":"market-policy-v1","affects_decision":false}]'::jsonb)
