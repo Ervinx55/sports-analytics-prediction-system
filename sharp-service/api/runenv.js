@@ -105,6 +105,89 @@ function bestOdds(books = {}) {
   return { odds: best, book: bestBook };
 }
 
+function impliedProbability(odds) {
+  const o = num(odds);
+  if (o === null || o === 0) return null;
+  return o > 0 ? 100 / (o + 100) : Math.abs(o) / (Math.abs(o) + 100);
+}
+
+function noVigProbability(sideOdds, opponentOdds) {
+  const a = impliedProbability(sideOdds);
+  const b = impliedProbability(opponentOdds);
+  if (a === null || b === null || a + b <= 0) return null;
+  return a / (a + b);
+}
+
+function bestOddsAtLine(books = {}, line) {
+  let best = null;
+  let bestBook = null;
+  for (const [book, v] of Object.entries(books || {})) {
+    if (!v || v.available === false) continue;
+    const l = num(v.line);
+    const o = num(v.odds);
+    if (l === null || o === null || Math.abs(l - line) > 1e-9) continue;
+    if (best === null || o > best) {
+      best = o;
+      bestBook = book;
+    }
+  }
+  return { odds: best, book: bestBook };
+}
+
+function poissonArray(lambda, maxRuns = 25) {
+  const out = [];
+  let p = Math.exp(-lambda);
+  out.push(p);
+  let sum = p;
+  for (let k = 1; k <= maxRuns; k++) {
+    p *= lambda / k;
+    out.push(p);
+    sum += p;
+  }
+  if (sum > 0) {
+    for (let i = 0; i < out.length; i++) out[i] /= sum;
+  }
+  return out;
+}
+
+function spreadOutcomeProbability(awayLambda, homeLambda, side, line) {
+  if (
+    !Number.isFinite(awayLambda) ||
+    !Number.isFinite(homeLambda) ||
+    !Number.isFinite(line)
+  ) {
+    return null;
+  }
+  const away = poissonArray(awayLambda);
+  const home = poissonArray(homeLambda);
+  let win = 0;
+  let push = 0;
+  let loss = 0;
+  for (let a = 0; a < away.length; a++) {
+    for (let h = 0; h < home.length; h++) {
+      const mass = away[a] * home[h];
+      const margin = side === "away" ? a - h + line : h - a + line;
+      if (margin > 1e-9) win += mass;
+      else if (Math.abs(margin) <= 1e-9) push += mass;
+      else loss += mass;
+    }
+  }
+  const total = win + push + loss;
+  if (total <= 0) return null;
+  return {
+    win: win / total,
+    push: push / total,
+    loss: loss / total,
+  };
+}
+
+function expectedValueWithPush(winProb, pushProb, odds) {
+  const d = americanToDecimal(odds);
+  if (d === null || winProb === null || pushProb === null) return null;
+  const lossProb = Math.max(0, 1 - winProb - pushProb);
+  return winProb * (d - 1) - lossProb;
+}
+
 function parseWind(weather = {}) {
   const text = String(weather.wind || "");
   const speedMatch = text.match(/(\d+(?:\.\d+)?)\s*mph/i);
@@ -387,7 +470,7 @@ export default async function handler(req, res) {
     const underEv =
       underBest.odds === null ? null : expectedValue(underProb, underBest.odds);
 
-    let totalLean = "PASS";
+    let totalLean = marketLine === null ? "PENDING" : "PASS";
     if (marketLine !== null) {
       const diff = projectedTotal - marketLine;
       if (
@@ -402,8 +485,138 @@ export default async function handler(req, res) {
         (underEv ?? -1) >= 0.04
       ) {
         totalLean = "UNDER_CANDIDATE";
-      } else if (Math.abs(diff) >= 0.35 || marketSplit) {
-        totalLean = "WATCH";
+      }
+    }
+
+    const spreadAway = boardEvent?.markets?.spread?.away || null;
+    const spreadHome = boardEvent?.markets?.spread?.home || null;
+    const awaySpreadLine = num(spreadAway?.consensus?.line);
+    const homeSpreadLine = num(spreadHome?.consensus?.line);
+
+    const spreadBookLines = [
+      ...Object.values(spreadAway?.books || {}),
+      ...Object.values(spreadHome?.books || {}),
+    ]
+      .filter((x) => x && x.available !== false)
+      .map((x) => num(x.line))
+      .filter((x) => x !== null);
+    const uniqueSpreadLines = [...new Set(spreadBookLines.map((x) => Number(x)))];
+    const spreadMarketSplit =
+      uniqueSpreadLines.length > 2 ||
+      (awaySpreadLine !== null &&
+        homeSpreadLine !== null &&
+        Math.abs(awaySpreadLine + homeSpreadLine) > 1e-9);
+
+    const rawAwayEnvironmentRuns =
+      awayRuns.neutralRuns * environment.totalMultiplier;
+    const rawHomeEnvironmentRuns =
+      homeRuns.neutralRuns * environment.totalMultiplier;
+    const rawTeamTotal =
+      rawAwayEnvironmentRuns + rawHomeEnvironmentRuns;
+    const teamScale =
+      rawTeamTotal > 0 ? projectedTotal / rawTeamTotal : 1;
+    const projectedAwayRuns = rawAwayEnvironmentRuns * teamScale;
+    const projectedHomeRuns = rawHomeEnvironmentRuns * teamScale;
+
+    const awaySpreadOutcome =
+      awaySpreadLine === null
+        ? null
+        : spreadOutcomeProbability(
+            projectedAwayRuns,
+            projectedHomeRuns,
+            "away",
+            awaySpreadLine
+          );
+    const homeSpreadOutcome =
+      homeSpreadLine === null
+        ? null
+        : spreadOutcomeProbability(
+            projectedAwayRuns,
+            projectedHomeRuns,
+            "home",
+            homeSpreadLine
+          );
+
+    const spreadPairComparable =
+      awaySpreadLine !== null &&
+      homeSpreadLine !== null &&
+      Math.abs(awaySpreadLine + homeSpreadLine) <= 1e-9;
+
+    const marketAwaySpreadFair = spreadPairComparable
+      ? noVigProbability(
+          spreadAway?.consensus?.odds,
+          spreadHome?.consensus?.odds
+        )
+      : null;
+    const marketHomeSpreadFair =
+      marketAwaySpreadFair === null ? null : 1 - marketAwaySpreadFair;
+
+    const awaySpreadModel =
+      awaySpreadOutcome === null
+        ? null
+        : marketAwaySpreadFair === null
+        ? awaySpreadOutcome.win
+        : 0.65 * awaySpreadOutcome.win + 0.35 * marketAwaySpreadFair;
+    const homeSpreadModel =
+      homeSpreadOutcome === null
+        ? null
+        : marketHomeSpreadFair === null
+        ? homeSpreadOutcome.win
+        : 0.65 * homeSpreadOutcome.win + 0.35 * marketHomeSpreadFair;
+
+    const awaySpreadBest =
+      awaySpreadLine === null
+        ? { odds: null, book: null }
+        : bestOddsAtLine(spreadAway?.books || {}, awaySpreadLine);
+    const homeSpreadBest =
+      homeSpreadLine === null
+        ? { odds: null, book: null }
+        : bestOddsAtLine(spreadHome?.books || {}, homeSpreadLine);
+
+    const awaySpreadEv =
+      awaySpreadModel === null || awaySpreadOutcome === null
+        ? null
+        : expectedValueWithPush(
+            awaySpreadModel,
+            awaySpreadOutcome.push,
+            awaySpreadBest.odds
+          );
+    const homeSpreadEv =
+      homeSpreadModel === null || homeSpreadOutcome === null
+        ? null
+        : expectedValueWithPush(
+            homeSpreadModel,
+            homeSpreadOutcome.push,
+            homeSpreadBest.odds
+          );
+
+    const awaySpreadEdge =
+      awaySpreadModel === null || marketAwaySpreadFair === null
+        ? null
+        : awaySpreadModel - marketAwaySpreadFair;
+    const homeSpreadEdge =
+      homeSpreadModel === null || marketHomeSpreadFair === null
+        ? null
+        : homeSpreadModel - marketHomeSpreadFair;
+
+    let spreadDecision =
+      awaySpreadLine === null || homeSpreadLine === null
+        ? "PENDING"
+        : "PASS";
+
+    if (!spreadMarketSplit) {
+      if (
+        awaySpreadEdge !== null &&
+        awaySpreadEdge >= 0.025 &&
+        (awaySpreadEv ?? -1) >= 0.03
+      ) {
+        spreadDecision = "AWAY_CANDIDATE";
+      } else if (
+        homeSpreadEdge !== null &&
+        homeSpreadEdge >= 0.025 &&
+        (homeSpreadEv ?? -1) >= 0.03
+      ) {
+        spreadDecision = "HOME_CANDIDATE";
       }
     }
 
@@ -491,6 +704,69 @@ export default async function handler(req, res) {
         },
         decision: totalLean,
       },
+      spreadProjection: {
+        projectedAwayRuns: Number(projectedAwayRuns.toFixed(2)),
+        projectedHomeRuns: Number(projectedHomeRuns.toFixed(2)),
+        marketSplit: spreadMarketSplit,
+        availableBookLines: uniqueSpreadLines.sort((a, b) => a - b),
+        away: {
+          line: awaySpreadLine,
+          probability:
+            awaySpreadModel === null ? null : Number(awaySpreadModel.toFixed(4)),
+          rawPoissonProbability:
+            awaySpreadOutcome === null
+              ? null
+              : Number(awaySpreadOutcome.win.toFixed(4)),
+          pushProbability:
+            awaySpreadOutcome === null
+              ? null
+              : Number(awaySpreadOutcome.push.toFixed(4)),
+          marketFairProbability:
+            marketAwaySpreadFair === null
+              ? null
+              : Number(marketAwaySpreadFair.toFixed(4)),
+          edgePctPoints:
+            awaySpreadEdge === null
+              ? null
+              : Number((awaySpreadEdge * 100).toFixed(2)),
+          bestBook: awaySpreadBest.book,
+          bestOdds: awaySpreadBest.odds,
+          evPct:
+            awaySpreadEv === null
+              ? null
+              : Number((awaySpreadEv * 100).toFixed(2)),
+        },
+        home: {
+          line: homeSpreadLine,
+          probability:
+            homeSpreadModel === null ? null : Number(homeSpreadModel.toFixed(4)),
+          rawPoissonProbability:
+            homeSpreadOutcome === null
+              ? null
+              : Number(homeSpreadOutcome.win.toFixed(4)),
+          pushProbability:
+            homeSpreadOutcome === null
+              ? null
+              : Number(homeSpreadOutcome.push.toFixed(4)),
+          marketFairProbability:
+            marketHomeSpreadFair === null
+              ? null
+              : Number(marketHomeSpreadFair.toFixed(4)),
+          edgePctPoints:
+            homeSpreadEdge === null
+              ? null
+              : Number((homeSpreadEdge * 100).toFixed(2)),
+          bestBook: homeSpreadBest.book,
+          bestOdds: homeSpreadBest.odds,
+          evPct:
+            homeSpreadEv === null
+              ? null
+              : Number((homeSpreadEv * 100).toFixed(2)),
+        },
+        decision: spreadDecision,
+        note:
+          "Run-line probabilities use a Poisson score model based on the park/weather-adjusted team run means, shrunk 35% toward the exact current no-vig spread market when comparable. Split spread lines are not auto-promoted.",
+      },
       moneylineEnvironment,
       methodology: {
         temperature:
@@ -502,7 +778,7 @@ export default async function handler(req, res) {
         roof:
           "outdoor weather adjustments are suppressed at dome/retractable venues unless roof status is explicitly known",
         calibration:
-          "the independent park/weather total is shrunk 35% toward the live market before betting thresholds are applied; split total lines are never auto-promoted",
+          "the independent park/weather total is shrunk 35% toward the live market before betting thresholds are applied; run-line probabilities use a Poisson team-score model shrunk 35% toward the exact no-vig spread market; split lines are never auto-promoted",
       },
     });
   } catch (err) {
