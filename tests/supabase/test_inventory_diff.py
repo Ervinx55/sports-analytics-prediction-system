@@ -77,7 +77,13 @@ def test_production_drift_workflow_is_read_only_and_pinned():
 
     assert "workflow_dispatch" in workflow
     assert "schedule:" in workflow
-    assert "version: 2.98.2" in workflow
+    import json
+
+    toolchain = json.loads(
+        (ROOT / "supabase" / "manifests" / "toolchain.json").read_text()
+    )
+    cli = next(item for item in toolchain["items"] if item["name"] == "supabase-cli")
+    assert f"version: {cli['version']}" in workflow
     assert "version: latest" not in workflow
     assert "python scripts/supabase/production_drift.py" in workflow
 
