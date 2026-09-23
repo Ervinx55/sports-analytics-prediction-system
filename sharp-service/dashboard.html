@@ -134,6 +134,7 @@
 
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
+    <button class="tab" data-tab="plays">Plays</button>
     <button class="tab" data-tab="market">Market</button>
     <button class="tab" data-tab="sharp">Sharp Gate</button>
     <button class="tab" data-tab="results">Results & CLV</button>
@@ -146,6 +147,42 @@
     <div id="finalPlayList"><div class="empty loading">Loading final plays…</div></div>
     <div class="section-title"><h2>Today’s Board</h2><p id="todayStamp"></p></div>
     <div id="candidateList"><div class="empty loading">Loading audited candidates…</div></div>
+  </section>
+
+  <section class="section" id="plays">
+    <div class="section-title"><h2>Plays</h2><p>only sharp-gate qualified wagers</p></div>
+
+    <div class="card">
+      <div class="candidate-head">
+        <div>
+          <div class="match">Singles</div>
+          <div class="pick">Only FINAL PLAY wagers appear here.</div>
+        </div>
+        <span class="badge play" id="singleCountBadge">0 QUALIFIED</span>
+      </div>
+      <div id="singlePlayList" style="margin-top:10px">
+        <div class="empty">No singles have cleared the complete sharp gate yet.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="candidate-head">
+        <div>
+          <div class="match">Parlays</div>
+          <div class="pick">Built only from qualified singles on different games.</div>
+        </div>
+        <span class="badge neutral">2-LEG DEFAULT</span>
+      </div>
+      <div id="parlayList" style="margin-top:10px">
+        <div class="empty">A parlay requires at least two qualified singles.</div>
+      </div>
+    </div>
+
+    <div class="card" style="box-shadow:none">
+      <div class="reason" style="margin-top:0">
+        <strong>Parlay rule:</strong> no WATCH legs, no PASS legs, no same-game combinations, and no forced parlay when fewer than two FINAL PLAY singles qualify. Combined probability/EV are estimates that assume the legs are independent.
+      </div>
+    </div>
   </section>
 
   <section class="section" id="market">
@@ -277,6 +314,115 @@
     return '<span class="badge watch">WATCH</span>';
   }
 
+  function americanToDecimal(odds){
+    const o=Number(odds);
+    if(!Number.isFinite(o) || o===0) return null;
+    return o>0 ? 1+o/100 : 1+100/Math.abs(o);
+  }
+
+  function decimalToAmerican(decimal){
+    const d=Number(decimal);
+    if(!Number.isFinite(d) || d<=1) return null;
+    return d>=2 ? Math.round((d-1)*100) : Math.round(-100/(d-1));
+  }
+
+  function playEv(prob, odds){
+    const d=americanToDecimal(odds);
+    const p=Number(prob);
+    if(!d || !Number.isFinite(p)) return null;
+    return p*d-1;
+  }
+
+  function renderPlays(gate){
+    const singles=[...(gate?.finalPlays||[])].filter(g=>g.final_status==="FINAL_PLAY");
+
+    $("singleCountBadge").textContent=singles.length+" QUALIFIED";
+
+    if(!singles.length){
+      $("singlePlayList").innerHTML='<div class="empty">No singles have cleared the complete sharp gate yet.</div>';
+      $("parlayList").innerHTML='<div class="empty">A parlay requires at least two qualified singles.</div>';
+      return;
+    }
+
+    const ranked=[...singles].sort((a,b)=>{
+      const ea=playEv(a.model_probability,a.mainstream_odds) ?? -999;
+      const eb=playEv(b.model_probability,b.mainstream_odds) ?? -999;
+      return eb-ea;
+    });
+
+    $("singlePlayList").innerHTML=ranked.map((g,i)=>{
+      const ev=playEv(g.model_probability,g.mainstream_odds);
+      return `
+        <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
+          <div class="candidate-head">
+            <div>
+              <div class="match">#${i+1} · ${esc(g.side_name)}</div>
+              <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
+            </div>
+            <span class="badge play">SINGLE</span>
+          </div>
+          <div class="grid4">
+            <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.mainstream_odds)}</div><div class="small">${esc(g.mainstream_book||"—")}</div></div>
+            <div class="stat"><div class="k">Model Prob.</div><div class="v">${fmtPct(g.model_probability)}</div></div>
+            <div class="stat"><div class="k">vs BookMaker (pp)</div><div class="v positive">${fmtPP(g.model_vs_bookmaker_pp)}</div></div>
+            <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(ev)>=0?"positive":"negative"}">${ev==null?"—":(ev>=0?"+":"")+(ev*100).toFixed(2)+"%"}</div></div>
+          </div>
+          <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)} · ${esc(g.reason||"Cleared the sharp gate.")}</div>
+        </div>`;
+    }).join("");
+
+    const pairs=[];
+    for(let i=0;i<ranked.length;i++){
+      for(let j=i+1;j<ranked.length;j++){
+        const a=ranked[i], b=ranked[j];
+        if(a.event_id && b.event_id && a.event_id===b.event_id) continue;
+
+        const da=americanToDecimal(a.mainstream_odds);
+        const db=americanToDecimal(b.mainstream_odds);
+        const pa=Number(a.model_probability);
+        const pb=Number(b.model_probability);
+        if(!da || !db || !Number.isFinite(pa) || !Number.isFinite(pb)) continue;
+
+        const dec=da*db;
+        const combinedProb=pa*pb;
+        const ev=combinedProb*dec-1;
+        pairs.push({
+          a,b,
+          decimal:dec,
+          odds:decimalToAmerican(dec),
+          probability:combinedProb,
+          ev
+        });
+      }
+    }
+
+    pairs.sort((x,y)=>y.ev-x.ev);
+    const playablePairs=pairs.filter(x=>x.ev>0).slice(0,5);
+
+    if(!playablePairs.length){
+      $("parlayList").innerHTML='<div class="empty">No positive-EV 2-leg parlay qualifies from the current FINAL PLAY singles.</div>';
+      return;
+    }
+
+    $("parlayList").innerHTML=playablePairs.map((p,i)=>`
+      <div class="card" style="box-shadow:none;margin:8px 0">
+        <div class="candidate-head">
+          <div>
+            <div class="match">Parlay #${i+1}</div>
+            <div class="pick">${esc(p.a.side_name)} + ${esc(p.b.side_name)}</div>
+          </div>
+          <span class="badge neutral">${fmtOdds(p.odds)}</span>
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Leg 1</div><div class="v">${esc(p.a.side_name)}</div><div class="small">${fmtOdds(p.a.mainstream_odds)}</div></div>
+          <div class="stat"><div class="k">Leg 2</div><div class="v">${esc(p.b.side_name)}</div><div class="small">${fmtOdds(p.b.mainstream_odds)}</div></div>
+          <div class="stat"><div class="k">Combined Prob.</div><div class="v">${fmtPct(p.probability)}</div></div>
+          <div class="stat"><div class="k">Approx. EV</div><div class="v ${p.ev>=0?"positive":"negative"}">${(p.ev>=0?"+":"")+(p.ev*100).toFixed(2)+"%"}</div></div>
+        </div>
+        <div class="reason">Approximate combined probability assumes independent games. If either single falls below its playable threshold, this parlay is no longer qualified.</div>
+      </div>`).join("");
+  }
+
   function renderFinalPlays(rows){
     if(!rows?.length){
       $("finalPlayList").innerHTML='<div class="empty">No wager has cleared the complete sharp gate yet.</div>';
@@ -302,6 +448,7 @@
   }
 
   function renderSharpGate(gate){
+    renderPlays(gate);
     const latest=gate?.latest||[];
     const history=gate?.history||[];
     renderFinalPlays(gate?.finalPlays||[]);
