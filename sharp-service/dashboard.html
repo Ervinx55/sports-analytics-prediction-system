@@ -926,6 +926,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
+        ${fusionPanel(p)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
       </div>`).join("");
@@ -1024,6 +1025,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
+          ${fusionPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
           <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
         </div>`).join("");
@@ -1040,6 +1042,7 @@
             <span class="badge watch">PENDING</span>
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
+          ${fusionPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         </div>`).join("");
     }
@@ -1054,6 +1057,7 @@
             <div class="main">${esc(p.label)}</div>
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
+            ${fusionPanel(p)}
             <div class="small" style="margin-top:4px"><strong>STATS:</strong> ${esc(propStats(p))}</div>
           </div>
           <div><div class="small">Decision</div>${statusBadge(p)}</div>
@@ -1333,13 +1337,14 @@
     );
   }
 
-  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal){
+  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
     const types=marketCal?.byMarketType||{};
     const sharpClasses=sharpDiagCal?.byClassification||{};
     const fusionCodes=fusionCal?.byConflictCode||{};
+    const propFusionCodes=propFusionCal?.byConflictCode||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1348,6 +1353,16 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const propFusionCard=(label,key)=>{
+      const m=propFusionCodes[key]||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${m.graded??0} graded</div>
+          <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · good blocks ${m.goodBlocks??0} · missed wins ${m.missedWins??0}</div>
+          <div class="hint">${esc(m.sampleStatus||"INSUFFICIENT_SAMPLE")} · ${m.rows??0} captured</div>
         </div>`;
     };
     const fusionCard=(label,key)=>{
@@ -1409,6 +1424,25 @@
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>Fusion policy:</strong> explanatory only. A conflict code needs at least 100 graded observations plus stable closing-line behavior before it can be considered for production decision logic.</div>
       </div>
+      <div class="section-title" style="margin-top:18px"><h2>Player Prop Fusion Calibration</h2><p>role, market quality, and environment vs outcomes</p></div>
+      <div class="cal-grid">
+        ${propFusionCard("Hitter Signals Aligned","HITTER_PROP_ALL_SIGNALS_ALIGNED")}
+        ${propFusionCard("Pitcher Signals Aligned","PITCHER_PROP_ALL_SIGNALS_ALIGNED")}
+        ${propFusionCard("Market Coverage Fail","MARKET_COVERAGE_FAIL")}
+        ${propFusionCard("Edge / EV Fail","EDGE_EV_FAIL")}
+        ${propFusionCard("Data Quality Fail","DATA_QUALITY_FAIL")}
+        ${propFusionCard("Hitter Not Starting","PLAYER_NOT_STARTING")}
+        ${propFusionCard("Pitcher Not Starter","PITCHER_NOT_CONFIRMED_STARTER")}
+        ${propFusionCard("Starter Leash Watch","STARTER_LEASH_WATCH")}
+        ${propFusionCard("Opposing Hand Remodel","OPPOSING_HAND_CHANGED_REMODEL")}
+        ${propFusionCard("Opposing Starter Remodel","OPPOSING_STARTER_CHANGED_REMODEL")}
+        ${propFusionCard("Catcher Remodel","CATCHER_CHANGED_REMODEL")}
+        ${propFusionCard("Weather Opportunity Risk","WEATHER_OPPORTUNITY_RISK")}
+        ${propFusionCard("Adverse Environment","MATERIAL_ENVIRONMENT_ADVERSE")}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Prop fusion policy:</strong> explanatory only. Hitter and pitcher conflict codes stay separate and need at least 100 graded outcomes per code before promotion is considered.</div>
+      </div>
       <div class="section-title" style="margin-top:18px"><h2>Sharp Disagreement Calibration</h2><p>shadow diagnosis vs closing value</p></div>
       <div class="cal-grid">
         ${sharpDiagCard("Consensus OK","CONSENSUS_OK")}
@@ -1468,7 +1502,7 @@
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration);
     renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
