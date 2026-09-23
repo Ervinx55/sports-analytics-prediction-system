@@ -214,7 +214,7 @@
       "version": "20260923213738",
       "name": "recover_pipeline_health",
       "path": "supabase/migrations/20260923213738_recover_pipeline_health.sql",
-      "sha256": "450d3d2f1d8f1fdcd77abebcc8a5a1347dd6985c678cb676551d0623b56367b8",
+      "sha256": "a19ea5bd6ef0961afb077089c0f59555f0a89856639611859f3ed734da5d6eae",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
@@ -223,7 +223,7 @@
       "version": "20260923213739",
       "name": "recover_posthistory_security_and_cron",
       "path": "supabase/migrations/20260923213739_recover_posthistory_security_and_cron.sql",
-      "sha256": "67e834338d8fa218908de464b2c7dded9b33ef4c2f57054f9e0398474d2904a4",
+      "sha256": "33b48553238e0728cb1a6ec8e23db10787c61cfd10b97a4f86e4390c81a66900",
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
