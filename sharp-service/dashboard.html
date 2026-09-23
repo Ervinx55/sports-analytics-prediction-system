@@ -1336,22 +1336,46 @@
     $("healthText").textContent=bad ? "Some data sources are degraded" : "Live system connected";
   }
 
+  async function fetchDashboardData(){
+    let lastError=null;
+    for(let attempt=1;attempt<=2;attempt++){
+      const controller=new AbortController();
+      const timer=setTimeout(()=>controller.abort(),20000);
+      try{
+        const r=await fetch("/api/dashboard?sport=MLB&hours=36&t="+Date.now(),{
+          cache:"no-store",
+          signal:controller.signal
+        });
+        if(!r.ok) throw new Error("Dashboard API returned "+r.status);
+        return await r.json();
+      }catch(err){
+        lastError=err;
+        if(attempt<2) await new Promise(resolve=>setTimeout(resolve,900));
+      }finally{
+        clearTimeout(timer);
+      }
+    }
+    throw lastError || new Error("Dashboard request failed");
+  }
+
   async function load(){
     $("refreshBtn").disabled=true;
     $("refreshBtn").textContent="Loading…";
     try{
-      const r=await fetch("/api/dashboard?sport=MLB&hours=36&t="+Date.now(),{cache:"no-store"});
-      if(!r.ok) throw new Error("Dashboard API returned "+r.status);
-      const data=await r.json();
+      const data=await fetchDashboardData();
       render(data);
     }catch(err){
       $("healthDot").classList.add("bad");
-      $("healthText").textContent="Dashboard connection failed";
-      $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      for(const id of ["allPlayWins","allPlayLosses","allPlayPushes","teamPlayWins","teamPlayLosses","teamPlayPushes","teamGoodPasses","teamMissedWins","propPlayWins","propPlayLosses","propPlayPushes","propGoodPasses","propMissedWins"]){
-        $(id).innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      if(DATA){
+        $("healthText").textContent="Live refresh failed — showing last successful data";
+      }else{
+        $("healthText").textContent="Dashboard connection failed";
+        $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+        $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+        $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+        for(const id of ["allPlayWins","allPlayLosses","allPlayPushes","teamPlayWins","teamPlayLosses","teamPlayPushes","teamGoodPasses","teamMissedWins","teamHardPasses","propPlayWins","propPlayLosses","propPlayPushes","propGoodPasses","propMissedWins","propHardPasses"]){
+          $(id).innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+        }
       }
     }finally{
       $("refreshBtn").disabled=false;
