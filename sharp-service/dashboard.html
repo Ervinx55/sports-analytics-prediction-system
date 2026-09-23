@@ -1324,17 +1324,30 @@
       </div>`;
   }
 
-  function renderSystem(sys){
+  function renderSystem(sys,sharpHealth){
     const h=sys?.sourceHealth||{};
     $("sourceHealth").innerHTML=Object.entries(h).map(([name,v])=>`
       <div class="source"><span class="name">${esc(name)}</span><span class="${v.ok?"ok":"badtext"}">${v.ok?"ONLINE":"ERROR"}</span></div>
     `).join("");
+
+    const ss=sharpHealth?.sources||{};
+    const sharpRows=Object.entries(ss).map(([name,v])=>{
+      const status=String(v?.status||"UNKNOWN");
+      const healthy=status==="ONLINE";
+      const partial=status==="NO_PUBLIC_UPCOMING_QUOTES"||status==="API_NOT_CONNECTED";
+      const cls=healthy?"ok":partial?"":"badtext";
+      const age=v?.ageMinutes==null?"":` · ${Number(v.ageMinutes).toFixed(0)}m old`;
+      return `<div class="source"><span class="name">Sharp: ${esc(name)}</span><span class="${cls}">${esc(status)}${esc(age)}</span></div>`;
+    }).join("");
+    if(sharpRows) $("sourceHealth").innerHTML += sharpRows;
+
     $("modelState").innerHTML=`
       <div><strong>Model:</strong> ${esc(sys?.modelVersion||"—")}</div>
       <div><strong>Weights:</strong> ${sys?.frozenWeights?"Frozen for audit":"Adjustable"}</div>
       <div><strong>Latest audit:</strong> ${fmtTime(sys?.latestAuditAt)}</div>
       <div><strong>Latest market snapshot:</strong> ${fmtTime(sys?.latestSnapshotAt)}</div>
-      <div style="margin-top:8px;color:var(--muted)">Sharp Gate Watch runs separately and can promote a READY candidate only after direct/secondary sharp confirmation. Sharp-check decisions are now stored persistently and shown in the Sharp Gate tab.</div>
+      <div><strong>Sharp refresh:</strong> every ${sharpHealth?.refreshCadenceMinutes??5} minutes</div>
+      <div style="margin-top:8px;color:var(--muted)">BookMaker is captured directly from its public MLB odds feed. Circa is secondary/public coverage when VSiN exposes the matchup. Pinnacle remains reserved for authorized API access; automated scraping is disabled.</div>
     `;
   }
 
@@ -1356,7 +1369,7 @@
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
     renderCalibration(data.calibration,data.marketCalibration);
-    renderSystem(data.system);
+    renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
     $("healthDot").classList.toggle("bad",bad);
