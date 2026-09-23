@@ -576,6 +576,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "player-prop-fusion-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "d21254b31fbf656bf748e0c130d0149f25f628e514f8f5ddd3ab9c4381aa3b97",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/player-prop-fusion-status/index.ts",
+          "name": "index.ts",
+          "sha256": "58b424eb3e01b6a54e1b744ec81ac6cb80c02397c67c5689cbc23747846521e6"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "player-prop-fusion-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "9d405cd657c46e4f6ceac090d1d25a51b1775f064ba1c605709101dfdfeafabb",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/player-prop-fusion-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "f7ef535f2102cbb79c1b6e577adaa7f594c45f89489cff1acbe11a5d3823b795"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-player-prop-clv",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "a24834ff01bf8a222a7f966ec6e53f3ef9a9ac081c9ec4acd85d53d97aefc92a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-player-prop-clv/index.ts",
+          "name": "index.ts",
+          "sha256": "fa97de211870bc85071b6c2b5c5b3266949c3173510c11e43dee511f56b628ce"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "player-prop-clv-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "da80072ba8f4d7205a74be3a5b9d2488356d67aae96ae7d9aeceab94e7f6df9b",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/player-prop-clv-status/index.ts",
+          "name": "index.ts",
+          "sha256": "f6e58e78d234f1dddb60a5da2e1029751894573a2b3e139035a3304502ac360f"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "player-prop-clv-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "7210c41b9e5ebcef183bdec789b4cdcd571bef5c915c238afa5ca9a9cbffeb2d",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/player-prop-clv-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "795a8744dc786347fdda3146d121598a1b48dab910ca6ebe344969256fda3b1b"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "parlay-correlation-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b4ab5a9ed92fe362f2c60ffb1d34373a43a27332250699d4326bb35a4c51ab99",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/parlay-correlation-status/index.ts",
+          "name": "index.ts",
+          "sha256": "5676c93692abfb2998f7a621e78857707bbda61a8eaad9895c111455fe75dd63"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }

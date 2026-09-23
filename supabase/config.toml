@@ -108,3 +108,21 @@ verify_jwt = false
 
 [functions.decision-fusion-calibration]
 verify_jwt = false
+
+[functions.player-prop-fusion-status]
+verify_jwt = false
+
+[functions.player-prop-fusion-calibration]
+verify_jwt = false
+
+[functions.refresh-player-prop-clv]
+verify_jwt = true
+
+[functions.player-prop-clv-status]
+verify_jwt = false
+
+[functions.player-prop-clv-calibration]
+verify_jwt = false
+
+[functions.parlay-correlation-status]
+verify_jwt = false
