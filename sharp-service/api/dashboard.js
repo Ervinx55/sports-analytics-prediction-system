@@ -80,6 +80,8 @@ export default async function handler(req, res) {
     decisionFusionCalibration: `${BASE}/decision-fusion-calibration?days=90`,
     playerPropFusionCalibration: `${BASE}/player-prop-fusion-calibration?days=90`,
     playerPropClvCalibration: `${BASE}/player-prop-clv-calibration?days=90`,
+    parlayCorrelation: `${BASE}/parlay-correlation-status?sport=${encodeURIComponent(sport)}`,
+    parlayCorrelationCalibration: `${BASE}/parlay-correlation-calibration?days=90`,
     sharpSourceHealth: `${BASE}/sharp-source-health`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
@@ -88,7 +90,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, sharpSourceHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, sharpSourceHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -101,6 +103,8 @@ export default async function handler(req, res) {
       fetchJson(urls.decisionFusionCalibration),
       fetchJson(urls.playerPropFusionCalibration),
       fetchJson(urls.playerPropClvCalibration),
+      fetchJson(urls.parlayCorrelation),
+      fetchJson(urls.parlayCorrelationCalibration),
       fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
@@ -119,6 +123,8 @@ export default async function handler(req, res) {
     decisionFusionCalibration: settled(decisionFusionCalibration),
     playerPropFusionCalibration: settled(playerPropFusionCalibration),
     playerPropClvCalibration: settled(playerPropClvCalibration),
+    parlayCorrelation: settled(parlayCorrelation),
+    parlayCorrelationCalibration: settled(parlayCorrelationCalibration),
     sharpSourceHealth: settled(sharpSourceHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
@@ -192,6 +198,13 @@ export default async function handler(req, res) {
     decisionFusionCalibration: sources.decisionFusionCalibration.data || null,
     playerPropFusionCalibration: sources.playerPropFusionCalibration.data || null,
     playerPropClvCalibration: sources.playerPropClvCalibration.data || null,
+    parlayCorrelationCalibration: sources.parlayCorrelationCalibration.data || null,
+    parlayCorrelation: sources.parlayCorrelation.data || {
+      summary: { pairs: 0, recommendedIndependentPairs: 0, sameGameAuditPairs: 0, blockedPairs: 0 },
+      recommended: [],
+      sameGameAudit: [],
+      blocked: []
+    },
     grades: sources.results.data?.grades || [],
     results: sources.results.data?.results || [],
     movements: movementList,

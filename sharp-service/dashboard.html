@@ -218,10 +218,10 @@
     <div class="card">
       <div class="candidate-head">
         <div>
-          <div class="match">Team Market Parlays</div>
-          <div class="pick">Built only from qualified team-market singles on different games.</div>
+          <div class="match">Correlation-Aware Parlays</div>
+          <div class="pick">Qualified team markets and player props are combined only when the correlation engine permits an independence estimate.</div>
         </div>
-        <span class="badge neutral">2-LEG DEFAULT</span>
+        <span class="badge neutral">2-LEG CORRELATION GATE</span>
       </div>
       <div id="parlayList" style="margin-top:10px">
         <div class="empty">A team-market parlay requires at least two qualified singles.</div>
@@ -230,7 +230,7 @@
 
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        <strong>Separation rule:</strong> player props never get mixed into team-market parlays here. No PENDING or PASS legs are used, and no same-game team-market combinations are forced. Combined parlay probability/EV are estimates that assume the legs are independent.
+        <strong>Correlation rule:</strong> singles remain separated by model, but the parlay engine may combine qualified legs across different games. Same-game positive/negative relationships are stored for calibration only; redundant or contradictory legs are blocked. Independence is an estimate, not an assertion of exact statistical independence.
       </div>
     </div>
   </section>
@@ -849,84 +849,64 @@
     return p*d-1;
   }
 
-  function renderPlays(card){
+  function renderPlays(card, parlayCorrelation){
     const singles=[...(card?.plays||[])];
-
     $("singleCountBadge").textContent=singles.length+" QUALIFIED";
+    const ranked=[...singles].sort((a,b)=>Number(b.ev_pct??-999)-Number(a.ev_pct??-999));
 
-    if(!singles.length){
-      $("singlePlayList").innerHTML='<div class="empty">No singles are labeled PLAY right now.</div>';
-      $("parlayList").innerHTML='<div class="empty">A parlay requires at least two qualified PLAY singles.</div>';
-      return;
-    }
-
-    const ranked=[...singles].sort((a,b)=>
-      Number(b.ev_pct??-999)-Number(a.ev_pct??-999)
-    );
-
-    $("singlePlayList").innerHTML=ranked.map((g,i)=>`
-      <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
-        <div class="candidate-head">
-          <div>
-            <div class="match">#${i+1} · ${esc(g.market_label)}</div>
-            <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
+    if(!ranked.length){
+      $("singlePlayList").innerHTML='<div class="empty">No team-market singles are labeled PLAY right now.</div>';
+    } else {
+      $("singlePlayList").innerHTML=ranked.map((g,i)=>`
+        <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
+          <div class="candidate-head">
+            <div>
+              <div class="match">#${i+1} · ${esc(g.market_label)}</div>
+              <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
+            </div>
+            <span class="badge play">PLAY</span>
           </div>
-          <span class="badge play">PLAY</span>
-        </div>
-        <div class="grid4">
-          <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
-          <div class="stat">${probCompare(g.model_probability,g.market_fair_probability)}</div>
-          <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
-          <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
-        </div>
-        <div class="why play">${esc(marketWhy(g))}</div>
-        ${fusionPanel(g)}
-        <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
-        <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
-      </div>`).join("");
-
-    const pairs=[];
-    for(let i=0;i<ranked.length;i++){
-      for(let j=i+1;j<ranked.length;j++){
-        const a=ranked[i], b=ranked[j];
-        if(a.event_id && b.event_id && a.event_id===b.event_id) continue;
-        const da=americanToDecimal(a.best_odds);
-        const db=americanToDecimal(b.best_odds);
-        const pa=Number(a.model_probability);
-        const pb=Number(b.model_probability);
-        if(!da || !db || !Number.isFinite(pa) || !Number.isFinite(pb)) continue;
-        const dec=da*db;
-        const combinedProb=pa*pb;
-        const ev=combinedProb*dec-1;
-        pairs.push({a,b,odds:decimalToAmerican(dec),probability:combinedProb,ev});
-      }
+          <div class="grid4">
+            <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
+            <div class="stat">${probCompare(g.model_probability,g.market_fair_probability)}</div>
+            <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
+            <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
+          </div>
+          <div class="why play">${esc(marketWhy(g))}</div>
+          ${fusionPanel(g)}
+          <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
+          <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
+        </div>`).join("");
     }
 
-    pairs.sort((x,y)=>y.ev-x.ev);
-    const playablePairs=pairs.filter(x=>x.ev>0).slice(0,5);
-
-    if(!playablePairs.length){
-      $("parlayList").innerHTML='<div class="empty">No positive-EV 2-leg parlay qualifies from the current PLAY singles.</div>';
+    const summary=parlayCorrelation?.summary||{};
+    const recommended=[...(parlayCorrelation?.recommended||[])];
+    if(!recommended.length){
+      $("parlayList").innerHTML=`
+        <div class="empty">No correlation-cleared positive-EV 2-leg parlay is available right now.</div>
+        <div class="reason"><strong>Correlation audit:</strong> ${summary.sameGameAuditPairs??0} same-game pairs under audit · ${summary.blockedPairs??0} blocked redundant/conflicting pairs.</div>`;
       return;
     }
 
-    $("parlayList").innerHTML=playablePairs.map((p,i)=>`
+    $("parlayList").innerHTML=recommended.slice(0,8).map((p,i)=>`
       <div class="card" style="box-shadow:none;margin:8px 0">
         <div class="candidate-head">
           <div>
-            <div class="match">Parlay #${i+1}</div>
-            <div class="pick">${esc(p.a.market_label)} + ${esc(p.b.market_label)}</div>
+            <div class="match">Parlay #${i+1} · ${esc(String(p.pair_type||"").replaceAll("_"," + "))}</div>
+            <div class="pick">${esc(p.leg_a_label)} + ${esc(p.leg_b_label)}</div>
           </div>
-          <span class="badge neutral">${fmtOdds(p.odds)}</span>
+          <span class="badge neutral">${fmtOdds(p.independent_american_odds)}</span>
         </div>
         <div class="grid4">
-          <div class="stat"><div class="k">Leg 1</div><div class="v">${esc(p.a.market_label)}</div><div class="small">${fmtOdds(p.a.best_odds)}</div></div>
-          <div class="stat"><div class="k">Leg 2</div><div class="v">${esc(p.b.market_label)}</div><div class="small">${fmtOdds(p.b.best_odds)}</div></div>
-          <div class="stat"><div class="k">Combined Prob.</div><div class="v">${fmtPct(p.probability)}</div></div>
-          <div class="stat"><div class="k">Approx. EV</div><div class="v ${p.ev>=0?"positive":"negative"}">${(p.ev>=0?"+":"")+(p.ev*100).toFixed(2)+"%"}</div></div>
+          <div class="stat"><div class="k">${esc(p.leg_a_kind)} Leg</div><div class="v">${esc(p.leg_a_label)}</div><div class="small">${fmtOdds(p.leg_a_odds)}</div></div>
+          <div class="stat"><div class="k">${esc(p.leg_b_kind)} Leg</div><div class="v">${esc(p.leg_b_label)}</div><div class="small">${fmtOdds(p.leg_b_odds)}</div></div>
+          <div class="stat"><div class="k">Independence Est.</div><div class="v">${fmtPct(p.independent_probability)}</div></div>
+          <div class="stat"><div class="k">Approx. EV</div><div class="v ${Number(p.independent_ev_pct)>=0?"positive":"negative"}">${p.independent_ev_pct==null?"—":(Number(p.independent_ev_pct)>=0?"+":"")+Number(p.independent_ev_pct).toFixed(2)+"%"}</div></div>
         </div>
-        <div class="reason">Approximate combined probability assumes independent games. If either leg stops being PLAY, this parlay is no longer qualified.</div>
-      </div>`).join("");
+        <div class="reason"><strong>Correlation:</strong> ${esc(p.relation_class)} · ${esc(p.strength)} · ${esc(p.reason)}</div>
+        <div class="small" style="margin-top:6px">Probability uses ${esc(p.leg_a_probability_basis||"model")} × ${esc(p.leg_b_probability_basis||"model")}. Same-game adjusted probability remains disabled until calibration.</div>
+      </div>`).join("")+
+      `<div class="reason"><strong>Audit:</strong> ${summary.sameGameAuditPairs??0} same-game pairs are being measured without recommendation · ${summary.blockedPairs??0} contradictory/redundant pairs blocked.</div>`;
   }
 
   function renderPropPlaysInPlays(card){
@@ -1372,7 +1352,7 @@
     );
   }
 
-  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal, propClvCal){
+  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal, propClvCal, parlayCal){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
@@ -1381,6 +1361,7 @@
     const fusionCodes=fusionCal?.byConflictCode||{};
     const propFusionCodes=propFusionCal?.byConflictCode||{};
     const propClvStats=propClvCal||{};
+    const parlayRelations=parlayCal?.byRelationClass||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1389,6 +1370,16 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const parlayCard=(label,key)=>{
+      const m=parlayRelations[key]||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${m.gradedPairs??0} graded pairs</div>
+          <div class="hint">Joint hit ${m.empiricalJointWinRate==null?"—":fmtPct(m.empiricalJointWinRate)} · independence ${m.averageIndependenceEstimate==null?"—":fmtPct(m.averageIndependenceEstimate)}</div>
+          <div class="hint">Excess ${m.excessVsIndependencePp==null?"—":fmtPP(m.excessVsIndependencePp)} · ${esc(m.sampleStatus||"INSUFFICIENT_SAMPLE")}</div>
         </div>`;
     };
     const propClvCard=(label,m)=>{
@@ -1501,6 +1492,17 @@
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>CLV rule:</strong> positive line CLV means our ticket had the better number at close; when the line is unchanged, positive price/fair-probability CLV means the market moved toward our side after the decision. CLV measures process quality, not whether one wager won.</div>
       </div>
+      <div class="section-title" style="margin-top:18px"><h2>Parlay Correlation Calibration</h2><p>empirical joint outcomes vs independence estimate</p></div>
+      <div class="cal-grid">
+        ${parlayCard("Cross-Game Low Known Correlation","CROSS_GAME_LOW_KNOWN_CORRELATION")}
+        ${parlayCard("Positive Correlation","POSITIVE_CORRELATION")}
+        ${parlayCard("Negative Correlation","NEGATIVE_CORRELATION")}
+        ${parlayCard("Unknown Same Game","UNKNOWN_SAME_GAME")}
+        ${parlayCard("Shared Team Across Events","CROSS_GAME_SHARED_TEAM")}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>Correlation policy:</strong> same-game adjusted joint probabilities stay disabled until a relation has at least 100 graded pairs. Duplicate and hard-conflict combinations remain blocked regardless of sample.</div>
+      </div>
       <div class="section-title" style="margin-top:18px"><h2>Sharp Disagreement Calibration</h2><p>shadow diagnosis vs closing value</p></div>
       <div class="cal-grid">
         ${sharpDiagCard("Consensus OK","CONSENSUS_OK")}
@@ -1553,14 +1555,14 @@
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
     renderMarketCard(data.marketCard||{});
-    renderPlays(data.marketCard||{});
+    renderPlays(data.marketCard||{},data.parlayCorrelation||{});
     renderPropPlaysInPlays(data.playerProps||{});
     renderPlayerProps(data.playerProps||{});
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration);
     renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
