@@ -3,7 +3,7 @@
   "items": [
     {
       "name": "supabase-cli",
-      "version": "2.98.2",
+      "version": "2.117.0",
       "reason": "Pinned known-good CLI for reconstruction and local/CI verification"
     }
   ]

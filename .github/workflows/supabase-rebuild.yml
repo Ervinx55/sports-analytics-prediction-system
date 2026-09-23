@@ -30,7 +30,7 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: 2.98.2
+          version: 2.117.0
 
       - name: Install PostgreSQL client
         run: |
