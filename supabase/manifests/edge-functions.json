@@ -288,6 +288,102 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-source-health",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "1ce87f58b20a1363aa9be1647afe51e5a45c7bd917912116f5f53c09117b0f89",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-source-health/index.ts",
+          "name": "index.ts",
+          "sha256": "6a044e8bcd4c154b8a04c03cedfc53f43755a7217e3e0128332138cc34f525b5"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "ingest-sharp-board",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "d00d70401c540252484213cbaa442f6d55550b386474cd52d603cbb4b81953fc",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/ingest-sharp-board/index.ts",
+          "name": "index.ts",
+          "sha256": "b4644cd801bb56809f67c1c41e075e6c4b76405ac22abcf4af47feba24c82b8b"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "capture-sharp-clv",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "2e22108cf4b8b723cbb5f0b85e0f930f8fe9ffe84f14eadd0a4921e07a869625",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-sharp-clv/index.ts",
+          "name": "index.ts",
+          "sha256": "32874d82b50232d0a22153a188a6f37c0a3e2f03e881d0e13b30af9b8f881787"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-movement",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "066b23b0de698383e800b88a4c284a849378e8e526b2c9bad1e14bb3c9db1e53",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-movement/index.ts",
+          "name": "index.ts",
+          "sha256": "67f9d3af671968f86a9e7754b6f2de2e7a4a394cc739e84f91583ff49e9314c6"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-uncertainty",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "c0f2f10b287fa0a2666e0a4fc0eaf66c0971a60cb3eb3100077d6596d1020cc9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-uncertainty/index.ts",
+          "name": "index.ts",
+          "sha256": "7071ef77cc1a7cce07997c2861f5750d2861aaa9d7b70b7bfb3d065301c23a60"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-policy-calibration",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b08c52885810eab842a121c4fde934ba9fb13150d8db2152ee030e267aa9a322",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-policy-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "e2b1727b042f70315f67336886c25acbb70b231e9b20f1d3b53387b56959be7c"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }

@@ -54,3 +54,21 @@ verify_jwt = false
 
 [functions.refresh-sharp-sources]
 verify_jwt = true
+
+[functions.sharp-source-health]
+verify_jwt = false
+
+[functions.ingest-sharp-board]
+verify_jwt = true
+
+[functions.capture-sharp-clv]
+verify_jwt = true
+
+[functions.sharp-movement]
+verify_jwt = false
+
+[functions.market-uncertainty]
+verify_jwt = false
+
+[functions.market-policy-calibration]
+verify_jwt = false
