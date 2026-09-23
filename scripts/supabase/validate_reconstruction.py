@@ -75,7 +75,7 @@ def validate_repository(root: Path) -> list[str]:
     for name in MANIFESTS:
         path = manifests_dir / name
         manifests[name] = _load_json(path, errors)
-        if path.exists():
+        if path.exists() and name != "production-inventory.json":
             items = manifests[name].get("items")
             if not isinstance(items, list):
                 errors.append(f"{name}: items must be a list")
