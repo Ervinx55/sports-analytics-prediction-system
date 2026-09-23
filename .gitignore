@@ -6,3 +6,7 @@ venv/
 .pytest_cache/
 .DS_Store
 .streamlit/secrets.toml
+supabase/.env
+supabase/.env.*
+supabase/.temp/
+supabase/.branches/
