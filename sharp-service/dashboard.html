@@ -61,10 +61,15 @@
     .ready{color:#04190e;background:var(--green)}.watch{color:#261800;background:var(--amber)}
     .pass{color:#2a070a;background:var(--red)}.play{color:#001d1a;background:var(--cyan)}
     .neutral{color:#e9f0ff;background:#2b3f5f}
+    .result-win{color:#04190e;background:var(--green)}
+    .result-loss{color:#2a070a;background:var(--red)}
+    .result-push{color:#eef3fb;background:#59687c}
+    .result-pass-good{color:#eef3fb;background:#46556b}
+    .result-pass-missed{color:#2a1700;background:var(--amber)}
     .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:13px}
     .stat{background:rgba(5,15,29,.52);border:1px solid rgba(50,77,113,.55);border-radius:11px;padding:9px}
     .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
-    .stat .v{font-size:15px;font-weight:800;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}
+    .stat .v{font-size:15px;font-weight:800;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}.push-result{color:#9aa8bc}
     .prob-compare{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
     .prob-box{border-radius:10px;padding:7px 8px;border:1px solid var(--line);min-width:0}
     .prob-box .prob-label{font-size:9px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}
@@ -998,7 +1003,7 @@
       $("propResultsList").innerHTML='<div class="card">'+results.slice(0,40).map(r=>`
         <div class="list-row">
           <div><div class="main">${esc(r.observation?.label||r.stat_id)}</div><div class="small">Actual: ${r.actual_value??"—"} · line ${r.line}</div></div>
-          <div><div class="small">Result</div><strong class="${r.outcome==="W"?"positive":r.outcome==="L"?"negative":""}">${esc(r.outcome||"—")}</strong></div>
+          <div><div class="small">Result</div><strong class="${r.outcome==="W"?"positive":r.outcome==="L"?"negative":"push-result"}">${esc(r.outcome||"—")}</strong></div>
           <div><div class="small">Side</div><strong>${esc(String(r.side||"").toUpperCase())}</strong></div>
           <div class="hide-mobile"><div class="small">Price</div><strong>${fmtOdds(r.observation?.best_odds)}</strong></div>
           <div class="hide-mobile"><div class="small">Model</div><strong>${fmtPct(r.observation?.model_probability)}</strong></div>
@@ -1034,9 +1039,21 @@
   }
 
   function resultClass(label){
-    if(label==="W" || label==="GOOD PASS") return "positive";
-    if(label==="L" || label==="MISSED WIN") return "negative";
+    if(label==="W") return "positive";
+    if(label==="L") return "negative";
+    if(label==="PUSH") return "push-result";
     return "";
+  }
+
+  function resultBadgeClass(r){
+    if(r?.decisionStatus==="PASS"){
+      if(r?.passEvaluation==="GOOD_PASS") return "result-pass-good";
+      if(r?.passEvaluation==="MISSED_WIN") return "result-pass-missed";
+      return "result-push";
+    }
+    if(r?.outcome==="W") return "result-win";
+    if(r?.outcome==="L") return "result-loss";
+    return "result-push";
   }
 
   function teamResultWhy(r){
@@ -1065,7 +1082,7 @@
             <div class="match">${esc(r.market_label)}</div>
             <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
           </div>
-          <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.resultLabel||r.outcome||"—")}</span>
+          <span class="badge ${resultBadgeClass(r)}">${esc(r.resultLabel||r.outcome||"—")}</span>
         </div>
         <div class="grid4">
           <div class="stat"><div class="k">Decision</div><div class="v">${esc(r.decisionStatus||"—")}</div></div>
@@ -1087,7 +1104,7 @@
             <div class="match">${esc(r.label)}</div>
             <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
           </div>
-          <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.resultLabel||r.outcome||"—")}</span>
+          <span class="badge ${resultBadgeClass(r)}">${esc(r.resultLabel||r.outcome||"—")}</span>
         </div>
         <div class="grid4">
           <div class="stat"><div class="k">Decision</div><div class="v">${esc(r.decisionStatus||"—")}</div></div>
@@ -1115,7 +1132,7 @@
                   <div class="match">${esc(r.label)}</div>
                   <div class="pick">PLAYER PROP · ${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
                 </div>
-                <span class="badge play">${esc(r.outcome||"—")}</span>
+                <span class="badge ${resultBadgeClass(r)}">${esc(r.outcome||"—")}</span>
               </div>
               <div class="grid4">
                 <div class="stat"><div class="k">Type</div><div class="v">PROP</div></div>
@@ -1134,7 +1151,7 @@
                 <div class="match">${esc(r.market_label)}</div>
                 <div class="pick">TEAM MARKET · ${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
               </div>
-              <span class="badge play">${esc(r.outcome||"—")}</span>
+              <span class="badge ${resultBadgeClass(r)}">${esc(r.outcome||"—")}</span>
             </div>
             <div class="grid4">
               <div class="stat"><div class="k">Type</div><div class="v">${esc(String(r.market_type||"TEAM").toUpperCase())}</div></div>
