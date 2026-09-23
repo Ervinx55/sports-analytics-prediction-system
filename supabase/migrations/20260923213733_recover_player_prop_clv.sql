@@ -95,13 +95,13 @@ CREATE OR REPLACE FUNCTION public.american_to_decimal_v1(p_odds integer)
  LANGUAGE sql
  IMMUTABLE STRICT
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
   select case
     when p_odds > 0 then 1 + p_odds::numeric/100
     when p_odds < 0 then 1 + 100::numeric/abs(p_odds)
     else null
   end
-$function$
+$function$;
 revoke execute on function public.american_to_decimal_v1(p_odds integer) from public, anon, authenticated;
 grant execute on function public.american_to_decimal_v1(p_odds integer) to service_role;
 
@@ -110,13 +110,13 @@ CREATE OR REPLACE FUNCTION public.decimal_to_american_v1(p_decimal numeric)
  LANGUAGE sql
  IMMUTABLE STRICT
  SET search_path TO 'pg_catalog', 'public'
-AS $function$
+AS $function$;
   select case
     when p_decimal <= 1 then null
     when p_decimal >= 2 then round((p_decimal-1)*100)::integer
     else round(-100/(p_decimal-1))::integer
   end
-$function$
+$function$;
 revoke execute on function public.decimal_to_american_v1(p_decimal numeric) from public, anon, authenticated;
 grant execute on function public.decimal_to_american_v1(p_decimal numeric) to service_role;
 
