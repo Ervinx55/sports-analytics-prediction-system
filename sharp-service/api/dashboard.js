@@ -70,15 +70,19 @@ export default async function handler(req, res) {
     alerts: `${BASE}/market-alerts?league=${encodeURIComponent(
       sport
     )}&hours=${hours}&minBooks=3`,
+    sharpGate: `${BASE}/sharp-gate-history?sport=${encodeURIComponent(
+      sport
+    )}&limit=50`,
   };
 
-  const [audit, calibration, results, movement, alerts] =
+  const [audit, calibration, results, movement, alerts, sharpGate] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
       fetchJson(urls.results),
       fetchJson(urls.movement),
       fetchJson(urls.alerts),
+      fetchJson(urls.sharpGate),
     ]);
 
   const sources = {
@@ -87,6 +91,7 @@ export default async function handler(req, res) {
     results: settled(results),
     movement: settled(movement),
     alerts: settled(alerts),
+    sharpGate: settled(sharpGate),
   };
 
   const sourceHealth = Object.fromEntries(
@@ -136,6 +141,10 @@ export default async function handler(req, res) {
         sources.results.data?.summary?.marketSnapshots ?? 0,
       alerts: alertList.length,
       movements: movementList.length,
+      finalPlays:
+        sources.sharpGate.data?.summary?.finalPlayCount ?? 0,
+      sharpGateChecks:
+        sources.sharpGate.data?.summary?.historyCount ?? 0,
     },
     candidates: activeCandidates,
     calibration: sources.calibration.data || null,
@@ -143,6 +152,12 @@ export default async function handler(req, res) {
     results: sources.results.data?.results || [],
     movements: movementList,
     alerts: alertList,
+    sharpGate: sources.sharpGate.data || {
+      latest: [],
+      history: [],
+      finalPlays: [],
+      summary: { latestCount: 0, historyCount: 0, finalPlayCount: 0 },
+    },
     system: {
       sourceHealth,
       latestAuditAt:
