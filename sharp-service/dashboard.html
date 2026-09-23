@@ -70,10 +70,15 @@
     .stat{background:rgba(5,15,29,.52);border:1px solid rgba(50,77,113,.55);border-radius:11px;padding:9px}
     .stat .k{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
     .stat .v{font-size:15px;font-weight:800;margin-top:3px}.positive{color:var(--green)}.negative{color:var(--red)}.push-result{color:#9aa8bc}
-    .prob-compare{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:5px}
-    .prob-box{border-radius:10px;padding:7px 8px;border:1px solid var(--line);min-width:0}
-    .prob-box .prob-label{font-size:9px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}
-    .prob-box .prob-value{font-size:17px;font-weight:900;margin-top:2px;letter-spacing:-.2px}
+    .prob-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:7px;width:100%}
+    .prob-box{border-radius:12px;padding:10px 8px;border:1px solid var(--line);min-width:0;text-align:center}
+    .prob-box .prob-label{font-size:9px;font-weight:900;letter-spacing:.75px;text-transform:uppercase;white-space:nowrap}
+    .prob-box .prob-value{font-size:20px;font-weight:900;margin-top:4px;letter-spacing:-.2px;white-space:nowrap}
+    .market-list-row{display:grid;grid-template-columns:minmax(0,1fr) 210px;gap:14px;padding:16px 0;border-bottom:1px solid rgba(45,68,99,.5);align-items:start}
+    .market-list-row:last-child{border-bottom:0}
+    .market-decision-panel{min-width:0}
+    .market-decision-box{text-align:center;padding:9px 8px;border:1px solid var(--line);border-radius:12px;background:rgba(8,22,39,.65)}
+    .market-decision-box .small{margin-bottom:4px}
     .model-prob{background:rgba(77,226,208,.10);border-color:rgba(77,226,208,.34)}
     .model-prob .prob-label{color:var(--cyan)}
     .market-prob{background:rgba(85,167,255,.10);border-color:rgba(85,167,255,.34)}
@@ -114,6 +119,11 @@
       .cal-grid{grid-template-columns:1fr 1fr}
       .list-row{grid-template-columns:minmax(130px,1.4fr) repeat(2,minmax(70px,.7fr))}
       .list-row .hide-mobile{display:none}
+      .market-list-row{grid-template-columns:minmax(0,1fr) 154px;gap:10px}
+      .market-list-row .why{font-size:13px;line-height:1.48;padding:10px}
+      .market-list-row .prob-box{padding:9px 5px}
+      .market-list-row .prob-box .prob-label{font-size:8px;letter-spacing:.55px}
+      .market-list-row .prob-box .prob-value{font-size:18px}
       h1{font-size:19px}
     }
   </style>
@@ -664,27 +674,23 @@
           </div>
           <div style="margin-top:10px">
             ${group.map(m=>`
-              <div class="list-row">
+              <div class="market-list-row">
                 <div>
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
                   <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
                 </div>
-                <div>
-                  <div class="small">Decision</div>
-                  ${statusBadge(m)}
-                </div>
-                <div>
+                <div class="market-decision-panel">
+                  <div class="market-decision-box">
+                    <div class="small">Decision</div>
+                    ${statusBadge(m)}
+                  </div>
                   ${probCompare(m.model_probability,m.market_fair_probability)}
-                </div>
-                <div class="hide-mobile">
-                  <div class="small">Edge</div>
-                  <strong class="${Number(m.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(m.edge_pct_points)}</strong>
-                </div>
-                <div class="hide-mobile">
-                  <div class="small">EV</div>
-                  <strong class="${Number(m.ev_pct)>=0?"positive":"negative"}">${m.ev_pct==null?"—":(Number(m.ev_pct)>=0?"+":"")+Number(m.ev_pct).toFixed(2)+"%"}</strong>
+                  <div class="small" style="margin-top:8px;text-align:center">
+                    Edge <strong class="${Number(m.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(m.edge_pct_points)}</strong>
+                    · EV <strong class="${Number(m.ev_pct)>=0?"positive":"negative"}">${m.ev_pct==null?"—":(Number(m.ev_pct)>=0?"+":"")+Number(m.ev_pct).toFixed(2)+"%"}</strong>
+                  </div>
                 </div>
               </div>`).join("")}
           </div>
