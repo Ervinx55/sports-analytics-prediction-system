@@ -1,4 +1,101 @@
 {
   "recoveryBaseline": "2026-09-23",
-  "items": []
+  "items": [
+    {
+      "slug": "capture-market-snapshot",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "c8ca80cc4e1a8f1d5d1d7d2cd501ba9b89f9fcc4e8894e6e29da834ae81eca48",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-market-snapshot/index.ts",
+          "name": "index.ts",
+          "sha256": "85ca860bf494bdd4220decb2f6adbb0d89b1d4ce9bf5a6c8866b6b333078f3a0"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-movement",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "9c0563364eea722917ae7f4989ab080a1b16815ac0f0434895e836be24ae8b7f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-movement/index.ts",
+          "name": "index.ts",
+          "sha256": "a2bfe754dbe0abebfb3f89b5f2d2c5125ecfc8353676c18917a64c67c1c46546"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-alerts",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "7162cb4120241829acb4076f7a4f872c8194ad66e45b24a5d4580e7b1227ff66",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-alerts/index.ts",
+          "name": "index.ts",
+          "sha256": "8e74b6763e41fc6a56390a5c7c66e66a382c4ee6a3de519eac6d2bcfa718c1f1"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "capture-model-audit",
+      "version": 5,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "e35389b19f0462061a6a77ddf97e9053c41965796db707c228c9c400e0612796",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-model-audit/index.ts",
+          "name": "index.ts",
+          "sha256": "24b5bdc6b336a13e32e6e76077df8e40dad8c681107c7b2667dde2b3be3e7d63"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "grade-model-audit",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "609af7add2c480072833194554588898bc44ee18b17cb0147bc53d8e3c87499a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-model-audit/index.ts",
+          "name": "index.ts",
+          "sha256": "9668bae81531bfd1e1af4a423e9207b843396a58a56d79a05629869ced0a2264"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "model-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "8434085ceac4f46ad308d8caaca833d2595526dc195d1e51ee6e32ef8594029c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/model-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "6314a7b27f86bd2dbeee8b38f872b290b1cc87667b0f1b38e1391e7a0ee0b291"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    }
+  ]
 }
