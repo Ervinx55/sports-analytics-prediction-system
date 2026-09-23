@@ -144,3 +144,6 @@ verify_jwt = false
 
 [functions.outcome-attribution-status]
 verify_jwt = false
+
+[functions.pipeline-health-status]
+verify_jwt = false

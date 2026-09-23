@@ -768,6 +768,22 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "pipeline-health-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "dd9732190d1f0a32ac9a3eb46397b75a0764898797488c318b3070b99065ab10",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/pipeline-health-status/index.ts",
+          "name": "index.ts",
+          "sha256": "a48433b4dab87bc1726d36d2f1061415ff77994cafc8ad6c100942d59942383c"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ]
 }
