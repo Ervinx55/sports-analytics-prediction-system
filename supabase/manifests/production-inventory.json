@@ -1,4 +1,2053 @@
 {
-  "recoveryBaseline": "2026-09-23",
-  "items": []
+  "project_ref": "yeoxroijaptomomshdii",
+  "captured_at": "2026-09-23T21:28:53.825Z",
+  "tables": [
+    {
+      "name": "candidate_grades",
+      "schema": "public",
+      "structure_sha256": "20900dba4127a18adc97ca0d7f578b45c42d3e479b0fef02cba9cd98db2d6891"
+    },
+    {
+      "name": "decision_outcome_attribution",
+      "schema": "public",
+      "structure_sha256": "c5ed4f5ea54466925f59cc44c4aaee299efde91de7b495b8bc70fb756a5ced42"
+    },
+    {
+      "name": "decision_timing_shadow",
+      "schema": "public",
+      "structure_sha256": "e8569669537722fc05ed9fe3a998ff1505865939ca869f384b3b03104446d72a"
+    },
+    {
+      "name": "game_results",
+      "schema": "public",
+      "structure_sha256": "63a83f37c69ae9316bd73e500ced4b5b7788976bba3e901712668fc505a9b572"
+    },
+    {
+      "name": "market_decision_fusion_shadow",
+      "schema": "public",
+      "structure_sha256": "44879324e30129659c7e8c586ebe3d8ebaee4ff448a6ea7d687497b12bc32af7"
+    },
+    {
+      "name": "market_grade_observations",
+      "schema": "public",
+      "structure_sha256": "4251ac6920927e3f90a42c092281d6964eef94b88d3b42b261f63b0abb823b59"
+    },
+    {
+      "name": "market_policy_registry",
+      "schema": "public",
+      "structure_sha256": "aa0a07ec2d2ab4eb0f8fe224735bf661a99ebbb51943143d78fe0234b7bb7e41"
+    },
+    {
+      "name": "market_policy_shadow_results",
+      "schema": "public",
+      "structure_sha256": "b90f8769b8517411e14df5abb407f3d51716f43aa0de96d70ac7541f797d9f54"
+    },
+    {
+      "name": "market_price_sensitivity_shadow",
+      "schema": "public",
+      "structure_sha256": "6e9d6e2f3614ab3d78512a46f7295431d32f3dd773305a888990972c2a57b641"
+    },
+    {
+      "name": "market_snapshot_runs",
+      "schema": "public",
+      "structure_sha256": "2e731f01f9d3288aeede1f75341291e04d0fafa8bb87df45a08b63d86ef60ab0"
+    },
+    {
+      "name": "market_snapshots",
+      "schema": "public",
+      "structure_sha256": "81d82931b345cfd3c676544a85f58c0a987e983c05e8a6f7b0e114052f9232a5"
+    },
+    {
+      "name": "market_uncertainty_shadow",
+      "schema": "public",
+      "structure_sha256": "242e840d283ff60ece099d60e138a874c81d8b88046df930731d624c5a0d1524"
+    },
+    {
+      "name": "mlb_roof_status_overrides",
+      "schema": "public",
+      "structure_sha256": "5274f535de6ea1b223c91f992a9445d2bf64e12df212984fee9320c19ff42d74"
+    },
+    {
+      "name": "mlb_verification_snapshots",
+      "schema": "public",
+      "structure_sha256": "538f2cdde43bd94e64f6e7e2912dbc067a81d14a32e044bd1b594b361eb9f14a"
+    },
+    {
+      "name": "mlb_weather_park_snapshots",
+      "schema": "public",
+      "structure_sha256": "4a80373576f629318ec57667d1b1ba35ea60d203a78d2c4fb07e779ab2899d3d"
+    },
+    {
+      "name": "model_audit_observations",
+      "schema": "public",
+      "structure_sha256": "0ff50c16f238058923283a71040e5a149958eb1a80d934f87f9300876352a68d"
+    },
+    {
+      "name": "model_governance_evaluations",
+      "schema": "public",
+      "structure_sha256": "b0e6b63be5eb4b0f699188215c7f96e2e477dc172011fe0ce6320e5c96c11554"
+    },
+    {
+      "name": "model_governance_registry",
+      "schema": "public",
+      "structure_sha256": "3152b9afd02d36e521f5714f50b92d7e554fa969f5aabb4d4b82f5354b1c62f2"
+    },
+    {
+      "name": "model_registry",
+      "schema": "public",
+      "structure_sha256": "4832a843911d3bac251bd5bf3af63767a1131d2cb6250f834616c84c52d94f3f"
+    },
+    {
+      "name": "parlay_correlation_shadow",
+      "schema": "public",
+      "structure_sha256": "001fb18218212a779a5372b3155d854e3c1a54699078dd35c40fe7595ea24161"
+    },
+    {
+      "name": "pipeline_component_registry",
+      "schema": "public",
+      "structure_sha256": "6c4464c9997c389943efa9d980f5b213802832b89b9b78bff96dd80d3f0aa87f"
+    },
+    {
+      "name": "pipeline_http_request_log",
+      "schema": "public",
+      "structure_sha256": "0fd84581b62b87ba17fe9eeb61a9328c2981d830a8d32b2839761fbb793d5f4b"
+    },
+    {
+      "name": "player_prop_clv",
+      "schema": "public",
+      "structure_sha256": "a664729f25b92ce39a87f417c78c1e10301a68958baf3130d501adf83cca13cb"
+    },
+    {
+      "name": "player_prop_decision_fusion_shadow",
+      "schema": "public",
+      "structure_sha256": "69763e618cc8860dfa7b45cbe8eb3ed634c6d04441a87caf67dd77ccb66ebf20"
+    },
+    {
+      "name": "player_prop_market_quotes",
+      "schema": "public",
+      "structure_sha256": "8d9e428188b8130312c429b3f8ff292c4ddc455e83f87743c713df027d3af2d2"
+    },
+    {
+      "name": "player_prop_observations",
+      "schema": "public",
+      "structure_sha256": "e6a38b40b58d3e59bbe7647b60efd4721ce9549ed40abc9dab8daf94edc52e2e"
+    },
+    {
+      "name": "player_prop_results",
+      "schema": "public",
+      "structure_sha256": "5410d0e5079b6b5adeb1ca27f413aa4425fcd47574b15f749809137d8cb43a51"
+    },
+    {
+      "name": "player_prop_verification_shadow",
+      "schema": "public",
+      "structure_sha256": "6cb74a88ccf934282a01b15702b09bcb16daf7f465faaa131da2081f028bb901"
+    },
+    {
+      "name": "player_prop_weather_shadow",
+      "schema": "public",
+      "structure_sha256": "57a735137ef279156c624d2bc167f6351b935d671c5cb5ad2332c15ecf862372"
+    },
+    {
+      "name": "sharp_disagreement_shadow",
+      "schema": "public",
+      "structure_sha256": "54c184bce77302d9dd809000158bc7dc3c3521efd2f53971c0c8f07dfe1079c6"
+    },
+    {
+      "name": "sharp_gate_history",
+      "schema": "public",
+      "structure_sha256": "6c6126f182e1d53119b00c3320b4ecf4a3c7547feb6bdad795f7285f590c3d89"
+    },
+    {
+      "name": "sharp_market_clv",
+      "schema": "public",
+      "structure_sha256": "1b02d6ab6dfb249f87ede87f61051ae73f2e7a1afe8421ae7eba43a997b9a9e4"
+    },
+    {
+      "name": "sharp_source_quotes",
+      "schema": "public",
+      "structure_sha256": "d82e4405d10a0e9216a97d9abf60407157daf26424b49ccf567e216f0d575749"
+    },
+    {
+      "name": "team_market_results",
+      "schema": "public",
+      "structure_sha256": "0b2d843e99822f83ef5699299395180e54e2be8d342925c00d0266eb40922173"
+    },
+    {
+      "name": "team_market_verification_shadow",
+      "schema": "public",
+      "structure_sha256": "25c6786a26fe7dfe4a26ad12403533e116d6ac73af2efe66cae4c5541ebad84d"
+    },
+    {
+      "name": "team_market_weather_shadow",
+      "schema": "public",
+      "structure_sha256": "f48bdd156ecb8c04d6da5686a525498a80d0ab787ec8997faf8042f93f5334cd"
+    }
+  ],
+  "views": [
+    {
+      "name": "decision_timing_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "c55c34656c5a05447d375c9e2dbcfd2bcb69cb26b1e9bce9524617c07b4f55c2"
+    },
+    {
+      "name": "market_decision_fusion_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "0485ae720f84a1956a583821352b809b4b49f313b2cfdbff2fba369404559dd1"
+    },
+    {
+      "name": "market_grade_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "cf473c71076ac0915c39171ab6e00904aa8af36c8f6612bcb916566457d5b2d5"
+    },
+    {
+      "name": "market_policy_final_pregame",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "1781abc34ba0b300c55d21b70e133a2880e1e64fb12f1f068337a957dd625456"
+    },
+    {
+      "name": "market_policy_grade_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "e9114ec04353ebcb62ae3fa7551465b391d8f770cafbd5411c22910911a144a8"
+    },
+    {
+      "name": "market_price_sensitivity_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "0469a3810ca4cdce7ed7f70c705188e06e97bdc82d14b9d091b859d89c92cdc2"
+    },
+    {
+      "name": "market_price_wait_analysis",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "d58f2bd002526ed3d6dc3e762513a96217025cc84e92a9f5a45cde00bdf7fb5a"
+    },
+    {
+      "name": "market_uncertainty_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "61bc796ea64786cc01a899d808b32a8ff582a83b212f1b8f747ca8c4ab7a2741"
+    },
+    {
+      "name": "mlb_verification_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "41e53d2621fc2243846ee2b044ee1f6f2739690626738a6092cc6b54d43f2453"
+    },
+    {
+      "name": "mlb_weather_park_final_pregame",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "28b2cbc5c5cb04198fe6f30f53d2833afd1f31cb8b89fd875c9afaa2e2f77531"
+    },
+    {
+      "name": "mlb_weather_park_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "2fb69018a58243d784a0be36199145f96cfa96de9afc788c3c055dc3baf5eb3f"
+    },
+    {
+      "name": "model_calibration_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "60a39b3fbf5841f8ae9ecb31df7c4280b24711e1475fb31887e9a363878dd0d6"
+    },
+    {
+      "name": "model_governance_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "9c187394fa1789458b4cfd3efcdbf927c9b6e8f70a55f7f9dfbb1e54ed48714b"
+    },
+    {
+      "name": "parlay_correlation_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "bb5fdeb7a6dd4ebbd18fda7a98c760d69dba7907b5572140deb8e7b42e7404f7"
+    },
+    {
+      "name": "pipeline_component_health_v1",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "798a19bec6466f29ab7e0b367dfb64bd57dfe8019009addee43411c1ee0eaaf8"
+    },
+    {
+      "name": "player_prop_clv_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "f3abf4c87dd7c514c753855d1223690b04028b2ae4eb50d978bcb9aa63b079f4"
+    },
+    {
+      "name": "player_prop_decision_fusion_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "3dd35cab9d5246c497990b7b3679b57e3f9ea229da7505f2b152f71574967f8c"
+    },
+    {
+      "name": "player_prop_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "64eda9cbc751efd7cb798d1f4bdc89f6889b0f2bd48b9090102cd2142a4823db"
+    },
+    {
+      "name": "player_prop_latest_results",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "e3eea34188c7b6da7a2bfe97c463fc7b764ddf29a9b2b47fabf3527ffde90553"
+    },
+    {
+      "name": "player_prop_verification_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "f56000a9acab9c564f434c36a1dc967ccbe92ec8d8a1873d3f5a49494c6db56c"
+    },
+    {
+      "name": "player_prop_weather_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "44d4af0711109339f4347606948907e7f48c54321c4599a5129a1c2399c69ac6"
+    },
+    {
+      "name": "sharp_disagreement_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "d3d7557eb0477959c4fb6f879dde9a11ce21449c32d40f4e2654c85eba104cc6"
+    },
+    {
+      "name": "sharp_gate_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "6cb805c955fcf56807c6dfe95a1948bc595f1f441307525e9bd7f6ea900b936a"
+    },
+    {
+      "name": "sharp_source_quote_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "fddd74291fa7711ca46be206e3ef1d17fd01d90e567ee47c6d1374332d74b69f"
+    },
+    {
+      "name": "team_market_latest_results",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "48499e392f0a07990a39069d9e831fede02a0376634e14eb5b76e3cb18a6105c"
+    },
+    {
+      "name": "team_market_verification_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "a4cdb423f08c908aa2cac22eab84f60b31d6400ea7be91cb8f2100da5969999a"
+    },
+    {
+      "name": "team_market_weather_latest",
+      "schema": "public",
+      "security_invoker": true,
+      "definition_sha256": "c3743ef3007398e17640b082250fb88381a983ddad016032dee9fe9c8aa3da9f"
+    }
+  ],
+  "functions": [
+    {
+      "name": "american_to_decimal_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "647e144a2980680b0c48bce77a36a0af63eb416b76f8bb1269a8d01e1c8de228",
+      "identity_arguments": "p_odds integer"
+    },
+    {
+      "name": "cleanup_mlb_verification_history",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "2ee47786c4b496c8479a64d10eede451163d114e2af615e41f4915d818c99d36",
+      "identity_arguments": ""
+    },
+    {
+      "name": "cleanup_mlb_weather_park_history",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "9586fa46328895729d1dcfd0afd11d2d5b4cb3d6be3999ddb3f6b7536545d370",
+      "identity_arguments": ""
+    },
+    {
+      "name": "cleanup_sharp_source_quotes",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "ab1768d7bc21cd54fbde11f95574ae0e0b6c9de8992c8f0eae2f8dca45893819",
+      "identity_arguments": ""
+    },
+    {
+      "name": "compute_decision_fusion_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "9f4581abef111eac8830af099e2a73e31e34268280c126c04dec7876d4dedf20",
+      "identity_arguments": "p_non_sharp_status text, p_uncertainty_class text, p_robust_market_edge_pp numeric, p_price_state text, p_robust_ev_pct numeric, p_price_cushion_cents numeric, p_verification_state text, p_verification_reason text, p_weather_state text, p_weather_impact_direction text, p_delay_risk text, p_sharp_gate_status text, p_sharp_classification text, p_sharp_confidence numeric, p_model_vs_sharp_pp numeric"
+    },
+    {
+      "name": "compute_market_policy_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "32e3a3ba59fd9fd54e2918a5e51b92d727c2558f126f34f95c9bbbc9adb62f8a",
+      "identity_arguments": "p_market_type text, p_robust_market_edge_pp numeric, p_robust_sharp_edge_pp numeric, p_ev_pct numeric, p_uncertainty_pp numeric, p_sharp_data_quality numeric, p_sharp_source_count integer, p_non_sharp_status text, p_raw jsonb, p_policy jsonb"
+    },
+    {
+      "name": "compute_market_uncertainty_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "c96d33f0aa2c0226d5f1203305de7acafefbd97668721913883d9f37235e7420",
+      "identity_arguments": "p_market_type text, p_model_probability numeric, p_market_fair_probability numeric, p_non_sharp_status text, p_calibration_sample integer, p_raw jsonb"
+    },
+    {
+      "name": "compute_outcome_attribution_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "fd88bc47826556d04e3df9fed6c8098eb031aa2d6f4933e917d7f491448e5abf",
+      "identity_arguments": "p_outcome text, p_decision_status text, p_clv_signal text, p_context_changed boolean, p_data_quality_problem boolean, p_sharp_warning boolean, p_fusion_state text, p_fusion_conflict text"
+    },
+    {
+      "name": "compute_parlay_correlation_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "435b9a5bc62c71c773fe4066f42509d9ea4a89e9bfbc97a8d6657fd324a7b974",
+      "identity_arguments": "p_leg_a jsonb, p_leg_b jsonb"
+    },
+    {
+      "name": "compute_player_prop_fusion_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "0caab79a2b2dd1c47f4ce37cd1304d1164d6239cd64ee3b7199b94eb2600957d",
+      "identity_arguments": "p_upstream_status text, p_player_role text, p_stat_id text, p_edge_pp numeric, p_ev_pct numeric, p_data_quality numeric, p_exact_line_book_count integer, p_paired_books integer, p_verification_state text, p_verification_reason text, p_in_starting_lineup boolean, p_is_confirmed_starter boolean, p_batting_order_spot integer, p_catcher_change_after_model boolean, p_opposing_starter_change_after_model boolean, p_opposing_handedness_change_after_model boolean, p_weather_state text, p_weather_impact_direction text, p_weather_impact_multiplier numeric, p_delay_risk text"
+    },
+    {
+      "name": "compute_price_sensitivity_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "9abb9ce533aca944cdb4df5947d748ffd403f3064bed4c8131b4d2f98862a09a",
+      "identity_arguments": "p_market_type text, p_current_odds integer, p_model_probability numeric, p_conservative_probability numeric, p_sharp_probability numeric, p_push_probability numeric, p_target_ev_pct numeric, p_strong_ev_pct numeric"
+    },
+    {
+      "name": "compute_weather_park_impact_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "c95512bcf4fd963cce690732483638e9067e738ffef5a382e299a20896688062",
+      "identity_arguments": "p_park_factor numeric, p_park_factor_known boolean, p_temp_f numeric, p_humidity_pct numeric, p_wind_mph numeric, p_wind_class text, p_roof_type text, p_roof_status text, p_precip_probability_pct numeric, p_precip_inches numeric, p_condition text, p_elevation_ft numeric"
+    },
+    {
+      "name": "decimal_to_american_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "f81e4ed3960f1999b984cdf6fcd60ea306701a67dd3287ef62c69edc8ba60c5b",
+      "identity_arguments": "p_decimal numeric"
+    },
+    {
+      "name": "decision_timing_bucket_v1",
+      "schema": "public",
+      "security_definer": false,
+      "definition_sha256": "1363dda9a3582c82f478f4a517ed2915018c2bacaa4db4ba31277300f106aa01",
+      "identity_arguments": "p_starts_at timestamp with time zone, p_captured_at timestamp with time zone"
+    },
+    {
+      "name": "enqueue_pipeline_http_v1",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "3a4e5d07da689a0ac7f9541d2c171142d1b6b7bd0ec926ec8dca1e5f20de03e1",
+      "identity_arguments": "p_component_key text, p_body jsonb"
+    },
+    {
+      "name": "pipeline_health_snapshot_v1",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "0724830638fc34edd2718279922b30941f20005f293cf8f0a5d1c681efc96951",
+      "identity_arguments": ""
+    },
+    {
+      "name": "reconcile_pipeline_http_requests_v1",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "c3308a20104d58aecab5553db1c997a7c20e52b66dbb1fe6c992f2d19c67a54f",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_decision_outcome_attribution",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "dbc26d8c160f7baf32d2038a045d7286e49cb9d14a11d86f08975219cc872fda",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_decision_timing_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "edd14989ac9d029082bb32a66ae51b5df17e21b06c89c839adcb7d8b04d0328b",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_market_decision_fusion_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "10d789eac1c03dd2a593156ef019b2933c27f5c44729a4a71e7efdee43906bcb",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_market_policy_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "0df89de6a8a6ce84a04f18e3bc589e1c6b21173cbbc7f5985f3675cbc11e0122",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_market_price_sensitivity_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "77ae79b2ff65532aaa4fa003a794f2aacc7bca4a84a6db1407f0e1434c7114c9",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_market_uncertainty_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "03abe04617e0fcaaeeb93fad44f166942e8205fba2fe8d0c943efacb9ff771d1",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_parlay_correlation_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "a4d581ee110b11ab6ae3babeff1dc23cac748a34f63b8c790b66c6378917855e",
+      "identity_arguments": ""
+    },
+    {
+      "name": "refresh_player_prop_decision_fusion_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "0c4839fc16adfa8c48d41dd69b8e75d262f15c7feac2ad0665fddc3fbe68b548",
+      "identity_arguments": ""
+    },
+    {
+      "name": "rls_auto_enable",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "dd9ce3fd3905d621611cf0ea2e7591bada6d61f827445cfa2afe27e69b03f271",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_closing_snapshot",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "0241062ecde28075b4ec24dd63cd9f2f62aa36259d470b1619a09a4ff52abdc7",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_decision_outcome_attribution",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "e41a66660ffdccfc4edbf5028563975917c6e8e3b4207d94c2d57d4e6349238f",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_decision_timing_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "3691c02e710c711409471116df28a539d9c5a328b8c54e81a3201bd28f0d8276",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_league_snapshot",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "cf3b377d0eb8afb4c9a3252fb47d65a979b6cce1dfb35d9cde2d401dee114f95",
+      "identity_arguments": "p_league text, p_label text, p_window_hours integer"
+    },
+    {
+      "name": "trigger_market_decision_fusion",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "811d3ceb330b4a23ed8b4b0c4a0152050a411c6d71be5f479a17b6dd8ad726a0",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_market_snapshot",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "4f0944b3760afbab0ffb8cf6ec00022db4800a76af14bb0b6f535dbde9daba5a",
+      "identity_arguments": "p_label text"
+    },
+    {
+      "name": "trigger_mlb_verification_gate",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "2bc332b56fb7f9cb8b5c601effd9b4fbfce6a46d8736f8aa0a0dd023833c3e74",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_mlb_weather_park",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "8b9763f47411919908db0645e4f3335383f6c27d9dd29f372db081c5ec44f553",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_model_audit",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "990a34fbbafbdc21a743cb3c16164048c3ca5487006f86ee7cf3391c6f70b863",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_model_governance_refresh",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "4b623da1e66a57a9a7f3bc452c116fcf8ae18ecc57a8f2f0d9f4b98444840f19",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_model_grading",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "8257aa27d1a04c2d5305b7b93c43cd180b32ffb44312b49d9b43142acaccc0f1",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_parlay_correlation_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "b6155febe5a36bc5428abd6c1af907f0c75f9e45451ae9089d8673e39cbc57e5",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_player_prop_capture",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "6687d324d5360b07140fd46ac981278471b1440b88be5e1af71c80756a4755e4",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_player_prop_clv_refresh",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "34cdf3a0a9a38bc0e6b16be30e3236227f80fcd3d1a1b15c3e794c1f77b4787a",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_player_prop_decision_fusion",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "486b410e5b4e15891d888d61c0fd6ff13d166fd4f160e64a814f2cb3ba6b868d",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_player_prop_grading",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "9c7b968702798f35df76df4af4fbc542c5eade029fb7bb522bffc57d374a2fe8",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_sharp_clv_capture",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "5372e0e8ed5b89ca4949ef6840fde51bdffd00e0ade84d6eec293e6652979560",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_sharp_disagreement_shadow",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "249b205cc9f12ac4f1b1eb2629e31dc3d9f887238ec8f566c184d5ebf16b7adb",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_sharp_source_refresh",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "a3475d382328e81ff4153faf77a1e04d127da7554506be62955678781249b83f",
+      "identity_arguments": ""
+    },
+    {
+      "name": "trigger_team_market_grading",
+      "schema": "public",
+      "security_definer": true,
+      "definition_sha256": "1791066ba09fd5f001533c3fbd0bd79b2e1c2b96b087e4fb9bf281a6bda7c9f0",
+      "identity_arguments": ""
+    }
+  ],
+  "indexes": [
+    {
+      "name": "candidate_grades_event_idx",
+      "table": "candidate_grades",
+      "schema": "public",
+      "definition_sha256": "c0f22d6d609eee1b24d0ea6d06f2c5ae726c94951717cb6939d4665848fc304e"
+    },
+    {
+      "name": "candidate_grades_pkey",
+      "table": "candidate_grades",
+      "schema": "public",
+      "definition_sha256": "410a106273a5d317494cdcd1d725437076a255ff9e01b4f56b3bf1f702f55ccd"
+    },
+    {
+      "name": "decision_outcome_attribution_pkey",
+      "table": "decision_outcome_attribution",
+      "schema": "public",
+      "definition_sha256": "e411080546b3680dff1579fe0df28e90dbb9f60910dc6424f900b6646890b5d2"
+    },
+    {
+      "name": "outcome_attribution_primary_idx",
+      "table": "decision_outcome_attribution",
+      "schema": "public",
+      "definition_sha256": "5b4ec7d0ddb10eef61ef7d3024c3abdf8e5760db92efa385201cb2f6e1a2ee41"
+    },
+    {
+      "name": "outcome_attribution_process_idx",
+      "table": "decision_outcome_attribution",
+      "schema": "public",
+      "definition_sha256": "7a50a717706a7384fc30498d5054f25812a4e5fe72fef119870644d99d989e09"
+    },
+    {
+      "name": "decision_timing_bucket_idx",
+      "table": "decision_timing_shadow",
+      "schema": "public",
+      "definition_sha256": "e82b2c0af309b817cc10c32d30fc05e60301c2f2ecf09c4821d4d764a6e387c1"
+    },
+    {
+      "name": "decision_timing_event_idx",
+      "table": "decision_timing_shadow",
+      "schema": "public",
+      "definition_sha256": "84344c78b3340857c57dd4ef9b3fdda23b46e60a38df7f2b78e21f1096823e5d"
+    },
+    {
+      "name": "decision_timing_shadow_pkey",
+      "table": "decision_timing_shadow",
+      "schema": "public",
+      "definition_sha256": "e98208fc0ec4f67e87cecef6c8ba3e44791a2fc2c75d5574447ec8ecdf390481"
+    },
+    {
+      "name": "game_results_pkey",
+      "table": "game_results",
+      "schema": "public",
+      "definition_sha256": "b689d25a14acabf7653af8c0a530b0c178623d147661809b00db1c4ccc694bab"
+    },
+    {
+      "name": "market_decision_fusion_event_idx",
+      "table": "market_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "6055ac8f73299b2f8d2da3cb4d887a99645ea2a771d2dccbe06f2acae84e0e9b"
+    },
+    {
+      "name": "market_decision_fusion_shadow_pkey",
+      "table": "market_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "900374131ce39ed32c1561fc98b4d900578a765377a2d9cd2a75331f77b307e9"
+    },
+    {
+      "name": "market_decision_fusion_sharp_gate_idx",
+      "table": "market_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "f4c6ba866158ce29438c9c17dca55c1d7eac39e16056090de56bd533f6de2596"
+    },
+    {
+      "name": "market_decision_fusion_state_idx",
+      "table": "market_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "ddb907a40af079a889add05f8d9bfd2e135be2056d1ac0708fb30372dfdcf8dd"
+    },
+    {
+      "name": "market_grade_lookup_idx",
+      "table": "market_grade_observations",
+      "schema": "public",
+      "definition_sha256": "ec4a03ac6c983fb27beda9ab929d889fde68251a98465cf78969b3f0b1146074"
+    },
+    {
+      "name": "market_grade_observations_pkey",
+      "table": "market_grade_observations",
+      "schema": "public",
+      "definition_sha256": "8808f4c828726d5531092b2eae9bb5a67529f5ea353d56e523004e06f2359da3"
+    },
+    {
+      "name": "market_policy_registry_pkey",
+      "table": "market_policy_registry",
+      "schema": "public",
+      "definition_sha256": "f8a6fafc4a38d477e09b0a403b7f16a0180418d6ad4854f2853206d28b7c8a75"
+    },
+    {
+      "name": "market_policy_shadow_results_event_idx",
+      "table": "market_policy_shadow_results",
+      "schema": "public",
+      "definition_sha256": "4a5a09ac6f807d62ebb8adfa8354733bdf7176c2cb535264bf9ce28b5bdb0ec9"
+    },
+    {
+      "name": "market_policy_shadow_results_pkey",
+      "table": "market_policy_shadow_results",
+      "schema": "public",
+      "definition_sha256": "962568d3b0026751c13bfd6eb7025226c0d351267d2c7003274e56e85d636f96"
+    },
+    {
+      "name": "market_policy_shadow_results_policy_idx",
+      "table": "market_policy_shadow_results",
+      "schema": "public",
+      "definition_sha256": "a1fa69e9edb62246ca7bdb7adf5632f37a2df4073443cc19a592893b0e878fdd"
+    },
+    {
+      "name": "market_policy_shadow_results_source_idx",
+      "table": "market_policy_shadow_results",
+      "schema": "public",
+      "definition_sha256": "26e4ecffeb8719cf2f6f7be1810372b4885252753f7837a8704e4a3599aec54f"
+    },
+    {
+      "name": "market_price_sensitivity_shadow_event_idx",
+      "table": "market_price_sensitivity_shadow",
+      "schema": "public",
+      "definition_sha256": "71268d1438108fa22aa6c3988604a961a3ca3e437b91fb57c75a6f76e14c1cde"
+    },
+    {
+      "name": "market_price_sensitivity_shadow_pkey",
+      "table": "market_price_sensitivity_shadow",
+      "schema": "public",
+      "definition_sha256": "846004e644d53acd6848fecca019ca49912327f4d31abf07d65968a5fc2169ee"
+    },
+    {
+      "name": "market_price_sensitivity_shadow_policy_idx",
+      "table": "market_price_sensitivity_shadow",
+      "schema": "public",
+      "definition_sha256": "1027143b877de24b4de2525e69d2098187aa37a8a7597188be91c8ed70f8f935"
+    },
+    {
+      "name": "market_snapshot_runs_pkey",
+      "table": "market_snapshot_runs",
+      "schema": "public",
+      "definition_sha256": "9155fe0be78ea6fc194632f8b76e598caa56d8f800e09e1b3f8cb85f3ccb4396"
+    },
+    {
+      "name": "market_snapshots_event_idx",
+      "table": "market_snapshots",
+      "schema": "public",
+      "definition_sha256": "a283dc129b4b3f12c1987e567fd1871ad6f66eddc3e50a4f7f3e00660564d136"
+    },
+    {
+      "name": "market_snapshots_lookup_idx",
+      "table": "market_snapshots",
+      "schema": "public",
+      "definition_sha256": "54197b470e5952a45b541e457ffc0a0822d5f303b39e5a62d84fbd09d77667f2"
+    },
+    {
+      "name": "market_snapshots_pkey",
+      "table": "market_snapshots",
+      "schema": "public",
+      "definition_sha256": "9981486f6f60ac2405f8bc51961df4300d7b24fd085367226722dd6d7bdefa1d"
+    },
+    {
+      "name": "market_snapshots_run_id_idx",
+      "table": "market_snapshots",
+      "schema": "public",
+      "definition_sha256": "035992196a7f82efab0e4800cc8d376df7fe4befc3fa901bbeeb82a5f3861920"
+    },
+    {
+      "name": "market_snapshots_start_idx",
+      "table": "market_snapshots",
+      "schema": "public",
+      "definition_sha256": "9c948613a8cb5dab8103418539ad8484afd18ff3939e025b6aa8a173faf89ab6"
+    },
+    {
+      "name": "market_uncertainty_shadow_classification_idx",
+      "table": "market_uncertainty_shadow",
+      "schema": "public",
+      "definition_sha256": "abde4ed457955a71d8a6a0804b6740055d55ecb8754e618ffc6a875376ecd5ba"
+    },
+    {
+      "name": "market_uncertainty_shadow_event_idx",
+      "table": "market_uncertainty_shadow",
+      "schema": "public",
+      "definition_sha256": "85659ec3c1a5a49c5e089e4e6cb66e75d023301ca90ed533338f900f55e7d30b"
+    },
+    {
+      "name": "market_uncertainty_shadow_pkey",
+      "table": "market_uncertainty_shadow",
+      "schema": "public",
+      "definition_sha256": "602763240b02822a69a28ba749f68eaeda7c8377ad75b6293db26f252f45dd7d"
+    },
+    {
+      "name": "market_uncertainty_shadow_source_capture_idx",
+      "table": "market_uncertainty_shadow",
+      "schema": "public",
+      "definition_sha256": "a638f96922f8cf128873000245e5f09d11148390240822a88f2dabf297d8d38c"
+    },
+    {
+      "name": "mlb_roof_status_overrides_pkey",
+      "table": "mlb_roof_status_overrides",
+      "schema": "public",
+      "definition_sha256": "6a2b1b96dda5af0ae7513bed43b1e946884c04d57e168c675fead5f5188b5c90"
+    },
+    {
+      "name": "mlb_verification_event_idx",
+      "table": "mlb_verification_snapshots",
+      "schema": "public",
+      "definition_sha256": "95a9868291adb9196128f104657e5a7218b9f90f3e6c4777ce7454aa555cb006"
+    },
+    {
+      "name": "mlb_verification_game_idx",
+      "table": "mlb_verification_snapshots",
+      "schema": "public",
+      "definition_sha256": "4d3de43711970d4d70ecd7a50f6f84d68ea1b6720f59b487fbf7aa5c5874a13c"
+    },
+    {
+      "name": "mlb_verification_snapshots_pkey",
+      "table": "mlb_verification_snapshots",
+      "schema": "public",
+      "definition_sha256": "a66a26e7f407bbf0bcc32ff7e2d455b638b72650cc7ea24afcf69da51e7da8d0"
+    },
+    {
+      "name": "mlb_weather_park_event_idx",
+      "table": "mlb_weather_park_snapshots",
+      "schema": "public",
+      "definition_sha256": "61b50a33d274042f29bd02d0424dd4d426537f071f4122b004cd5fc518f8a598"
+    },
+    {
+      "name": "mlb_weather_park_game_idx",
+      "table": "mlb_weather_park_snapshots",
+      "schema": "public",
+      "definition_sha256": "e69a7cc9e4c770551ee2bc5baebf131a0ca4445945c864dcc162a54e1e9913e3"
+    },
+    {
+      "name": "mlb_weather_park_snapshots_pkey",
+      "table": "mlb_weather_park_snapshots",
+      "schema": "public",
+      "definition_sha256": "099a046e627fc22b3af6573e1cd1f443f0d1508b7c6290235f82cb64f3bdad3e"
+    },
+    {
+      "name": "model_audit_event_idx",
+      "table": "model_audit_observations",
+      "schema": "public",
+      "definition_sha256": "e1ac2f7bc939e8ffa281858750dc094b1317829e66a02b4ff8ec4a25adc79385"
+    },
+    {
+      "name": "model_audit_observations_event_id_side_key_captured_at_key",
+      "table": "model_audit_observations",
+      "schema": "public",
+      "definition_sha256": "8b48cd4c139e1cd00a249b0ff6d7092d10da1a6355ef02552e76a0946ad88e07"
+    },
+    {
+      "name": "model_audit_observations_pkey",
+      "table": "model_audit_observations",
+      "schema": "public",
+      "definition_sha256": "c79a78106db63dd088a4091640af78c73d1fa318f20f2fb6f84d5f7565bd21e7"
+    },
+    {
+      "name": "model_audit_start_idx",
+      "table": "model_audit_observations",
+      "schema": "public",
+      "definition_sha256": "b163248fb5f2b993ebf8730addffd40e394de65304393c26fb71add23586abe3"
+    },
+    {
+      "name": "model_governance_eval_key_idx",
+      "table": "model_governance_evaluations",
+      "schema": "public",
+      "definition_sha256": "74a61d9e7aa832d8318f95fe84a5b0690361f49a4877b48f97e913e18b311e4e"
+    },
+    {
+      "name": "model_governance_eval_scope_idx",
+      "table": "model_governance_evaluations",
+      "schema": "public",
+      "definition_sha256": "a264b2321b222013787942d3c2b71f5533ec5d39b95b2dbdd068a0b72c12a297"
+    },
+    {
+      "name": "model_governance_evaluations_pkey",
+      "table": "model_governance_evaluations",
+      "schema": "public",
+      "definition_sha256": "964486fa7583202e14d8973198894a8ff9af2566152bdfc43a459cae36b486e8"
+    },
+    {
+      "name": "model_governance_registry_pkey",
+      "table": "model_governance_registry",
+      "schema": "public",
+      "definition_sha256": "dc3e0ae8f0ac80d8de805c8dd88af1740077572b84baed38579886731624e5c4"
+    },
+    {
+      "name": "model_registry_pkey",
+      "table": "model_registry",
+      "schema": "public",
+      "definition_sha256": "78f909cf91a5f58df2d07cfcf7c25011a2b1371f2de2e76ae2989e6dca12e47a"
+    },
+    {
+      "name": "parlay_correlation_eval_idx",
+      "table": "parlay_correlation_shadow",
+      "schema": "public",
+      "definition_sha256": "abc48de4f18efd21acc7e9d028c7795a9d3fce37c6ff6ff64cde54b4b56a0f21"
+    },
+    {
+      "name": "parlay_correlation_leg_a_idx",
+      "table": "parlay_correlation_shadow",
+      "schema": "public",
+      "definition_sha256": "0dcc9a074d1507c0b70d844b085175f8ac413ccc878a2fe603a4014d9243b979"
+    },
+    {
+      "name": "parlay_correlation_leg_b_idx",
+      "table": "parlay_correlation_shadow",
+      "schema": "public",
+      "definition_sha256": "ca0a5979abd5e6609a0556c565909d4edc96e80d845f9b8f0d4887ef6b1735fe"
+    },
+    {
+      "name": "parlay_correlation_relation_idx",
+      "table": "parlay_correlation_shadow",
+      "schema": "public",
+      "definition_sha256": "96f2545b030aceac4e19d7b644c63c792a600c746f52ff8e2d9a78870490dad9"
+    },
+    {
+      "name": "parlay_correlation_shadow_pkey",
+      "table": "parlay_correlation_shadow",
+      "schema": "public",
+      "definition_sha256": "4cea11faabac65c4f9a9713427c2d58a10577c2f49653e99880cf8df55e9164c"
+    },
+    {
+      "name": "pipeline_component_registry_job_name_key",
+      "table": "pipeline_component_registry",
+      "schema": "public",
+      "definition_sha256": "2a2143bdab13d22b7444ceb328de9e2c896ee73a74a537ee3e5119735779112c"
+    },
+    {
+      "name": "pipeline_component_registry_pkey",
+      "table": "pipeline_component_registry",
+      "schema": "public",
+      "definition_sha256": "dde020075970e08b410462d645d5b5c458315ff2793b6e86686561914ebd9bb0"
+    },
+    {
+      "name": "pipeline_http_component_idx",
+      "table": "pipeline_http_request_log",
+      "schema": "public",
+      "definition_sha256": "614ede9f582815abab060b588847b0afeb5713ca0760d2913b9f83af3afd1267"
+    },
+    {
+      "name": "pipeline_http_request_log_pkey",
+      "table": "pipeline_http_request_log",
+      "schema": "public",
+      "definition_sha256": "53124d574eb9c94a02dcb151881dc52c2203203bc4278a9b131d67cf4069158f"
+    },
+    {
+      "name": "player_prop_clv_final_idx",
+      "table": "player_prop_clv",
+      "schema": "public",
+      "definition_sha256": "d700b9a9f164e77276d4057cae9199b187c7b177850f2938cb8953580d5e31a9"
+    },
+    {
+      "name": "player_prop_clv_market_idx",
+      "table": "player_prop_clv",
+      "schema": "public",
+      "definition_sha256": "2c04a72903ce5c0c6f7c9d199dab6d6754e88a5d50bbbf9a25e9e389ac587a25"
+    },
+    {
+      "name": "player_prop_clv_pkey",
+      "table": "player_prop_clv",
+      "schema": "public",
+      "definition_sha256": "85b5ab81407060abc70d9e5274b4b8b231e2d42cf9f3f98a38413f429c678545"
+    },
+    {
+      "name": "player_prop_decision_fusion_shadow_pkey",
+      "table": "player_prop_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "f796b3d93828f377f0b24fc951864d417d2653ecc7c5bf8ad991898a10c1a45b"
+    },
+    {
+      "name": "player_prop_fusion_event_idx",
+      "table": "player_prop_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "2e9e98e6803da2a99a36fb43c0bbc0551302254129f9dcfa391b6a646b413283"
+    },
+    {
+      "name": "player_prop_fusion_state_idx",
+      "table": "player_prop_decision_fusion_shadow",
+      "schema": "public",
+      "definition_sha256": "e50e65ecbd10a8e111d14cbf103b4626db183853847365eb803303210db0a501"
+    },
+    {
+      "name": "player_prop_market_quotes_pkey",
+      "table": "player_prop_market_quotes",
+      "schema": "public",
+      "definition_sha256": "68a3815510aaea06c20b86cc079323c0e0f0923da23b72cc02944677bf76393c"
+    },
+    {
+      "name": "player_prop_quotes_exact_line_idx",
+      "table": "player_prop_market_quotes",
+      "schema": "public",
+      "definition_sha256": "81b4148f48da353bfe33ee3af380b4231b9b4b03255d128e3e75273598f08697"
+    },
+    {
+      "name": "player_prop_quotes_market_idx",
+      "table": "player_prop_market_quotes",
+      "schema": "public",
+      "definition_sha256": "51db809d17035a8a663e92c35ded4fc868fbb2dc031a91184a8e47ab6586043b"
+    },
+    {
+      "name": "player_prop_quotes_start_idx",
+      "table": "player_prop_market_quotes",
+      "schema": "public",
+      "definition_sha256": "4a2a148c97082a885a9ab4c7e5be27e026dd2706af1860904702c7672764e929"
+    },
+    {
+      "name": "player_prop_lookup_idx",
+      "table": "player_prop_observations",
+      "schema": "public",
+      "definition_sha256": "222f79f9f3a4d363ee65df2954a3a7a092a862f200d9ac50fa82a9f471c8919c"
+    },
+    {
+      "name": "player_prop_observations_pkey",
+      "table": "player_prop_observations",
+      "schema": "public",
+      "definition_sha256": "df59f7de98553dc08bfcc6ead63c846f2039fa9698b529daef13ff15ec58beaa"
+    },
+    {
+      "name": "player_prop_results_event_idx",
+      "table": "player_prop_results",
+      "schema": "public",
+      "definition_sha256": "6ea4172150e79b36026f3832a0907cf8cf619d7d28bb0704db059348eaabb4f7"
+    },
+    {
+      "name": "player_prop_results_pkey",
+      "table": "player_prop_results",
+      "schema": "public",
+      "definition_sha256": "7eae5c911d1863f8904fc0cef9d47b6a6a68e3880eb1d60af01af2b924451a73"
+    },
+    {
+      "name": "player_prop_verification_shadow_pkey",
+      "table": "player_prop_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "212e4b2fa77f956e6780cccc02e529194c5100362626d41735e552ca4750bf52"
+    },
+    {
+      "name": "player_prop_verification_snapshot_idx",
+      "table": "player_prop_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "95a54a6e5353f9d6677b5d345bf44118393cb68c3167a0c79c5d8e89e16a3615"
+    },
+    {
+      "name": "player_prop_verification_state_idx",
+      "table": "player_prop_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "29be7c5111a63273f26ea76644dd0232ab6687c44ab769d63d57bd18775e4e46"
+    },
+    {
+      "name": "player_prop_weather_shadow_pkey",
+      "table": "player_prop_weather_shadow",
+      "schema": "public",
+      "definition_sha256": "0d60fa8ebbdbbc234c002c9baa7f7f81ab6421e818e167a3131f0f4a49d1518b"
+    },
+    {
+      "name": "player_prop_weather_snapshot_idx",
+      "table": "player_prop_weather_shadow",
+      "schema": "public",
+      "definition_sha256": "3f5ce8f8dcea0b994412f3d7ae6d8364034ed062cd8709538a03b2c5cd523ae8"
+    },
+    {
+      "name": "sharp_disagreement_classification_idx",
+      "table": "sharp_disagreement_shadow",
+      "schema": "public",
+      "definition_sha256": "5ad40eefc3e0c649de7cd384ed74f293a2a8047c28fce09e3c4b4e745b08180e"
+    },
+    {
+      "name": "sharp_disagreement_market_idx",
+      "table": "sharp_disagreement_shadow",
+      "schema": "public",
+      "definition_sha256": "34206e9aad16102f3e701bff7b6ced52e9abbf550cd1847da3ef2010ee4c4b27"
+    },
+    {
+      "name": "sharp_disagreement_shadow_pkey",
+      "table": "sharp_disagreement_shadow",
+      "schema": "public",
+      "definition_sha256": "6bec427d2ab823bca97e4858336ff5bb2962bb0a94fe14ac89a04e9a424dcc1f"
+    },
+    {
+      "name": "sharp_gate_event_idx",
+      "table": "sharp_gate_history",
+      "schema": "public",
+      "definition_sha256": "93bb423414e0d4b727a87e0f346fcd4636dda703bf9b211e7abb32e7b3af4594"
+    },
+    {
+      "name": "sharp_gate_history_pkey",
+      "table": "sharp_gate_history",
+      "schema": "public",
+      "definition_sha256": "74f63b346b09f2b56650276da4c747724a9e7d9db4681ab16164f77ee39790a9"
+    },
+    {
+      "name": "sharp_gate_lookup_idx",
+      "table": "sharp_gate_history",
+      "schema": "public",
+      "definition_sha256": "c1e4f650ca5017d4ba599afccb68bee48d89280af29707a510ea22c70feae377"
+    },
+    {
+      "name": "sharp_gate_status_idx",
+      "table": "sharp_gate_history",
+      "schema": "public",
+      "definition_sha256": "5aebc21d2b46cdd94e800dadaac18ae67aa2ed9e18afc96618a8a92d196e724f"
+    },
+    {
+      "name": "sharp_market_clv_event_idx",
+      "table": "sharp_market_clv",
+      "schema": "public",
+      "definition_sha256": "99391995319bf267488f95003641dbf28ba970dfd9afd9d1c2178d5b72b5a315"
+    },
+    {
+      "name": "sharp_market_clv_pkey",
+      "table": "sharp_market_clv",
+      "schema": "public",
+      "definition_sha256": "f76c0ab56ff31c7771c14e9c92f8345f5e03096a66affe18d68da2808e3cbe58"
+    },
+    {
+      "name": "sharp_market_clv_start_idx",
+      "table": "sharp_market_clv",
+      "schema": "public",
+      "definition_sha256": "faa206ddd322b7557dfa12e31e42cec5fcdaeac1df9bf8753358ea496ac3a7b4"
+    },
+    {
+      "name": "sharp_source_quotes_lookup_idx",
+      "table": "sharp_source_quotes",
+      "schema": "public",
+      "definition_sha256": "5996977dafdab1de20f3a563d73bfbf129a134e84d68aa5d0fec3e66224d8631"
+    },
+    {
+      "name": "sharp_source_quotes_matchup_idx",
+      "table": "sharp_source_quotes",
+      "schema": "public",
+      "definition_sha256": "e79372c8be61995d32101ad17c281d91732b53ff59ae94651d04ae3bd25128d2"
+    },
+    {
+      "name": "sharp_source_quotes_pkey",
+      "table": "sharp_source_quotes",
+      "schema": "public",
+      "definition_sha256": "95b0dd4d6f0b1bc2132e873af77dbba88668a952e9eff80a9c513d9e0480fdcd"
+    },
+    {
+      "name": "team_market_results_event_idx",
+      "table": "team_market_results",
+      "schema": "public",
+      "definition_sha256": "557a802344abf98b8c0e30c82ecc2d1d4d61016921fe17a4e2966a86b43ab8b3"
+    },
+    {
+      "name": "team_market_results_pkey",
+      "table": "team_market_results",
+      "schema": "public",
+      "definition_sha256": "a1ce762c96f031d2b441763c9c70f19de02f79efb220fb7c87fceab66cee4325"
+    },
+    {
+      "name": "team_market_verification_shadow_pkey",
+      "table": "team_market_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "ddb249534fa1e0a24f87d8935953ae1b80e9a1d84b99f8551ad5b0a78da76f75"
+    },
+    {
+      "name": "team_market_verification_snapshot_idx",
+      "table": "team_market_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "faf3f562d6c7afaa658dd4ecc88576b1e8eda2076500a663f05985b53b4c88de"
+    },
+    {
+      "name": "team_market_verification_state_idx",
+      "table": "team_market_verification_shadow",
+      "schema": "public",
+      "definition_sha256": "6d7b731e256c0c56f97f0276dd3d12c6c739f9dd34f79cc8f4728b6d6852f48b"
+    },
+    {
+      "name": "team_market_weather_shadow_pkey",
+      "table": "team_market_weather_shadow",
+      "schema": "public",
+      "definition_sha256": "ea5fb9b6c70e8055eb2dd2d9b74284e6ddf48a6fde34349758511897bcc4ec73"
+    },
+    {
+      "name": "team_market_weather_snapshot_idx",
+      "table": "team_market_weather_shadow",
+      "schema": "public",
+      "definition_sha256": "a411e9d2e8eeae084d8f96429ef50cc402449851652295eea7e71d03d5cae573"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "pg_cron",
+      "version": "1.6.4"
+    },
+    {
+      "name": "pg_net",
+      "version": "0.20.4"
+    },
+    {
+      "name": "pg_stat_statements",
+      "version": "1.11"
+    },
+    {
+      "name": "pgcrypto",
+      "version": "1.3"
+    },
+    {
+      "name": "plpgsql",
+      "version": "1.0"
+    },
+    {
+      "name": "supabase_vault",
+      "version": "0.3.1"
+    },
+    {
+      "name": "uuid-ossp",
+      "version": "1.1"
+    }
+  ],
+  "rls": [
+    {
+      "table": "candidate_grades",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "decision_outcome_attribution",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "decision_timing_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "game_results",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_decision_fusion_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_grade_observations",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_policy_registry",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_policy_shadow_results",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_price_sensitivity_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_snapshot_runs",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_snapshots",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "market_uncertainty_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "mlb_roof_status_overrides",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "mlb_verification_snapshots",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "mlb_weather_park_snapshots",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "model_audit_observations",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "model_governance_evaluations",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "model_governance_registry",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "model_registry",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "parlay_correlation_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "pipeline_component_registry",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "pipeline_http_request_log",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_clv",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_decision_fusion_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_market_quotes",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_observations",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_results",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_verification_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "player_prop_weather_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "sharp_disagreement_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "sharp_gate_history",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "sharp_market_clv",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "sharp_source_quotes",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "team_market_results",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "team_market_verification_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    },
+    {
+      "table": "team_market_weather_shadow",
+      "forced": false,
+      "schema": "public",
+      "enabled": true
+    }
+  ],
+  "grants": [
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.american_to_decimal_v1(american_to_decimal_v1_26433)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.cleanup_mlb_verification_history(cleanup_mlb_verification_history_26108)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.cleanup_mlb_weather_park_history(cleanup_mlb_weather_park_history_26238)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.cleanup_sharp_source_quotes(cleanup_sharp_source_quotes_25838)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_decision_fusion_v1(compute_decision_fusion_v1_26282)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_market_policy_v1(compute_market_policy_v1_25899)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_market_uncertainty_v1(compute_market_uncertainty_v1_25861)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_outcome_attribution_v1(compute_outcome_attribution_v1_26550)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_parlay_correlation_v1(compute_parlay_correlation_v1_26428)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_player_prop_fusion_v1(compute_player_prop_fusion_v1_26327)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_price_sensitivity_v1(compute_price_sensitivity_v1_25957)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.compute_weather_park_impact_v1(compute_weather_park_impact_v1_26140)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.decimal_to_american_v1(decimal_to_american_v1_26434)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.decision_timing_bucket_v1(decision_timing_bucket_v1_26469)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.enqueue_pipeline_http_v1(enqueue_pipeline_http_v1_26614)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.pipeline_health_snapshot_v1(pipeline_health_snapshot_v1_26579)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.reconcile_pipeline_http_requests_v1(reconcile_pipeline_http_requests_v1_26615)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_decision_outcome_attribution(refresh_decision_outcome_attribution_26569)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_decision_timing_shadow(refresh_decision_timing_shadow_26485)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_market_decision_fusion_shadow(refresh_market_decision_fusion_shadow_26322)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_market_policy_shadow(refresh_market_policy_shadow_25942)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_market_price_sensitivity_shadow(refresh_market_price_sensitivity_shadow_25988)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_market_uncertainty_shadow(refresh_market_uncertainty_shadow_25884)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_parlay_correlation_shadow(refresh_parlay_correlation_shadow_26455)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.refresh_player_prop_decision_fusion_shadow(refresh_player_prop_decision_fusion_shadow_26362)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.rls_auto_enable(rls_auto_enable_17478)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_closing_snapshot(trigger_closing_snapshot_25671)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_decision_outcome_attribution(trigger_decision_outcome_attribution_26576)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_decision_timing_shadow(trigger_decision_timing_shadow_26493)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_league_snapshot(trigger_league_snapshot_25678)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_market_decision_fusion(trigger_market_decision_fusion_26326)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_market_snapshot(trigger_market_snapshot_25618)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_mlb_verification_gate(trigger_mlb_verification_gate_26107)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_mlb_weather_park(trigger_mlb_weather_park_26237)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_model_audit(trigger_model_audit_25670)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_model_governance_refresh(trigger_model_governance_refresh_26549)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_model_grading(trigger_model_grading_25672)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_parlay_correlation_shadow(trigger_parlay_correlation_shadow_26464)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_player_prop_capture(trigger_player_prop_capture_25760)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_player_prop_clv_refresh(trigger_player_prop_clv_refresh_26623)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_player_prop_decision_fusion(trigger_player_prop_decision_fusion_26366)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_player_prop_grading(trigger_player_prop_grading_25761)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_sharp_clv_capture(trigger_sharp_clv_capture_25859)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_sharp_disagreement_shadow(trigger_sharp_disagreement_shadow_26277)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_sharp_source_refresh(trigger_sharp_source_refresh_25835)"
+    },
+    {
+      "object_type": "ROUTINE",
+      "grant_sha256": "b0f2c18d3bd06b1c3357a0f9c507038eb8853e86f54e8eaffb0a0632baebfe6b",
+      "object_identity": "public.trigger_team_market_grading(trigger_team_market_grading_25795)"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.candidate_grades"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.decision_outcome_attribution"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.decision_timing_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.decision_timing_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.game_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_decision_fusion_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_decision_fusion_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.market_grade_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.market_grade_observations"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_policy_final_pregame"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_policy_grade_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_policy_registry"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_policy_shadow_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_price_sensitivity_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_price_sensitivity_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_price_wait_analysis"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.market_snapshot_runs"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.market_snapshots"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_uncertainty_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.market_uncertainty_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_roof_status_overrides"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_verification_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_verification_snapshots"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_weather_park_final_pregame"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_weather_park_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.mlb_weather_park_snapshots"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.model_audit_observations"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.model_calibration_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.model_governance_evaluations"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.model_governance_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.model_governance_registry"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.model_registry"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.parlay_correlation_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.parlay_correlation_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.pipeline_component_health_v1"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.pipeline_component_registry"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.pipeline_http_request_log"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_clv"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_clv_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_decision_fusion_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_decision_fusion_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.player_prop_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.player_prop_latest_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_market_quotes"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.player_prop_observations"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.player_prop_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_verification_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_verification_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_weather_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.player_prop_weather_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.sharp_disagreement_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.sharp_disagreement_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.sharp_gate_history"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.sharp_gate_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.sharp_market_clv"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.sharp_source_quote_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.sharp_source_quotes"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.team_market_latest_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "0469ab8e4d139e4a836da7df0a97c2e1f9f35585ac197a13dc825d64091f291c",
+      "object_identity": "public.team_market_results"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.team_market_verification_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.team_market_verification_shadow"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.team_market_weather_latest"
+    },
+    {
+      "object_type": "TABLE",
+      "grant_sha256": "73369184d67b481f41b9ef961227bbb2d1cca86cef3d0a11e800c9b79c1b69a1",
+      "object_identity": "public.team_market_weather_shadow"
+    }
+  ]
 }

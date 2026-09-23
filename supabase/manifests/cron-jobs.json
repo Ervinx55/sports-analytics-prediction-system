@@ -1,4 +1,216 @@
 {
-  "recoveryBaseline": "2026-09-23",
-  "items": []
+  "project_ref": "yeoxroijaptomomshdii",
+  "captured_at": "2026-09-23T21:28:53.825Z",
+  "items": [
+    {
+      "active": true,
+      "jobname": "decision-outcome-attribution-10min",
+      "schedule": "12-59/10 * * * *",
+      "command_sha256": "81f6c67910c70d57cc14ea0b88e5ab8f39d6161fa9126d652142df26d3ab3616"
+    },
+    {
+      "active": true,
+      "jobname": "decision-timing-shadow-5min",
+      "schedule": "10-59/5 * * * *",
+      "command_sha256": "3a73267a8cc3f61c411b6b8be0fd3e072f10c0bc8de0603ce9113e35b50d2ca9"
+    },
+    {
+      "active": true,
+      "jobname": "market-decision-fusion-5min",
+      "schedule": "7-59/5 * * * *",
+      "command_sha256": "2a8ecf144a70fe9e9b08758c7ca89bf108b591af9c376f8440b2561edae13ca7"
+    },
+    {
+      "active": true,
+      "jobname": "market-policy-shadow-5min",
+      "schedule": "1-59/5 * * * *",
+      "command_sha256": "8a55bc72c7fcd107b75bf95275512d85ac395199e6b4bf343327f5a0143b73f5"
+    },
+    {
+      "active": true,
+      "jobname": "market-price-sensitivity-shadow-5min",
+      "schedule": "2-59/5 * * * *",
+      "command_sha256": "4ad5742c12086dbb9b26b3601b07ece04d74694ff4abb0a410751146ef521d12"
+    },
+    {
+      "active": true,
+      "jobname": "market-uncertainty-shadow-5min",
+      "schedule": "*/5 * * * *",
+      "command_sha256": "21da2804007bdde3940c3c86aff7ac251ea0ec0f95ba46e8b5d908724eadd5dd"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-closing-window-hourly",
+      "schedule": "45 * * * *",
+      "command_sha256": "c864e2b85ee63145d98e59228c4d3de33997143010a298cc7254e952b017233c"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-market-snapshot-midday",
+      "schedule": "0 18 * * *",
+      "command_sha256": "55314f46bb55af8f1da34e09447400798e83aedefaa86c2b740487024c2049a2"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-market-snapshot-morning",
+      "schedule": "0 13 * * *",
+      "command_sha256": "6320bf667a64c3a67575504b78c8f3a8cf19adce55a427cdc2a20513ae984e45"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-market-snapshot-pregame",
+      "schedule": "30 21 * * *",
+      "command_sha256": "864985f6c828f0c669204dbe213b5d8ee192d5699e7da53a1c8179484a3eb28d"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-model-audit-hourly",
+      "schedule": "20 * * * *",
+      "command_sha256": "adb8f8eb062b915d064bda1b09a5594a54bb148755cac0f002a53a343120e1f3"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-model-grading-hourly",
+      "schedule": "35 * * * *",
+      "command_sha256": "bc3340f43b1aca1353920027a15b07208deb0a80473cfcd0c35a9c1758f336e5"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-player-prop-clv-5min",
+      "schedule": "*/5 * * * *",
+      "command_sha256": "053ced12dbd01d7df3a2cc690fc05832cd33fee1c6bd632ccde79565f9626c3d"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-player-prop-quote-retention-daily",
+      "schedule": "55 9 * * *",
+      "command_sha256": "d1b141b7d6f9f06ca7e4934fb3c008b91f14a477889a56c04207a6285fb6395a"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-player-props-capture-hourly",
+      "schedule": "25 * * * *",
+      "command_sha256": "15d6dad5fd4015e3a9c3495c4ec16699717774ad78b0d18f2e92b2c4eb908890"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-player-props-grading-live",
+      "schedule": "*/5 * * * *",
+      "command_sha256": "495bcba4341f06e7e8c3d860fc8387eef48eb651b3916b7e74c410f1cfc14a40"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-sharp-clv-10min",
+      "schedule": "*/10 * * * *",
+      "command_sha256": "52e005f357baaed6a46b35a3e5ca02462e41bd1ddea379f973dd8fe2e80d36fa"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-sharp-sources-5min",
+      "schedule": "*/5 * * * *",
+      "command_sha256": "5ac00a7fcc312a43ba74d26a107887caee6feb7b41224ff3273deb9ee5a4cb5b"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-team-market-grading-live",
+      "schedule": "*/5 * * * *",
+      "command_sha256": "e1e1c6250947a9ac74fee6938806fba44f79f28f32f00981de5173df48fbc2a7"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-verification-gate-5min",
+      "schedule": "3-59/5 * * * *",
+      "command_sha256": "c20c177bd607e83676feafc17b1109968ae064eadfe965e9d8772bf3ade0c326"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-verification-retention-daily",
+      "schedule": "35 9 * * *",
+      "command_sha256": "3b29196ed5f54386de783a547892fbb8219e251b3858268724ff8cd5342cacc2"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-weather-park-5min",
+      "schedule": "4-59/5 * * * *",
+      "command_sha256": "1f42fbd0176ceea4ce1f6fadedfe8b49357ac57be6668bfe4f4183e5105a5909"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-weather-park-retention-daily",
+      "schedule": "40 9 * * *",
+      "command_sha256": "4be1105df4cef83480a001ed4d490618573474e030fb3bf9941ae1789ca3c79c"
+    },
+    {
+      "active": true,
+      "jobname": "mls-closing-window-hourly",
+      "schedule": "18 * * * *",
+      "command_sha256": "52fde89726e7e4a2a2a24b3bc33f9aeb90cc956bf69cba62bc98eb117eca7250"
+    },
+    {
+      "active": true,
+      "jobname": "mls-market-baseline-daily",
+      "schedule": "15 13 * * *",
+      "command_sha256": "d5fc55f93f3e5ecb935985ba43674cea0e9394c82c7796e3fd7ee94d3457127b"
+    },
+    {
+      "active": true,
+      "jobname": "model-governance-6hour",
+      "schedule": "15 */6 * * *",
+      "command_sha256": "c67ce48dfbae9f7538a110713ca1ba7ec205fd660ec35d37e511e412ba34e575"
+    },
+    {
+      "active": true,
+      "jobname": "nfl-closing-window-hourly",
+      "schedule": "8 * * * *",
+      "command_sha256": "e6ecd89c241ad29e4b2016d7152de467dbcaae90d82a04b51988ffac47a9f74f"
+    },
+    {
+      "active": true,
+      "jobname": "nfl-market-baseline-daily",
+      "schedule": "5 13 * * *",
+      "command_sha256": "a28e82abd5c23322b53a1ab639c8bd66926ffd16e3d37879649cb5e3834c9891"
+    },
+    {
+      "active": true,
+      "jobname": "parlay-correlation-shadow-5min",
+      "schedule": "9-59/5 * * * *",
+      "command_sha256": "1859d289858d6dcd3edbdada1ac649e9fb61b624bf1fc30f58f506f9dc3d61ae"
+    },
+    {
+      "active": true,
+      "jobname": "pipeline-http-reconcile-1min",
+      "schedule": "* * * * *",
+      "command_sha256": "d850a0b62358ecd8b7f4562ef9f461894395083e02fd31f0c02b3b62079afe23"
+    },
+    {
+      "active": true,
+      "jobname": "player-prop-decision-fusion-5min",
+      "schedule": "8-59/5 * * * *",
+      "command_sha256": "5a5d8042ad4169923bd983e7f2fae144d0a22e7568b2f807646ebe6d3ddd79b4"
+    },
+    {
+      "active": true,
+      "jobname": "sharp-disagreement-shadow-5min",
+      "schedule": "6-59/5 * * * *",
+      "command_sha256": "caa028cfd4d7859985c176c71ba3cc034f197786b35d62d57ba2665e6a09e7a4"
+    },
+    {
+      "active": true,
+      "jobname": "sharp-source-retention-daily",
+      "schedule": "15 9 * * *",
+      "command_sha256": "fccf002eae3e8b40be11a85e8d7bf6204095925ec14b00bcc9e88d5e978a5e0b"
+    },
+    {
+      "active": true,
+      "jobname": "ucl-closing-window-hourly",
+      "schedule": "28 * * * *",
+      "command_sha256": "d561d59879ad610873b6c6d6b789d3f4195c00a70228327d4b210bb0f3768d32"
+    },
+    {
+      "active": true,
+      "jobname": "ucl-market-baseline-daily",
+      "schedule": "25 13 * * *",
+      "command_sha256": "76a3c9bc78f3dcc1ff2e4bd581319da1d488ee8bfba9d43e487e3b9ad834e4e3"
+    }
+  ]
 }
