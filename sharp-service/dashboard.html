@@ -686,6 +686,37 @@
       </div>`;
   }
 
+  function clvPanel(p){
+    const x=p?.marketClv;
+    if(!x) return "";
+    const cls=String(x.clv_classification||"TRACKING");
+    const tone=cls.startsWith("POSITIVE")?"play":cls.startsWith("NEGATIVE")?"pass":"pending";
+    const open=x.opening_consensus_line==null?"—":Number(x.opening_consensus_line).toFixed(1);
+    const current=x.current_consensus_line==null?"—":Number(x.current_consensus_line).toFixed(1);
+    const close=x.closing_consensus_line==null?"—":Number(x.closing_consensus_line).toFixed(1);
+    const currentPrice=x.current_best_odds_at_decision_line==null?"—":fmtOdds(x.current_best_odds_at_decision_line);
+    const closePrice=x.closing_best_odds_at_decision_line==null?"—":fmtOdds(x.closing_best_odds_at_decision_line);
+    const bits=[
+      "open line "+open,
+      "current line "+current,
+      x.finalized?"close line "+close:null,
+      "ticket "+fmtOdds(x.decision_odds),
+      x.finalized?"close price "+closePrice:"current price "+currentPrice
+    ].filter(Boolean);
+    const details=[];
+    if(x.line_clv_units!=null) details.push("line CLV "+(Number(x.line_clv_units)>=0?"+":"")+Number(x.line_clv_units).toFixed(2));
+    if(x.fair_probability_clv_pp!=null) details.push("fair-prob CLV "+fmtPP(x.fair_probability_clv_pp));
+    if(x.same_book_price_clv_pp!=null) details.push("same-book CLV "+fmtPP(x.same_book_price_clv_pp));
+    if(x.close_quote_age_minutes!=null) details.push("close quote "+Number(x.close_quote_age_minutes).toFixed(0)+"m before start");
+    return `
+      <div class="why ${tone}" style="margin-top:8px">
+        <strong>PROP CLV · ${esc(cls)}</strong>
+        <div style="margin-top:4px">${esc(bits.join(" · "))}</div>
+        ${details.length?'<div style="margin-top:4px">'+esc(details.join(" · "))+'</div>':""}
+        <div class="small" style="margin-top:4px">${x.finalized?"Finalized from our last pregame snapshots.":"Tracking live market movement; no closing grade yet."}</div>
+      </div>`;
+  }
+
   function renderMarketCard(card){
     const rows=card?.markets||[];
     if(!rows.length){
@@ -927,6 +958,7 @@
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
         ${fusionPanel(p)}
+        ${clvPanel(p)}
         <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
       </div>`).join("");
@@ -1026,6 +1058,7 @@
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
           ${fusionPanel(p)}
+          ${clvPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
           <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
         </div>`).join("");
@@ -1043,6 +1076,7 @@
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
           ${fusionPanel(p)}
+          ${clvPanel(p)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
         </div>`).join("");
     }
@@ -1058,6 +1092,7 @@
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
             ${fusionPanel(p)}
+            ${clvPanel(p)}
             <div class="small" style="margin-top:4px"><strong>STATS:</strong> ${esc(propStats(p))}</div>
           </div>
           <div><div class="small">Decision</div>${statusBadge(p)}</div>
@@ -1337,7 +1372,7 @@
     );
   }
 
-  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal){
+  function renderCalibration(c, marketCal, sharpDiagCal, fusionCal, propFusionCal, propClvCal){
     const x=c?.allCandidates || {};
     const sample=Number(x.sampleSize||0), target=Number(x.targetSample||100);
     const pct=Math.min(100, target?sample/target*100:0);
@@ -1345,6 +1380,7 @@
     const sharpClasses=sharpDiagCal?.byClassification||{};
     const fusionCodes=fusionCal?.byConflictCode||{};
     const propFusionCodes=propFusionCal?.byConflictCode||{};
+    const propClvStats=propClvCal||{};
     const typeCard=(label,key)=>{
       const m=types[key]||{};
       return `
@@ -1353,6 +1389,16 @@
           <div class="value" style="font-size:20px">${m.graded??0} graded</div>
           <div class="hint">W-L-P ${m.wins??0}-${m.losses??0}-${m.pushes??0} · ROI ${m.roiPct==null?"—":Number(m.roiPct).toFixed(1)+"%"}</div>
           <div class="hint">Avg edge ${m.averageEdgePctPoints==null?"—":fmtPP(m.averageEdgePctPoints)} · Brier ${m.brierScore??"—"}</div>
+        </div>`;
+    };
+    const propClvCard=(label,m)=>{
+      const x=m||{};
+      return `
+        <div class="metric">
+          <div class="label">${label}</div>
+          <div class="value" style="font-size:20px">${x.usableClose??0} closes</div>
+          <div class="hint">Beat close ${x.beatCloseRate==null?"—":(Number(x.beatCloseRate)*100).toFixed(1)+"%"} · line CLV ${x.averageLineClvUnits==null?"—":Number(x.averageLineClvUnits).toFixed(2)}</div>
+          <div class="hint">Price CLV ${x.averagePriceClvPp==null?"—":fmtPP(x.averagePriceClvPp)} · W-L-P ${x.wins??0}-${x.losses??0}-${x.pushes??0}</div>
         </div>`;
     };
     const propFusionCard=(label,key)=>{
@@ -1443,6 +1489,18 @@
       <div class="card" style="margin-top:10px;box-shadow:none">
         <div class="reason" style="margin-top:0"><strong>Prop fusion policy:</strong> explanatory only. Hitter and pitcher conflict codes stay separate and need at least 100 graded outcomes per code before promotion is considered.</div>
       </div>
+      <div class="section-title" style="margin-top:18px"><h2>Player Prop CLV Calibration</h2><p>did our ticket beat the closing prop market?</p></div>
+      <div class="cal-grid">
+        ${propClvCard("Overall",propClvStats.overall)}
+        ${propClvCard("Pitcher Strikeouts",propClvStats.byStat?.pitching_strikeouts)}
+        ${propClvCard("Hitter Hits",propClvStats.byStat?.batting_hits)}
+        ${propClvCard("Hitter Total Bases",propClvStats.byStat?.batting_totalBases)}
+        ${propClvCard("Pitcher Props",propClvStats.byRole?.PITCHER)}
+        ${propClvCard("Hitter Props",propClvStats.byRole?.HITTER)}
+      </div>
+      <div class="card" style="margin-top:10px;box-shadow:none">
+        <div class="reason" style="margin-top:0"><strong>CLV rule:</strong> positive line CLV means our ticket had the better number at close; when the line is unchanged, positive price/fair-probability CLV means the market moved toward our side after the decision. CLV measures process quality, not whether one wager won.</div>
+      </div>
       <div class="section-title" style="margin-top:18px"><h2>Sharp Disagreement Calibration</h2><p>shadow diagnosis vs closing value</p></div>
       <div class="cal-grid">
         ${sharpDiagCard("Consensus OK","CONSENSUS_OK")}
@@ -1502,7 +1560,7 @@
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
-    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration);
+    renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration);
     renderSystem(data.system,data.sharpSourceHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const bad=health.some(x=>!x.ok);
