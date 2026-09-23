@@ -1,4 +1,7 @@
--- Reconstructed from production catalog on 2026-09-23.\n-- Catch-up source for fresh environments; do not replay blindly on current production.\n\ncreate table if not exists public.parlay_correlation_shadow (
+-- Reconstructed from production catalog on 2026-09-23.
+-- Catch-up source for fresh environments; do not replay blindly on current production.
+
+create table if not exists public.parlay_correlation_shadow (
   pair_key text not null,
   first_seen_at timestamp with time zone default now() not null,
   evaluated_at timestamp with time zone default now() not null,
@@ -41,7 +44,20 @@
   affects_decision boolean default false not null,
   raw jsonb default '{}'::jsonb not null,
   constraint parlay_correlation_shadow_pkey PRIMARY KEY (pair_key)
-);\nalter table public.parlay_correlation_shadow enable row level security;\nrevoke all on table public.parlay_correlation_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.parlay_correlation_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS parlay_correlation_eval_idx ON public.parlay_correlation_shadow USING btree (evaluated_at DESC);\n\nCREATE INDEX IF NOT EXISTS parlay_correlation_leg_a_idx ON public.parlay_correlation_shadow USING btree (leg_a_kind, leg_a_observation_id);\n\nCREATE INDEX IF NOT EXISTS parlay_correlation_leg_b_idx ON public.parlay_correlation_shadow USING btree (leg_b_kind, leg_b_observation_id);\n\nCREATE INDEX IF NOT EXISTS parlay_correlation_relation_idx ON public.parlay_correlation_shadow USING btree (relation_class, action, evaluated_at DESC);\n\ncreate table if not exists public.decision_timing_shadow (
+);
+alter table public.parlay_correlation_shadow enable row level security;
+revoke all on table public.parlay_correlation_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.parlay_correlation_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS parlay_correlation_eval_idx ON public.parlay_correlation_shadow USING btree (evaluated_at DESC);
+
+CREATE INDEX IF NOT EXISTS parlay_correlation_leg_a_idx ON public.parlay_correlation_shadow USING btree (leg_a_kind, leg_a_observation_id);
+
+CREATE INDEX IF NOT EXISTS parlay_correlation_leg_b_idx ON public.parlay_correlation_shadow USING btree (leg_b_kind, leg_b_observation_id);
+
+CREATE INDEX IF NOT EXISTS parlay_correlation_relation_idx ON public.parlay_correlation_shadow USING btree (relation_class, action, evaluated_at DESC);
+
+create table if not exists public.decision_timing_shadow (
   leg_type text not null,
   observation_id bigint not null,
   captured_at timestamp with time zone not null,
@@ -76,7 +92,16 @@
   constraint decision_timing_shadow_leg_type_check CHECK (leg_type = ANY (ARRAY['TEAM'::text, 'PROP'::text])),
   constraint decision_timing_shadow_timing_bucket_check CHECK (timing_bucket = ANY (ARRAY['GT_180'::text, '120_180'::text, '60_120'::text, '30_60'::text, '20_30'::text, 'LT_20'::text])),
   constraint decision_timing_shadow_pkey PRIMARY KEY (leg_type, observation_id)
-);\nalter table public.decision_timing_shadow enable row level security;\nrevoke all on table public.decision_timing_shadow from public, anon, authenticated;\ngrant select, insert, update, delete on table public.decision_timing_shadow to service_role;\n\nCREATE INDEX IF NOT EXISTS decision_timing_bucket_idx ON public.decision_timing_shadow USING btree (leg_type, timing_bucket, captured_at DESC);\n\nCREATE INDEX IF NOT EXISTS decision_timing_event_idx ON public.decision_timing_shadow USING btree (event_id, leg_type, captured_at DESC);\n\nCREATE OR REPLACE FUNCTION public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb)
+);
+alter table public.decision_timing_shadow enable row level security;
+revoke all on table public.decision_timing_shadow from public, anon, authenticated;
+grant select, insert, update, delete on table public.decision_timing_shadow to service_role;
+
+CREATE INDEX IF NOT EXISTS decision_timing_bucket_idx ON public.decision_timing_shadow USING btree (leg_type, timing_bucket, captured_at DESC);
+
+CREATE INDEX IF NOT EXISTS decision_timing_event_idx ON public.decision_timing_shadow USING btree (event_id, leg_type, captured_at DESC);
+
+CREATE OR REPLACE FUNCTION public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb)
  RETURNS jsonb
  LANGUAGE plpgsql
  IMMUTABLE
@@ -414,7 +439,11 @@ begin
     'calibrationNeeded',action<>'BLOCK'
   );
 end;
-$function$\nrevoke execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) from public, anon, authenticated;\ngrant execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_parlay_correlation_shadow()
+$function$
+revoke execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) from public, anon, authenticated;
+grant execute on function public.compute_parlay_correlation_v1(p_leg_a jsonb, p_leg_b jsonb) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_parlay_correlation_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -659,14 +688,22 @@ begin
 
   return v_count;
 end;
-$function$\nrevoke execute on function public.refresh_parlay_correlation_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_parlay_correlation_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.trigger_parlay_correlation_shadow()
+$function$
+revoke execute on function public.refresh_parlay_correlation_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_parlay_correlation_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_parlay_correlation_shadow()
  RETURNS integer
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
 AS $function$
   select public.refresh_parlay_correlation_shadow();
-$function$\nrevoke execute on function public.trigger_parlay_correlation_shadow() from public, anon, authenticated;\ngrant execute on function public.trigger_parlay_correlation_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone)
+$function$
+revoke execute on function public.trigger_parlay_correlation_shadow() from public, anon, authenticated;
+grant execute on function public.trigger_parlay_correlation_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone)
  RETURNS text
  LANGUAGE plpgsql
  IMMUTABLE STRICT
@@ -685,7 +722,11 @@ begin
   else return 'GT_180';
   end if;
 end;
-$function$\nrevoke execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) from public, anon, authenticated;\ngrant execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) to service_role;\n\nCREATE OR REPLACE FUNCTION public.refresh_decision_timing_shadow()
+$function$
+revoke execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) from public, anon, authenticated;
+grant execute on function public.decision_timing_bucket_v1(p_starts_at timestamp with time zone, p_captured_at timestamp with time zone) to service_role;
+
+CREATE OR REPLACE FUNCTION public.refresh_decision_timing_shadow()
  RETURNS integer
  LANGUAGE plpgsql
  SECURITY DEFINER
@@ -840,14 +881,23 @@ begin
   get diagnostics v_prop = row_count;
   return v_team+v_prop;
 end;
-$function$\nrevoke execute on function public.refresh_decision_timing_shadow() from public, anon, authenticated;\ngrant execute on function public.refresh_decision_timing_shadow() to service_role;\n\nCREATE OR REPLACE FUNCTION public.trigger_decision_timing_shadow()
+$function$
+revoke execute on function public.refresh_decision_timing_shadow() from public, anon, authenticated;
+grant execute on function public.refresh_decision_timing_shadow() to service_role;
+
+CREATE OR REPLACE FUNCTION public.trigger_decision_timing_shadow()
  RETURNS integer
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO 'public', 'pg_catalog'
 AS $function$
   select public.refresh_decision_timing_shadow();
-$function$\nrevoke execute on function public.trigger_decision_timing_shadow() from public, anon, authenticated;\ngrant execute on function public.trigger_decision_timing_shadow() to service_role;\n\ncreate or replace view public.parlay_correlation_latest with (security_invoker = true) as\nSELECT pair_key,
+$function$
+revoke execute on function public.trigger_decision_timing_shadow() from public, anon, authenticated;
+grant execute on function public.trigger_decision_timing_shadow() to service_role;
+
+create or replace view public.parlay_correlation_latest with (security_invoker = true) as
+SELECT pair_key,
     first_seen_at,
     evaluated_at,
     sport,
@@ -889,7 +939,13 @@ $function$\nrevoke execute on function public.trigger_decision_timing_shadow() f
     affects_decision,
     raw
    FROM parlay_correlation_shadow
-  WHERE GREATEST(COALESCE(leg_a_starts_at, '1970-01-01 00:00:00+00'::timestamp with time zone), COALESCE(leg_b_starts_at, '1970-01-01 00:00:00+00'::timestamp with time zone)) > now();\n;\nrevoke all on table public.parlay_correlation_latest from public, anon, authenticated;\ngrant select on table public.parlay_correlation_latest to service_role;\n\ncreate or replace view public.decision_timing_latest with (security_invoker = true) as\nSELECT leg_type,
+  WHERE GREATEST(COALESCE(leg_a_starts_at, '1970-01-01 00:00:00+00'::timestamp with time zone), COALESCE(leg_b_starts_at, '1970-01-01 00:00:00+00'::timestamp with time zone)) > now();
+;
+revoke all on table public.parlay_correlation_latest from public, anon, authenticated;
+grant select on table public.parlay_correlation_latest to service_role;
+
+create or replace view public.decision_timing_latest with (security_invoker = true) as
+SELECT leg_type,
     observation_id,
     captured_at,
     starts_at,
@@ -921,4 +977,7 @@ $function$\nrevoke execute on function public.trigger_decision_timing_shadow() f
     shadow_only,
     affects_decision
    FROM decision_timing_shadow
-  WHERE starts_at > now();\n;\nrevoke all on table public.decision_timing_latest from public, anon, authenticated;\ngrant select on table public.decision_timing_latest to service_role;\n
+  WHERE starts_at > now();
+;
+revoke all on table public.decision_timing_latest from public, anon, authenticated;
+grant select on table public.decision_timing_latest to service_role;
