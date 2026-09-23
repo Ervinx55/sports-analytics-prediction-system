@@ -286,11 +286,53 @@
       </div>
     </div>
 
-    <div class="section-title"><h2>Team Market Decisions</h2><p>moneyline · run line · totals</p></div>
-    <div id="teamDecisionResults"><div class="empty">No completed team-market decisions yet.</div></div>
+    <div class="section-title"><h2>Team Market PLAY Results</h2><p>moneyline · run line · totals</p></div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Wins</div>
+      <div id="teamPlayWins"><div class="empty">No team-market wins yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Losses</div>
+      <div id="teamPlayLosses"><div class="empty">No team-market losses yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Pushes</div>
+      <div id="teamPlayPushes"><div class="empty">No team-market pushes yet.</div></div>
+    </div>
 
-    <div class="section-title"><h2>Player Prop Decisions</h2><p>plays and passes tracked separately</p></div>
-    <div id="propDecisionResults"><div class="empty">No completed prop decisions yet.</div></div>
+    <div class="section-title"><h2>Team Market PASS Review</h2><p>counterfactual tracking</p></div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Good Passes</div>
+      <div id="teamGoodPasses"><div class="empty">No good passes graded yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Missed Wins</div>
+      <div id="teamMissedWins"><div class="empty">No missed wins graded yet.</div></div>
+    </div>
+
+    <div class="section-title"><h2>Player Prop PLAY Results</h2><p>separate prop model</p></div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Wins</div>
+      <div id="propPlayWins"><div class="empty">No prop wins yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Losses</div>
+      <div id="propPlayLosses"><div class="empty">No prop losses yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Pushes</div>
+      <div id="propPlayPushes"><div class="empty">No prop pushes yet.</div></div>
+    </div>
+
+    <div class="section-title"><h2>Player Prop PASS Review</h2><p>counterfactual tracking</p></div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Good Passes</div>
+      <div id="propGoodPasses"><div class="empty">No good prop passes graded yet.</div></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:850;margin-bottom:8px">Missed Wins</div>
+      <div id="propMissedWins"><div class="empty">No missed prop wins graded yet.</div></div>
+    </div>
   </section>
 
   <section class="section" id="calibration">
@@ -999,6 +1041,50 @@
     return propWhy({...r,status:r?.decisionStatus==="PLAY"?"PLAY":"PASS"});
   }
 
+  function renderTeamResultRows(rows, emptyText){
+    if(!rows?.length) return '<div class="empty">'+esc(emptyText)+'</div>';
+    return rows.slice(0,100).map(r=>`
+      <div class="card" style="box-shadow:none;margin:7px 0">
+        <div class="candidate-head">
+          <div>
+            <div class="match">${esc(r.market_label)}</div>
+            <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
+          </div>
+          <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.resultLabel||r.outcome||"—")}</span>
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Decision</div><div class="v">${esc(r.decisionStatus||"—")}</div></div>
+          <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
+          <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+        </div>
+        <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(teamResultWhy(r))}</div>
+        <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(r))}</div>
+      </div>`).join("");
+  }
+
+  function renderPropResultRows(rows, emptyText){
+    if(!rows?.length) return '<div class="empty">'+esc(emptyText)+'</div>';
+    return rows.slice(0,100).map(r=>`
+      <div class="card" style="box-shadow:none;margin:7px 0">
+        <div class="candidate-head">
+          <div>
+            <div class="match">${esc(r.label)}</div>
+            <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
+          </div>
+          <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.resultLabel||r.outcome||"—")}</span>
+        </div>
+        <div class="grid4">
+          <div class="stat"><div class="k">Decision</div><div class="v">${esc(r.decisionStatus||"—")}</div></div>
+          <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
+          <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
+          <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
+        </div>
+        <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(propResultWhy(r))}</div>
+        <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(r))}</div>
+      </div>`).join("");
+  }
+
   function renderDecisionResults(data){
     const summary=data?.summary||{};
     const team=summary.team||{};
@@ -1014,54 +1100,54 @@
     $("rPropPass").textContent=pgood+" / "+pmiss;
 
     const teamRows=data?.team||[];
-    if(!teamRows.length){
-      $("teamDecisionResults").innerHTML='<div class="empty">No completed team-market decisions yet. The grader runs automatically after games become final.</div>';
-    } else {
-      $("teamDecisionResults").innerHTML=teamRows.slice(0,100).map(r=>`
-        <div class="card" style="box-shadow:none">
-          <div class="candidate-head">
-            <div>
-              <div class="match">${esc(r.market_label)}</div>
-              <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Final ${r.away_score??"—"}-${r.home_score??"—"}</div>
-            </div>
-            <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.decisionStatus)}</span>
-          </div>
-          <div class="grid4">
-            <div class="stat"><div class="k">Result</div><div class="v ${resultClass(r.resultLabel)}">${esc(r.resultLabel||r.outcome||"—")}</div></div>
-            <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
-            <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
-            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
-          </div>
-          <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(teamResultWhy(r))}</div>
-          <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(r))}</div>
-          ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This passed wager would have won; review whether the filter was too strict without assuming one result proves the rule was wrong.":r.resultLabel==="GOOD PASS"?"The pass avoided a losing wager; this is evidence in favor of the filter, but still only one observation.":"The passed wager pushed.")+'</div>' : ''}
-        </div>`).join("");
-    }
+    const teamPlay=teamRows.filter(r=>r.decisionStatus==="PLAY");
+    const teamPass=teamRows.filter(r=>r.decisionStatus==="PASS");
+
+    $("teamPlayWins").innerHTML=renderTeamResultRows(
+      teamPlay.filter(r=>r.outcome==="W"),
+      "No team-market wins yet."
+    );
+    $("teamPlayLosses").innerHTML=renderTeamResultRows(
+      teamPlay.filter(r=>r.outcome==="L"),
+      "No team-market losses yet."
+    );
+    $("teamPlayPushes").innerHTML=renderTeamResultRows(
+      teamPlay.filter(r=>r.outcome==="PUSH"),
+      "No team-market pushes yet."
+    );
+    $("teamGoodPasses").innerHTML=renderTeamResultRows(
+      teamPass.filter(r=>r.passEvaluation==="GOOD_PASS"),
+      "No good passes graded yet."
+    );
+    $("teamMissedWins").innerHTML=renderTeamResultRows(
+      teamPass.filter(r=>r.passEvaluation==="MISSED_WIN"),
+      "No missed wins graded yet."
+    );
 
     const propRows=data?.props||[];
-    if(!propRows.length){
-      $("propDecisionResults").innerHTML='<div class="empty">No completed player-prop decisions yet. Prop results are graded automatically after games finish.</div>';
-    } else {
-      $("propDecisionResults").innerHTML=propRows.slice(0,100).map(r=>`
-        <div class="card" style="box-shadow:none">
-          <div class="candidate-head">
-            <div>
-              <div class="match">${esc(r.label)}</div>
-              <div class="pick">${esc(r.away_team)} @ ${esc(r.home_team)} · ${fmtTime(r.starts_at)} · Actual ${r.actual_value??"—"}</div>
-            </div>
-            <span class="badge ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(r.decisionStatus)}</span>
-          </div>
-          <div class="grid4">
-            <div class="stat"><div class="k">Result</div><div class="v ${resultClass(r.resultLabel)}">${esc(r.resultLabel||r.outcome||"—")}</div></div>
-            <div class="stat">${probCompare(r.model_probability,r.market_fair_probability)}</div>
-            <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(r.edge_pct_points)}</div></div>
-            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(r.best_odds)}</div><div class="small">${esc(r.best_book||"—")}</div></div>
-          </div>
-          <div class="why ${r.decisionStatus==="PLAY"?"play":"pass"}">${esc(propResultWhy(r))}</div>
-          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(r))}</div>
-          ${r.decisionStatus==="PASS" ? '<div class="reason"><strong>Pass review:</strong> '+esc(r.resultLabel==="MISSED WIN"?"This prop would have won despite being filtered out. It is logged as a missed win for later threshold analysis.":r.resultLabel==="GOOD PASS"?"The filter avoided a losing prop.":"The passed prop pushed.")+'</div>' : ''}
-        </div>`).join("");
-    }
+    const propPlay=propRows.filter(r=>r.decisionStatus==="PLAY");
+    const propPass=propRows.filter(r=>r.decisionStatus==="PASS");
+
+    $("propPlayWins").innerHTML=renderPropResultRows(
+      propPlay.filter(r=>r.outcome==="W"),
+      "No prop wins yet."
+    );
+    $("propPlayLosses").innerHTML=renderPropResultRows(
+      propPlay.filter(r=>r.outcome==="L"),
+      "No prop losses yet."
+    );
+    $("propPlayPushes").innerHTML=renderPropResultRows(
+      propPlay.filter(r=>r.outcome==="PUSH"),
+      "No prop pushes yet."
+    );
+    $("propGoodPasses").innerHTML=renderPropResultRows(
+      propPass.filter(r=>r.passEvaluation==="GOOD_PASS"),
+      "No good prop passes graded yet."
+    );
+    $("propMissedWins").innerHTML=renderPropResultRows(
+      propPass.filter(r=>r.passEvaluation==="MISSED_WIN"),
+      "No missed prop wins graded yet."
+    );
   }
 
   function renderCalibration(c){
@@ -1137,8 +1223,9 @@
       $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("propPlayList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
       $("playsPropList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      $("teamDecisionResults").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
-      $("propDecisionResults").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      for(const id of ["teamPlayWins","teamPlayLosses","teamPlayPushes","teamGoodPasses","teamMissedWins","propPlayWins","propPlayLosses","propPlayPushes","propGoodPasses","propMissedWins"]){
+        $(id).innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';
+      }
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
