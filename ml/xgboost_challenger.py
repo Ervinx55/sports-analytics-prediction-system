@@ -53,7 +53,7 @@ def _metrics(y_true: np.ndarray, probs: np.ndarray) -> dict[str, float]:
     }
 
 
-def __best_ensemble_weight(
+def _best_ensemble_weight(
     y_val: np.ndarray,
     champion: np.ndarray,
     challenger: np.ndarray,
