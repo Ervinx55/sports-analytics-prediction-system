@@ -259,6 +259,11 @@ async function backtestSeason(season, minWeek) {
       indexBy(rows, (row) => normalizePlayerName(playerName(row)))
     ])
   );
+  const depthChartsByTeam = indexBy(
+    nflData.depthCharts,
+    (row) => rowTeam(row)
+  );
+  const opponentSnapshotCache = new Map();
 
   const targetRows = playerData.playerStats
     .filter((row) => {
@@ -316,16 +321,21 @@ async function backtestSeason(season, minWeek) {
         index.get(normalizedPlayer) || []
       ])
     );
-    const opponentSnapshot = teamSnapshot(
-      nflData.schedule,
-      nflData.stats,
-      season,
-      opponent,
-      {
-        beforeDate: game.gameday,
-        beforeWeek: week
-      }
-    );
+    const snapshotKey = `${game.game_id}|${opponent}`;
+    let opponentSnapshot = opponentSnapshotCache.get(snapshotKey);
+    if (!opponentSnapshot) {
+      opponentSnapshot = teamSnapshot(
+        nflData.schedule,
+        nflData.stats,
+        season,
+        opponent,
+        {
+          beforeDate: game.gameday,
+          beforeWeek: week
+        }
+      );
+      opponentSnapshotCache.set(snapshotKey, opponentSnapshot);
+    }
 
     const opportunity = projectPlayerOpportunity({
       playerName: playerName(target),
@@ -335,7 +345,7 @@ async function backtestSeason(season, minWeek) {
       playerStats: scopedStats,
       snapCounts: scopedSnaps,
       ngs: scopedNgs,
-      depthCharts: nflData.depthCharts,
+      depthCharts: depthChartsByTeam.get(team) || [],
       weatherContext: null,
       opponentSnapshot
     });
