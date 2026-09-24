@@ -245,6 +245,22 @@ function summarizeEvent(event) {
   };
 }
 
+function boardPriority(live, startsBefore) {
+  if (live === "true") return "critical";
+
+  const cutoff = Date.parse(String(startsBefore || ""));
+  const now = Date.now();
+  if (
+    Number.isFinite(cutoff) &&
+    cutoff >= now - 5 * 60 * 1000 &&
+    cutoff <= now + 90 * 60 * 1000
+  ) {
+    return "critical";
+  }
+
+  return "normal";
+}
+
 async function fetchLeague({
   league,
   books,
@@ -252,7 +268,8 @@ async function fetchLeague({
   apiKey,
   live,
   startsAfter,
-  startsBefore
+  startsBefore,
+  priority
 }) {
   const params = new URLSearchParams({
     leagueID: league,
@@ -279,7 +296,8 @@ async function fetchLeague({
       freshMs: PROVIDER_FRESH_MS,
       staleMs: PROVIDER_STALE_MS,
       timeoutMs: 7_000,
-      consumer: "board"
+      consumer: "board",
+      priority
     });
 
     return {
@@ -295,6 +313,7 @@ async function fetchLeague({
         sharedEnabled: result.sharedEnabled,
         circuitOpen: result.circuitOpen,
         recoveryState: result.recoveryState || "CLOSED",
+        budget: result.budget || null,
         upstreamError: result.upstreamError
       }
     };
@@ -308,7 +327,9 @@ async function fetchLeague({
           ? error.message
           : "SportsGameOdds request failed",
       retryAfterSeconds: error?.retryAfter ?? null,
-      circuitOpen: Boolean(error?.circuitOpen)
+      circuitOpen: Boolean(error?.circuitOpen),
+      budgetBlocked: Boolean(error?.budgetBlocked),
+      budget: error?.budget || null
     };
   }
 }
@@ -377,6 +398,7 @@ export default async function handler(req, res) {
   const live = String(req.query.live ?? "");
   const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
   const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+  const priority = boardPriority(live, startsBefore);
 
   const results = await mapWithConcurrency(
     leagues,
@@ -389,7 +411,8 @@ export default async function handler(req, res) {
         apiKey,
         live,
         startsAfter,
-        startsBefore
+        startsBefore,
+        priority
       })
   );
 
@@ -402,13 +425,17 @@ export default async function handler(req, res) {
         status,
         error,
         retryAfterSeconds,
-        circuitOpen
+        circuitOpen,
+        budgetBlocked,
+        budget
       }) => ({
         league,
         status,
         error,
         retryAfterSeconds,
-        circuitOpen
+        circuitOpen,
+        budgetBlocked,
+        budget
       })
     );
 
@@ -431,6 +458,7 @@ export default async function handler(req, res) {
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
+    providerPriority: priority,
     window: {
       startsAfter: startsAfter || null,
       startsBefore: startsBefore || null

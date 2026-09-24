@@ -221,7 +221,8 @@ export default async function handler(req, res) {
       freshMs: CACHE_TTL_MS,
       staleMs: STALE_TTL_MS,
       timeoutMs: 8_000,
-      consumer: "props"
+      consumer: "props",
+      priority: "critical"
     });
 
     const body = buildBody({
@@ -243,6 +244,10 @@ export default async function handler(req, res) {
     res.setHeader("Vercel-Cache-Tag", "edge-lab-props");
     res.setHeader("X-Props-Cache", result.cacheStatus);
     res.setHeader("X-Provider-Cache-Layer", result.cacheLayer);
+    res.setHeader(
+      "X-Provider-Budget",
+      result.budget?.claimed ? "CLAIMED" : "CACHE"
+    );
 
     return res.status(200).json({
       ...body,
@@ -257,6 +262,7 @@ export default async function handler(req, res) {
       servedStale: result.cacheStatus === "STALE",
       circuitOpen: result.circuitOpen,
       recoveryState: result.recoveryState || "CLOSED",
+      requestBudget: result.budget || null,
       upstreamError: result.upstreamError
     });
   } catch (error) {
@@ -267,12 +273,17 @@ export default async function handler(req, res) {
     }
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("X-Props-Cache", "MISS");
+    if (error?.budgetBlocked) {
+      res.setHeader("X-Provider-Budget", "BLOCKED");
+    }
 
     return res.status(status).json({
       error: error instanceof Error ? error.message : String(error),
       source: "SportsGameOdds v2",
       retryAfterSeconds: retryAfter,
       circuitOpen: Boolean(error?.circuitOpen),
+      budgetBlocked: Boolean(error?.budgetBlocked),
+      requestBudget: error?.budget || null,
       cache: {
         status: "MISS",
         layer: "none",

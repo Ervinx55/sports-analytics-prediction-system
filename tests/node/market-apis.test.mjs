@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import boardHandler from "../../sharp-service/api/board.js";
 import sharpHandler from "../../sharp-service/api/sharp.js";
+import propsHandler from "../../sharp-service/api/props.js";
 import {
   resetProviderProtectionForTests
 } from "../../sharp-service/lib/provider-protection.js";
@@ -13,7 +14,13 @@ const originalEnv = {
   SHARP_MONITOR_TOKEN: process.env.SHARP_MONITOR_TOKEN,
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SPORTS_ODDS_REQUESTS_PER_MINUTE:
+    process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE,
+  SPORTS_ODDS_CRITICAL_RESERVE:
+    process.env.SPORTS_ODDS_CRITICAL_RESERVE,
+  SPORTS_ODDS_NORMAL_RESERVE:
+    process.env.SPORTS_ODDS_NORMAL_RESERVE
 };
 
 function jsonResponse(body, status = 200, headers = {}) {
@@ -67,6 +74,9 @@ beforeEach(() => {
   delete process.env.SUPABASE_URL;
   delete process.env.SUPABASE_SECRET_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+  delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
+  delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
 });
 
 afterEach(() => {
@@ -178,4 +188,60 @@ test("sharp blocks unsupported methods before calling provider", async () => {
   assert.equal(response.statusCode, 405);
   assert.equal(response.body.error, "GET only");
   assert.equal(calls, 0);
+});
+
+
+test("background sharp traffic preserves critical request capacity", async () => {
+  process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "4";
+  process.env.SPORTS_ODDS_CRITICAL_RESERVE = "1";
+  process.env.SPORTS_ODDS_NORMAL_RESERVE = "1";
+
+  let providerCalls = 0;
+  globalThis.fetch = async () => {
+    providerCalls += 1;
+    return jsonResponse({ success: true, data: [] });
+  };
+
+  const bulk = await invoke(sharpHandler, {
+    leagues: "MLB,NFL,NBA,NHL"
+  });
+
+  assert.equal(bulk.statusCode, 200);
+  assert.equal(providerCalls, 2);
+  assert.equal(bulk.body.availableLeagues.length, 2);
+  assert.equal(bulk.body.unavailableLeagues.length, 2);
+  assert.ok(
+    bulk.body.unavailableLeagues.every(
+      (row) => row.budgetBlocked === true
+    )
+  );
+
+  const props = await invoke(propsHandler, { limit: "99" });
+
+  assert.equal(props.statusCode, 200);
+  assert.equal(props.body.requestBudget.priority, "critical");
+  assert.equal(props.body.requestBudget.claimed, true);
+  assert.equal(providerCalls, 3);
+});
+
+test("live board traffic is promoted to critical priority", async () => {
+  process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "2";
+  process.env.SPORTS_ODDS_CRITICAL_RESERVE = "1";
+  process.env.SPORTS_ODDS_NORMAL_RESERVE = "0";
+
+  let providerCalls = 0;
+  globalThis.fetch = async () => {
+    providerCalls += 1;
+    return jsonResponse({ success: true, data: [] });
+  };
+
+  const response = await invoke(boardHandler, {
+    leagues: "MLB",
+    live: "true"
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.providerPriority, "critical");
+  assert.equal(response.body.unavailableLeagues.length, 0);
+  assert.equal(providerCalls, 1);
 });

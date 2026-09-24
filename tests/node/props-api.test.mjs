@@ -13,7 +13,13 @@ const originalEnv = {
   SPORTS_ODDS_API_KEY: process.env.SPORTS_ODDS_API_KEY,
   SUPABASE_URL: process.env.SUPABASE_URL,
   SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
-  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SPORTS_ODDS_REQUESTS_PER_MINUTE:
+    process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE,
+  SPORTS_ODDS_CRITICAL_RESERVE:
+    process.env.SPORTS_ODDS_CRITICAL_RESERVE,
+  SPORTS_ODDS_NORMAL_RESERVE:
+    process.env.SPORTS_ODDS_NORMAL_RESERVE
 };
 
 function jsonResponse(body, status = 200, headers = {}) {
@@ -66,6 +72,9 @@ beforeEach(() => {
   delete process.env.SUPABASE_URL;
   delete process.env.SUPABASE_SECRET_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+  delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
+  delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
   Date.now = originalDateNow;
   globalThis.setTimeout = originalSetTimeout;
 });

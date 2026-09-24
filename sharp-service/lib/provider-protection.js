@@ -3,6 +3,9 @@ import { createHash } from "node:crypto";
 const DEFAULT_PROVIDER = "sportsgameodds";
 const DEFAULT_SUPABASE_URL = "https://yeoxroijaptomomshdii.supabase.co";
 const MAX_LOCAL_ENTRIES = 100;
+const DEFAULT_REQUESTS_PER_MINUTE = 9;
+const DEFAULT_CRITICAL_RESERVE = 2;
+const DEFAULT_NORMAL_RESERVE = 1;
 
 const state =
   globalThis.__edgeLabProviderProtection ||
@@ -10,10 +13,12 @@ const state =
     entries: new Map(),
     inFlight: new Map(),
     circuits: new Map(),
-    probes: new Map()
+    probes: new Map(),
+    budgets: new Map()
   });
 
 if (!state.probes) state.probes = new Map();
+if (!state.budgets) state.budgets = new Map();
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -21,6 +26,116 @@ function clamp(value, min, max) {
 
 function nowMs() {
   return Date.now();
+}
+
+function envInt(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isFinite(value) ? Math.floor(value) : fallback;
+}
+
+function normalizePriority(value) {
+  const priority = String(value || "normal").toLowerCase();
+  return ["critical", "normal", "background"].includes(priority)
+    ? priority
+    : "normal";
+}
+
+function requestBudgetSettings() {
+  const capacity = clamp(
+    envInt(
+      "SPORTS_ODDS_REQUESTS_PER_MINUTE",
+      DEFAULT_REQUESTS_PER_MINUTE
+    ),
+    1,
+    1000
+  );
+  const criticalReserve = clamp(
+    envInt(
+      "SPORTS_ODDS_CRITICAL_RESERVE",
+      DEFAULT_CRITICAL_RESERVE
+    ),
+    0,
+    Math.max(capacity - 1, 0)
+  );
+  const normalReserve = clamp(
+    envInt(
+      "SPORTS_ODDS_NORMAL_RESERVE",
+      DEFAULT_NORMAL_RESERVE
+    ),
+    0,
+    Math.max(capacity - criticalReserve - 1, 0)
+  );
+
+  return {
+    capacity,
+    criticalReserve,
+    normalReserve
+  };
+}
+
+function requiredBudgetTokens(priority, settings) {
+  if (priority === "critical") return 1;
+  if (priority === "normal") {
+    return settings.criticalReserve + 1;
+  }
+  return (
+    settings.criticalReserve +
+    settings.normalReserve +
+    1
+  );
+}
+
+function claimLocalBudget(provider, priority, settings) {
+  const now = nowMs();
+  const current = state.budgets.get(provider);
+  const refillPerMs = settings.capacity / 60_000;
+  let tokens = settings.capacity;
+
+  if (current) {
+    const elapsedMs = Math.max(0, now - current.refilledAt);
+    tokens = Math.min(
+      settings.capacity,
+      Math.min(Number(current.tokens), settings.capacity) +
+        elapsedMs * refillPerMs
+    );
+  }
+
+  const required = requiredBudgetTokens(priority, settings);
+  const allowed = tokens >= required;
+  let retryAfterSeconds = 0;
+
+  if (allowed) {
+    tokens -= 1;
+  } else if (refillPerMs > 0) {
+    retryAfterSeconds = Math.max(
+      1,
+      Math.ceil((required - tokens) / refillPerMs / 1000)
+    );
+  } else {
+    retryAfterSeconds = 60;
+  }
+
+  state.budgets.set(provider, {
+    tokens,
+    capacity: settings.capacity,
+    refilledAt: now,
+    claimedCount:
+      Number(current?.claimedCount || 0) + (allowed ? 1 : 0),
+    deniedCount:
+      Number(current?.deniedCount || 0) + (allowed ? 0 : 1)
+  });
+
+  return {
+    allowed,
+    claimed: allowed,
+    source: "local",
+    priority,
+    capacity: settings.capacity,
+    tokensRemaining: Number(tokens.toFixed(3)),
+    criticalReserve: settings.criticalReserve,
+    normalReserve: settings.normalReserve,
+    retryAfterSeconds
+  };
 }
 
 function sleep(ms) {
@@ -219,6 +334,72 @@ async function recordSharedFailure(config, provider, error) {
   });
 }
 
+async function claimSharedBudget(
+  config,
+  provider,
+  priority,
+  settings
+) {
+  const result = await sharedRequest(
+    config,
+    "rpc/claim_provider_budget",
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        p_provider: provider,
+        p_priority: priority,
+        p_capacity: settings.capacity,
+        p_critical_reserve: settings.criticalReserve,
+        p_normal_reserve: settings.normalReserve
+      })
+    }
+  );
+
+  return {
+    ...(result || {}),
+    claimed: Boolean(result?.allowed),
+    source: "shared"
+  };
+}
+
+async function claimProviderBudget(config, provider, priority) {
+  const settings = requestBudgetSettings();
+
+  if (config) {
+    try {
+      return await claimSharedBudget(
+        config,
+        provider,
+        priority,
+        settings
+      );
+    } catch {
+      // Shared budgeting is an optimization. Preserve safety with the
+      // per-instance token bucket if Supabase is temporarily unavailable.
+    }
+  }
+
+  return claimLocalBudget(
+    provider,
+    priority,
+    settings
+  );
+}
+
+function budgetBlockedError(budget) {
+  const error = new Error(
+    "Provider request budget is preserving capacity for higher-priority traffic"
+  );
+  error.status = 429;
+  error.retryAfter = Number(
+    budget?.retryAfterSeconds || 1
+  );
+  error.budgetBlocked = true;
+  error.budget = budget;
+  return error;
+}
+
 async function recordProviderEvent(config, {
   provider,
   consumer,
@@ -226,7 +407,8 @@ async function recordProviderEvent(config, {
   statusCode = null,
   cacheLayer = null,
   retryAfterSeconds = null,
-  durationMs = null
+  durationMs = null,
+  details = {}
 }) {
   await sharedRequest(config, "provider_request_events", {
     method: "POST",
@@ -242,7 +424,7 @@ async function recordProviderEvent(config, {
       cache_layer: cacheLayer,
       retry_after_seconds: retryAfterSeconds,
       duration_ms: durationMs,
-      details: {}
+      details
     })
   });
 }
@@ -454,6 +636,7 @@ async function fetchUpstream(url, apiKey, timeoutMs, maxAttempts = 2) {
         await sleep(400);
         continue;
       }
+      error.budget = budget;
       throw error;
     }
 
@@ -506,7 +689,8 @@ export async function protectedSportsGameOddsFetch({
   staleMs = 300_000,
   timeoutMs = 8_000,
   provider = DEFAULT_PROVIDER,
-  consumer = "unknown"
+  consumer = "unknown",
+  priority = "normal"
 }) {
   const key = cacheKey({ provider, url, freshMs, staleMs });
   const now = nowMs();
@@ -664,25 +848,8 @@ export async function protectedSportsGameOddsFetch({
           probeLeaseClaimed = false;
         }
 
-        if (probeLeaseClaimed) {
-          await Promise.allSettled([
-            recordSharedProbe(config, provider),
-            recordProviderEvent(config, {
-              provider,
-              consumer,
-              eventType: "PROBE_STARTED"
-            })
-          ]);
-        }
       } else {
         probeLeaseClaimed = claimLocalProbe(provider);
-        if (probeLeaseClaimed) {
-          const current = localCircuit(provider);
-          state.circuits.set(provider, {
-            ...current,
-            lastProbeAt: nowMs()
-          });
-        }
       }
 
       if (!probeLeaseClaimed) {
@@ -817,6 +984,107 @@ export async function protectedSportsGameOddsFetch({
       }
     }
 
+    const effectivePriority = recovering
+      ? "critical"
+      : normalizePriority(priority);
+    const budget = await claimProviderBudget(
+      config,
+      provider,
+      effectivePriority
+    );
+
+    if (!budget.allowed) {
+      if (config) {
+        await Promise.allSettled([
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "BUDGET_BLOCKED",
+            statusCode: 429,
+            retryAfterSeconds:
+              budget.retryAfterSeconds || 1,
+            details: {
+              priority: effectivePriority,
+              capacity: budget.capacity ?? null,
+              tokensRemaining:
+                budget.tokensRemaining ?? null,
+              source: budget.source || "shared"
+            }
+          }),
+          leaseClaimed
+            ? releaseSharedRefresh(config, key)
+            : Promise.resolve(),
+          probeLeaseClaimed
+            ? releaseSharedRefresh(config, probeKey)
+            : Promise.resolve()
+        ]);
+      } else if (probeLeaseClaimed) {
+        releaseLocalProbe(provider);
+      }
+
+      leaseClaimed = false;
+      probeLeaseClaimed = false;
+
+      const stale = chooseStale({
+        local: localEntry(key),
+        shared,
+        staleMs,
+        now: nowMs()
+      });
+
+      if (stale) {
+        storeLocal(key, stale.payload, stale.fetchedAt);
+        return {
+          payload: stale.payload,
+          cacheStatus: "STALE",
+          cacheLayer: stale.layer,
+          ageMs: stale.ageMs,
+          fetchedAt: stale.fetchedAt,
+          upstreamError: {
+            status: 429,
+            message:
+              "Provider request budget preserved capacity",
+            retryAfterSeconds:
+              budget.retryAfterSeconds || 1,
+            circuitOpen: recovering
+          },
+          circuitOpen: recovering,
+          recoveryState:
+            recovering ? "HALF_OPEN" : "CLOSED",
+          budget,
+          sharedEnabled: Boolean(config)
+        };
+      }
+
+      const error = budgetBlockedError(budget);
+      error.circuitOpen = recovering;
+      error.recoveryState =
+        recovering ? "HALF_OPEN" : "CLOSED";
+      throw error;
+    }
+
+    if (recovering) {
+      if (config) {
+        await Promise.allSettled([
+          recordSharedProbe(config, provider),
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "PROBE_STARTED",
+            details: {
+              priority: effectivePriority
+            }
+          })
+        ]);
+      } else {
+        const current = localCircuit(provider);
+        state.circuits.set(provider, {
+          ...current,
+          lastProbeAt: nowMs()
+        });
+      }
+    }
+
     const upstreamStartedAt = nowMs();
     try {
       const upstream = await fetchUpstream(
@@ -885,6 +1153,7 @@ export async function protectedSportsGameOddsFetch({
         upstreamError: null,
         circuitOpen: false,
         recoveryState: recovered ? "RECOVERED" : "CLOSED",
+        budget,
         sharedEnabled: Boolean(config)
       };
     } catch (error) {
@@ -967,6 +1236,7 @@ export async function protectedSportsGameOddsFetch({
               : recovering
                 ? "HALF_OPEN"
                 : "CLOSED",
+          budget,
           sharedEnabled: Boolean(config)
         };
       }
@@ -990,4 +1260,5 @@ export function resetProviderProtectionForTests() {
   state.inFlight.clear();
   state.circuits.clear();
   state.probes.clear();
+  state.budgets.clear();
 }

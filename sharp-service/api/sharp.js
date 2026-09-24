@@ -73,7 +73,8 @@ async function fetchLeague({
       freshMs: PROVIDER_FRESH_MS,
       staleMs: PROVIDER_STALE_MS,
       timeoutMs: 7_000,
-      consumer: "sharp"
+      consumer: "sharp",
+      priority: "background"
     });
 
     return {
@@ -89,6 +90,7 @@ async function fetchLeague({
         sharedEnabled: result.sharedEnabled,
         circuitOpen: result.circuitOpen,
         recoveryState: result.recoveryState || "CLOSED",
+        budget: result.budget || null,
         upstreamError: result.upstreamError
       }
     };
@@ -102,7 +104,9 @@ async function fetchLeague({
           ? error.message
           : "SportsGameOdds request failed",
       retryAfterSeconds: error?.retryAfter ?? null,
-      circuitOpen: Boolean(error?.circuitOpen)
+      circuitOpen: Boolean(error?.circuitOpen),
+      budgetBlocked: Boolean(error?.budgetBlocked),
+      budget: error?.budget || null
     };
   }
 }
@@ -192,13 +196,17 @@ export default async function handler(req, res) {
         status,
         error,
         retryAfterSeconds,
-        circuitOpen
+        circuitOpen,
+        budgetBlocked,
+        budget
       }) => ({
         league,
         status,
         error,
         retryAfterSeconds,
-        circuitOpen
+        circuitOpen,
+        budgetBlocked,
+        budget
       })
     );
 
@@ -231,8 +239,14 @@ export default async function handler(req, res) {
       res.setHeader("Retry-After", String(retryAfter));
     }
 
-    return res.status(502).json({
-      error: "No requested leagues were available from SportsGameOdds",
+    const allBudgetBlocked =
+      unavailableLeagues.length > 0 &&
+      unavailableLeagues.every((row) => row.budgetBlocked);
+
+    return res.status(allBudgetBlocked ? 429 : 502).json({
+      error: allBudgetBlocked
+        ? "Provider request budget is preserving capacity for higher-priority traffic"
+        : "No requested leagues were available from SportsGameOdds",
       fetchedAt: new Date().toISOString(),
       leagues,
       books: books.length ? books : "account-entitled bookmakers",
