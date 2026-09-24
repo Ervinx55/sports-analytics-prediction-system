@@ -198,9 +198,17 @@ async function fetchCsv(url, ttlMs = 15 * 60 * 1000) {
   if (!response.ok) {
     throw new Error(`${response.status} fetching ${url}`);
   }
-  const text = url.endsWith(".gz")
-    ? gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8")
-    : await response.text();
+  let text;
+  if (url.endsWith(".gz")) {
+    const bytes = Buffer.from(await response.arrayBuffer());
+    const gzipped =
+      bytes.length >= 2 &&
+      bytes[0] === 0x1f &&
+      bytes[1] === 0x8b;
+    text = (gzipped ? gunzipSync(bytes) : bytes).toString("utf8");
+  } else {
+    text = await response.text();
+  }
   const rows = parseCsv(text);
   cache.set(url, { at: now, rows });
   return rows;
