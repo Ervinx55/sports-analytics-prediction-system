@@ -114,7 +114,7 @@ const snapCounts = [1, 2, 3, 4].map((week, index) => ({
   season: "2026",
   week: String(week),
   team: "GB",
-  player_id: "WR1",
+  pfr_player_id: `ReedJa00-${week}`,
   player: "Jayden Reed",
   position: "WR",
   offense_pct: String([72, 76, 88, 91][index])
