@@ -309,7 +309,7 @@ function playerHistory(stats, schedule, playerKey, team, cutoff, limit = 10) {
   return sortHistory(
     stats.filter((row) => {
       const key = rowPlayerId(row) || normalizePlayerName(playerName(row));
-      return key === playerKey && (!team || rowTeam(row) === team);
+      return key === playerKey;
     }),
     schedule,
     cutoff
@@ -598,6 +598,8 @@ function findPlayerIdentity(playerStats, playerNameValue, eventTeams = []) {
 
 function projectPlayerOpportunity({
   playerName: playerNameValue,
+  preferredTeam = null,
+  preferredPosition = null,
   event,
   schedule,
   season,
@@ -614,6 +616,15 @@ function projectPlayerOpportunity({
     normalizeTeam(event?.matchup?.away?.name || event?.matchup?.away?.short)
   ].filter(Boolean);
   const identity = findPlayerIdentity(playerStats, playerNameValue, eventTeams);
+  if (
+    preferredTeam &&
+    eventTeams.includes(normalizeTeam(preferredTeam))
+  ) {
+    identity.team = normalizeTeam(preferredTeam);
+  }
+  if (!identity.position && preferredPosition) {
+    identity.position = String(preferredPosition).toUpperCase();
+  }
 
   if (!identity.team || !identity.position) {
     return {
