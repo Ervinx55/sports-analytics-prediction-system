@@ -250,13 +250,24 @@ function sd(values) {
   return Math.sqrt(variance) || 1;
 }
 
-function teamGameHistory(schedule, season, team) {
+function teamGameHistory(
+  schedule,
+  season,
+  team,
+  beforeDate = null
+) {
   const completed = schedule
     .filter((game) => {
       const gameSeason = number(game.season);
       if (![season, season - 1].includes(gameSeason)) return false;
       if (String(game.game_type || "") !== "REG") return false;
       if (![game.away_team, game.home_team].includes(team)) return false;
+      if (
+        beforeDate &&
+        String(game.gameday || "") >= String(beforeDate)
+      ) {
+        return false;
+      }
       return number(game.away_score) !== null && number(game.home_score) !== null;
     })
     .sort((a, b) => String(b.gameday).localeCompare(String(a.gameday)))
@@ -307,15 +318,30 @@ function rowOffense(row) {
   };
 }
 
-function teamStatHistory(allRows, season, team) {
+function teamStatHistory(
+  allRows,
+  season,
+  team,
+  beforeWeek = null
+) {
   const candidates = allRows
     .filter((row) => {
       const rowSeason = number(row.season);
-      return (
-        [season, season - 1].includes(rowSeason) &&
-        String(row.season_type || "") === "REG" &&
-        row.team === team
-      );
+      if (
+        ![season, season - 1].includes(rowSeason) ||
+        String(row.season_type || "") !== "REG" ||
+        row.team !== team
+      ) {
+        return false;
+      }
+      if (
+        rowSeason === season &&
+        beforeWeek !== null &&
+        (number(row.week) ?? 999) >= beforeWeek
+      ) {
+        return false;
+      }
+      return true;
     })
     .sort((a, b) => {
       const seasonDiff = (number(b.season) ?? 0) - (number(a.season) ?? 0);
@@ -346,9 +372,25 @@ function teamStatHistory(allRows, season, team) {
   });
 }
 
-function teamSnapshot(schedule, stats, season, team) {
-  const games = teamGameHistory(schedule, season, team);
-  const statRows = teamStatHistory(stats, season, team);
+function teamSnapshot(
+  schedule,
+  stats,
+  season,
+  team,
+  options = {}
+) {
+  const games = teamGameHistory(
+    schedule,
+    season,
+    team,
+    options.beforeDate || null
+  );
+  const statRows = teamStatHistory(
+    stats,
+    season,
+    team,
+    options.beforeWeek ?? null
+  );
   const currentGames = games.filter((game) => game.season === season);
 
   const pointsFor = weightedAverage(games, (game) => game.pointsFor);
@@ -1020,7 +1062,8 @@ function projectEvent({
   baseline,
   season,
   weatherContext = null,
-  sourceHealth = null
+  sourceHealth = null,
+  disableAvailabilityAdjustments = false
 }) {
   const away = normalizeTeam(
     event?.matchup?.away?.name || event?.matchup?.away?.short
@@ -1075,9 +1118,12 @@ function projectEvent({
       side: "home"
     })
   };
-  const qbAdjustment =
-    availability.home.adjustmentPoints -
-    availability.away.adjustmentPoints;
+  const qbAdjustment = disableAvailabilityAdjustments
+    ? 0
+    : (
+        availability.home.adjustmentPoints -
+        availability.away.adjustmentPoints
+      );
 
   const independentHomeMargin =
     homeField +
@@ -1268,6 +1314,7 @@ function projectEvent({
       baseIndependentTotal: Number(baseIndependentTotal.toFixed(3)),
       qbAdjustmentPoints: Number(qbAdjustment.toFixed(3)),
       weatherAdjustmentPoints: Number(weatherAdjustment.toFixed(3)),
+      availabilityAdjustmentApplied: !disableAvailabilityAdjustments,
       dataQuality: Number(quality.toFixed(3))
     },
     simulation,

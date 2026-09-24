@@ -5,7 +5,8 @@ import nflHandler from "../../sharp-service/api/nflmodel.js";
 import {
   normalizeTeam,
   parseCsv,
-  simulateGame
+  simulateGame,
+  teamSnapshot
 } from "../../sharp-service/lib/nfl-model.js";
 
 const originalFetch = globalThis.fetch;
@@ -260,4 +261,111 @@ test("NFL model rejects unsupported methods before fetching", async () => {
   const response = await invoke({}, "POST");
   assert.equal(response.statusCode, 405);
   assert.equal(calls, 0);
+});
+
+
+test("historical team snapshots exclude target and future games", () => {
+  const schedule = [
+    {
+      game_id: "2025_01_ATL_GB",
+      season: "2025",
+      game_type: "REG",
+      week: "1",
+      gameday: "2025-09-07",
+      away_team: "ATL",
+      home_team: "GB",
+      away_score: "20",
+      home_score: "27"
+    },
+    {
+      game_id: "2025_02_GB_MIN",
+      season: "2025",
+      game_type: "REG",
+      week: "2",
+      gameday: "2025-09-14",
+      away_team: "GB",
+      home_team: "MIN",
+      away_score: "24",
+      home_score: "17"
+    },
+    {
+      game_id: "2025_03_GB_CHI",
+      season: "2025",
+      game_type: "REG",
+      week: "3",
+      gameday: "2025-09-21",
+      away_team: "GB",
+      home_team: "CHI",
+      away_score: "35",
+      home_score: "10"
+    }
+  ];
+  const stats = [
+    {
+      season: "2025",
+      week: "1",
+      team: "GB",
+      season_type: "REG",
+      game_id: "2025_01_ATL_GB",
+      opponent_team: "ATL",
+      attempts: "30",
+      carries: "25",
+      sacks_suffered: "2",
+      passing_yards: "250",
+      rushing_yards: "120",
+      passing_epa: "3",
+      rushing_epa: "1",
+      passing_interceptions: "0",
+      fumbles_lost: "0"
+    },
+    {
+      season: "2025",
+      week: "2",
+      team: "GB",
+      season_type: "REG",
+      game_id: "2025_02_GB_MIN",
+      opponent_team: "MIN",
+      attempts: "30",
+      carries: "25",
+      sacks_suffered: "2",
+      passing_yards: "240",
+      rushing_yards: "110",
+      passing_epa: "2",
+      rushing_epa: "1",
+      passing_interceptions: "0",
+      fumbles_lost: "0"
+    },
+    {
+      season: "2025",
+      week: "3",
+      team: "GB",
+      season_type: "REG",
+      game_id: "2025_03_GB_CHI",
+      opponent_team: "CHI",
+      attempts: "30",
+      carries: "25",
+      sacks_suffered: "2",
+      passing_yards: "300",
+      rushing_yards: "150",
+      passing_epa: "6",
+      rushing_epa: "3",
+      passing_interceptions: "0",
+      fumbles_lost: "0"
+    }
+  ];
+
+  const snapshot = teamSnapshot(
+    schedule,
+    stats,
+    2025,
+    "GB",
+    {
+      beforeDate: "2025-09-21",
+      beforeWeek: 3
+    }
+  );
+
+  assert.equal(snapshot.currentSeasonGames, 2);
+  assert.equal(snapshot.statGames, 2);
+  assert.ok(snapshot.pointsFor < 30);
 });

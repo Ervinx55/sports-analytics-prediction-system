@@ -1,0 +1,44 @@
+name: NFL Shadow Backtest
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "master"
+    paths:
+      - "sharp-service/lib/nfl-model.js"
+      - "sharp-service/api/nflmodel.js"
+      - "scripts/nfl/backtest-nfl-team-markets.mjs"
+      - ".github/workflows/nfl-shadow.yml"
+      - "tests/node/nfl-model.test.mjs"
+  schedule:
+    - cron: "15 11 * * 2"
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run NFL chronological backtest
+        run: |
+          node scripts/nfl/backtest-nfl-team-markets.mjs \
+            --seasons=2024,2025 \
+            --min-week=4 \
+            --output-dir=artifacts/nfl-backtest
+
+      - name: Upload NFL backtest artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfl-shadow-backtest
+          path: artifacts/nfl-backtest
