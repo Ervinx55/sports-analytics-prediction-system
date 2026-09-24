@@ -18,11 +18,15 @@ test("provider health observability is wired into the dashboard", () => {
     "phShared",
     "phStale",
     "phCache",
+    "phObjects",
     "providerHealthDetail",
     "providerIncidentList",
   ]) {
     assert.match(html, new RegExp(`id=["']${id}["']`));
   }
 
-  assert.match(html, /renderProviderHealth\(data\.providerHealth\|\|\{\}\)/);
+  assert.match(
+    html,
+    /renderProviderHealth\([\s\S]*data\.providerHealth\|\|\{\}[\s\S]*data\.providerUsage\|\|null[\s\S]*\)/
+  );
 });
