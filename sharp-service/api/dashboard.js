@@ -269,6 +269,9 @@ export default async function handler(req, res) {
         probeFailures: 0,
         recoveries: 0,
         budgetBlocks: 0,
+        requestBudgetBlocks: 0,
+        objectBudgetBlocks: 0,
+        objectsFetched: 0,
         criticalBudgetBlocks: 0,
         activeRefreshLocks: 0,
         cacheRows: 0,
@@ -286,6 +289,11 @@ export default async function handler(req, res) {
         totalClaims: 0,
         totalDenials: 0,
         providers: []
+      },
+      objectUsage: {
+        objectsFetched24h: 0,
+        objectBudgetBlocks24h: 0,
+        byConsumer: {}
       },
       selfHealing: {
         state: "CLOSED",

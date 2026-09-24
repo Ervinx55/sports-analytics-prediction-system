@@ -1681,7 +1681,7 @@
         objectUsage
           ? esc(objectUsage.currentObjects??0)+"/"+esc(objectUsage.maxObjects??"—")+" · "+esc(objectUsage.interval||"interval")+" · "+esc(Number(objectUsage.usagePct??0).toFixed(1))+"%"
           : "usage data unavailable"
-      )+" · tier "+esc(providerUsage?.tier||"—")+"</div>"+
+      )+" · tier "+esc(providerUsage?.tier||"—")+" · fetched "+esc(s.objectsFetched??ph?.objectUsage?.objectsFetched24h??0)+" objects / 24h · object blocks "+esc(s.objectBudgetBlocks??ph?.objectUsage?.objectBudgetBlocks24h??0)+"</div>"+
       "<div><strong>Latest provider success:</strong> "+fmtTime(ph?.latest?.upstreamSuccessAt)+" · latest failure "+fmtTime(ph?.latest?.upstreamFailureAt)+"</div>"+
       (!ph?.sharedActivityDetected
         ? '<div style="margin-top:7px;color:var(--amber)">Shared Supabase telemetry has no activity yet. The Vercel odds APIs may still be operating on their safe local-cache fallback until the server-side Supabase secret is available there.</div>'

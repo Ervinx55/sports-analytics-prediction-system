@@ -787,22 +787,22 @@
     },
     {
       "slug": "provider-health-status",
-      "version": 3,
+      "version": 4,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "068778e77667e078e92aea5ce802b1e32314a7643e19fe48f400ece5d9f9a170",
+      "bundle_sha256": "9a6f6169462841ac4666a1211afb6ab638d092b85a51140cd70885789a32ef80",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/provider-health-status/index.ts",
           "name": "index.ts",
-          "sha256": "f5373c87467561d78bf8fa0be06e6d6ee60028002b2595efd8b25777476054c7"
+          "sha256": "7e844aaa0d84e728fec305b6abde920d003c8cf0d8042ce55bd72a38c7b3d40a"
         }
       ],
       "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T07:21:18Z",
+  "final_verified_at": "2026-09-24T07:39:20Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 49,

@@ -107,6 +107,22 @@ Deno.serve(async (req) => {
     const probeFailures = count("PROBE_FAILURE");
     const recoveries = count("RECOVERED");
     const budgetBlocks = count("BUDGET_BLOCKED");
+    const objectBudgetBlocks = events.filter(
+      (row: any) =>
+        row.event_type === "BUDGET_BLOCKED" &&
+        String(row.details?.budgetType || "") === "objects",
+    ).length;
+    const requestBudgetBlocks = Math.max(
+      0,
+      budgetBlocks - objectBudgetBlocks,
+    );
+    const objectsFetched = events
+      .filter((row: any) => row.event_type === "UPSTREAM_SUCCESS")
+      .reduce(
+        (sum: number, row: any) =>
+          sum + Number(row.details?.objectsReturned || 0),
+        0,
+      );
     const criticalBudgetBlocks = events.filter(
       (row: any) =>
         row.event_type === "BUDGET_BLOCKED" &&
@@ -240,6 +256,9 @@ Deno.serve(async (req) => {
           probeFailures,
           recoveries,
           budgetBlocks,
+          requestBudgetBlocks,
+          objectBudgetBlocks,
+          objectsFetched,
           criticalBudgetBlocks,
           activeRefreshLocks: locks.length,
           cacheRows: cacheRows.length,
@@ -325,6 +344,19 @@ Deno.serve(async (req) => {
               (max, row) => Math.max(max, Number(row.backoffSeconds || 0)),
               0,
             ),
+        },
+        objectUsage: {
+          objectsFetched24h: objectsFetched,
+          objectBudgetBlocks24h: objectBudgetBlocks,
+          byConsumer: Object.fromEntries(
+            Object.entries(byConsumer).map(([consumer, counts]) => [
+              consumer,
+              {
+                upstreamSuccesses:
+                  (counts as Record<string, number>).UPSTREAM_SUCCESS || 0,
+              },
+            ]),
+          ),
         },
         byConsumer,
         recentIncidents,
