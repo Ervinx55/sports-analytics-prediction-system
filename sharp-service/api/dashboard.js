@@ -87,6 +87,7 @@ export default async function handler(req, res) {
     outcomeAttribution: `${BASE}/outcome-attribution-status?days=30`,
     pipelineHealth: `${BASE}/pipeline-health-status`,
     sharpSourceHealth: `${BASE}/sharp-source-health`,
+    providerHealth: `${BASE}/provider-health-status?hours=24`,
     marketCard: `${BASE}/market-card?sport=${encodeURIComponent(
       sport
     )}&hours=12`,
@@ -94,7 +95,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, providerHealth, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -114,6 +115,7 @@ export default async function handler(req, res) {
       fetchJson(urls.outcomeAttribution),
       fetchJson(urls.pipelineHealth),
       fetchJson(urls.sharpSourceHealth),
+      fetchJson(urls.providerHealth),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
       fetchJson(urls.decisionResults),
@@ -138,6 +140,7 @@ export default async function handler(req, res) {
     outcomeAttribution: settled(outcomeAttribution),
     pipelineHealth: settled(pipelineHealth),
     sharpSourceHealth: settled(sharpSourceHealth),
+    providerHealth: settled(providerHealth),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
     decisionResults: settled(decisionResults),
@@ -233,6 +236,31 @@ export default async function handler(req, res) {
     sharpSourceHealth: sources.sharpSourceHealth.data || {
       refreshCadenceMinutes: 5,
       sources: {}
+    },
+    providerHealth: sources.providerHealth.data || {
+      status: "UNKNOWN",
+      sharedActivityDetected: false,
+      summary: {
+        observedEvents: 0,
+        upstreamAttempts: 0,
+        upstreamSuccesses: 0,
+        upstreamFailures: 0,
+        upstreamSuccessRatePct: null,
+        rateLimits: 0,
+        serverErrors: 0,
+        staleServes: 0,
+        sharedHits: 0,
+        circuitBlocks: 0,
+        activeRefreshLocks: 0,
+        cacheRows: 0,
+        freshCacheRows: 0,
+        staleCacheRows: 0,
+        expiredCacheRows: 0
+      },
+      latest: {},
+      circuit: { open: false, providers: [] },
+      byConsumer: {},
+      recentIncidents: []
     },
     sharpGate: sources.sharpGate.data || {
       latest: [],

@@ -387,6 +387,24 @@
       <div class="health-grid" id="sourceHealth"></div>
     </div>
     <div class="card">
+      <div class="candidate-head">
+        <div>
+          <div class="match">Provider Protection</div>
+          <div class="pick">SportsGameOdds cache, rate-limit, and circuit-breaker telemetry</div>
+        </div>
+        <span class="badge neutral" id="providerHealthBadge">UNKNOWN</span>
+      </div>
+      <div class="metrics" style="grid-template-columns:repeat(5,1fr);margin-top:12px;margin-bottom:10px">
+        <div class="metric"><div class="label">Upstream</div><div class="value" id="phUpstream">—</div><div class="hint">attempts / 24h</div></div>
+        <div class="metric"><div class="label">429s</div><div class="value" id="ph429">—</div><div class="hint">rate limits / 24h</div></div>
+        <div class="metric"><div class="label">Shared Hits</div><div class="value" id="phShared">—</div><div class="hint">cross-instance cache</div></div>
+        <div class="metric"><div class="label">Stale</div><div class="value" id="phStale">—</div><div class="hint">stale serves / 24h</div></div>
+        <div class="metric"><div class="label">Cache Rows</div><div class="value" id="phCache">—</div><div class="hint">fresh / stale</div></div>
+      </div>
+      <div id="providerHealthDetail" class="reason"></div>
+      <div id="providerIncidentList" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
       <div style="font-weight:800">Model State</div>
       <div id="modelState" class="reason"></div>
     </div>
@@ -1617,6 +1635,44 @@
       </div>`;
   }
 
+  function renderProviderHealth(ph){
+    const status=String(ph?.status||"UNKNOWN");
+    const badge=$("providerHealthBadge");
+    badge.textContent=status;
+    badge.className="badge "+(
+      status==="HEALTHY"?"play":
+      status==="DEGRADED"?"pass":
+      status==="WATCH"?"watch":"neutral"
+    );
+
+    const s=ph?.summary||{};
+    $("phUpstream").textContent=s.upstreamAttempts??0;
+    $("ph429").textContent=s.rateLimits??0;
+    $("phShared").textContent=s.sharedHits??0;
+    $("phStale").textContent=s.staleServes??0;
+    $("phCache").textContent=(s.freshCacheRows??0)+" / "+(s.staleCacheRows??0);
+
+    const circuit=ph?.circuit||{};
+    const success=s.upstreamSuccessRatePct==null?"—":Number(s.upstreamSuccessRatePct).toFixed(1)+"%";
+    $("providerHealthDetail").innerHTML=
+      "<div><strong>Shared activity:</strong> "+(ph?.sharedActivityDetected?"DETECTED":"NOT DETECTED YET")+"</div>"+
+      "<div><strong>Upstream success:</strong> "+esc(success)+" · failures "+esc(s.upstreamFailures??0)+" · 5xx "+esc(s.serverErrors??0)+"</div>"+
+      "<div><strong>Circuit:</strong> "+(circuit.open?"OPEN":"CLOSED")+" · active refresh locks "+esc(s.activeRefreshLocks??0)+"</div>"+
+      "<div><strong>Latest provider success:</strong> "+fmtTime(ph?.latest?.upstreamSuccessAt)+" · latest failure "+fmtTime(ph?.latest?.upstreamFailureAt)+"</div>"+
+      (!ph?.sharedActivityDetected
+        ? '<div style="margin-top:7px;color:var(--amber)">Shared Supabase telemetry has no activity yet. The Vercel odds APIs may still be operating on their safe local-cache fallback until the server-side Supabase secret is available there.</div>'
+        : "");
+
+    const incidents=ph?.recentIncidents||[];
+    $("providerIncidentList").innerHTML=incidents.length
+      ? incidents.slice(0,8).map(x=>`
+          <div class="source">
+            <span class="name">${esc(x.consumer||"provider")} · ${esc(x.type||"incident")}</span>
+            <span class="${Number(x.statusCode)===429||Number(x.statusCode)>=500?"badtext":""}">${esc(x.statusCode??"—")} · ${fmtTime(x.occurredAt)}</span>
+          </div>`).join("")
+      : '<div class="empty">No provider incidents recorded in this window.</div>';
+  }
+
   function renderSystem(sys,sharpHealth,modelGov,pipelineHealth){
     const h=sys?.sourceHealth||{};
     $("sourceHealth").innerHTML=Object.entries(h).map(([name,v])=>`
@@ -1685,19 +1741,25 @@
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
     renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration,data.decisionTimingCalibration,data.modelGovernance,data.outcomeAttribution);
+    renderProviderHealth(data.providerHealth||{});
     renderSystem(data.system,data.sharpSourceHealth,data.modelGovernance,data.pipelineHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const sourceBad=health.some(x=>!x.ok);
     const pipelineState=String(data.pipelineHealth?.overallStatus||"UNKNOWN");
     const pipelineBad=pipelineState==="DEGRADED";
     const pipelineWarming=pipelineState==="WARMING_UP";
-    const bad=sourceBad||pipelineBad;
+    const providerState=String(data.providerHealth?.status||"UNKNOWN");
+    const providerBad=providerState==="DEGRADED";
+    const providerWatch=providerState==="WATCH";
+    const bad=sourceBad||pipelineBad||providerBad;
     $("healthDot").classList.toggle("bad",bad);
     $("healthText").textContent=bad
       ? "Some data sources or pipeline components are degraded"
-      : pipelineWarming
-        ? "Pipeline monitoring warming up"
-        : "Live system connected";
+      : providerWatch
+        ? "Provider protection is active with recent warnings"
+        : pipelineWarming
+          ? "Pipeline monitoring warming up"
+          : "Live system connected";
   }
 
   async function fetchDashboardData(){
