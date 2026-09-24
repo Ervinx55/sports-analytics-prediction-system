@@ -1653,11 +1653,17 @@
     $("phCache").textContent=(s.freshCacheRows??0)+" / "+(s.staleCacheRows??0);
 
     const circuit=ph?.circuit||{};
+    const heal=ph?.selfHealing||{};
     const success=s.upstreamSuccessRatePct==null?"—":Number(s.upstreamSuccessRatePct).toFixed(1)+"%";
+    const healingState=String(heal.state||(
+      circuit.open?"BACKOFF":circuit.halfOpen?"HALF_OPEN":"CLOSED"
+    ));
+    const nextProbe=heal.nextProbeAt?fmtTime(heal.nextProbeAt):"—";
     $("providerHealthDetail").innerHTML=
       "<div><strong>Shared activity:</strong> "+(ph?.sharedActivityDetected?"DETECTED":"NOT DETECTED YET")+"</div>"+
       "<div><strong>Upstream success:</strong> "+esc(success)+" · failures "+esc(s.upstreamFailures??0)+" · 5xx "+esc(s.serverErrors??0)+"</div>"+
-      "<div><strong>Circuit:</strong> "+(circuit.open?"OPEN":"CLOSED")+" · active refresh locks "+esc(s.activeRefreshLocks??0)+"</div>"+
+      "<div><strong>Self-healing:</strong> "+esc(healingState)+" · recoveries "+esc(heal.recoveries??s.recoveries??0)+" · probe W/L "+esc(heal.probeSuccesses??s.probeSuccesses??0)+"/"+esc(heal.probeFailures??s.probeFailures??0)+"</div>"+
+      "<div><strong>Backoff:</strong> max "+esc(heal.maxBackoffSeconds??0)+"s · next probe "+esc(nextProbe)+" · active refresh locks "+esc(s.activeRefreshLocks??0)+"</div>"+
       "<div><strong>Latest provider success:</strong> "+fmtTime(ph?.latest?.upstreamSuccessAt)+" · latest failure "+fmtTime(ph?.latest?.upstreamFailureAt)+"</div>"+
       (!ph?.sharedActivityDetected
         ? '<div style="margin-top:7px;color:var(--amber)">Shared Supabase telemetry has no activity yet. The Vercel odds APIs may still be operating on their safe local-cache fallback until the server-side Supabase secret is available there.</div>'

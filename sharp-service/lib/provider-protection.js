@@ -594,6 +594,21 @@ export async function protectedSportsGameOddsFetch({
         now: nowMs()
       });
       if (stale) {
+        if (config) {
+          await Promise.allSettled([
+            recordProviderEvent(config, {
+              provider,
+              consumer,
+              eventType: "STALE_SERVED",
+              statusCode: Number(circuit.lastStatus || 503),
+              cacheLayer: stale.layer,
+              retryAfterSeconds: Math.max(
+                1,
+                Math.ceil((circuit.openUntil - nowMs()) / 1000)
+              )
+            })
+          ]);
+        }
         storeLocal(key, stale.payload, stale.fetchedAt);
         return {
           payload: stale.payload,
@@ -612,6 +627,7 @@ export async function protectedSportsGameOddsFetch({
             circuitOpen: true
           },
           circuitOpen: true,
+          recoveryState: "BACKOFF",
           sharedEnabled: Boolean(config)
         };
       }
@@ -735,6 +751,19 @@ export async function protectedSportsGameOddsFetch({
           now: nowMs()
         });
         if (stale) {
+          await Promise.allSettled([
+            recordProviderEvent(config, {
+              provider,
+              consumer,
+              eventType: "STALE_SERVED",
+              statusCode: 202,
+              cacheLayer: stale.layer
+            }),
+            probeLeaseClaimed
+              ? releaseSharedRefresh(config, probeKey)
+              : Promise.resolve()
+          ]);
+          probeLeaseClaimed = false;
           storeLocal(key, stale.payload, stale.fetchedAt);
           return {
             payload: stale.payload,
@@ -749,6 +778,7 @@ export async function protectedSportsGameOddsFetch({
               circuitOpen: false
             },
             circuitOpen: false,
+            recoveryState: recovering ? "HALF_OPEN" : "CLOSED",
             sharedEnabled: true
           };
         }
@@ -762,6 +792,12 @@ export async function protectedSportsGameOddsFetch({
             const ageMs = rowAgeMs(refreshed, nowMs());
             if (refreshed && ageMs < freshMs) {
               const fetchedAt = Date.parse(refreshed.fetched_at);
+              if (probeLeaseClaimed) {
+                await Promise.allSettled([
+                  releaseSharedRefresh(config, probeKey)
+                ]);
+                probeLeaseClaimed = false;
+              }
               storeLocal(key, refreshed.payload, fetchedAt);
               return {
                 payload: refreshed.payload,
@@ -894,6 +930,21 @@ export async function protectedSportsGameOddsFetch({
         now: nowMs()
       });
       if (stale) {
+        if (config) {
+          await Promise.allSettled([
+            recordProviderEvent(config, {
+              provider,
+              consumer,
+              eventType: "STALE_SERVED",
+              statusCode: Number(error?.status || 502),
+              cacheLayer: stale.layer,
+              retryAfterSeconds:
+                localFailure.backoffSeconds ||
+                error?.retryAfter ||
+                null
+            })
+          ]);
+        }
         storeLocal(key, stale.payload, stale.fetchedAt);
         return {
           payload: stale.payload,

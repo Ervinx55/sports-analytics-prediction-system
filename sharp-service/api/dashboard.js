@@ -251,6 +251,10 @@ export default async function handler(req, res) {
         staleServes: 0,
         sharedHits: 0,
         circuitBlocks: 0,
+        probesStarted: 0,
+        probeSuccesses: 0,
+        probeFailures: 0,
+        recoveries: 0,
         activeRefreshLocks: 0,
         cacheRows: 0,
         freshCacheRows: 0,
@@ -258,7 +262,16 @@ export default async function handler(req, res) {
         expiredCacheRows: 0
       },
       latest: {},
-      circuit: { open: false, providers: [] },
+      circuit: { open: false, halfOpen: false, providers: [] },
+      selfHealing: {
+        state: "CLOSED",
+        probesStarted: 0,
+        probeSuccesses: 0,
+        probeFailures: 0,
+        recoveries: 0,
+        nextProbeAt: null,
+        maxBackoffSeconds: 0
+      },
       byConsumer: {},
       recentIncidents: []
     },
