@@ -45,7 +45,7 @@ def test_sparse_enrichment_is_selected_from_training_window_only():
 
 def test_market_specific_feature_policies_exist_and_are_applied():
     source = (ROOT / "ml" / "train_player_prop_tensorflow.py").read_text()
-    assert 'MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v1"' in source
+    assert 'MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v2"' in source
     assert '"batting_hits"' in source
     assert '"batting_totalBases"' in source
     assert '"pitching_strikeouts"' in source
@@ -58,3 +58,12 @@ def test_market_specific_feature_policies_exist_and_are_applied():
     assert "model_train = apply_market_feature_policy(train)" in walk_forward
     assert "aggregate_by_market" in walk_forward
     assert '"by_market"' in walk_forward
+
+
+def test_hybrid_market_policy_preserves_broad_hitter_features():
+    source = (ROOT / "ml" / "train_player_prop_tensorflow.py").read_text()
+    assert '"batting_totalBases": {' in source
+    assert '"numeric": ALL_ENRICHED_NUMERIC,' in source
+    assert 'ALL_ENRICHED_NUMERIC - {"hr_multiplier"}' in source
+    assert '"pitching_strikeouts": {' in source
+    assert '"strikeout_opportunity_multiplier"' in source

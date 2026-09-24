@@ -127,7 +127,12 @@ CORE_NUMERIC_FEATURES = {
 }
 CORE_CATEGORICAL_FEATURES = {"stat_id", "side"}
 MIN_ENRICHED_FEATURE_COVERAGE = 0.20
-MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v1"
+MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v2"
+
+ALL_ENRICHED_NUMERIC = set(NUMERIC_FEATURES) - CORE_NUMERIC_FEATURES
+ALL_ENRICHED_CATEGORICAL = (
+    set(CATEGORICAL_FEATURES) - CORE_CATEGORICAL_FEATURES
+)
 
 COMMON_MARKET_NUMERIC = {
     "market_open_line",
@@ -140,57 +145,20 @@ COMMON_MARKET_NUMERIC = {
     "feature_source_count",
 }
 
-HITTER_COMMON_NUMERIC = COMMON_MARKET_NUMERIC | {
-    "in_starting_lineup",
-    "batting_order_spot",
-    "catcher_change_after_model",
-    "opposing_starter_change_after_model",
-    "opposing_handedness_change_after_model",
-    "verification_data_quality",
-    "own_lineup_avg_ops",
-    "opponent_bullpen_score",
-    "game_starter_changed",
-    "game_lineup_changed",
-    "game_catcher_changed",
-    "game_handedness_changed",
-    "weather_impact_multiplier",
-    "weather_environment_multiplier",
-    "prop_weather_data_quality",
-    "weather_change_after_model",
-    "temp_f",
-    "humidity_pct",
-    "wind_mph",
-    "park_factor",
-    "run_multiplier",
-    "hits_tb_multiplier",
-    "game_weather_data_quality",
-    "pitchmix_weighted_xwoba_delta",
-    "pitchmix_probability_adjustment",
-    "pitchmix_arsenal_coverage",
-    "pitchmix_usable_usage",
-}
-
-HITTER_COMMON_CATEGORICAL = {
-    "player_role",
-    "player_team_side",
-    "opposing_starter_hand",
-    "opponent_bullpen_level",
-    "weather_impact_direction",
-    "prop_delay_risk",
-    "roof_status",
-    "wind_class",
-    "game_delay_risk",
-}
-
 MARKET_FEATURE_POLICIES = {
+    # Hitter markets keep the broader gated feature set that already improved
+    # the aggregate walk-forward result. Hits only suppresses the explicitly
+    # power-oriented HR multiplier; total bases retains the full enrichment.
     "batting_hits": {
-        "numeric": HITTER_COMMON_NUMERIC,
-        "categorical": HITTER_COMMON_CATEGORICAL,
+        "numeric": ALL_ENRICHED_NUMERIC - {"hr_multiplier"},
+        "categorical": ALL_ENRICHED_CATEGORICAL,
     },
     "batting_totalBases": {
-        "numeric": HITTER_COMMON_NUMERIC | {"hr_multiplier"},
-        "categorical": HITTER_COMMON_CATEGORICAL,
+        "numeric": ALL_ENRICHED_NUMERIC,
+        "categorical": ALL_ENRICHED_CATEGORICAL,
     },
+    # Pitcher strikeouts showed a material gain from a tighter role-specific
+    # subset, so Ks keep the focused opportunity/leash/opponent context mask.
     "pitching_strikeouts": {
         "numeric": COMMON_MARKET_NUMERIC | {
             "is_confirmed_starter",
