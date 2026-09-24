@@ -99,7 +99,8 @@ def fold_layout(events: list[str]) -> list[dict]:
 SPECIALIST_MIN_TRAIN_ROWS = 12
 SPECIALIST_MIN_VALIDATION_ROWS = 4
 SPECIALIST_MIN_TEST_ROWS = 2
-SPECIALIST_MIN_TRAIN_EVENTS = 3
+SPECIALIST_MIN_TRAIN_EVENTS = 20
+SPECIALIST_MIN_TRAIN_DAYS = 7.0
 SPECIALIST_MIN_VALIDATION_BRIER_GAIN = 0.001
 SPECIALIST_MIN_VALIDATION_LOG_LOSS_GAIN = 0.002
 
@@ -126,11 +127,22 @@ def market_specialist_residual_predictions(
         ].copy()
         test_part = test[test["stat_id"].astype(str) == stat_id].copy()
 
+        train_days = 0.0
+        if len(train_part) > 1:
+            train_days = max(
+                0.0,
+                (
+                    train_part["starts_at"].max()
+                    - train_part["starts_at"].min()
+                ).total_seconds()
+                / 86400.0,
+            )
         base_report = {
             "train_rows": int(len(train_part)),
             "validation_rows": int(len(val_part)),
             "test_rows": int(len(test_part)),
             "train_events": int(train_part["event_key"].nunique()),
+            "train_days": round(float(train_days), 3),
             "active": False,
             "reason": None,
         }
@@ -140,10 +152,13 @@ def market_specialist_residual_predictions(
             and len(test_part) >= SPECIALIST_MIN_TEST_ROWS
             and train_part["event_key"].nunique()
             >= SPECIALIST_MIN_TRAIN_EVENTS
+            and train_days >= SPECIALIST_MIN_TRAIN_DAYS
             and train_part["target"].nunique() >= 2
         )
         if not enough:
-            base_report["reason"] = "insufficient specialist history"
+            base_report["reason"] = (
+                "specialist maturity gate not met"
+            )
             reports[stat_id] = base_report
             continue
 

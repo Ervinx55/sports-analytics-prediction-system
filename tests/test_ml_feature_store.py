@@ -94,3 +94,13 @@ def test_specialists_require_validation_margin_before_activation():
     assert "validation_brier_gain" in walk_forward
     assert "validation_log_loss_gain" in walk_forward
     assert "effective_shrinkage" in walk_forward
+
+
+def test_market_specialists_require_mature_history():
+    walk_forward = (
+        ROOT / "ml" / "walk_forward_player_prop.py"
+    ).read_text()
+    assert "SPECIALIST_MIN_TRAIN_EVENTS = 20" in walk_forward
+    assert "SPECIALIST_MIN_TRAIN_DAYS = 7.0" in walk_forward
+    assert "train_days >= SPECIALIST_MIN_TRAIN_DAYS" in walk_forward
+    assert "specialist maturity gate not met" in walk_forward
