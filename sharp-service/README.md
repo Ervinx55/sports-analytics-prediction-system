@@ -47,3 +47,16 @@ current-season games, capped at 50%.
 NFL v1 is shadow-only. Every market receives a shadow PLAY/PASS grade, but the
 production status remains PASS and production weight remains zero until
 chronological backtesting and calibration gates are added.
+
+
+### NFL availability and environment v2
+
+NFL v2 adds current daily nflverse depth charts, expected-QB continuity,
+roof-aware weather handling, and Open-Meteo forecasts for outdoor/open-roof
+games. Weather adjusts only the independent total projection and is capped at a
+small range before the projection is blended back toward the sharp market.
+
+nflverse's injury source is not used for current-season adjustments because its
+published status says that feed ended after 2024. The API surfaces this as
+`sourceHealth.injuries.status = "UNAVAILABLE"` and applies zero stale-injury
+penalty rather than silently treating old data as current.

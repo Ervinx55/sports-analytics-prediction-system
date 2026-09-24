@@ -1,6 +1,7 @@
 import {
   leagueBaselines,
   loadNflData,
+  loadWeatherContext,
   normalizeTeam,
   projectEvent,
   seasonForDate,
@@ -104,14 +105,34 @@ export default async function handler(req, res) {
     }
     const baseline = leagueBaselines([...snapshots.values()]);
 
+    const weatherEntries = await Promise.all(
+      events.map(async (event) => {
+        const home = normalizeTeam(
+          event?.matchup?.home?.name || event?.matchup?.home?.short
+        );
+        if (!home) return [event.eventID, null];
+        const weather = await loadWeatherContext({
+          event,
+          schedule: nflData.schedule,
+          season,
+          homeTeam: home
+        });
+        return [event.eventID, weather];
+      })
+    );
+    const weatherByEvent = new Map(weatherEntries);
+
     const projections = events.map((event) =>
       projectEvent({
         event,
         schedule: nflData.schedule,
         stats: nflData.stats,
+        depthCharts: nflData.depthCharts,
         snapshots,
         baseline,
-        season
+        season,
+        weatherContext: weatherByEvent.get(event.eventID) || null,
+        sourceHealth: nflData.sourceHealth
       })
     );
 
@@ -142,7 +163,7 @@ export default async function handler(req, res) {
       "public, max-age=0, s-maxage=120, stale-while-revalidate=180"
     );
     return res.status(200).json({
-      version: "NFL Team Markets v1-shadow",
+      version: "NFL Team Markets v2-shadow",
       generatedAt: new Date().toISOString(),
       sport: "FOOTBALL",
       league: "NFL",
@@ -161,15 +182,22 @@ export default async function handler(req, res) {
           "defensive yards/play allowed",
           "turnover margin",
           "rest differential",
-          "home/neutral site"
+          "home/neutral site",
+          "QB continuity and current depth-chart agreement",
+          "roof / temperature / wind / precipitation environment"
         ],
         simulationIterations: 20000,
         dataSources: [
           "Edge Lab sharp market board",
           "nflverse schedule/game data",
-          "nflverse weekly team statistics"
-        ]
+          "nflverse weekly team statistics",
+          "nflverse daily depth charts",
+          "Open-Meteo outdoor forecasts"
+        ],
+        injuryPolicy:
+          "No current nflverse injury adjustment is applied because the feed ended after 2024."
       },
+      sourceHealth: nflData.sourceHealth,
       marketBooks: BOOKS,
       boardProviderCache: board.providerCache ?? null,
       eventCount: projections.length,
@@ -185,7 +213,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : String(error),
-      version: "NFL Team Markets v1-shadow",
+      version: "NFL Team Markets v2-shadow",
       productionEligible: false
     });
   }

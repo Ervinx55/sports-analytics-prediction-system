@@ -102,13 +102,13 @@ test("NFL model produces shadow-only team market grades", async () => {
   process.env.EDGE_LAB_BOARD_URL = "https://edge.test/api/board";
 
   const schedule = [
-    "game_id,season,game_type,week,gameday,away_team,away_score,home_team,home_score,location,away_rest,home_rest,away_qb_name,home_qb_name,roof,surface,stadium",
-    "2026_01_ATL_GB,2026,REG,1,2026-09-10,ATL,20,GB,27,Home,7,7,Michael Penix Jr.,Jordan Love,outdoors,grass,Lambeau Field",
-    "2026_02_GB_MIN,2026,REG,2,2026-09-17,GB,24,MIN,17,Home,7,7,Jordan Love,J.J. McCarthy,dome,turf,U.S. Bank Stadium",
-    "2026_02_CAR_ATL,2026,REG,2,2026-09-17,CAR,13,ATL,30,Home,7,7,Bryce Young,Michael Penix Jr.,dome,turf,Mercedes-Benz Stadium",
-    "2025_18_GB_CHI,2025,REG,18,2026-01-04,GB,28,CHI,20,Home,7,7,Jordan Love,Caleb Williams,outdoors,grass,Soldier Field",
-    "2025_18_NO_ATL,2025,REG,18,2026-01-04,NO,17,ATL,24,Home,7,7,Derek Carr,Michael Penix Jr.,dome,turf,Mercedes-Benz Stadium",
-    "2026_03_ATL_GB,2026,REG,3,2026-09-24,ATL,,GB,,Home,7,7,Michael Penix Jr.,Jordan Love,outdoors,grass,Lambeau Field"
+    "game_id,season,game_type,week,gameday,away_team,away_score,home_team,home_score,location,away_rest,home_rest,away_qb_name,home_qb_name,roof,surface,stadium,temp,wind",
+    "2026_01_ATL_GB,2026,REG,1,2026-09-10,ATL,20,GB,27,Home,7,7,Michael Penix Jr.,Jordan Love,outdoors,grass,Lambeau Field,,",
+    "2026_02_GB_MIN,2026,REG,2,2026-09-17,GB,24,MIN,17,Home,7,7,Jordan Love,J.J. McCarthy,dome,turf,U.S. Bank Stadium,,",
+    "2026_02_CAR_ATL,2026,REG,2,2026-09-17,CAR,13,ATL,30,Home,7,7,Bryce Young,Michael Penix Jr.,dome,turf,Mercedes-Benz Stadium,,",
+    "2025_18_GB_CHI,2025,REG,18,2026-01-04,GB,28,CHI,20,Home,7,7,Jordan Love,Caleb Williams,outdoors,grass,Soldier Field,,",
+    "2025_18_NO_ATL,2025,REG,18,2026-01-04,NO,17,ATL,24,Home,7,7,Derek Carr,Michael Penix Jr.,dome,turf,Mercedes-Benz Stadium,,",
+    "2026_03_ATL_GB,2026,REG,3,2026-09-24,ATL,,GB,,Home,7,7,Michael Penix Jr.,Jordan Love,outdoors,grass,Lambeau Field,,"
   ].join("\n");
 
   const statsHeader = [
@@ -132,6 +132,27 @@ test("NFL model produces shadow-only team market grades", async () => {
     "2025,18,NO,REG,2025_18_NO_ATL,ATL,33,21,2,215,80,-1.0,0.5,1,0",
     "2025,18,ATL,REG,2025_18_NO_ATL,NO,28,27,1,245,125,2.8,1.8,0,0"
   ].join("\n");
+
+  const depthCharts = [
+    "dt,team,player_name,pos_abb,pos_rank",
+    "2026-09-24T07:00:00Z,ATL,Michael Penix Jr.,QB,1",
+    "2026-09-24T07:00:00Z,GB,Jordan Love,QB,1"
+  ].join("\n");
+
+  const weather = {
+    hourly: {
+      time: [
+        "2026-09-25T00:00",
+        "2026-09-25T01:00",
+        "2026-09-25T02:00"
+      ],
+      temperature_2m: [57, 55, 54],
+      precipitation_probability: [30, 45, 35],
+      wind_speed_10m: [18, 22, 20],
+      wind_gusts_10m: [28, 32, 30],
+      weather_code: [3, 61, 3]
+    }
+  };
 
   const market = (odds, line = null) => ({
     consensus: { odds, line },
@@ -184,6 +205,12 @@ test("NFL model produces shadow-only team market grades", async () => {
     if (value.includes("stats_team_week_2025.csv")) {
       return textResponse(priorStats);
     }
+    if (value.includes("depth_charts_2026.csv")) {
+      return textResponse(depthCharts);
+    }
+    if (value.startsWith("https://api.open-meteo.com/v1/forecast")) {
+      return jsonResponse(weather);
+    }
     throw new Error(`unexpected fetch: ${value}`);
   };
 
@@ -199,9 +226,25 @@ test("NFL model produces shadow-only team market grades", async () => {
   assert.equal(response.body.eventCount, 1);
   assert.equal(response.body.availableEventCount, 1);
   assert.equal(response.body.marketCount, 6);
-  assert.equal(response.body.events[0].model.version, "NFL Team Markets v1-shadow");
+  assert.equal(response.body.events[0].model.version, "NFL Team Markets v2-shadow");
   assert.equal(response.body.events[0].simulation.iterations, 20000);
   assert.ok(response.body.events[0].model.marketWeight > 0.5);
+  assert.equal(response.body.sourceHealth.injuries.status, "UNAVAILABLE");
+  assert.equal(
+    response.body.sourceHealth.injuries.adjustmentApplied,
+    false
+  );
+  assert.equal(
+    response.body.events[0].gameContext.availability.home.depthChartQb1,
+    "Jordan Love"
+  );
+  assert.equal(
+    response.body.events[0].gameContext.weather.source,
+    "open_meteo"
+  );
+  assert.ok(
+    response.body.events[0].model.weatherAdjustmentPoints < 0
+  );
   assert.ok(response.body.markets.every((row) => row.status === "PASS"));
   assert.ok(response.body.markets.every((row) =>
     ["PLAY", "PASS"].includes(row.shadowStatus)

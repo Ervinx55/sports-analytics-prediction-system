@@ -2,6 +2,44 @@ const NFLVERSE_GAMES_URL =
   "https://raw.githubusercontent.com/nflverse/nfldata/master/data/games.csv";
 const NFLVERSE_STATS_URL = (season) =>
   `https://github.com/nflverse/nflverse-data/releases/download/stats_team/stats_team_week_${season}.csv`;
+const NFLVERSE_DEPTH_CHART_URL = (season) =>
+  `https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_${season}.csv`;
+const OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+
+const STADIUM_COORDINATES = {
+  ARI: [33.528, -112.263],
+  ATL: [33.755, -84.401],
+  BAL: [39.278, -76.623],
+  BUF: [42.774, -78.787],
+  CAR: [35.226, -80.853],
+  CHI: [41.862, -87.617],
+  CIN: [39.095, -84.516],
+  CLE: [41.506, -81.699],
+  DAL: [32.748, -97.093],
+  DEN: [39.744, -105.020],
+  DET: [42.340, -83.046],
+  GB: [44.501, -88.062],
+  HOU: [29.685, -95.411],
+  IND: [39.760, -86.164],
+  JAX: [30.324, -81.637],
+  KC: [39.049, -94.484],
+  LV: [36.090, -115.184],
+  LAC: [33.953, -118.339],
+  LA: [33.953, -118.339],
+  MIA: [25.958, -80.239],
+  MIN: [44.974, -93.258],
+  NE: [42.091, -71.264],
+  NO: [29.951, -90.081],
+  NYG: [40.813, -74.074],
+  NYJ: [40.813, -74.074],
+  PHI: [39.901, -75.168],
+  PIT: [40.447, -80.016],
+  SF: [37.403, -121.970],
+  SEA: [47.595, -122.332],
+  TB: [27.976, -82.503],
+  TEN: [36.166, -86.771],
+  WAS: [38.908, -76.864]
+};
 
 const TEAM_ALIASES = new Map(Object.entries({
   arizonacardinals: "ARI", ari: "ARI",
@@ -151,6 +189,24 @@ async function fetchTextCached(url, ttlMs = 15 * 60 * 1000) {
   const text = await response.text();
   cache.set(url, { at: now, text });
   return text;
+}
+
+async function fetchJsonCached(url, ttlMs = 10 * 60 * 1000) {
+  const cache = cacheState();
+  const now = Date.now();
+  const hit = cache.get(url);
+  if (hit && now - hit.at < ttlMs) return hit.json;
+
+  const response = await fetch(url, {
+    headers: { accept: "application/json" },
+    cache: "no-store"
+  });
+  if (!response.ok) {
+    throw new Error(`${response.status} fetching ${url}`);
+  }
+  const json = await response.json();
+  cache.set(url, { at: now, json });
+  return json;
 }
 
 function seasonForDate(date = new Date()) {
@@ -406,6 +462,303 @@ function teamPower(snapshot, baseline) {
   };
 }
 
+
+function normalizePlayerName(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\b(jr|sr|ii|iii|iv)\b/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function latestPriorQb(schedule, season, team, currentGame) {
+  const cutoff = String(currentGame?.gameday || "9999-99-99");
+  const games = schedule
+    .filter((game) => {
+      const gameSeason = number(game.season);
+      return (
+        [season, season - 1].includes(gameSeason) &&
+        String(game.game_type || "") === "REG" &&
+        String(game.gameday || "") < cutoff &&
+        [game.away_team, game.home_team].includes(team) &&
+        number(game.away_score) !== null &&
+        number(game.home_score) !== null
+      );
+    })
+    .sort((a, b) => String(b.gameday).localeCompare(String(a.gameday)));
+
+  const game = games[0];
+  if (!game) return null;
+  return game.home_team === team
+    ? game.home_qb_name || null
+    : game.away_qb_name || null;
+}
+
+function latestDepthChartQb(depthCharts, team) {
+  const rows = (depthCharts || [])
+    .filter((row) => {
+      const rowTeam = normalizeTeam(row.team);
+      const position = String(
+        row.pos_abb || row.pos_name || row.position || ""
+      ).toUpperCase();
+      return rowTeam === team && position === "QB";
+    })
+    .sort((a, b) => {
+      const dateDiff = String(b.dt || "").localeCompare(String(a.dt || ""));
+      if (dateDiff) return dateDiff;
+      return (number(a.pos_rank) ?? 999) - (number(b.pos_rank) ?? 999);
+    });
+
+  if (!rows.length) return null;
+  const latestDate = rows[0].dt || null;
+  const latestRows = latestDate
+    ? rows.filter((row) => row.dt === latestDate)
+    : rows;
+  const qb1 = latestRows
+    .sort(
+      (a, b) =>
+        (number(a.pos_rank) ?? 999) - (number(b.pos_rank) ?? 999)
+    )[0];
+  return qb1?.player_name || qb1?.full_name || null;
+}
+
+function qbAvailabilityContext({
+  schedule,
+  depthCharts,
+  season,
+  team,
+  game,
+  side
+}) {
+  const listed = side === "home"
+    ? game?.home_qb_name || null
+    : game?.away_qb_name || null;
+  const depthChart = latestDepthChartQb(depthCharts, team);
+  const prior = latestPriorQb(schedule, season, team, game);
+  const expected = listed || depthChart || null;
+
+  const changedFromPrior = Boolean(
+    expected &&
+    prior &&
+    normalizePlayerName(expected) !== normalizePlayerName(prior)
+  );
+  const depthChartDisagreement = Boolean(
+    listed &&
+    depthChart &&
+    normalizePlayerName(listed) !== normalizePlayerName(depthChart)
+  );
+
+  let adjustmentPoints = 0;
+  if (changedFromPrior) adjustmentPoints -= 0.4;
+  if (depthChartDisagreement) adjustmentPoints -= 0.45;
+  adjustmentPoints = clamp(adjustmentPoints, -0.85, 0);
+
+  let confidence = 0.45;
+  if (expected) confidence += 0.2;
+  if (prior) confidence += 0.1;
+  if (depthChart) confidence += 0.1;
+  if (depthChartDisagreement) confidence -= 0.2;
+  confidence = clamp(confidence, 0, 1);
+
+  return {
+    expected,
+    scheduleListed: listed,
+    depthChartQb1: depthChart,
+    previousStarter: prior,
+    changedFromPrior,
+    depthChartDisagreement,
+    adjustmentPoints,
+    confidence,
+    source: {
+      schedule: Boolean(listed),
+      depthChart: Boolean(depthChart),
+      injuryReport: false
+    }
+  };
+}
+
+function weatherTotalAdjustment({
+  temperatureF,
+  windMph,
+  windGustMph,
+  precipitationProbability
+}) {
+  let adjustment = 0;
+  if (Number.isFinite(windMph) && windMph > 12) {
+    adjustment -= Math.min(1.5, (windMph - 12) * 0.10);
+  }
+  if (Number.isFinite(windGustMph) && windGustMph > 25) {
+    adjustment -= Math.min(0.6, (windGustMph - 25) * 0.03);
+  }
+  if (Number.isFinite(temperatureF) && temperatureF < 32) {
+    adjustment -= Math.min(0.8, (32 - temperatureF) * 0.04);
+  } else if (Number.isFinite(temperatureF) && temperatureF > 85) {
+    adjustment += Math.min(0.3, (temperatureF - 85) * 0.015);
+  }
+  if (
+    Number.isFinite(precipitationProbability) &&
+    precipitationProbability >= 75
+  ) {
+    adjustment -= 0.45;
+  } else if (
+    Number.isFinite(precipitationProbability) &&
+    precipitationProbability >= 50
+  ) {
+    adjustment -= 0.25;
+  }
+  return clamp(adjustment, -2.0, 0.5);
+}
+
+function nearestHourlyWeather(hourly, startsAt) {
+  const target = Date.parse(startsAt || "");
+  const times = hourly?.time || [];
+  if (!Number.isFinite(target) || !times.length) return null;
+
+  let bestIndex = -1;
+  let bestDistance = Infinity;
+  for (let i = 0; i < times.length; i += 1) {
+    const timestamp = Date.parse(times[i]);
+    if (!Number.isFinite(timestamp)) continue;
+    const distance = Math.abs(timestamp - target);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = i;
+    }
+  }
+  if (bestIndex < 0 || bestDistance > 2 * 60 * 60 * 1000) return null;
+
+  return {
+    temperatureF: number(hourly.temperature_2m?.[bestIndex]),
+    precipitationProbability: number(
+      hourly.precipitation_probability?.[bestIndex]
+    ),
+    windMph: number(hourly.wind_speed_10m?.[bestIndex]),
+    windGustMph: number(hourly.wind_gusts_10m?.[bestIndex]),
+    weatherCode: number(hourly.weather_code?.[bestIndex]),
+    forecastTime: times[bestIndex]
+  };
+}
+
+async function loadWeatherContext({
+  event,
+  schedule,
+  season,
+  homeTeam
+}) {
+  const awayTeam = normalizeTeam(
+    event?.matchup?.away?.name || event?.matchup?.away?.short
+  );
+  const game = currentScheduleGame(
+    schedule,
+    event,
+    season,
+    awayTeam,
+    homeTeam
+  );
+  const roof = String(game?.roof || "").toLowerCase();
+  const controlled = ["dome", "closed"].includes(roof);
+  if (controlled) {
+    return {
+      available: true,
+      controlledEnvironment: true,
+      source: "nflverse_roof",
+      roof,
+      totalAdjustmentPoints: 0,
+      warning: null
+    };
+  }
+
+  const scheduleTemperature = number(game?.temp);
+  const scheduleWind = number(game?.wind);
+  if (scheduleTemperature !== null || scheduleWind !== null) {
+    const totalAdjustmentPoints = weatherTotalAdjustment({
+      temperatureF: scheduleTemperature,
+      windMph: scheduleWind,
+      windGustMph: null,
+      precipitationProbability: null
+    });
+    return {
+      available: true,
+      controlledEnvironment: false,
+      source: "nflverse_schedule_weather",
+      roof: roof || null,
+      temperatureF: scheduleTemperature,
+      windMph: scheduleWind,
+      windGustMph: null,
+      precipitationProbability: null,
+      totalAdjustmentPoints,
+      warning: null
+    };
+  }
+
+  const coordinates = STADIUM_COORDINATES[homeTeam];
+  const startsAtMs = Date.parse(event?.startsAt || "");
+  const daysAway = Number.isFinite(startsAtMs)
+    ? (startsAtMs - Date.now()) / (24 * 60 * 60 * 1000)
+    : null;
+  if (
+    !coordinates ||
+    daysAway === null ||
+    daysAway < -0.5 ||
+    daysAway > 8
+  ) {
+    return {
+      available: false,
+      controlledEnvironment: false,
+      source: null,
+      roof: roof || null,
+      totalAdjustmentPoints: 0,
+      warning:
+        "Outdoor forecast is unavailable for this venue/time window."
+    };
+  }
+
+  const [latitude, longitude] = coordinates;
+  const params = new URLSearchParams({
+    latitude: String(latitude),
+    longitude: String(longitude),
+    hourly: [
+      "temperature_2m",
+      "precipitation_probability",
+      "wind_speed_10m",
+      "wind_gusts_10m",
+      "weather_code"
+    ].join(","),
+    temperature_unit: "fahrenheit",
+    wind_speed_unit: "mph",
+    timezone: "UTC",
+    forecast_days: "9"
+  });
+  try {
+    const forecast = await fetchJsonCached(
+      `${OPEN_METEO_FORECAST_URL}?${params.toString()}`,
+      20 * 60 * 1000
+    );
+    const point = nearestHourlyWeather(forecast?.hourly, event?.startsAt);
+    if (!point) {
+      throw new Error("forecast hour not found");
+    }
+    return {
+      available: true,
+      controlledEnvironment: false,
+      source: "open_meteo",
+      roof: roof || null,
+      ...point,
+      totalAdjustmentPoints: weatherTotalAdjustment(point),
+      warning: null
+    };
+  } catch (error) {
+    return {
+      available: false,
+      controlledEnvironment: false,
+      source: "open_meteo",
+      roof: roof || null,
+      totalAdjustmentPoints: 0,
+      warning:
+        error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
 function currentScheduleGame(schedule, event, season, away, home) {
   const startsAt = event?.startsAt ? new Date(event.startsAt) : null;
   const date = startsAt && !Number.isNaN(startsAt.valueOf())
@@ -623,7 +976,14 @@ function candidate({
   };
 }
 
-function dataQuality(home, away, game, boardEvent) {
+function dataQuality(
+  home,
+  away,
+  game,
+  boardEvent,
+  availability = null,
+  weather = null
+) {
   const currentGames = Math.min(
     home.currentSeasonGames,
     away.currentSeasonGames
@@ -637,8 +997,17 @@ function dataQuality(home, away, game, boardEvent) {
   score += Math.min(0.18, currentGames * 0.04);
   score += Math.min(0.16, statsGames * 0.02);
   score += Math.min(0.16, moneylineBooks * 0.04);
-  if (game?.home_qb_name && game?.away_qb_name) score += 0.06;
+  if (game?.home_qb_name && game?.away_qb_name) score += 0.04;
   if (game?.away_rest && game?.home_rest) score += 0.03;
+  if (
+    availability?.home?.confidence >= 0.65 &&
+    availability?.away?.confidence >= 0.65
+  ) {
+    score += 0.04;
+  }
+  if (weather?.available || weather?.controlledEnvironment) {
+    score += 0.03;
+  }
   return clamp(score, 0, 1);
 }
 
@@ -646,9 +1015,12 @@ function projectEvent({
   event,
   schedule,
   stats,
+  depthCharts = [],
   snapshots,
   baseline,
-  season
+  season,
+  weatherContext = null,
+  sourceHealth = null
 }) {
   const away = normalizeTeam(
     event?.matchup?.away?.name || event?.matchup?.away?.short
@@ -685,11 +1057,33 @@ function projectEvent({
     4
   );
   const restAdjustment = restDiff * 0.16;
+  const availability = {
+    away: qbAvailabilityContext({
+      schedule,
+      depthCharts,
+      season,
+      team: away,
+      game,
+      side: "away"
+    }),
+    home: qbAvailabilityContext({
+      schedule,
+      depthCharts,
+      season,
+      team: home,
+      game,
+      side: "home"
+    })
+  };
+  const qbAdjustment =
+    availability.home.adjustmentPoints -
+    availability.away.adjustmentPoints;
 
   const independentHomeMargin =
     homeField +
     2.55 * (homePower.composite - awayPower.composite) +
-    restAdjustment;
+    restAdjustment +
+    qbAdjustment;
 
   const leaguePoints = baseline.pointsFor.mean || 22.5;
   const homeExpected =
@@ -704,7 +1098,15 @@ function projectEvent({
     0.42 * ((homeSnapshot.pointsAgainst ?? leaguePoints) - leaguePoints) +
     1.2 * awayPower.components.offenseEpa -
     0.9 * homePower.components.defenseEpa;
-  const independentTotal = clamp(homeExpected + awayExpected, 30, 62);
+  const baseIndependentTotal = clamp(homeExpected + awayExpected, 30, 62);
+  const weatherAdjustment = Number(
+    weatherContext?.totalAdjustmentPoints || 0
+  );
+  const independentTotal = clamp(
+    baseIndependentTotal + weatherAdjustment,
+    30,
+    62
+  );
 
   const homeSpreadMarket = event?.markets?.spread?.home;
   const totalOverMarket = event?.markets?.total?.over;
@@ -742,7 +1144,9 @@ function projectEvent({
     homeSnapshot,
     awaySnapshot,
     game,
-    event
+    event,
+    availability,
+    weatherContext
   );
 
   const markets = [];
@@ -847,10 +1251,13 @@ function projectEvent({
       homeQB: game?.home_qb_name || null,
       roof: game?.roof || null,
       surface: game?.surface || null,
-      stadium: game?.stadium || null
+      stadium: game?.stadium || null,
+      availability,
+      weather: weatherContext,
+      sourceHealth
     },
     model: {
-      version: "NFL Team Markets v1-shadow",
+      version: "NFL Team Markets v2-shadow",
       productionEligible: false,
       independentWeight,
       marketWeight,
@@ -858,6 +1265,9 @@ function projectEvent({
       projectedTotal: Number(projectedTotal.toFixed(3)),
       independentHomeMargin: Number(independentHomeMargin.toFixed(3)),
       independentTotal: Number(independentTotal.toFixed(3)),
+      baseIndependentTotal: Number(baseIndependentTotal.toFixed(3)),
+      qbAdjustmentPoints: Number(qbAdjustment.toFixed(3)),
+      weatherAdjustmentPoints: Number(weatherAdjustment.toFixed(3)),
       dataQuality: Number(quality.toFixed(3))
     },
     simulation,
@@ -878,28 +1288,57 @@ function projectEvent({
 }
 
 async function loadNflData(season) {
-  const [gamesText, currentStatsText, previousStatsText] =
+  const [gamesText, currentStatsText, previousStatsText, depthResult] =
     await Promise.all([
       fetchTextCached(NFLVERSE_GAMES_URL),
       fetchTextCached(NFLVERSE_STATS_URL(season)),
-      fetchTextCached(NFLVERSE_STATS_URL(season - 1))
+      fetchTextCached(NFLVERSE_STATS_URL(season - 1)),
+      fetchTextCached(NFLVERSE_DEPTH_CHART_URL(season), 60 * 60 * 1000)
+        .then((text) => ({ ok: true, text }))
+        .catch((error) => ({
+          ok: false,
+          error: error instanceof Error ? error.message : String(error)
+        }))
     ]);
   return {
     schedule: parseCsv(gamesText),
     stats: [
       ...parseCsv(previousStatsText),
       ...parseCsv(currentStatsText)
-    ]
+    ],
+    depthCharts: depthResult.ok ? parseCsv(depthResult.text) : [],
+    sourceHealth: {
+      schedule: { status: "HEALTHY", source: "nflverse" },
+      teamStats: { status: "HEALTHY", source: "nflverse" },
+      depthCharts: {
+        status: depthResult.ok ? "HEALTHY" : "UNAVAILABLE",
+        source: "nflverse",
+        error: depthResult.ok ? null : depthResult.error
+      },
+      injuries: {
+        status: "UNAVAILABLE",
+        source: "nflverse",
+        lastSupportedSeason: 2024,
+        adjustmentApplied: false,
+        reason:
+          "nflverse reports its injury source ended after 2024; stale injury rows are never used."
+      }
+    }
   };
 }
 
 export {
   NFLVERSE_GAMES_URL,
   NFLVERSE_STATS_URL,
+  NFLVERSE_DEPTH_CHART_URL,
+  OPEN_METEO_FORECAST_URL,
   normalizeTeam,
   parseCsv,
   seasonForDate,
   loadNflData,
+  loadWeatherContext,
+  qbAvailabilityContext,
+  weatherTotalAdjustment,
   projectEvent,
   teamSnapshot,
   leagueBaselines,
