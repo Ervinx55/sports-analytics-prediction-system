@@ -19,6 +19,7 @@ for (const [name, source] of [
     assert.match(source, /function applyFreshnessGate/);
     assert.match(source, /DOWNGRADE_PENDING/);
     assert.match(source, /PASS_STALE/);
+    assert.match(source, /freshness\.score < 65/);
     assert.match(source, /freshness\.score < 80/);
     assert.match(source, /freshness\.hardStale/);
     assert.match(source, /affectsDecision: true/);

@@ -126,7 +126,7 @@ function applyFreshnessGate(
   let action = "KEEP";
 
   if (status === "PLAY") {
-    if (freshness.hardStale || freshness.score < 50) {
+    if (freshness.hardStale || freshness.score < 65) {
       next = "PASS";
       action = "PASS_STALE";
     } else if (freshness.score < 80) {

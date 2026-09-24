@@ -147,16 +147,16 @@
     },
     {
       "slug": "market-card",
-      "version": 9,
+      "version": 10,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "03e6d075cf1f5b5a4ce2a70eee7bcabf8509504ade83d171c25a856f15b46839",
+      "bundle_sha256": "1f5def4d4ec50726e005310251efa2423aa2a713af1d956fae4994eb07df31cd",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/market-card/index.ts",
           "name": "index.ts",
-          "sha256": "bc358f0471d13e59a762616d71ac827e0ab065ca8ea474f4320f73a630bc5d04"
+          "sha256": "1d8554468337b6e75599c4785d70b7914608e826ea648353b63606bef357165d"
         }
       ],
       "recovered_at": "2026-09-23",
@@ -196,16 +196,16 @@
     },
     {
       "slug": "player-prop-card",
-      "version": 7,
+      "version": 8,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "ec0f05d1261b6281bbf5161e961f280e2d150d9fba102a2f927b0527c0f02810",
+      "bundle_sha256": "bc90a0c9177ed76f49d0060176bd234deb3c4a28177218cbf5638e813ce03fcc",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/player-prop-card/index.ts",
           "name": "index.ts",
-          "sha256": "68736c7b0af6cd851a0131e03f2228f86292a3a68ed564473dc3f1ed52264479"
+          "sha256": "242e75c92b0caf6bd2e5fff10ddb3b452f9b523b92f05ad6d5afbcc63573ed9a"
         }
       ],
       "recovered_at": "2026-09-23",
@@ -804,7 +804,7 @@
       "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T08:00:00Z",
+  "final_verified_at": "2026-09-24T08:04:00Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 49,
