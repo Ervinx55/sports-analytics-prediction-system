@@ -67,6 +67,7 @@ function playerName(row = {}) {
   return (
     row.player_display_name ||
     row.player_name ||
+    row.player ||
     row.full_name ||
     row.name ||
     ""
