@@ -67,3 +67,19 @@ def test_hybrid_market_policy_preserves_broad_hitter_features():
     assert 'ALL_ENRICHED_NUMERIC - {"hr_multiplier"}' in source
     assert '"pitching_strikeouts": {' in source
     assert '"strikeout_opportunity_multiplier"' in source
+
+
+def test_market_specialists_are_separate_from_universal_challenger():
+    train = (ROOT / "ml" / "train_player_prop_tensorflow.py").read_text()
+    assert "select_available_features(train)" in train
+    assert "select_available_features(model_train)" not in train.split(
+        "def main()"
+    )[-1]
+
+    walk_forward = (
+        ROOT / "ml" / "walk_forward_player_prop.py"
+    ).read_text()
+    assert "def market_specialist_residual_predictions" in walk_forward
+    assert "market_specialist_residual_probability" in walk_forward
+    assert "apply_market_feature_policy(train_part)" in walk_forward
+    assert "SPECIALIST_MIN_TRAIN_ROWS" in walk_forward

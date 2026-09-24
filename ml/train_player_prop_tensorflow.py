@@ -694,20 +694,19 @@ def main() -> None:
     frame = load_training_frame(data_path)
     train, val, test = split_by_event(frame)
 
-    model_train = apply_market_feature_policy(train)
-    model_val = apply_market_feature_policy(val)
-    model_test = apply_market_feature_policy(test)
-
+    # The production-candidate challenger keeps the stronger universal
+    # leakage-safe feature set. Market-specific masks are evaluated separately
+    # as shadow residual specialists in walk-forward testing.
     numeric_features, categorical_features, feature_coverage = (
-        select_available_features(model_train)
+        select_available_features(train)
     )
     preprocessor = build_preprocessor(
         numeric_features=numeric_features,
         categorical_features=categorical_features,
     )
-    x_train = preprocessor.fit_transform(model_train)
-    x_val = preprocessor.transform(model_val)
-    x_test = preprocessor.transform(model_test)
+    x_train = preprocessor.fit_transform(train)
+    x_val = preprocessor.transform(val)
+    x_test = preprocessor.transform(test)
 
     y_train = train["target"].to_numpy(dtype=np.float32)
     y_val = val["target"].to_numpy(dtype=np.float32)
@@ -868,9 +867,9 @@ def main() -> None:
             "training_coverage": feature_coverage,
             "transformed_dimension": int(x_train.shape[1]),
             "feature_store": True,
-            "market_feature_policy_version":
+            "market_specialist_feature_policy_version":
                 MARKET_FEATURE_POLICY_VERSION,
-            "market_feature_policies": {
+            "market_specialist_feature_policies": {
                 market: {
                     "numeric": sorted(policy["numeric"]),
                     "categorical": sorted(policy["categorical"]),
@@ -980,14 +979,6 @@ def main() -> None:
 
     inference_bundle = {
         "schemaVersion": 3,
-        "marketFeaturePolicyVersion": MARKET_FEATURE_POLICY_VERSION,
-        "marketFeaturePolicies": {
-            market: {
-                "numeric": sorted(policy["numeric"]),
-                "categorical": sorted(policy["categorical"]),
-            }
-            for market, policy in MARKET_FEATURE_POLICIES.items()
-        },
         "model": report["model"],
         "mode": "SHADOW",
         "eligibleForProduction": bool(

@@ -96,6 +96,124 @@ def fold_layout(events: list[str]) -> list[dict]:
     return folds
 
 
+SPECIALIST_MIN_TRAIN_ROWS = 12
+SPECIALIST_MIN_VALIDATION_ROWS = 4
+SPECIALIST_MIN_TEST_ROWS = 2
+SPECIALIST_MIN_TRAIN_EVENTS = 3
+
+
+def market_specialist_residual_predictions(
+    train: pd.DataFrame,
+    validation: pd.DataFrame,
+    test: pd.DataFrame,
+    fold: int,
+) -> tuple[np.ndarray, np.ndarray, dict]:
+    market_series = pd.Series(
+        clip_probability(test["market_fair_probability"].to_numpy(float)),
+        index=test.index,
+        dtype=float,
+    )
+    probability = market_series.copy()
+    raw_probability = market_series.copy()
+    reports = {}
+
+    for stat_id in sorted(test["stat_id"].dropna().astype(str).unique()):
+        train_part = train[train["stat_id"].astype(str) == stat_id].copy()
+        val_part = validation[
+            validation["stat_id"].astype(str) == stat_id
+        ].copy()
+        test_part = test[test["stat_id"].astype(str) == stat_id].copy()
+
+        base_report = {
+            "train_rows": int(len(train_part)),
+            "validation_rows": int(len(val_part)),
+            "test_rows": int(len(test_part)),
+            "train_events": int(train_part["event_key"].nunique()),
+            "active": False,
+            "reason": None,
+        }
+        enough = (
+            len(train_part) >= SPECIALIST_MIN_TRAIN_ROWS
+            and len(val_part) >= SPECIALIST_MIN_VALIDATION_ROWS
+            and len(test_part) >= SPECIALIST_MIN_TEST_ROWS
+            and train_part["event_key"].nunique()
+            >= SPECIALIST_MIN_TRAIN_EVENTS
+            and train_part["target"].nunique() >= 2
+        )
+        if not enough:
+            base_report["reason"] = "insufficient specialist history"
+            reports[stat_id] = base_report
+            continue
+
+        model_train = apply_market_feature_policy(train_part)
+        model_val = apply_market_feature_policy(val_part)
+        model_test = apply_market_feature_policy(test_part)
+        numeric, categorical, coverage = select_available_features(
+            model_train
+        )
+        specialist_preprocessor = build_preprocessor(
+            numeric_features=numeric,
+            categorical_features=categorical,
+        )
+        x_train = specialist_preprocessor.fit_transform(model_train)
+        x_val = specialist_preprocessor.transform(model_val)
+        x_test = specialist_preprocessor.transform(model_test)
+
+        selection = select_market_residual_challenger(
+            x_train,
+            train_part["target"].to_numpy(dtype=float),
+            clip_probability(
+                train_part["market_fair_probability"].to_numpy(float)
+            ),
+            x_val,
+            val_part["target"].to_numpy(dtype=float),
+            clip_probability(
+                val_part["market_fair_probability"].to_numpy(float)
+            ),
+            seed=SEED + int(fold) * 100 + len(reports),
+        )
+        correction = residual_correction_from_model(
+            selection.model,
+            x_test,
+        )
+        market_test = clip_probability(
+            test_part["market_fair_probability"].to_numpy(float)
+        )
+        raw = residual_corrected_probability(
+            market_test,
+            correction,
+            1.0,
+        )
+        selected = residual_corrected_probability(
+            market_test,
+            correction,
+            selection.shrinkage,
+        )
+        probability.loc[test_part.index] = selected
+        raw_probability.loc[test_part.index] = raw
+
+        reports[stat_id] = {
+            **base_report,
+            "active": True,
+            "reason": "validated market-specific residual",
+            "shrinkage": float(selection.shrinkage),
+            "params": selection.params,
+            "validation": selection.validation_metrics,
+            "validation_raw": selection.validation_raw_metrics,
+            "mean_abs_correction":
+                float(selection.mean_abs_correction),
+            "selected_numeric_features": numeric,
+            "selected_categorical_features": categorical,
+            "feature_coverage": coverage,
+        }
+
+    return (
+        probability.loc[test.index].to_numpy(dtype=float),
+        raw_probability.loc[test.index].to_numpy(dtype=float),
+        reports,
+    )
+
+
 def train_fold(
     frame: pd.DataFrame,
     layout: dict,
@@ -107,20 +225,16 @@ def train_fold(
     ].copy()
     test = frame[frame["event_key"].isin(layout["test_events"])].copy()
 
-    model_train = apply_market_feature_policy(train)
-    model_validation = apply_market_feature_policy(validation)
-    model_test = apply_market_feature_policy(test)
-
     numeric_features, categorical_features, feature_coverage = (
-        select_available_features(model_train)
+        select_available_features(train)
     )
     preprocessor = build_preprocessor(
         numeric_features=numeric_features,
         categorical_features=categorical_features,
     )
-    x_train = preprocessor.fit_transform(model_train)
-    x_validation = preprocessor.transform(model_validation)
-    x_test = preprocessor.transform(model_test)
+    x_train = preprocessor.fit_transform(train)
+    x_validation = preprocessor.transform(validation)
+    x_test = preprocessor.transform(test)
 
     y_train = train["target"].to_numpy(dtype=np.float32)
     y_validation = validation["target"].to_numpy(dtype=np.float32)
@@ -215,6 +329,17 @@ def train_fold(
         residual_selection.shrinkage,
     )
 
+    (
+        specialist_residual_test,
+        specialist_residual_raw_test,
+        specialist_reports,
+    ) = market_specialist_residual_predictions(
+        train,
+        validation,
+        test,
+        int(layout["fold"]),
+    )
+
     logistic = LogisticRegression(
         C=0.5,
         max_iter=2000,
@@ -233,6 +358,12 @@ def train_fold(
         "xgboost_ensemble": metrics(y_test, xgb_ensemble_test),
         "market_residual_raw": metrics(y_test, residual_raw_test),
         "market_residual": metrics(y_test, residual_test),
+        "market_specialist_residual_raw": metrics(
+            y_test, specialist_residual_raw_test
+        ),
+        "market_specialist_residual": metrics(
+            y_test, specialist_residual_test
+        ),
         "ensemble": metrics(y_test, ensemble_test),
     }
 
@@ -263,6 +394,12 @@ def train_fold(
     pred["market_residual_raw_probability"] = residual_raw_test
     pred["market_residual_probability"] = residual_test
     pred["market_residual_shrinkage"] = residual_selection.shrinkage
+    pred["market_specialist_residual_raw_probability"] = (
+        specialist_residual_raw_test
+    )
+    pred["market_specialist_residual_probability"] = (
+        specialist_residual_test
+    )
     output_predictions.append(pred)
 
     return {
@@ -286,6 +423,7 @@ def train_fold(
             residual_selection.validation_metrics,
         "market_residual_mean_abs_correction":
             residual_selection.mean_abs_correction,
+        "market_specialists": specialist_reports,
         "epochs_ran": int(len(history.history.get("loss", []))),
         "validation_ensemble": validation_ensemble,
         "xgboost_validation": xgb_selection.validation_metrics,
@@ -311,6 +449,16 @@ def aggregate_predictions(predictions: pd.DataFrame) -> dict:
         ),
         "market_residual": metrics(
             y, predictions["market_residual_probability"]
+        ),
+        "market_specialist_residual_raw": metrics(
+            y, predictions[
+                "market_specialist_residual_raw_probability"
+            ]
+        ),
+        "market_specialist_residual": metrics(
+            y, predictions[
+                "market_specialist_residual_probability"
+            ]
         ),
         "ensemble": metrics(y, predictions["ensemble_probability"]),
     }
@@ -391,6 +539,18 @@ def main() -> None:
         if fold["metrics"]["market_residual"]["log_loss"]
         < fold["metrics"]["market"]["log_loss"]
     )
+    specialist_brier_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["market_specialist_residual"]["brier"]
+        < fold["metrics"]["market"]["brier"]
+    )
+    specialist_log_loss_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["market_specialist_residual"]["log_loss"]
+        < fold["metrics"]["market"]["log_loss"]
+    )
 
     report = {
         "mode": "WALK_FORWARD",
@@ -405,6 +565,10 @@ def main() -> None:
             residual_brier_wins / len(fold_reports),
         "market_residual_fold_log_loss_win_rate":
             residual_log_loss_wins / len(fold_reports),
+        "market_specialist_residual_fold_brier_win_rate":
+            specialist_brier_wins / len(fold_reports),
+        "market_specialist_residual_fold_log_loss_win_rate":
+            specialist_log_loss_wins / len(fold_reports),
         "coverage": {
             "unique_events": int(frame["event_key"].nunique()),
             "unique_outcomes": int(frame["outcome_key"].nunique()),
@@ -453,6 +617,7 @@ def main() -> None:
         f"- XGBoost Brier: {aggregate['xgboost']['brier']:.6f}",
         f"- XGB ensemble Brier: {aggregate['xgboost_ensemble']['brier']:.6f}",
         f"- Market residual Brier: {aggregate['market_residual']['brier']:.6f}",
+        f"- Market-specialist residual Brier: {aggregate['market_specialist_residual']['brier']:.6f}",
         f"- Market Brier: {aggregate['market']['brier']:.6f}",
         f"- Brier improvement vs champion: {brier_improvement:+.6f}",
         f"- Champion log loss: {aggregate['champion']['log_loss']:.6f}",
@@ -461,6 +626,7 @@ def main() -> None:
         f"- XGBoost log loss: {aggregate['xgboost']['log_loss']:.6f}",
         f"- XGB ensemble log loss: {aggregate['xgboost_ensemble']['log_loss']:.6f}",
         f"- Market residual log loss: {aggregate['market_residual']['log_loss']:.6f}",
+        f"- Market-specialist residual log loss: {aggregate['market_specialist_residual']['log_loss']:.6f}",
         f"- Log-loss improvement vs champion: {log_loss_improvement:+.6f}",
         f"- TF ensemble Brier fold win rate: {report['fold_brier_win_rate']:.1%}",
         f"- XGB ensemble Brier fold win rate: {report['xgboost_fold_brier_win_rate']:.1%}",
@@ -477,9 +643,11 @@ def main() -> None:
             f"- Champion Brier: {market_metrics['champion']['brier']:.6f}",
             f"- TF ensemble Brier: {market_metrics['ensemble']['brier']:.6f}",
             f"- Market Brier: {market_metrics['market']['brier']:.6f}",
+            f"- Specialist residual Brier: {market_metrics['market_specialist_residual']['brier']:.6f}",
             f"- Champion log loss: {market_metrics['champion']['log_loss']:.6f}",
             f"- TF ensemble log loss: {market_metrics['ensemble']['log_loss']:.6f}",
             f"- Market log loss: {market_metrics['market']['log_loss']:.6f}",
+            f"- Specialist residual log loss: {market_metrics['market_specialist_residual']['log_loss']:.6f}",
         ])
     summary.extend([
         "",
@@ -499,6 +667,8 @@ def main() -> None:
             report["xgboost_fold_brier_win_rate"],
         "market_residual_fold_brier_win_rate":
             report["market_residual_fold_brier_win_rate"],
+        "market_specialist_residual_fold_brier_win_rate":
+            report["market_specialist_residual_fold_brier_win_rate"],
         "aggregate": aggregate,
         "by_market": {
             stat_id: {
@@ -509,12 +679,20 @@ def main() -> None:
                     market_report["metrics"]["ensemble"]["brier"],
                 "market_brier":
                     market_report["metrics"]["market"]["brier"],
+                "specialist_residual_brier":
+                    market_report["metrics"][
+                        "market_specialist_residual"
+                    ]["brier"],
                 "champion_log_loss":
                     market_report["metrics"]["champion"]["log_loss"],
                 "ensemble_log_loss":
                     market_report["metrics"]["ensemble"]["log_loss"],
                 "market_log_loss":
                     market_report["metrics"]["market"]["log_loss"],
+                "specialist_residual_log_loss":
+                    market_report["metrics"][
+                        "market_specialist_residual"
+                    ]["log_loss"],
             }
             for stat_id, market_report in by_market.items()
         },
