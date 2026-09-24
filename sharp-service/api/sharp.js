@@ -185,16 +185,19 @@ export default async function handler(req, res) {
   const books = unique(csv(req.query.books, []), { sort: true });
   const includeAltLines = String(req.query.alts || "0") === "1";
   const now = Date.now();
+  const windowAnchor =
+    Math.floor(now / (6 * 60 * 60 * 1000)) *
+    (6 * 60 * 60 * 1000);
   const limitRaw = Number(req.query.limit || 20);
   const requestedLimit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
     : 20;
   const startsAfter = req.query.startsAfter
     ? String(req.query.startsAfter)
-    : new Date(now - 8 * 60 * 60 * 1000).toISOString();
+    : new Date(windowAnchor - 8 * 60 * 60 * 1000).toISOString();
   const startsBefore = req.query.startsBefore
     ? String(req.query.startsBefore)
-    : new Date(now + 72 * 60 * 60 * 1000).toISOString();
+    : new Date(windowAnchor + 72 * 60 * 60 * 1000).toISOString();
   const objectPolicy = await optimizeSportsGameOddsObjectLimit({
     apiKey,
     requestedLimit,
