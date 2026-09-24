@@ -6,6 +6,8 @@ const MAX_LOCAL_ENTRIES = 100;
 const DEFAULT_REQUESTS_PER_MINUTE = 9;
 const DEFAULT_CRITICAL_RESERVE = 2;
 const DEFAULT_NORMAL_RESERVE = 1;
+const DEFAULT_UNLIMITED_REQUESTS_PER_MINUTE = 60;
+const USAGE_CACHE_TTL_MS = 60 * 1000;
 
 const state =
   globalThis.__edgeLabProviderProtection ||
@@ -19,6 +21,13 @@ const state =
 
 if (!state.probes) state.probes = new Map();
 if (!state.budgets) state.budgets = new Map();
+if (!state.usage) {
+  state.usage = {
+    value: null,
+    fetchedAt: 0,
+    inFlight: null
+  };
+}
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -40,28 +49,52 @@ function normalizePriority(value) {
     : "normal";
 }
 
-function requestBudgetSettings() {
+function hasEnvValue(name) {
+  return process.env[name] !== undefined &&
+    String(process.env[name]).trim() !== "";
+}
+
+function requestBudgetSettings(capacityOverride = null) {
+  const explicitCapacity = hasEnvValue(
+    "SPORTS_ODDS_REQUESTS_PER_MINUTE"
+  );
   const capacity = clamp(
-    envInt(
-      "SPORTS_ODDS_REQUESTS_PER_MINUTE",
-      DEFAULT_REQUESTS_PER_MINUTE
-    ),
+    capacityOverride == null || explicitCapacity
+      ? envInt(
+          "SPORTS_ODDS_REQUESTS_PER_MINUTE",
+          DEFAULT_REQUESTS_PER_MINUTE
+        )
+      : Math.floor(capacityOverride),
     1,
     1000
   );
+
+  const defaultCriticalReserve = Math.max(
+    DEFAULT_CRITICAL_RESERVE,
+    Math.ceil(capacity * 0.2)
+  );
   const criticalReserve = clamp(
-    envInt(
-      "SPORTS_ODDS_CRITICAL_RESERVE",
-      DEFAULT_CRITICAL_RESERVE
-    ),
+    hasEnvValue("SPORTS_ODDS_CRITICAL_RESERVE")
+      ? envInt(
+          "SPORTS_ODDS_CRITICAL_RESERVE",
+          defaultCriticalReserve
+        )
+      : defaultCriticalReserve,
     0,
     Math.max(capacity - 1, 0)
   );
+
+  const defaultNormalReserve = Math.max(
+    DEFAULT_NORMAL_RESERVE,
+    Math.ceil(capacity * 0.1)
+  );
   const normalReserve = clamp(
-    envInt(
-      "SPORTS_ODDS_NORMAL_RESERVE",
-      DEFAULT_NORMAL_RESERVE
-    ),
+    hasEnvValue("SPORTS_ODDS_NORMAL_RESERVE")
+      ? envInt(
+          "SPORTS_ODDS_NORMAL_RESERVE",
+          defaultNormalReserve
+        )
+      : defaultNormalReserve,
     0,
     Math.max(capacity - criticalReserve - 1, 0)
   );
@@ -202,6 +235,140 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 1500) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function readUsageLimit(payload) {
+  const data = payload?.data || payload || {};
+  const rateLimits = data.rateLimits || data.rate_limits || {};
+  const perMinute =
+    rateLimits["per-minute"] ||
+    rateLimits.perMinute ||
+    rateLimits.per_minute ||
+    {};
+
+  const maxRaw =
+    perMinute["max-requests"] ??
+    perMinute.maxRequestsPerInterval ??
+    perMinute.maxRequests ??
+    null;
+  const currentRaw =
+    perMinute["current-requests"] ??
+    perMinute.currentIntervalRequests ??
+    perMinute.currentRequests ??
+    null;
+
+  const maxRequests = Number(maxRaw);
+  const currentRequests = Number(currentRaw);
+  const unlimited =
+    String(maxRaw || "").toLowerCase() === "unlimited";
+
+  return {
+    tier: data.tier || null,
+    unlimited,
+    maxRequests:
+      Number.isFinite(maxRequests) && maxRequests > 0
+        ? maxRequests
+        : null,
+    currentRequests:
+      Number.isFinite(currentRequests) && currentRequests >= 0
+        ? currentRequests
+        : null
+  };
+}
+
+function capacityFromUsage(usage) {
+  if (usage?.unlimited) {
+    return DEFAULT_UNLIMITED_REQUESTS_PER_MINUTE;
+  }
+  if (!Number.isFinite(usage?.maxRequests)) return null;
+
+  const max = Math.max(1, Math.floor(usage.maxRequests));
+  const headroom = Math.max(1, Math.ceil(max * 0.1));
+  return Math.max(1, max - headroom);
+}
+
+async function fetchProviderUsage(apiKey) {
+  const response = await fetchWithTimeout(
+    "https://api.sportsgameodds.com/v2/account/usage",
+    {
+      headers: {
+        "x-api-key": apiKey,
+        accept: "application/json"
+      },
+      cache: "no-store"
+    },
+    2_000
+  );
+
+  const raw = await response.text();
+  const payload = parseJson(raw);
+  if (!response.ok || payload?.success === false) {
+    throw new Error(
+      payload?.error ||
+        payload?.message ||
+        "SportsGameOdds usage request failed"
+    );
+  }
+
+  return readUsageLimit(payload);
+}
+
+async function providerUsage(apiKey) {
+  const now = nowMs();
+  if (
+    state.usage.value &&
+    now - state.usage.fetchedAt < USAGE_CACHE_TTL_MS
+  ) {
+    return state.usage.value;
+  }
+
+  if (state.usage.inFlight) {
+    return state.usage.inFlight;
+  }
+
+  const work = fetchProviderUsage(apiKey);
+  state.usage.inFlight = work;
+
+  try {
+    const value = await work;
+    state.usage.value = value;
+    state.usage.fetchedAt = nowMs();
+    return value;
+  } finally {
+    if (state.usage.inFlight === work) {
+      state.usage.inFlight = null;
+    }
+  }
+}
+
+async function resolveBudgetSettings(apiKey) {
+  if (hasEnvValue("SPORTS_ODDS_REQUESTS_PER_MINUTE")) {
+    return {
+      ...requestBudgetSettings(),
+      limitSource: "environment",
+      providerRateLimit: null
+    };
+  }
+
+  try {
+    const usage = await providerUsage(apiKey);
+    const discoveredCapacity = capacityFromUsage(usage);
+    if (discoveredCapacity != null) {
+      return {
+        ...requestBudgetSettings(discoveredCapacity),
+        limitSource: "provider_usage",
+        providerRateLimit: usage
+      };
+    }
+  } catch {
+    // Keep operating with the conservative fallback if usage lookup fails.
+  }
+
+  return {
+    ...requestBudgetSettings(),
+    limitSource: "fallback",
+    providerRateLimit: null
+  };
 }
 
 async function sharedRequest(config, path, options = {}) {
@@ -363,28 +530,42 @@ async function claimSharedBudget(
   };
 }
 
-async function claimProviderBudget(config, provider, priority) {
-  const settings = requestBudgetSettings();
+async function claimProviderBudget(
+  config,
+  provider,
+  priority,
+  apiKey
+) {
+  const settings = await resolveBudgetSettings(apiKey);
 
   if (config) {
     try {
-      return await claimSharedBudget(
+      const result = await claimSharedBudget(
         config,
         provider,
         priority,
         settings
       );
+      return {
+        ...result,
+        limitSource: settings.limitSource,
+        providerRateLimit: settings.providerRateLimit
+      };
     } catch {
       // Shared budgeting is an optimization. Preserve safety with the
       // per-instance token bucket if Supabase is temporarily unavailable.
     }
   }
 
-  return claimLocalBudget(
-    provider,
-    priority,
-    settings
-  );
+  return {
+    ...claimLocalBudget(
+      provider,
+      priority,
+      settings
+    ),
+    limitSource: settings.limitSource,
+    providerRateLimit: settings.providerRateLimit
+  };
 }
 
 function budgetBlockedError(budget) {
@@ -990,7 +1171,8 @@ export async function protectedSportsGameOddsFetch({
     const budget = await claimProviderBudget(
       config,
       provider,
-      effectivePriority
+      effectivePriority,
+      apiKey
     );
 
     if (!budget.allowed) {
@@ -1261,4 +1443,7 @@ export function resetProviderProtectionForTests() {
   state.circuits.clear();
   state.probes.clear();
   state.budgets.clear();
+  state.usage.value = null;
+  state.usage.fetchedAt = 0;
+  state.usage.inFlight = null;
 }

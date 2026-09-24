@@ -72,7 +72,7 @@ beforeEach(() => {
   delete process.env.SUPABASE_URL;
   delete process.env.SUPABASE_SECRET_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-  delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+  process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "9";
   delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
   delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
   Date.now = originalDateNow;
@@ -384,4 +384,51 @@ test("half-open recovery allows only one local provider probe", async () => {
   assert.equal(recovered.statusCode, 200);
   assert.equal(recovered.body.recoveryState, "RECOVERED");
   assert.equal(calls, 2);
+});
+
+
+test("auto-discovers provider request capacity and caches usage lookup", async () => {
+  delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+
+  let usageCalls = 0;
+  let providerCalls = 0;
+
+  globalThis.fetch = async (url) => {
+    const text = String(url);
+
+    if (text.includes("/v2/account/usage")) {
+      usageCalls += 1;
+      return jsonResponse({
+        success: true,
+        data: {
+          tier: "rookie",
+          rateLimits: {
+            "per-minute": {
+              "max-requests": 50,
+              "current-requests": 4
+            }
+          }
+        }
+      });
+    }
+
+    if (text.startsWith("https://api.sportsgameodds.com/v2/events")) {
+      providerCalls += 1;
+      return jsonResponse({ success: true, data: [] });
+    }
+
+    throw new Error("Unexpected URL: " + text);
+  };
+
+  const first = await invoke({ limit: "91" });
+  const second = await invoke({ limit: "92" });
+
+  assert.equal(first.statusCode, 200);
+  assert.equal(second.statusCode, 200);
+  assert.equal(first.body.requestBudget.limitSource, "provider_usage");
+  assert.equal(first.body.requestBudget.capacity, 45);
+  assert.equal(first.body.requestBudget.providerRateLimit.maxRequests, 50);
+  assert.equal(first.body.requestBudget.providerRateLimit.currentRequests, 4);
+  assert.equal(usageCalls, 1);
+  assert.equal(providerCalls, 2);
 });

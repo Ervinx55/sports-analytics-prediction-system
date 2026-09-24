@@ -1669,7 +1669,7 @@
       "<div><strong>Request budget:</strong> "+(
         requestBudget.shared&&budgetRow
           ? esc(Number(budgetRow.tokensRemaining??0).toFixed(1))+"/"+esc(budgetRow.capacity??"—")+" shared tokens"
-          : "local fallback 9/min"
+          : "local auto-discovery · 9/min safe fallback"
       )+" · blocks "+esc(requestBudget.blockEvents24h??s.budgetBlocks??0)+" · critical blocks "+esc(requestBudget.criticalBlockEvents24h??s.criticalBudgetBlocks??0)+"</div>"+
       "<div><strong>Priority:</strong> props CRITICAL · live/near-start board CRITICAL · normal board NORMAL · broad sharp BACKGROUND</div>"+
       "<div><strong>Latest provider success:</strong> "+fmtTime(ph?.latest?.upstreamSuccessAt)+" · latest failure "+fmtTime(ph?.latest?.upstreamFailureAt)+"</div>"+

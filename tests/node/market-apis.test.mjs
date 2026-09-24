@@ -74,7 +74,7 @@ beforeEach(() => {
   delete process.env.SUPABASE_URL;
   delete process.env.SUPABASE_SECRET_KEY;
   delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-  delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+  process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "9";
   delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
   delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
 });
