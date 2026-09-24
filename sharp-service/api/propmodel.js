@@ -1,3 +1,8 @@
+import {
+  scorePlayerPropTensorflowShadow,
+  tensorflowShadowMetadata
+} from "../lib/tensorflow-shadow.js";
+
 const PROPS_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/props";
 
@@ -738,7 +743,7 @@ export default async function handler(req, res) {
               ev
             });
 
-            results.push({
+            const modeledRow = {
               eventID: event.eventID,
               gamePk: official.gamePk,
               startsAt: event.startsAt,
@@ -796,7 +801,10 @@ export default async function handler(req, res) {
               status: grade.status,
               reason: grade.reason,
               projection
-            });
+            };
+            modeledRow.tensorflowShadow =
+              scorePlayerPropTensorflowShadow(modeledRow);
+            results.push(modeledRow);
           }
         }
       }
@@ -811,7 +819,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
-      version: "MLB Player Props Model v1.1",
+      version: "MLB Player Props Model v1.2",
       date,
       finalWindowMinutes: FINAL_WINDOW_MINUTES,
       method: {
@@ -826,13 +834,22 @@ export default async function handler(req, res) {
         playRule:
           "PLAY requires sufficient official sample/role confirmation, >=1 exact-line two-sided book pair, >=2 books offering the selected side at that exact line, data quality >=0.75, model edge >=6 percentage points and modeled EV >=6% after shrinking independent probability 35% toward the exact-line no-vig market.",
         lifecycle:
-          "Missing required information is PENDING only until 20 minutes before first pitch; then it becomes PASS."
+          "Missing required information is PENDING only until 20 minutes before first pitch; then it becomes PASS.",
+        tensorflowShadow:
+          "A TensorFlow meta-model challenger scores every feature-complete prop prospectively in SHADOW mode. It has zero decision weight until chronological promotion gates pass."
       },
       summary: {
         rows: results.length,
         play: results.filter((x) => x.status === "PLAY").length,
         pending: results.filter((x) => x.status === "PENDING").length,
-        pass: results.filter((x) => x.status === "PASS").length
+        pass: results.filter((x) => x.status === "PASS").length,
+        tensorflowShadow: {
+          ...tensorflowShadowMetadata(),
+          scored: results.filter(
+            (x) => x.tensorflowShadow?.available
+          ).length,
+          affectsDecision: false
+        }
       },
       plays: results.filter((x) => x.status === "PLAY"),
       pending: results.filter((x) => x.status === "PENDING"),
