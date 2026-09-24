@@ -60,3 +60,22 @@ performance, fold win rates, selected hyperparameters, and selected weights.
 XGBoost does not affect PLAY/PENDING/PASS or production probabilities until its
 out-of-sample evidence satisfies the same governance standards and a production
 inference path is explicitly promoted.
+
+
+## Market-residual challenger
+
+The strongest current baseline is the sharp-market fair probability, so the
+third challenger no longer predicts the binary outcome from scratch. It trains
+an XGBoost regressor on the residual target
+`actual_outcome - market_fair_probability`.
+
+The model's raw correction is capped at ±20 percentage points. A shrinkage
+factor from 0%, 25%, 50%, 75%, or 100% is selected using validation games only;
+a small complexity penalty favors leaving the market untouched when performance
+is effectively tied. The selected model and shrinkage are then frozen before
+the next unseen games are scored.
+
+This challenger remains shadow-only. Its walk-forward score is compared directly
+against the market baseline, because the question is whether the learned
+correction adds information beyond the market—not merely whether it beats a
+weaker internal model.

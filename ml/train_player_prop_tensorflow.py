@@ -25,6 +25,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from xgboost_challenger import select_xgboost_challenger
+from market_residual_challenger import (
+    corrected_probability as residual_corrected_probability,
+    correction_from_model as residual_correction_from_model,
+    select_market_residual_challenger,
+)
 
 
 SEED = 42
@@ -466,6 +471,12 @@ def main() -> None:
 
     champion_val = clip_probability(val["model_probability"].to_numpy(float))
     champion_test = clip_probability(test["model_probability"].to_numpy(float))
+    market_train = clip_probability(
+        train["market_fair_probability"].to_numpy(float)
+    )
+    market_val = clip_probability(
+        val["market_fair_probability"].to_numpy(float)
+    )
     market_test = clip_probability(test["market_fair_probability"].to_numpy(float))
 
     xgb_selection = select_xgboost_challenger(
@@ -480,6 +491,30 @@ def main() -> None:
     xgb_ensemble_test = (
         (1.0 - xgb_selection.blend_weight) * champion_test
         + xgb_selection.blend_weight * xgb_test
+    )
+
+    residual_selection = select_market_residual_challenger(
+        x_train,
+        y_train,
+        market_train,
+        x_val,
+        y_val,
+        market_val,
+        seed=SEED,
+    )
+    residual_correction_test = residual_correction_from_model(
+        residual_selection.model,
+        x_test,
+    )
+    residual_raw_test = residual_corrected_probability(
+        market_test,
+        residual_correction_test,
+        1.0,
+    )
+    residual_test = residual_corrected_probability(
+        market_test,
+        residual_correction_test,
+        residual_selection.shrinkage,
     )
 
     # Simple linear sanity challenger. Complex models must justify complexity.
@@ -509,6 +544,8 @@ def main() -> None:
         "tensorflow_ensemble": metrics(y_test, ensemble_test),
         "xgboost": metrics(y_test, xgb_test),
         "xgboost_ensemble": metrics(y_test, xgb_ensemble_test),
+        "market_residual_raw": metrics(y_test, residual_raw_test),
+        "market_residual": metrics(y_test, residual_test),
         "ensemble": metrics(y_test, ensemble_test),
     }
 
@@ -567,6 +604,17 @@ def main() -> None:
             "validation_metrics": xgb_selection.validation_metrics,
             "validation_blend_metrics": xgb_selection.blend_metrics,
         },
+        "market_residual_challenger": {
+            "params": residual_selection.params,
+            "shrinkage": residual_selection.shrinkage,
+            "validation_metrics": residual_selection.validation_metrics,
+            "validation_raw_metrics":
+                residual_selection.validation_raw_metrics,
+            "mean_abs_correction":
+                residual_selection.mean_abs_correction,
+            "max_abs_correction":
+                residual_selection.max_abs_correction,
+        },
         "test_metrics": test_metrics,
         "promotion": promotion,
         "walk_forward": walk_forward,
@@ -589,6 +637,9 @@ def main() -> None:
     predictions["ensemble_probability"] = ensemble_test
     predictions["xgboost_probability"] = xgb_test
     predictions["xgboost_ensemble_probability"] = xgb_ensemble_test
+    predictions["market_residual_correction"] = residual_correction_test
+    predictions["market_residual_raw_probability"] = residual_raw_test
+    predictions["market_residual_probability"] = residual_test
     predictions["market_probability"] = market_test
     predictions.to_csv(output_dir / "shadow_predictions.csv", index=False)
 
@@ -596,6 +647,9 @@ def main() -> None:
     joblib.dump(preprocessor, output_dir / "preprocessor.joblib")
     joblib.dump(logistic, output_dir / "logistic_sanity.joblib")
     xgb_selection.model.save_model(output_dir / "xgboost_challenger.json")
+    residual_selection.model.save_model(
+        output_dir / "market_residual_challenger.json"
+    )
 
     numeric_scaler = (
         preprocessor.named_transformers_["numeric"]
@@ -675,15 +729,18 @@ def main() -> None:
         f"- TF ensemble Brier: {test_metrics['tensorflow_ensemble']['brier']:.6f}",
         f"- XGBoost Brier: {test_metrics['xgboost']['brier']:.6f}",
         f"- XGB ensemble Brier: {test_metrics['xgboost_ensemble']['brier']:.6f}",
+        f"- Market residual Brier: {test_metrics['market_residual']['brier']:.6f}",
         f"- Ensemble Brier: {test_metrics['ensemble']['brier']:.6f}",
         f"- Champion log loss: {test_metrics['champion']['log_loss']:.6f}",
         f"- TensorFlow log loss: {test_metrics['tensorflow']['log_loss']:.6f}",
         f"- TF ensemble log loss: {test_metrics['tensorflow_ensemble']['log_loss']:.6f}",
         f"- XGBoost log loss: {test_metrics['xgboost']['log_loss']:.6f}",
         f"- XGB ensemble log loss: {test_metrics['xgboost_ensemble']['log_loss']:.6f}",
+        f"- Market residual log loss: {test_metrics['market_residual']['log_loss']:.6f}",
         f"- Ensemble log loss: {test_metrics['ensemble']['log_loss']:.6f}",
         f"- Selected TensorFlow ensemble weight: {ensemble_weight:.2f}",
         f"- Selected XGBoost ensemble weight: {xgb_selection.blend_weight:.2f}",
+        f"- Selected market-residual shrinkage: {residual_selection.shrinkage:.2f}",
         f"- Eligible for production: **{promotion['eligible_for_production']}**",
         "",
         "Promotion remains blocked until every coverage and performance gate passes.",

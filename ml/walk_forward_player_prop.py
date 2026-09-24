@@ -19,6 +19,11 @@ import tensorflow as tf
 from sklearn.linear_model import LogisticRegression
 
 from xgboost_challenger import select_xgboost_challenger
+from market_residual_challenger import (
+    corrected_probability as residual_corrected_probability,
+    correction_from_model as residual_correction_from_model,
+    select_market_residual_challenger,
+)
 
 from train_player_prop_tensorflow import (
     SEED,
@@ -143,6 +148,12 @@ def train_fold(
     champion_test = clip_probability(
         test["model_probability"].to_numpy(float)
     )
+    market_train = clip_probability(
+        train["market_fair_probability"].to_numpy(float)
+    )
+    market_validation = clip_probability(
+        validation["market_fair_probability"].to_numpy(float)
+    )
     market_test = clip_probability(
         test["market_fair_probability"].to_numpy(float)
     )
@@ -168,6 +179,30 @@ def train_fold(
         + xgb_selection.blend_weight * xgb_test
     )
 
+    residual_selection = select_market_residual_challenger(
+        x_train,
+        y_train,
+        market_train,
+        x_validation,
+        y_validation,
+        market_validation,
+        seed=SEED + int(layout["fold"]),
+    )
+    residual_correction_test = residual_correction_from_model(
+        residual_selection.model,
+        x_test,
+    )
+    residual_raw_test = residual_corrected_probability(
+        market_test,
+        residual_correction_test,
+        1.0,
+    )
+    residual_test = residual_corrected_probability(
+        market_test,
+        residual_correction_test,
+        residual_selection.shrinkage,
+    )
+
     logistic = LogisticRegression(
         C=0.5,
         max_iter=2000,
@@ -184,6 +219,8 @@ def train_fold(
         "tensorflow_ensemble": metrics(y_test, ensemble_test),
         "xgboost": metrics(y_test, xgb_test),
         "xgboost_ensemble": metrics(y_test, xgb_ensemble_test),
+        "market_residual_raw": metrics(y_test, residual_raw_test),
+        "market_residual": metrics(y_test, residual_test),
         "ensemble": metrics(y_test, ensemble_test),
     }
 
@@ -210,6 +247,10 @@ def train_fold(
     pred["xgboost_probability"] = xgb_test
     pred["xgboost_ensemble_probability"] = xgb_ensemble_test
     pred["xgboost_weight"] = xgb_selection.blend_weight
+    pred["market_residual_correction"] = residual_correction_test
+    pred["market_residual_raw_probability"] = residual_raw_test
+    pred["market_residual_probability"] = residual_test
+    pred["market_residual_shrinkage"] = residual_selection.shrinkage
     output_predictions.append(pred)
 
     return {
@@ -223,6 +264,13 @@ def train_fold(
         "tensorflow_weight": float(weight),
         "xgboost_weight": float(xgb_selection.blend_weight),
         "xgboost_params": xgb_selection.params,
+        "market_residual_shrinkage":
+            float(residual_selection.shrinkage),
+        "market_residual_params": residual_selection.params,
+        "market_residual_validation":
+            residual_selection.validation_metrics,
+        "market_residual_mean_abs_correction":
+            residual_selection.mean_abs_correction,
         "epochs_ran": int(len(history.history.get("loss", []))),
         "validation_ensemble": validation_ensemble,
         "xgboost_validation": xgb_selection.validation_metrics,
@@ -242,6 +290,12 @@ def aggregate_predictions(predictions: pd.DataFrame) -> dict:
         "xgboost": metrics(y, predictions["xgboost_probability"]),
         "xgboost_ensemble": metrics(
             y, predictions["xgboost_ensemble_probability"]
+        ),
+        "market_residual_raw": metrics(
+            y, predictions["market_residual_raw_probability"]
+        ),
+        "market_residual": metrics(
+            y, predictions["market_residual_probability"]
         ),
         "ensemble": metrics(y, predictions["ensemble_probability"]),
     }
@@ -298,6 +352,18 @@ def main() -> None:
         if fold["metrics"]["xgboost_ensemble"]["log_loss"]
         < fold["metrics"]["champion"]["log_loss"]
     )
+    residual_brier_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["market_residual"]["brier"]
+        < fold["metrics"]["market"]["brier"]
+    )
+    residual_log_loss_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["market_residual"]["log_loss"]
+        < fold["metrics"]["market"]["log_loss"]
+    )
 
     report = {
         "mode": "WALK_FORWARD",
@@ -308,6 +374,10 @@ def main() -> None:
             xgb_brier_wins / len(fold_reports),
         "xgboost_fold_log_loss_win_rate":
             xgb_log_loss_wins / len(fold_reports),
+        "market_residual_fold_brier_win_rate":
+            residual_brier_wins / len(fold_reports),
+        "market_residual_fold_log_loss_win_rate":
+            residual_log_loss_wins / len(fold_reports),
         "coverage": {
             "unique_events": int(frame["event_key"].nunique()),
             "unique_outcomes": int(frame["outcome_key"].nunique()),
@@ -354,6 +424,7 @@ def main() -> None:
         f"- TF ensemble Brier: {aggregate['tensorflow_ensemble']['brier']:.6f}",
         f"- XGBoost Brier: {aggregate['xgboost']['brier']:.6f}",
         f"- XGB ensemble Brier: {aggregate['xgboost_ensemble']['brier']:.6f}",
+        f"- Market residual Brier: {aggregate['market_residual']['brier']:.6f}",
         f"- Market Brier: {aggregate['market']['brier']:.6f}",
         f"- Brier improvement vs champion: {brier_improvement:+.6f}",
         f"- Champion log loss: {aggregate['champion']['log_loss']:.6f}",
@@ -361,9 +432,11 @@ def main() -> None:
         f"- TF ensemble log loss: {aggregate['tensorflow_ensemble']['log_loss']:.6f}",
         f"- XGBoost log loss: {aggregate['xgboost']['log_loss']:.6f}",
         f"- XGB ensemble log loss: {aggregate['xgboost_ensemble']['log_loss']:.6f}",
+        f"- Market residual log loss: {aggregate['market_residual']['log_loss']:.6f}",
         f"- Log-loss improvement vs champion: {log_loss_improvement:+.6f}",
         f"- TF ensemble Brier fold win rate: {report['fold_brier_win_rate']:.1%}",
         f"- XGB ensemble Brier fold win rate: {report['xgboost_fold_brier_win_rate']:.1%}",
+        f"- Residual vs market Brier fold win rate: {report['market_residual_fold_brier_win_rate']:.1%}",
         "",
         "Every test prediction was generated by a model trained only on earlier games.",
     ]
@@ -379,6 +452,8 @@ def main() -> None:
         "fold_brier_win_rate": report["fold_brier_win_rate"],
         "xgboost_fold_brier_win_rate":
             report["xgboost_fold_brier_win_rate"],
+        "market_residual_fold_brier_win_rate":
+            report["market_residual_fold_brier_win_rate"],
         "aggregate": aggregate,
     }
     print("WALK_FORWARD_SUMMARY=" + json.dumps(compact, sort_keys=True))
