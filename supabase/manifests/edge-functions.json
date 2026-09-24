@@ -147,19 +147,20 @@
     },
     {
       "slug": "market-card",
-      "version": 8,
+      "version": 9,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "7e07db6acf0d2525dc9012f4391503d83287cd5765a69dfa1c877901a832d99c",
+      "bundle_sha256": "03e6d075cf1f5b5a4ce2a70eee7bcabf8509504ade83d171c25a856f15b46839",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/market-card/index.ts",
           "name": "index.ts",
-          "sha256": "f43c2543b44432db34f5cca625129655f44602fd566ee0610f7ba58a184d4d85"
+          "sha256": "bc358f0471d13e59a762616d71ac827e0ab065ca8ea474f4320f73a630bc5d04"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-24"
     },
     {
       "slug": "capture-player-props",
@@ -195,19 +196,20 @@
     },
     {
       "slug": "player-prop-card",
-      "version": 6,
+      "version": 7,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "3b109640c4765a8a02a09fc4ddbe9d60aed356660f9c06586416a561a97a3938",
+      "bundle_sha256": "ec0f05d1261b6281bbf5161e961f280e2d150d9fba102a2f927b0527c0f02810",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/player-prop-card/index.ts",
           "name": "index.ts",
-          "sha256": "32c9a21b95b1a1f3f8733e7e6489abb5fd7db65834b0ee91bfe39df40c984e98"
+          "sha256": "68736c7b0af6cd851a0131e03f2228f86292a3a68ed564473dc3f1ed52264479"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-24"
     },
     {
       "slug": "grade-team-markets",
@@ -802,7 +804,7 @@
       "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T07:39:20Z",
+  "final_verified_at": "2026-09-24T08:00:00Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 49,
