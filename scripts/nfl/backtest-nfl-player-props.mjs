@@ -28,6 +28,7 @@ function playerName(row = {}) {
   return (
     row.player_display_name ||
     row.player_name ||
+    row.player ||
     row.full_name ||
     row.name ||
     ""
@@ -62,6 +63,29 @@ function rowPosition(row = {}) {
     row.pos_abb ||
     ""
   ).toUpperCase();
+}
+
+function playerKey(row = {}) {
+  return playerId(row) || normalizePlayerName(playerName(row));
+}
+
+function indexBy(rows, keyFn) {
+  const map = new Map();
+  for (const row of rows || []) {
+    const key = keyFn(row);
+    if (!key) continue;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(row);
+  }
+  return map;
+}
+
+function mergeTeamAndPlayerRows(teamRows, playerRows, team) {
+  const out = [...(teamRows || [])];
+  for (const row of playerRows || []) {
+    if (rowTeam(row) !== team) out.push(row);
+  }
+  return out;
 }
 
 function scheduleGame(schedule, season, week, team) {
@@ -217,6 +241,25 @@ async function backtestSeason(season, minWeek) {
     loadNflPlayerData(season)
   ]);
 
+  const statsByTeam = indexBy(
+    playerData.playerStats,
+    (row) => rowTeam(row)
+  );
+  const statsByPlayer = indexBy(
+    playerData.playerStats,
+    (row) => playerKey(row)
+  );
+  const snapsByPlayer = indexBy(
+    playerData.snapCounts,
+    (row) => normalizePlayerName(playerName(row))
+  );
+  const ngsByTypePlayer = Object.fromEntries(
+    Object.entries(playerData.ngs).map(([type, rows]) => [
+      type,
+      indexBy(rows, (row) => normalizePlayerName(playerName(row)))
+    ])
+  );
+
   const targetRows = playerData.playerStats
     .filter((row) => {
       const week = num(row.week);
@@ -257,6 +300,22 @@ async function backtestSeason(season, minWeek) {
     const event = eventFromGame(game);
     const opponent =
       game.home_team === team ? game.away_team : game.home_team;
+    const normalizedPlayer = normalizePlayerName(playerName(target));
+    const playerRows =
+      statsByPlayer.get(playerKey(target)) || [];
+    const scopedStats = mergeTeamAndPlayerRows(
+      statsByTeam.get(team) || [],
+      playerRows,
+      team
+    );
+    const scopedSnaps =
+      snapsByPlayer.get(normalizedPlayer) || [];
+    const scopedNgs = Object.fromEntries(
+      Object.entries(ngsByTypePlayer).map(([type, index]) => [
+        type,
+        index.get(normalizedPlayer) || []
+      ])
+    );
     const opponentSnapshot = teamSnapshot(
       nflData.schedule,
       nflData.stats,
@@ -273,9 +332,9 @@ async function backtestSeason(season, minWeek) {
       event,
       schedule: nflData.schedule,
       season,
-      playerStats: playerData.playerStats,
-      snapCounts: playerData.snapCounts,
-      ngs: playerData.ngs,
+      playerStats: scopedStats,
+      snapCounts: scopedSnaps,
+      ngs: scopedNgs,
       depthCharts: nflData.depthCharts,
       weatherContext: null,
       opponentSnapshot
@@ -291,7 +350,7 @@ async function backtestSeason(season, minWeek) {
       if (actual === null || prediction === null) continue;
 
       const baseline = priorMetricMean({
-        rows: playerData.playerStats,
+        rows: playerRows,
         schedule: nflData.schedule,
         targetRow: target,
         season,
