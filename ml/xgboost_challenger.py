@@ -5,9 +5,71 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import numpy as np
+from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 from xgboost import XGBClassifier
 
-from train_player_prop_tensorflow import best_ensemble_weight, metrics
+
+def _clip_probability(values: np.ndarray) -> np.ndarray:
+    return np.clip(np.asarray(values, dtype=float), 1e-5, 1 - 1e-5)
+
+
+def _expected_calibration_error(
+    y_true: np.ndarray,
+    probs: np.ndarray,
+    bins: int = 10,
+) -> float:
+    y = np.asarray(y_true, dtype=float)
+    p = _clip_probability(probs)
+    edges = np.linspace(0.0, 1.0, bins + 1)
+    total = len(y)
+    if total == 0:
+        return float("nan")
+    ece = 0.0
+    for i in range(bins):
+        left, right = edges[i], edges[i + 1]
+        mask = (
+            (p >= left) & (p <= right)
+            if i == bins - 1
+            else (p >= left) & (p < right)
+        )
+        count = int(mask.sum())
+        if count:
+            ece += (count / total) * abs(
+                float(y[mask].mean()) - float(p[mask].mean())
+            )
+    return float(ece)
+
+
+def _metrics(y_true: np.ndarray, probs: np.ndarray) -> dict[str, float]:
+    p = _clip_probability(probs)
+    y = np.asarray(y_true, dtype=int)
+    return {
+        "brier": float(brier_score_loss(y, p)),
+        "log_loss": float(log_loss(y, p, labels=[0, 1])),
+        "ece": _expected_calibration_error(y, p),
+        "accuracy_50": float(accuracy_score(y, p >= 0.5)),
+        "mean_probability": float(np.mean(p)),
+        "win_rate": float(np.mean(y)),
+    }
+
+
+def __best_ensemble_weight(
+    y_val: np.ndarray,
+    champion: np.ndarray,
+    challenger: np.ndarray,
+) -> tuple[float, dict[str, float]]:
+    best_weight = 0.0
+    best_score = float("inf")
+    best_metrics = _metrics(y_val, champion)
+    for weight in np.linspace(0.0, 0.5, 11):
+        blended = (1.0 - weight) * champion + weight * challenger
+        current = _metrics(y_val, blended)
+        objective = current["brier"] + 0.25 * current["log_loss"]
+        if objective < best_score:
+            best_score = objective
+            best_weight = float(weight)
+            best_metrics = current
+    return best_weight, best_metrics
 
 
 @dataclass(frozen=True)
@@ -79,8 +141,8 @@ def select_xgboost_challenger(
         model = make_xgb(params, seed)
         model.fit(x_train, y_train.astype(int))
         probability = model.predict_proba(x_validation)[:, 1]
-        validation_metrics = metrics(y_validation, probability)
-        blend_weight, blend_metrics = best_ensemble_weight(
+        validation_metrics = _metrics(y_validation, probability)
+        blend_weight, blend_metrics = _best_ensemble_weight(
             y_validation,
             champion_validation,
             probability,
