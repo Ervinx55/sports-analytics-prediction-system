@@ -9,8 +9,11 @@ const state =
   (globalThis.__edgeLabProviderProtection = {
     entries: new Map(),
     inFlight: new Map(),
-    circuits: new Map()
+    circuits: new Map(),
+    probes: new Map()
   });
+
+if (!state.probes) state.probes = new Map();
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -161,7 +164,7 @@ async function readSharedCircuit(config, provider) {
     config,
     `provider_circuit_state?provider=eq.${encodeURIComponent(
       provider
-    )}&select=provider,consecutive_failures,opened_until,last_status,last_error,last_failure_at&limit=1`
+    )}&select=provider,consecutive_failures,opened_until,last_status,last_error,last_failure_at,backoff_seconds,last_probe_at,last_success_at,recovery_count&limit=1`
   );
   return Array.isArray(rows) ? rows[0] || null : null;
 }
@@ -184,6 +187,14 @@ async function releaseSharedRefresh(config, key) {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ p_cache_key: key })
+  });
+}
+
+async function recordSharedProbe(config, provider) {
+  await sharedRequest(config, "rpc/record_provider_probe", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ p_provider: provider })
   });
 }
 
@@ -257,39 +268,90 @@ function localCircuit(provider) {
       failures: 0,
       openUntil: 0,
       lastStatus: null,
-      lastError: null
+      lastError: null,
+      backoffSeconds: 0,
+      lastProbeAt: 0
     }
   );
 }
 
+function adaptiveBackoffSeconds(status, retryAfter, failures) {
+  if (status === 429) {
+    const exponential = Math.min(
+      900,
+      60 * (2 ** Math.min(Math.max(failures - 1, 0), 4))
+    );
+    return clamp(
+      Math.max(Number(retryAfter ?? 60), exponential),
+      1,
+      900
+    );
+  }
+
+  if (status >= 500 && status <= 599 && failures >= 3) {
+    return Math.min(
+      300,
+      30 * (2 ** Math.min(Math.max(failures - 3, 0), 4))
+    );
+  }
+
+  return 0;
+}
+
+function claimLocalProbe(provider, leaseMs = 15_000) {
+  const now = nowMs();
+  const current = Number(state.probes.get(provider) || 0);
+  if (current > now) return false;
+  state.probes.set(provider, now + leaseMs);
+  return true;
+}
+
+function releaseLocalProbe(provider) {
+  state.probes.delete(provider);
+}
+
 function noteLocalSuccess(provider) {
+  const current = localCircuit(provider);
+  const recovered =
+    current.failures > 0 ||
+    current.openUntil > 0 ||
+    current.backoffSeconds > 0;
+
   state.circuits.set(provider, {
     failures: 0,
     openUntil: 0,
     lastStatus: null,
-    lastError: null
+    lastError: null,
+    backoffSeconds: 0,
+    lastProbeAt: current.lastProbeAt || 0
   });
+  releaseLocalProbe(provider);
+  return recovered;
 }
 
 function noteLocalFailure(provider, error) {
   const current = localCircuit(provider);
   const status = Number(error?.status || 502);
   const failures = current.failures + 1;
-  let openUntil = current.openUntil || 0;
+  const backoffSeconds = adaptiveBackoffSeconds(
+    status,
+    error?.retryAfter,
+    failures
+  );
 
-  if (status === 429) {
-    const seconds = clamp(Number(error?.retryAfter ?? 60), 1, 300);
-    openUntil = Math.max(openUntil, nowMs() + seconds * 1000);
-  } else if (status >= 500 && status <= 599 && failures >= 3) {
-    openUntil = Math.max(openUntil, nowMs() + 30_000);
-  }
-
-  state.circuits.set(provider, {
+  const next = {
     failures,
-    openUntil,
+    openUntil:
+      backoffSeconds > 0 ? nowMs() + backoffSeconds * 1000 : 0,
     lastStatus: status,
-    lastError: error instanceof Error ? error.message : String(error)
-  });
+    lastError: error instanceof Error ? error.message : String(error),
+    backoffSeconds,
+    lastProbeAt: current.lastProbeAt || 0
+  };
+
+  state.circuits.set(provider, next);
+  releaseLocalProbe(provider);
+  return next;
 }
 
 function rowAgeMs(row, now = nowMs()) {
@@ -328,16 +390,27 @@ function chooseStale({ local, shared, staleMs, now }) {
 
 function circuitFromShared(row) {
   const openedUntil = Date.parse(row?.opened_until || "");
+  const lastProbeAt = Date.parse(row?.last_probe_at || "");
   return {
+    failures: Number(row?.consecutive_failures || 0),
     openUntil: Number.isFinite(openedUntil) ? openedUntil : 0,
     lastStatus: row?.last_status ?? null,
-    lastError: row?.last_error ?? null
+    lastError: row?.last_error ?? null,
+    backoffSeconds: Number(row?.backoff_seconds || 0),
+    lastProbeAt: Number.isFinite(lastProbeAt) ? lastProbeAt : 0
   };
 }
 
 function strongestCircuit(local, shared) {
   const sharedCircuit = circuitFromShared(shared);
-  return sharedCircuit.openUntil > local.openUntil ? sharedCircuit : local;
+  if (sharedCircuit.openUntil !== local.openUntil) {
+    return sharedCircuit.openUntil > local.openUntil
+      ? sharedCircuit
+      : local;
+  }
+  return sharedCircuit.failures > local.failures
+    ? sharedCircuit
+    : local;
 }
 
 function circuitError(circuit) {
@@ -354,8 +427,8 @@ function circuitError(circuit) {
   return error;
 }
 
-async function fetchUpstream(url, apiKey, timeoutMs) {
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+async function fetchUpstream(url, apiKey, timeoutMs, maxAttempts = 2) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     let response;
     try {
       response = await fetchWithTimeout(
@@ -377,7 +450,7 @@ async function fetchUpstream(url, apiKey, timeoutMs) {
       );
       error.status = 502;
       error.cause = cause;
-      if (attempt === 0) {
+      if (attempt + 1 < maxAttempts) {
         await sleep(400);
         continue;
       }
@@ -408,7 +481,10 @@ async function fetchUpstream(url, apiKey, timeoutMs) {
     const shortRateLimit =
       error.status === 429 && retryAfter !== null && retryAfter <= 2;
 
-    if (attempt === 0 && (retryableServerError || shortRateLimit)) {
+    if (
+      attempt + 1 < maxAttempts &&
+      (retryableServerError || shortRateLimit)
+    ) {
       await sleep(
         shortRateLimit ? Math.max(250, retryAfter * 1000) : 400
       );
@@ -466,6 +542,8 @@ export async function protectedSportsGameOddsFetch({
     let shared = null;
     let sharedCircuit = null;
     let leaseClaimed = false;
+    let probeLeaseClaimed = false;
+    const probeKey = `__provider_probe__:${provider}`;
 
     if (config) {
       const [cacheResult, circuitResult] = await Promise.allSettled([
@@ -554,6 +632,94 @@ export async function protectedSportsGameOddsFetch({
       throw circuitError(circuit);
     }
 
+    const recovering =
+      circuit.failures > 0 &&
+      circuit.openUntil <= nowMs();
+
+    if (recovering) {
+      if (config) {
+        try {
+          probeLeaseClaimed = await claimSharedRefresh(
+            config,
+            probeKey,
+            provider
+          );
+        } catch {
+          probeLeaseClaimed = false;
+        }
+
+        if (probeLeaseClaimed) {
+          await Promise.allSettled([
+            recordSharedProbe(config, provider),
+            recordProviderEvent(config, {
+              provider,
+              consumer,
+              eventType: "PROBE_STARTED"
+            })
+          ]);
+        }
+      } else {
+        probeLeaseClaimed = claimLocalProbe(provider);
+        if (probeLeaseClaimed) {
+          const current = localCircuit(provider);
+          state.circuits.set(provider, {
+            ...current,
+            lastProbeAt: nowMs()
+          });
+        }
+      }
+
+      if (!probeLeaseClaimed) {
+        const stale = chooseStale({
+          local: localEntry(key),
+          shared,
+          staleMs,
+          now: nowMs()
+        });
+
+        if (stale) {
+          if (config) {
+            await Promise.allSettled([
+              recordProviderEvent(config, {
+                provider,
+                consumer,
+                eventType: "STALE_SERVED",
+                statusCode: Number(circuit.lastStatus || 503),
+                cacheLayer: stale.layer,
+                retryAfterSeconds: 2
+              })
+            ]);
+          }
+          storeLocal(key, stale.payload, stale.fetchedAt);
+          return {
+            payload: stale.payload,
+            cacheStatus: "STALE",
+            cacheLayer: stale.layer,
+            ageMs: stale.ageMs,
+            fetchedAt: stale.fetchedAt,
+            upstreamError: {
+              status: Number(circuit.lastStatus || 503),
+              message: "Provider recovery probe already in progress",
+              retryAfterSeconds: 2,
+              circuitOpen: true
+            },
+            circuitOpen: true,
+            recoveryState: "HALF_OPEN",
+            sharedEnabled: Boolean(config)
+          };
+        }
+
+        const error = new Error(
+          "Provider recovery probe already in progress"
+        );
+        error.status = 503;
+        error.retryAfter = 2;
+        error.circuitOpen = true;
+        error.recoveryState = "HALF_OPEN";
+        throw error;
+      }
+    }
+
     if (config) {
       try {
         leaseClaimed = await claimSharedRefresh(config, key, provider);
@@ -617,10 +783,16 @@ export async function protectedSportsGameOddsFetch({
 
     const upstreamStartedAt = nowMs();
     try {
-      const upstream = await fetchUpstream(url, apiKey, timeoutMs);
+      const upstream = await fetchUpstream(
+        url,
+        apiKey,
+        timeoutMs,
+        recovering ? 1 : 2
+      );
       const upstreamDurationMs = Math.max(0, nowMs() - upstreamStartedAt);
       storeLocal(key, upstream.payload, upstream.fetchedAt);
-      noteLocalSuccess(provider);
+      const localRecovered = noteLocalSuccess(provider);
+      const recovered = recovering || localRecovered;
 
       if (config) {
         await Promise.allSettled([
@@ -642,7 +814,29 @@ export async function protectedSportsGameOddsFetch({
             statusCode: upstream.statusCode,
             cacheLayer: "upstream",
             durationMs: upstreamDurationMs
-          })
+          }),
+          recovered
+            ? recordProviderEvent(config, {
+                provider,
+                consumer,
+                eventType: "PROBE_SUCCESS",
+                statusCode: upstream.statusCode,
+                cacheLayer: "upstream",
+                durationMs: upstreamDurationMs
+              })
+            : Promise.resolve(),
+          recovered
+            ? recordProviderEvent(config, {
+                provider,
+                consumer,
+                eventType: "RECOVERED",
+                statusCode: upstream.statusCode,
+                cacheLayer: "upstream"
+              })
+            : Promise.resolve(),
+          probeLeaseClaimed
+            ? releaseSharedRefresh(config, probeKey)
+            : Promise.resolve()
         ]);
       }
 
@@ -654,10 +848,11 @@ export async function protectedSportsGameOddsFetch({
         fetchedAt: upstream.fetchedAt,
         upstreamError: null,
         circuitOpen: false,
+        recoveryState: recovered ? "RECOVERED" : "CLOSED",
         sharedEnabled: Boolean(config)
       };
     } catch (error) {
-      noteLocalFailure(provider, error);
+      const localFailure = noteLocalFailure(provider, error);
 
       if (config) {
         await Promise.allSettled([
@@ -671,7 +866,24 @@ export async function protectedSportsGameOddsFetch({
             cacheLayer: "upstream",
             retryAfterSeconds: error?.retryAfter ?? null,
             durationMs: Math.max(0, nowMs() - upstreamStartedAt)
-          })
+          }),
+          recovering
+            ? recordProviderEvent(config, {
+                provider,
+                consumer,
+                eventType: "PROBE_FAILURE",
+                statusCode: Number(error?.status || 502),
+                cacheLayer: "upstream",
+                retryAfterSeconds:
+                  localFailure.backoffSeconds ||
+                  error?.retryAfter ||
+                  null,
+                durationMs: Math.max(0, nowMs() - upstreamStartedAt)
+              })
+            : Promise.resolve(),
+          probeLeaseClaimed
+            ? releaseSharedRefresh(config, probeKey)
+            : Promise.resolve()
         ]);
       }
 
@@ -695,7 +907,15 @@ export async function protectedSportsGameOddsFetch({
             retryAfterSeconds: error?.retryAfter ?? null,
             circuitOpen: Boolean(error?.circuitOpen)
           },
-          circuitOpen: Boolean(error?.circuitOpen),
+          circuitOpen:
+            Boolean(error?.circuitOpen) ||
+            localFailure.openUntil > nowMs(),
+          recoveryState:
+            localFailure.openUntil > nowMs()
+              ? "BACKOFF"
+              : recovering
+                ? "HALF_OPEN"
+                : "CLOSED",
           sharedEnabled: Boolean(config)
         };
       }
@@ -718,4 +938,5 @@ export function resetProviderProtectionForTests() {
   state.entries.clear();
   state.inFlight.clear();
   state.circuits.clear();
+  state.probes.clear();
 }

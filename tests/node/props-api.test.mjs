@@ -303,3 +303,76 @@ test("rejects unsupported methods without calling the provider", async () => {
   assert.equal(response.getHeader("allow"), "GET");
   assert.equal(calls, 0);
 });
+
+
+test("adaptive 429 backoff doubles after a failed half-open probe", async () => {
+  let now = 1_000;
+  Date.now = () => now;
+
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return jsonResponse(
+      { success: false, message: "rate limited" },
+      429,
+      { "retry-after": "1" }
+    );
+  };
+
+  const first = await invoke();
+  assert.equal(first.statusCode, 429);
+
+  now += 61_000;
+  const failedProbe = await invoke({ limit: "99" });
+  assert.equal(failedProbe.statusCode, 429);
+
+  const blocked = await invoke({ limit: "98" });
+  assert.equal(blocked.statusCode, 429);
+  assert.equal(blocked.body.circuitOpen, true);
+  assert.ok(blocked.body.retryAfterSeconds >= 119);
+  assert.equal(calls, 2);
+});
+
+test("half-open recovery allows only one local provider probe", async () => {
+  let now = 1_000;
+  Date.now = () => now;
+
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls += 1;
+    return jsonResponse(
+      { success: false, message: "rate limited" },
+      429,
+      { "retry-after": "1" }
+    );
+  };
+
+  const first = await invoke();
+  assert.equal(first.statusCode, 429);
+
+  now += 61_000;
+
+  let releaseProbe;
+  globalThis.fetch = () => {
+    calls += 1;
+    return new Promise((resolve) => {
+      releaseProbe = () =>
+        resolve(jsonResponse({ success: true, data: [] }));
+    });
+  };
+
+  const probe = invoke({ limit: "97" });
+  await Promise.resolve();
+
+  const blocked = await invoke({ limit: "96" });
+  assert.equal(blocked.statusCode, 503);
+  assert.equal(blocked.body.circuitOpen, true);
+  assert.equal(blocked.body.retryAfterSeconds, 2);
+
+  releaseProbe();
+  const recovered = await probe;
+
+  assert.equal(recovered.statusCode, 200);
+  assert.equal(recovered.body.recoveryState, "RECOVERED");
+  assert.equal(calls, 2);
+});

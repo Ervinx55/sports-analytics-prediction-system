@@ -294,6 +294,7 @@ async function fetchLeague({
         ageSeconds: Number((result.ageMs / 1000).toFixed(1)),
         sharedEnabled: result.sharedEnabled,
         circuitOpen: result.circuitOpen,
+        recoveryState: result.recoveryState || "CLOSED",
         upstreamError: result.upstreamError
       }
     };

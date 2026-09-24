@@ -256,6 +256,7 @@ export default async function handler(req, res) {
       },
       servedStale: result.cacheStatus === "STALE",
       circuitOpen: result.circuitOpen,
+      recoveryState: result.recoveryState || "CLOSED",
       upstreamError: result.upstreamError
     });
   } catch (error) {
