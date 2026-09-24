@@ -149,3 +149,6 @@ verify_jwt = false
 
 [functions.pipeline-health-status]
 verify_jwt = false
+
+[functions.provider-health-status]
+verify_jwt = false

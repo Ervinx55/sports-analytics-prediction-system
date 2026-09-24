@@ -784,12 +784,29 @@
         }
       ],
       "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "provider-health-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "3c27dfaaa4d1e803b065babc03e8ba2e06ea41f02c732d3e52d0b8276372ce1c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/provider-health-status/index.ts",
+          "name": "index.ts",
+          "sha256": "9334a99c3aaa43868af5972cf5cc7cf682d5db4d8f1f1a8aa82b0fa453dc1370"
+        }
+      ],
+      "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-23T23:25:32Z",
+  "final_verified_at": "2026-09-24T06:37:00Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 49,
-    "metadata_and_bundle_sha_match": true
+    "metadata_and_bundle_sha_match": true,
+    "repository_total_edge_functions": 50
   }
 }

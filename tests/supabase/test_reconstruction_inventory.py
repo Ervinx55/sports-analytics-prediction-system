@@ -75,7 +75,7 @@ def test_historical_migration_inventory_is_exact():
         assert (ROOT / expected_path).exists()
 
 
-EXPECTED_EDGE_FUNCTION_COUNT = 49
+EXPECTED_EDGE_FUNCTION_COUNT = 50
 
 
 def test_edge_function_recovery_is_complete_and_configured():
