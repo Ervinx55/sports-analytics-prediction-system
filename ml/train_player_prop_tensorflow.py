@@ -24,6 +24,8 @@ from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from xgboost_challenger import select_xgboost_challenger
+
 
 SEED = 42
 
@@ -466,7 +468,21 @@ def main() -> None:
     champion_test = clip_probability(test["model_probability"].to_numpy(float))
     market_test = clip_probability(test["market_fair_probability"].to_numpy(float))
 
-    # Simple non-neural sanity challenger. TensorFlow must justify complexity.
+    xgb_selection = select_xgboost_challenger(
+        x_train,
+        y_train,
+        x_val,
+        y_val,
+        champion_val,
+        seed=SEED,
+    )
+    xgb_test = xgb_selection.model.predict_proba(x_test)[:, 1]
+    xgb_ensemble_test = (
+        (1.0 - xgb_selection.blend_weight) * champion_test
+        + xgb_selection.blend_weight * xgb_test
+    )
+
+    # Simple linear sanity challenger. Complex models must justify complexity.
     logistic = LogisticRegression(
         C=0.5,
         max_iter=2000,
@@ -490,6 +506,9 @@ def main() -> None:
         "market": metrics(y_test, market_test),
         "logistic": metrics(y_test, logistic_test),
         "tensorflow": metrics(y_test, tf_test),
+        "tensorflow_ensemble": metrics(y_test, ensemble_test),
+        "xgboost": metrics(y_test, xgb_test),
+        "xgboost_ensemble": metrics(y_test, xgb_ensemble_test),
         "ensemble": metrics(y_test, ensemble_test),
     }
 
@@ -541,6 +560,13 @@ def main() -> None:
             "champion_weight": 1.0 - ensemble_weight,
             "validation_metrics": validation_ensemble_metrics,
         },
+        "xgboost_challenger": {
+            "params": xgb_selection.params,
+            "xgboost_weight": xgb_selection.blend_weight,
+            "champion_weight": 1.0 - xgb_selection.blend_weight,
+            "validation_metrics": xgb_selection.validation_metrics,
+            "validation_blend_metrics": xgb_selection.blend_metrics,
+        },
         "test_metrics": test_metrics,
         "promotion": promotion,
         "walk_forward": walk_forward,
@@ -561,12 +587,15 @@ def main() -> None:
     predictions["champion_probability"] = champion_test
     predictions["tensorflow_probability"] = tf_test
     predictions["ensemble_probability"] = ensemble_test
+    predictions["xgboost_probability"] = xgb_test
+    predictions["xgboost_ensemble_probability"] = xgb_ensemble_test
     predictions["market_probability"] = market_test
     predictions.to_csv(output_dir / "shadow_predictions.csv", index=False)
 
     model.save(output_dir / "model.keras")
     joblib.dump(preprocessor, output_dir / "preprocessor.joblib")
     joblib.dump(logistic, output_dir / "logistic_sanity.joblib")
+    xgb_selection.model.save_model(output_dir / "xgboost_challenger.json")
 
     numeric_scaler = (
         preprocessor.named_transformers_["numeric"]
@@ -643,11 +672,18 @@ def main() -> None:
         f"- Test rows: {len(test)} across {test['event_key'].nunique()} games",
         f"- Champion Brier: {test_metrics['champion']['brier']:.6f}",
         f"- TensorFlow Brier: {test_metrics['tensorflow']['brier']:.6f}",
+        f"- TF ensemble Brier: {test_metrics['tensorflow_ensemble']['brier']:.6f}",
+        f"- XGBoost Brier: {test_metrics['xgboost']['brier']:.6f}",
+        f"- XGB ensemble Brier: {test_metrics['xgboost_ensemble']['brier']:.6f}",
         f"- Ensemble Brier: {test_metrics['ensemble']['brier']:.6f}",
         f"- Champion log loss: {test_metrics['champion']['log_loss']:.6f}",
         f"- TensorFlow log loss: {test_metrics['tensorflow']['log_loss']:.6f}",
+        f"- TF ensemble log loss: {test_metrics['tensorflow_ensemble']['log_loss']:.6f}",
+        f"- XGBoost log loss: {test_metrics['xgboost']['log_loss']:.6f}",
+        f"- XGB ensemble log loss: {test_metrics['xgboost_ensemble']['log_loss']:.6f}",
         f"- Ensemble log loss: {test_metrics['ensemble']['log_loss']:.6f}",
         f"- Selected TensorFlow ensemble weight: {ensemble_weight:.2f}",
+        f"- Selected XGBoost ensemble weight: {xgb_selection.blend_weight:.2f}",
         f"- Eligible for production: **{promotion['eligible_for_production']}**",
         "",
         "Promotion remains blocked until every coverage and performance gate passes.",

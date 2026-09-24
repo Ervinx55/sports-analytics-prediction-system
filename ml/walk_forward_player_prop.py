@@ -18,6 +18,8 @@ import pandas as pd
 import tensorflow as tf
 from sklearn.linear_model import LogisticRegression
 
+from xgboost_challenger import select_xgboost_challenger
+
 from train_player_prop_tensorflow import (
     SEED,
     best_ensemble_weight,
@@ -152,6 +154,20 @@ def train_fold(
     )
     ensemble_test = (1.0 - weight) * champion_test + weight * tf_test
 
+    xgb_selection = select_xgboost_challenger(
+        x_train,
+        y_train,
+        x_validation,
+        y_validation,
+        champion_validation,
+        seed=SEED + int(layout["fold"]),
+    )
+    xgb_test = xgb_selection.model.predict_proba(x_test)[:, 1]
+    xgb_ensemble_test = (
+        (1.0 - xgb_selection.blend_weight) * champion_test
+        + xgb_selection.blend_weight * xgb_test
+    )
+
     logistic = LogisticRegression(
         C=0.5,
         max_iter=2000,
@@ -165,6 +181,9 @@ def train_fold(
         "market": metrics(y_test, market_test),
         "logistic": metrics(y_test, logistic_test),
         "tensorflow": metrics(y_test, tf_test),
+        "tensorflow_ensemble": metrics(y_test, ensemble_test),
+        "xgboost": metrics(y_test, xgb_test),
+        "xgboost_ensemble": metrics(y_test, xgb_ensemble_test),
         "ensemble": metrics(y_test, ensemble_test),
     }
 
@@ -188,6 +207,9 @@ def train_fold(
     pred["logistic_probability"] = logistic_test
     pred["ensemble_probability"] = ensemble_test
     pred["tensorflow_weight"] = weight
+    pred["xgboost_probability"] = xgb_test
+    pred["xgboost_ensemble_probability"] = xgb_ensemble_test
+    pred["xgboost_weight"] = xgb_selection.blend_weight
     output_predictions.append(pred)
 
     return {
@@ -199,8 +221,12 @@ def train_fold(
         "validation_rows": int(len(validation)),
         "test_rows": int(len(test)),
         "tensorflow_weight": float(weight),
+        "xgboost_weight": float(xgb_selection.blend_weight),
+        "xgboost_params": xgb_selection.params,
         "epochs_ran": int(len(history.history.get("loss", []))),
         "validation_ensemble": validation_ensemble,
+        "xgboost_validation": xgb_selection.validation_metrics,
+        "xgboost_validation_blend": xgb_selection.blend_metrics,
         "metrics": fold_metrics,
     }
 
@@ -212,6 +238,11 @@ def aggregate_predictions(predictions: pd.DataFrame) -> dict:
         "market": metrics(y, predictions["market_probability"]),
         "logistic": metrics(y, predictions["logistic_probability"]),
         "tensorflow": metrics(y, predictions["tensorflow_probability"]),
+        "tensorflow_ensemble": metrics(y, predictions["ensemble_probability"]),
+        "xgboost": metrics(y, predictions["xgboost_probability"]),
+        "xgboost_ensemble": metrics(
+            y, predictions["xgboost_ensemble_probability"]
+        ),
         "ensemble": metrics(y, predictions["ensemble_probability"]),
     }
 
@@ -255,12 +286,28 @@ def main() -> None:
         if fold["metrics"]["ensemble"]["log_loss"]
         < fold["metrics"]["champion"]["log_loss"]
     )
+    xgb_brier_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["xgboost_ensemble"]["brier"]
+        < fold["metrics"]["champion"]["brier"]
+    )
+    xgb_log_loss_wins = sum(
+        1
+        for fold in fold_reports
+        if fold["metrics"]["xgboost_ensemble"]["log_loss"]
+        < fold["metrics"]["champion"]["log_loss"]
+    )
 
     report = {
         "mode": "WALK_FORWARD",
         "fold_count": len(fold_reports),
         "fold_brier_win_rate": brier_wins / len(fold_reports),
         "fold_log_loss_win_rate": log_loss_wins / len(fold_reports),
+        "xgboost_fold_brier_win_rate":
+            xgb_brier_wins / len(fold_reports),
+        "xgboost_fold_log_loss_win_rate":
+            xgb_log_loss_wins / len(fold_reports),
         "coverage": {
             "unique_events": int(frame["event_key"].nunique()),
             "unique_outcomes": int(frame["outcome_key"].nunique()),
@@ -304,14 +351,19 @@ def main() -> None:
         f"- Walk-forward test events: **{report['coverage']['test_events']}**",
         f"- Champion Brier: {aggregate['champion']['brier']:.6f}",
         f"- TensorFlow Brier: {aggregate['tensorflow']['brier']:.6f}",
-        f"- Ensemble Brier: {aggregate['ensemble']['brier']:.6f}",
+        f"- TF ensemble Brier: {aggregate['tensorflow_ensemble']['brier']:.6f}",
+        f"- XGBoost Brier: {aggregate['xgboost']['brier']:.6f}",
+        f"- XGB ensemble Brier: {aggregate['xgboost_ensemble']['brier']:.6f}",
         f"- Market Brier: {aggregate['market']['brier']:.6f}",
         f"- Brier improvement vs champion: {brier_improvement:+.6f}",
         f"- Champion log loss: {aggregate['champion']['log_loss']:.6f}",
         f"- TensorFlow log loss: {aggregate['tensorflow']['log_loss']:.6f}",
-        f"- Ensemble log loss: {aggregate['ensemble']['log_loss']:.6f}",
+        f"- TF ensemble log loss: {aggregate['tensorflow_ensemble']['log_loss']:.6f}",
+        f"- XGBoost log loss: {aggregate['xgboost']['log_loss']:.6f}",
+        f"- XGB ensemble log loss: {aggregate['xgboost_ensemble']['log_loss']:.6f}",
         f"- Log-loss improvement vs champion: {log_loss_improvement:+.6f}",
-        f"- Ensemble Brier fold win rate: {report['fold_brier_win_rate']:.1%}",
+        f"- TF ensemble Brier fold win rate: {report['fold_brier_win_rate']:.1%}",
+        f"- XGB ensemble Brier fold win rate: {report['xgboost_fold_brier_win_rate']:.1%}",
         "",
         "Every test prediction was generated by a model trained only on earlier games.",
     ]
@@ -325,6 +377,8 @@ def main() -> None:
         "test_rows": report["coverage"]["test_rows"],
         "test_events": report["coverage"]["test_events"],
         "fold_brier_win_rate": report["fold_brier_win_rate"],
+        "xgboost_fold_brier_win_rate":
+            report["xgboost_fold_brier_win_rate"],
         "aggregate": aggregate,
     }
     print("WALK_FORWARD_SUMMARY=" + json.dumps(compact, sort_keys=True))

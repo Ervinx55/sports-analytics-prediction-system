@@ -46,3 +46,17 @@ the committed reproducible snapshot and clearly labels the run as such.
 
 Scheduled retraining does not automatically promote a model. It only refreshes
 evidence and artifacts; the promotion gates remain authoritative.
+
+
+## Gradient-boosting challenger
+
+XGBoost 3.4.1 is evaluated as a second shadow challenger alongside TensorFlow.
+Each walk-forward fold selects one conservative XGBoost configuration using only
+the validation games, chooses a champion+XGBoost blend weight from the same
+validation block, freezes both choices, and then scores the next unseen games.
+
+The walk-forward report records raw XGBoost performance, champion+XGBoost blend
+performance, fold win rates, selected hyperparameters, and selected weights.
+XGBoost does not affect PLAY/PENDING/PASS or production probabilities until its
+out-of-sample evidence satisfies the same governance standards and a production
+inference path is explicitly promoted.
