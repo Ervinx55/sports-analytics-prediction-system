@@ -190,3 +190,17 @@ def test_normal_ci_runs_full_supabase_reconstruction_checks():
     workflow = (ROOT / ".github" / "workflows" / "tests.yml").read_text()
     assert "pytest -q" in workflow
     assert "python scripts/supabase/validate_reconstruction.py --check-secrets ." in workflow
+
+
+def test_ml_training_export_rpc_is_service_role_only():
+    sql = (
+        ROOT
+        / "supabase"
+        / "migrations"
+        / "20260924084342_add_player_prop_training_export_rpc.sql"
+    ).read_text().lower()
+    assert "security invoker" in sql
+    assert "revoke all on function public.export_player_prop_training_rows()" in sql
+    assert "from public, anon, authenticated" in sql
+    assert "grant execute on function public.export_player_prop_training_rows()" in sql
+    assert "to service_role" in sql

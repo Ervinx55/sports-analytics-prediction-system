@@ -24,3 +24,25 @@ per unique prop outcome and splits entire games chronologically to reduce leakag
 
 The existing statistical/sharp model remains the champion until the challenger
 earns promotion.
+
+
+## Walk-forward evaluation and automatic retraining
+
+The challenger now uses expanding-window walk-forward evaluation before final
+training. Each fold trains only on earlier games, reserves the most recent past
+games for validation/ensemble-weight selection, and scores the next unseen game
+block. Promotion is impossible unless the walk-forward report is present.
+
+Additional promotion gates require at least 5 walk-forward folds and the
+champion+TensorFlow ensemble must beat the current champion on Brier score in at
+least 60% of folds.
+
+The GitHub Actions workflow also runs daily. When repository secrets
+`SUPABASE_URL` plus either `SUPABASE_SECRET_KEY` or
+`SUPABASE_SERVICE_ROLE_KEY` are configured, it refreshes the labeled snapshot
+through the service-role-only `export_player_prop_training_rows()` RPC before
+evaluation and retraining. If those secrets are unavailable, the job safely uses
+the committed reproducible snapshot and clearly labels the run as such.
+
+Scheduled retraining does not automatically promote a model. It only refreshes
+evidence and artifacts; the promotion gates remain authoritative.

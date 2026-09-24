@@ -7,7 +7,12 @@ on:
       - "data/ml/**"
       - "requirements-ml.txt"
       - ".github/workflows/ml-shadow.yml"
+  schedule:
+    - cron: "17 10 * * *"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   train-player-prop-shadow:
@@ -30,6 +35,31 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-ml.txt
 
+      - name: Refresh labeled snapshot from Supabase when configured
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        shell: bash
+        run: |
+          if [[ -n "$SUPABASE_URL" && ( -n "$SUPABASE_SECRET_KEY" || -n "$SUPABASE_SERVICE_ROLE_KEY" ) ]]; then
+            python ml/export_player_prop_snapshot.py \
+              --output data/ml/player_prop_training_snapshot.csv
+            echo "ML_SNAPSHOT_SOURCE=supabase_live" >> "$GITHUB_ENV"
+          else
+            echo "::notice::Supabase ML export secrets are not configured; using the committed reproducible snapshot."
+            echo "ML_SNAPSHOT_SOURCE=committed_snapshot" >> "$GITHUB_ENV"
+          fi
+
+      - name: Run expanding-window walk-forward evaluation
+        env:
+          TF_CPP_MIN_LOG_LEVEL: "2"
+          PYTHONHASHSEED: "42"
+        run: |
+          python ml/walk_forward_player_prop.py \
+            --data data/ml/player_prop_training_snapshot.csv \
+            --output-dir artifacts/player_prop_tf_shadow/walk_forward
+
       - name: Train TensorFlow challenger
         env:
           TF_CPP_MIN_LOG_LEVEL: "2"
@@ -37,11 +67,18 @@ jobs:
         run: |
           python ml/train_player_prop_tensorflow.py \
             --data data/ml/player_prop_training_snapshot.csv \
-            --output-dir artifacts/player_prop_tf_shadow
+            --output-dir artifacts/player_prop_tf_shadow \
+            --walk-forward-report artifacts/player_prop_tf_shadow/walk_forward/metrics.json
 
       - name: Publish model evaluation summary
         if: always()
         run: |
+          echo "Snapshot source: **${ML_SNAPSHOT_SOURCE:-unknown}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f artifacts/player_prop_tf_shadow/walk_forward/summary.md ]; then
+            cat artifacts/player_prop_tf_shadow/walk_forward/summary.md >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f artifacts/player_prop_tf_shadow/summary.md ]; then
             cat artifacts/player_prop_tf_shadow/summary.md >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -50,6 +87,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: player-prop-tensorflow-shadow
-          path: artifacts/player_prop_tf_shadow/
+          path: |
+            artifacts/player_prop_tf_shadow/
+            data/ml/player_prop_training_snapshot.csv
           if-no-files-found: error
           retention-days: 30

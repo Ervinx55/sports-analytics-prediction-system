@@ -53,6 +53,8 @@ PROMOTION_POLICY = {
     "min_brier_improvement": 0.003,
     "min_log_loss_improvement": 0.005,
     "max_ece_regression": 0.01,
+    "min_walk_forward_folds": 5,
+    "min_walk_forward_brier_win_rate": 0.60,
 }
 
 
@@ -267,6 +269,7 @@ def promotion_decision(
     test: pd.DataFrame,
     champion_metrics: dict[str, float],
     ensemble_metrics: dict[str, float],
+    walk_forward: dict | None = None,
 ) -> dict:
     coverage_days = max(
         0.0,
@@ -278,11 +281,37 @@ def promotion_decision(
     test_events = int(test["event_key"].nunique())
     test_rows = int(len(test))
 
-    brier_improvement = champion_metrics["brier"] - ensemble_metrics["brier"]
-    log_loss_improvement = (
-        champion_metrics["log_loss"] - ensemble_metrics["log_loss"]
+    evaluation_champion = champion_metrics
+    evaluation_ensemble = ensemble_metrics
+    walk_forward_folds = 0
+    walk_forward_brier_win_rate = 0.0
+    evaluation_source = "single_holdout"
+
+    if walk_forward:
+        aggregate = walk_forward.get("aggregate", {})
+        wf_champion = aggregate.get("champion")
+        wf_ensemble = aggregate.get("ensemble")
+        if wf_champion and wf_ensemble:
+            evaluation_champion = wf_champion
+            evaluation_ensemble = wf_ensemble
+            coverage = walk_forward.get("coverage", {})
+            test_events = int(coverage.get("test_events", test_events))
+            test_rows = int(coverage.get("test_rows", test_rows))
+            walk_forward_folds = int(walk_forward.get("fold_count", 0))
+            walk_forward_brier_win_rate = float(
+                walk_forward.get("fold_brier_win_rate", 0.0)
+            )
+            evaluation_source = "walk_forward"
+
+    brier_improvement = (
+        evaluation_champion["brier"] - evaluation_ensemble["brier"]
     )
-    ece_regression = ensemble_metrics["ece"] - champion_metrics["ece"]
+    log_loss_improvement = (
+        evaluation_champion["log_loss"] - evaluation_ensemble["log_loss"]
+    )
+    ece_regression = (
+        evaluation_ensemble["ece"] - evaluation_champion["ece"]
+    )
 
     checks = {
         "unique_events": {
@@ -326,11 +355,32 @@ def promotion_decision(
             "maximum": PROMOTION_POLICY["max_ece_regression"],
             "pass": ece_regression <= PROMOTION_POLICY["max_ece_regression"],
         },
+        "walk_forward_folds": {
+            "actual": walk_forward_folds,
+            "required": PROMOTION_POLICY["min_walk_forward_folds"],
+            "pass": (
+                evaluation_source == "walk_forward"
+                and walk_forward_folds
+                >= PROMOTION_POLICY["min_walk_forward_folds"]
+            ),
+        },
+        "walk_forward_brier_win_rate": {
+            "actual": round(walk_forward_brier_win_rate, 4),
+            "required": PROMOTION_POLICY[
+                "min_walk_forward_brier_win_rate"
+            ],
+            "pass": (
+                evaluation_source == "walk_forward"
+                and walk_forward_brier_win_rate
+                >= PROMOTION_POLICY["min_walk_forward_brier_win_rate"]
+            ),
+        },
     }
     eligible = all(check["pass"] for check in checks.values())
     return {
         "mode": "SHADOW",
         "eligible_for_production": eligible,
+        "evaluation_source": evaluation_source,
         "checks": checks,
         "policy": PROMOTION_POLICY,
         "reason": (
@@ -345,6 +395,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", required=True)
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument(
+        "--walk-forward-report",
+        default="",
+        help="Optional walk-forward metrics JSON; required for promotion eligibility.",
+    )
     args = parser.parse_args()
 
     os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
@@ -354,6 +409,12 @@ def main() -> None:
     data_path = Path(args.data)
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    walk_forward = None
+    if args.walk_forward_report:
+        report_path = Path(args.walk_forward_report)
+        if report_path.exists():
+            walk_forward = json.loads(report_path.read_text(encoding="utf-8"))
 
     frame = load_training_frame(data_path)
     train, val, test = split_by_event(frame)
@@ -437,6 +498,7 @@ def main() -> None:
         test,
         test_metrics["champion"],
         test_metrics["ensemble"],
+        walk_forward=walk_forward,
     )
 
     coverage_days = (
@@ -481,6 +543,7 @@ def main() -> None:
         },
         "test_metrics": test_metrics,
         "promotion": promotion,
+        "walk_forward": walk_forward,
     }
 
     predictions = test[

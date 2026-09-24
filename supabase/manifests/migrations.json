@@ -272,14 +272,23 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260924084342",
+      "name": "add_player_prop_training_export_rpc",
+      "path": "supabase/migrations/20260924084342_add_player_prop_training_export_rpc.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-24T08:27:39Z",
+  "final_verified_at": "2026-09-24T08:43:42Z",
   "authority_verification": {
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 32,
+    "repository_total_migrations": 33,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
