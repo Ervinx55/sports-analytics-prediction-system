@@ -315,7 +315,7 @@ test("adaptive 429 backoff doubles after a failed half-open probe", async () => 
     return jsonResponse(
       { success: false, message: "rate limited" },
       429,
-      { "retry-after": "1" }
+      { "retry-after": "60" }
     );
   };
 
@@ -343,7 +343,7 @@ test("half-open recovery allows only one local provider probe", async () => {
     return jsonResponse(
       { success: false, message: "rate limited" },
       429,
-      { "retry-after": "1" }
+      { "retry-after": "60" }
     );
   };
 
