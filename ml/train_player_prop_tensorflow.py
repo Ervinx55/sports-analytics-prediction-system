@@ -127,6 +127,107 @@ CORE_NUMERIC_FEATURES = {
 }
 CORE_CATEGORICAL_FEATURES = {"stat_id", "side"}
 MIN_ENRICHED_FEATURE_COVERAGE = 0.20
+MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v1"
+
+COMMON_MARKET_NUMERIC = {
+    "market_open_line",
+    "market_current_line",
+    "line_move_open_to_current",
+    "market_open_fair_probability",
+    "market_current_fair_probability",
+    "market_probability_move_pp",
+    "market_quote_age_minutes",
+    "feature_source_count",
+}
+
+HITTER_COMMON_NUMERIC = COMMON_MARKET_NUMERIC | {
+    "in_starting_lineup",
+    "batting_order_spot",
+    "catcher_change_after_model",
+    "opposing_starter_change_after_model",
+    "opposing_handedness_change_after_model",
+    "verification_data_quality",
+    "own_lineup_avg_ops",
+    "opponent_bullpen_score",
+    "game_starter_changed",
+    "game_lineup_changed",
+    "game_catcher_changed",
+    "game_handedness_changed",
+    "weather_impact_multiplier",
+    "weather_environment_multiplier",
+    "prop_weather_data_quality",
+    "weather_change_after_model",
+    "temp_f",
+    "humidity_pct",
+    "wind_mph",
+    "park_factor",
+    "run_multiplier",
+    "hits_tb_multiplier",
+    "game_weather_data_quality",
+    "pitchmix_weighted_xwoba_delta",
+    "pitchmix_probability_adjustment",
+    "pitchmix_arsenal_coverage",
+    "pitchmix_usable_usage",
+}
+
+HITTER_COMMON_CATEGORICAL = {
+    "player_role",
+    "player_team_side",
+    "opposing_starter_hand",
+    "opponent_bullpen_level",
+    "weather_impact_direction",
+    "prop_delay_risk",
+    "roof_status",
+    "wind_class",
+    "game_delay_risk",
+}
+
+MARKET_FEATURE_POLICIES = {
+    "batting_hits": {
+        "numeric": HITTER_COMMON_NUMERIC,
+        "categorical": HITTER_COMMON_CATEGORICAL,
+    },
+    "batting_totalBases": {
+        "numeric": HITTER_COMMON_NUMERIC | {"hr_multiplier"},
+        "categorical": HITTER_COMMON_CATEGORICAL,
+    },
+    "pitching_strikeouts": {
+        "numeric": COMMON_MARKET_NUMERIC | {
+            "is_confirmed_starter",
+            "opposing_starter_change_after_model",
+            "opposing_handedness_change_after_model",
+            "verification_data_quality",
+            "opponent_lineup_avg_ops",
+            "own_bullpen_score",
+            "game_lineup_changed",
+            "game_handedness_changed",
+            "weather_impact_multiplier",
+            "prop_weather_data_quality",
+            "weather_change_after_model",
+            "starter_durability_multiplier",
+            "strikeout_opportunity_multiplier",
+            "game_weather_data_quality",
+            "pitchmix_weighted_xwoba_delta",
+            "pitchmix_probability_adjustment",
+            "pitchmix_arsenal_coverage",
+            "pitchmix_usable_usage",
+        },
+        "categorical": {
+            "player_role",
+            "player_team_side",
+            "own_starter_hand",
+            "own_bullpen_level",
+            "weather_impact_direction",
+            "prop_delay_risk",
+            "roof_status",
+            "game_delay_risk",
+        },
+    },
+}
+DEFAULT_MARKET_FEATURE_POLICY = {
+    "numeric": COMMON_MARKET_NUMERIC,
+    "categorical": set(),
+}
 
 PROMOTION_POLICY = {
     "min_unique_events": 50,
@@ -301,6 +402,38 @@ def split_by_event(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.Dat
         if part.empty:
             raise ValueError(f"{name} split is empty.")
     return train, val, test
+
+
+def apply_market_feature_policy(frame: pd.DataFrame) -> pd.DataFrame:
+    masked = frame.copy()
+    stat = masked["stat_id"].astype(str)
+
+    enriched_numeric = set(NUMERIC_FEATURES) - CORE_NUMERIC_FEATURES
+    enriched_categorical = (
+        set(CATEGORICAL_FEATURES) - CORE_CATEGORICAL_FEATURES
+    )
+
+    for feature in enriched_numeric:
+        allowed = pd.Series(False, index=masked.index)
+        for market, policy in MARKET_FEATURE_POLICIES.items():
+            if feature in policy["numeric"]:
+                allowed |= stat.eq(market)
+        if feature in DEFAULT_MARKET_FEATURE_POLICY["numeric"]:
+            known = stat.isin(MARKET_FEATURE_POLICIES)
+            allowed |= ~known
+        masked.loc[~allowed, feature] = np.nan
+
+    for feature in enriched_categorical:
+        allowed = pd.Series(False, index=masked.index)
+        for market, policy in MARKET_FEATURE_POLICIES.items():
+            if feature in policy["categorical"]:
+                allowed |= stat.eq(market)
+        if feature in DEFAULT_MARKET_FEATURE_POLICY["categorical"]:
+            known = stat.isin(MARKET_FEATURE_POLICIES)
+            allowed |= ~known
+        masked.loc[~allowed, feature] = np.nan
+
+    return masked
 
 
 def select_available_features(
@@ -593,16 +726,20 @@ def main() -> None:
     frame = load_training_frame(data_path)
     train, val, test = split_by_event(frame)
 
+    model_train = apply_market_feature_policy(train)
+    model_val = apply_market_feature_policy(val)
+    model_test = apply_market_feature_policy(test)
+
     numeric_features, categorical_features, feature_coverage = (
-        select_available_features(train)
+        select_available_features(model_train)
     )
     preprocessor = build_preprocessor(
         numeric_features=numeric_features,
         categorical_features=categorical_features,
     )
-    x_train = preprocessor.fit_transform(train)
-    x_val = preprocessor.transform(val)
-    x_test = preprocessor.transform(test)
+    x_train = preprocessor.fit_transform(model_train)
+    x_val = preprocessor.transform(model_val)
+    x_test = preprocessor.transform(model_test)
 
     y_train = train["target"].to_numpy(dtype=np.float32)
     y_val = val["target"].to_numpy(dtype=np.float32)
@@ -763,6 +900,15 @@ def main() -> None:
             "training_coverage": feature_coverage,
             "transformed_dimension": int(x_train.shape[1]),
             "feature_store": True,
+            "market_feature_policy_version":
+                MARKET_FEATURE_POLICY_VERSION,
+            "market_feature_policies": {
+                market: {
+                    "numeric": sorted(policy["numeric"]),
+                    "categorical": sorted(policy["categorical"]),
+                }
+                for market, policy in MARKET_FEATURE_POLICIES.items()
+            },
             "coverage": {
                 "market_movement": float(
                     frame["market_probability_move_pp"].notna().mean()
@@ -865,7 +1011,15 @@ def main() -> None:
         )
 
     inference_bundle = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
+        "marketFeaturePolicyVersion": MARKET_FEATURE_POLICY_VERSION,
+        "marketFeaturePolicies": {
+            market: {
+                "numeric": sorted(policy["numeric"]),
+                "categorical": sorted(policy["categorical"]),
+            }
+            for market, policy in MARKET_FEATURE_POLICIES.items()
+        },
         "model": report["model"],
         "mode": "SHADOW",
         "eligibleForProduction": bool(

@@ -41,3 +41,20 @@ def test_sparse_enrichment_is_selected_from_training_window_only():
     walk_forward = (ROOT / "ml" / "walk_forward_player_prop.py").read_text()
     assert "select_available_features(train)" in walk_forward
     assert '"feature_coverage"' in walk_forward
+
+
+def test_market_specific_feature_policies_exist_and_are_applied():
+    source = (ROOT / "ml" / "train_player_prop_tensorflow.py").read_text()
+    assert 'MARKET_FEATURE_POLICY_VERSION = "mlb_prop_market_features_v1"' in source
+    assert '"batting_hits"' in source
+    assert '"batting_totalBases"' in source
+    assert '"pitching_strikeouts"' in source
+    assert '"hr_multiplier"' in source
+    assert '"strikeout_opportunity_multiplier"' in source
+    assert "def apply_market_feature_policy" in source
+    assert "model_train = apply_market_feature_policy(train)" in source
+
+    walk_forward = (ROOT / "ml" / "walk_forward_player_prop.py").read_text()
+    assert "model_train = apply_market_feature_policy(train)" in walk_forward
+    assert "aggregate_by_market" in walk_forward
+    assert '"by_market"' in walk_forward
