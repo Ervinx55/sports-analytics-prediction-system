@@ -27,6 +27,25 @@ const NFL_PROP_MARKET_SHRINKAGE = Object.freeze({
 const NFL_PROP_CALIBRATION_VERSION =
   "NFL Player Props Development Calibration v1";
 
+const NFL_PROP_V2_RESIDUAL_WEIGHTS = Object.freeze({
+  passing_yards: 0,
+  passing_touchdowns: 0,
+  rushing_yards: 0,
+  receiving_receptions: 0,
+  receiving_yards: 0
+});
+
+const NFL_PROP_V2_BASELINE_FIELDS = Object.freeze({
+  passing_yards: "passing_yards",
+  passing_touchdowns: "passing_tds",
+  rushing_yards: "rushing_yards",
+  receiving_receptions: "receptions",
+  receiving_yards: "receiving_yards"
+});
+
+const NFL_PROP_V2_VERSION =
+  "NFL Player Props v2 baseline-anchored shadow";
+
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(String(value).replace("+", "").replace("%", ""));
@@ -553,6 +572,112 @@ function historicalMetric(rows, field, attemptsField = null, fallback = null) {
   return weightedAverage(weighted, (row) => num(row[field])) ?? fallback;
 }
 
+function rollingPlayerBaseline(
+  rows,
+  field,
+  season,
+  team,
+  limit = 4
+) {
+  const values = rows
+    .filter(
+      (row) =>
+        num(row.season) === season &&
+        (!team || rowTeam(row) === team)
+    )
+    .map((row) => num(row[field]))
+    .filter(Number.isFinite)
+    .slice(0, limit);
+  return values.length ? mean(values) : null;
+}
+
+function anchorProjectionToBaseline(
+  projection,
+  baselineMean,
+  residualWeight,
+  statID
+) {
+  if (!projection) return projection;
+  const opportunityMean = num(projection.mean);
+  if (
+    !Number.isFinite(opportunityMean) ||
+    !Number.isFinite(baselineMean)
+  ) {
+    return {
+      ...projection,
+      baselineMean: Number.isFinite(baselineMean)
+        ? Number(baselineMean.toFixed(3))
+        : null,
+      opportunityMean: Number.isFinite(opportunityMean)
+        ? Number(opportunityMean.toFixed(3))
+        : null,
+      residualWeight: null,
+      anchored: false,
+      modelVersion: NFL_PROP_V2_VERSION
+    };
+  }
+
+  const weight = clamp(num(residualWeight) ?? 0, 0, 1);
+  const anchoredMean =
+    baselineMean + weight * (opportunityMean - baselineMean);
+
+  if (projection.distribution === "poisson") {
+    return {
+      ...projection,
+      mean: Number(Math.max(0, anchoredMean).toFixed(3)),
+      baselineMean: Number(baselineMean.toFixed(3)),
+      opportunityMean: Number(opportunityMean.toFixed(3)),
+      residualWeight: weight,
+      anchored: true,
+      statID,
+      modelVersion: NFL_PROP_V2_VERSION
+    };
+  }
+
+  const anchored = distribution(
+    anchoredMean,
+    num(projection.sd) ??
+      Math.max(1, Math.abs(anchoredMean) * 0.22),
+    0
+  );
+  return {
+    ...anchored,
+    baselineMean: Number(baselineMean.toFixed(3)),
+    opportunityMean: Number(opportunityMean.toFixed(3)),
+    residualWeight: weight,
+    anchored: true,
+    statID,
+    modelVersion: NFL_PROP_V2_VERSION
+  };
+}
+
+function applyV2ResidualAnchors(
+  projections,
+  history,
+  season,
+  team
+) {
+  for (const [statID, field] of Object.entries(
+    NFL_PROP_V2_BASELINE_FIELDS
+  )) {
+    if (!projections[statID]) continue;
+    const baselineMean = rollingPlayerBaseline(
+      history,
+      field,
+      season,
+      team,
+      4
+    );
+    projections[statID] = anchorProjectionToBaseline(
+      projections[statID],
+      baselineMean,
+      NFL_PROP_V2_RESIDUAL_WEIGHTS[statID] ?? 0,
+      statID
+    );
+  }
+  return projections;
+}
+
 function distribution(meanValue, sdValue, floor = 0) {
   const meanSafe = Math.max(floor, meanValue || 0);
   const sdSafe = Math.max(0.01, sdValue || Math.max(1, meanSafe * 0.22));
@@ -893,6 +1018,13 @@ function projectPlayerOpportunity({
     );
   }
 
+  applyV2ResidualAnchors(
+    projections,
+    history,
+    season,
+    identity.team
+  );
+
   const roleShareAvailable =
     identity.position === "QB"
       ? history.some((row) => (num(row.attempts) || 0) > 0)
@@ -1223,6 +1355,8 @@ export {
   PROVISIONAL_INDEPENDENT_WEIGHT,
   NFL_PROP_MARKET_SHRINKAGE,
   NFL_PROP_CALIBRATION_VERSION,
+  NFL_PROP_V2_RESIDUAL_WEIGHTS,
+  NFL_PROP_V2_VERSION,
   normalizePlayerName,
   pointInTimeRows,
   featureEnvelope,
