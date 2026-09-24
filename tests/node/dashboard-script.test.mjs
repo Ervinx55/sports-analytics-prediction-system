@@ -40,3 +40,12 @@ test("freshness grades are visible on team markets and player props", () => {
   assert.match(html, /freshnessPanel\(m\)/);
   assert.match(html, /freshnessPanel\(p\)/);
 });
+
+
+test("TensorFlow shadow probability is visible without production influence", () => {
+  assert.match(html, /function tensorflowShadowPanel\(p\)/);
+  assert.match(html, /TF SHADOW/);
+  assert.match(html, /production weight/);
+  assert.match(html, /SHADOW ONLY/);
+  assert.match(html, /tensorflowShadowPanel\(p\)/);
+});

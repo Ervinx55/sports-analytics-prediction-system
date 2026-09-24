@@ -647,6 +647,44 @@
     return "WHY PASS: "+(parts.length?parts.join(" · "):"The wager did not clear the model's required edge, EV, price, data-quality, or verification gates.");
   }
 
+  function tensorflowShadowPanel(p){
+    const probability=p?.tf_shadow_probability;
+    const modelVersion=p?.tf_shadow_model_version;
+    const raw=p?.raw?.tensorflowShadow||null;
+    const shadowProb=probability??raw?.probability;
+    if(shadowProb==null && !modelVersion && !raw) return "";
+
+    const champion=p?.model_probability??raw?.championProbability;
+    const market=p?.market_fair_probability??raw?.marketProbability;
+    const eligible=p?.tf_shadow_eligible_for_production??raw?.eligibleForProduction??false;
+    const affects=p?.tf_shadow_affects_decision??raw?.affectsDecision??false;
+    const weight=Number(
+      p?.tf_shadow_production_weight??
+      raw?.productionWeight??
+      0
+    );
+    const delta=
+      shadowProb==null||champion==null
+        ? null
+        : (Number(shadowProb)-Number(champion))*100;
+    const tone=
+      affects?"play":
+      eligible?"pending":"neutral";
+
+    return `
+      <div class="why ${tone}" style="margin-top:8px">
+        <strong>TF SHADOW · ${fmtPct(shadowProb)}</strong>
+        · champion ${fmtPct(champion)}
+        · market ${fmtPct(market)}
+        · Δ ${delta==null?"—":(delta>=0?"+":"")+delta.toFixed(2)+" pp"}
+        <div class="small" style="margin-top:4px">
+          ${esc(modelVersion||raw?.modelVersion||"player_prop_tensorflow_shadow_v1")}
+          · production weight ${(weight*100).toFixed(0)}%
+          · ${affects?"AFFECTS DECISION":eligible?"PROMOTION ELIGIBLE":"SHADOW ONLY"}
+        </div>
+      </div>`;
+  }
+
   function propWhy(p){
     const status=p?.status||"PASS";
     const reason=String(p?.reason||"").trim();
@@ -1123,6 +1161,7 @@
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
           ${freshnessPanel(p)}
+          ${tensorflowShadowPanel(p)}
           ${fusionPanel(p)}
         ${timingPanel(p)}
           ${clvPanel(p)}
@@ -1143,6 +1182,7 @@
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
           ${freshnessPanel(p)}
+          ${tensorflowShadowPanel(p)}
           ${fusionPanel(p)}
         ${timingPanel(p)}
           ${clvPanel(p)}
@@ -1161,6 +1201,7 @@
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
             ${freshnessPanel(p)}
+            ${tensorflowShadowPanel(p)}
             ${fusionPanel(p)}
         ${timingPanel(p)}
             ${clvPanel(p)}
