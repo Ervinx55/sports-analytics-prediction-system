@@ -17,6 +17,10 @@ on:
       - ".github/workflows/nfl-player-props-shadow.yml"
       - "tests/node/nfl-player-props.test.mjs"
 
+concurrency:
+  group: nfl-player-props-shadow-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
