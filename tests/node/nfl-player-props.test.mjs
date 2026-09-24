@@ -327,3 +327,31 @@ test("integer passing TD lines condition model probability on non-push outcomes"
   assert.ok(under > 0);
   assert.ok(Math.abs(over + under - 1) < 1e-9);
 });
+
+
+test("provider current-team identity overrides stale historical team after a move", () => {
+  const movedStats = playerStats
+    .filter((row) => row.player_id === "WR1")
+    .map((row) => ({ ...row, recent_team: "MIN" }));
+
+  const result = projectPlayerOpportunity({
+    playerName: "Jayden Reed",
+    preferredTeam: "GB",
+    preferredPosition: "WR",
+    event,
+    schedule,
+    season: 2026,
+    playerStats: movedStats,
+    snapCounts: [],
+    ngs: { passing: [], receiving: [], rushing: [] },
+    depthCharts: [],
+    weatherContext: { controlledEnvironment: true, windMph: 0 },
+    opponentSnapshot: { defYppAllowed: 5.6 }
+  });
+
+  assert.equal(result.player.team, "GB");
+  assert.equal(result.player.position, "WR");
+  assert.equal(result.historyGames, 4);
+  assert.ok(result.projections.receiving_yards.mean > 0);
+  assert.equal(result.dataQuality, "D");
+});
