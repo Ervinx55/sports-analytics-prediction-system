@@ -72,7 +72,8 @@ async function fetchLeague({
       apiKey,
       freshMs: PROVIDER_FRESH_MS,
       staleMs: PROVIDER_STALE_MS,
-      timeoutMs: 7_000
+      timeoutMs: 7_000,
+      consumer: "sharp"
     });
 
     return {

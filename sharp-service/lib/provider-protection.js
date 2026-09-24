@@ -208,6 +208,34 @@ async function recordSharedFailure(config, provider, error) {
   });
 }
 
+async function recordProviderEvent(config, {
+  provider,
+  consumer,
+  eventType,
+  statusCode = null,
+  cacheLayer = null,
+  retryAfterSeconds = null,
+  durationMs = null
+}) {
+  await sharedRequest(config, "provider_request_events", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      prefer: "return=minimal"
+    },
+    body: JSON.stringify({
+      provider,
+      consumer,
+      event_type: eventType,
+      status_code: statusCode,
+      cache_layer: cacheLayer,
+      retry_after_seconds: retryAfterSeconds,
+      duration_ms: durationMs,
+      details: {}
+    })
+  });
+}
+
 function localEntry(key) {
   return state.entries.get(key) || null;
 }
@@ -401,7 +429,8 @@ export async function protectedSportsGameOddsFetch({
   freshMs = 60_000,
   staleMs = 300_000,
   timeoutMs = 8_000,
-  provider = DEFAULT_PROVIDER
+  provider = DEFAULT_PROVIDER,
+  consumer = "unknown"
 }) {
   const key = cacheKey({ provider, url, freshMs, staleMs });
   const now = nowMs();
@@ -452,6 +481,15 @@ export async function protectedSportsGameOddsFetch({
       if (shared && sharedAge < freshMs) {
         const fetchedAt = Date.parse(shared.fetched_at);
         storeLocal(key, shared.payload, fetchedAt);
+        await Promise.allSettled([
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "SHARED_HIT",
+            statusCode: Number(shared.status_code || 200),
+            cacheLayer: "shared"
+          })
+        ]);
         return {
           payload: shared.payload,
           cacheStatus: "HIT",
@@ -498,6 +536,20 @@ export async function protectedSportsGameOddsFetch({
           circuitOpen: true,
           sharedEnabled: Boolean(config)
         };
+      }
+      if (config) {
+        await Promise.allSettled([
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "CIRCUIT_BLOCKED",
+            statusCode: Number(circuit.lastStatus || 503),
+            retryAfterSeconds: Math.max(
+              1,
+              Math.ceil((circuit.openUntil - nowMs()) / 1000)
+            )
+          })
+        ]);
       }
       throw circuitError(circuit);
     }
@@ -563,8 +615,10 @@ export async function protectedSportsGameOddsFetch({
       }
     }
 
+    const upstreamStartedAt = nowMs();
     try {
       const upstream = await fetchUpstream(url, apiKey, timeoutMs);
+      const upstreamDurationMs = Math.max(0, nowMs() - upstreamStartedAt);
       storeLocal(key, upstream.payload, upstream.fetchedAt);
       noteLocalSuccess(provider);
 
@@ -580,7 +634,15 @@ export async function protectedSportsGameOddsFetch({
             staleMs
           }),
           recordSharedSuccess(config, provider),
-          leaseClaimed ? releaseSharedRefresh(config, key) : Promise.resolve()
+          leaseClaimed ? releaseSharedRefresh(config, key) : Promise.resolve(),
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "UPSTREAM_SUCCESS",
+            statusCode: upstream.statusCode,
+            cacheLayer: "upstream",
+            durationMs: upstreamDurationMs
+          })
         ]);
       }
 
@@ -600,7 +662,16 @@ export async function protectedSportsGameOddsFetch({
       if (config) {
         await Promise.allSettled([
           recordSharedFailure(config, provider, error),
-          leaseClaimed ? releaseSharedRefresh(config, key) : Promise.resolve()
+          leaseClaimed ? releaseSharedRefresh(config, key) : Promise.resolve(),
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "UPSTREAM_FAILURE",
+            statusCode: Number(error?.status || 502),
+            cacheLayer: "upstream",
+            retryAfterSeconds: error?.retryAfter ?? null,
+            durationMs: Math.max(0, nowMs() - upstreamStartedAt)
+          })
         ]);
       }
 

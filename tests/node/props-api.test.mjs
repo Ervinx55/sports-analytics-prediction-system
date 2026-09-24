@@ -267,6 +267,10 @@ test("uses shared Supabase cache without calling SportsGameOdds", async () => {
       sharedCalls += 1;
       return jsonResponse([]);
     }
+    if (text.startsWith("https://cache.test/rest/v1/provider_request_events")) {
+      sharedCalls += 1;
+      return new Response("", { status: 201 });
+    }
     if (text.startsWith("https://api.sportsgameodds.com")) {
       providerCalls += 1;
       return jsonResponse({ success: true, data: [] });
@@ -282,7 +286,7 @@ test("uses shared Supabase cache without calling SportsGameOdds", async () => {
   assert.equal(response.body.cache.sharedEnabled, true);
   assert.equal(response.getHeader("x-provider-cache-layer"), "shared");
   assert.equal(providerCalls, 0);
-  assert.equal(sharedCalls, 2);
+  assert.equal(sharedCalls, 3);
 });
 
 test("rejects unsupported methods without calling the provider", async () => {

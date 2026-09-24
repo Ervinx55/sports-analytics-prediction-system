@@ -220,7 +220,8 @@ export default async function handler(req, res) {
       apiKey,
       freshMs: CACHE_TTL_MS,
       staleMs: STALE_TTL_MS,
-      timeoutMs: 8_000
+      timeoutMs: 8_000,
+      consumer: "props"
     });
 
     const body = buildBody({
