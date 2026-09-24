@@ -257,8 +257,15 @@ test("prop grading treats every sportsbook line as a distinct shadow candidate",
     [70.5, 72.5]
   );
   assert.ok(candidates.every((row) => row.status === "PASS"));
+  assert.ok(candidates.every((row) => row.shadowStatus === "PASS"));
   assert.ok(candidates.every((row) => row.productionEligible === false));
   assert.ok(candidates.every((row) => row.productionWeight === 0));
+  assert.ok(candidates.every((row) => row.marketShrinkage === 0));
+  assert.ok(candidates.every((row) =>
+    Math.abs(
+      row.shadowModelProbability - row.marketFairProbability
+    ) < 1e-12
+  ));
 });
 
 test("continuous probability responds monotonically to a harder over line", () => {
