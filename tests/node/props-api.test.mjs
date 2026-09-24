@@ -131,9 +131,14 @@ test("canonicalizes bookmaker order and duplicates into one cache key", async ()
 test("coalesces concurrent identical requests into one upstream fetch", async () => {
   let calls = 0;
   let releaseFetch;
+  let markFetchStarted;
+  const fetchStarted = new Promise((resolve) => {
+    markFetchStarted = resolve;
+  });
 
   globalThis.fetch = () => {
     calls += 1;
+    markFetchStarted();
     return new Promise((resolve) => {
       releaseFetch = () => resolve(jsonResponse({ success: true, data: [] }));
     });
@@ -142,7 +147,7 @@ test("coalesces concurrent identical requests into one upstream fetch", async ()
   const firstPromise = invoke();
   const secondPromise = invoke();
 
-  await Promise.resolve();
+  await fetchStarted;
   assert.equal(calls, 1);
 
   releaseFetch();
