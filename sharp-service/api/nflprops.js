@@ -485,14 +485,23 @@ export default async function handler(req, res) {
           "nflverse participation/route data (postseason-only for 2023+)",
           "nflverse injuries (source unavailable after 2024)"
         ],
-        provisionalShadowWeights: {
+        provisionalQualityWeights: {
           A: 0.35,
           B: 0.20,
           C: 0.10,
           D: 0
         },
+        calibratedMarketShrinkage: {
+          passing_yards: 0,
+          passing_touchdowns: 0,
+          rushing_yards: 0,
+          receiving_receptions: 0,
+          receiving_yards: 0
+        },
+        calibrationFinding:
+          "2024 development replay did not justify independent influence over the baseline. All five markets remain market-only in shadow output.",
         promotionPolicy:
-          "No production influence until chronological 2024 calibration and untouched 2025 validation beat the sharp-market baseline."
+          "No production influence until a revised challenger is calibrated on development data and then clears untouched holdout validation against historical sharp prop prices."
       },
       playerMarkets: PLAYER_MARKETS,
       books,
