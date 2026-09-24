@@ -974,6 +974,15 @@ function poissonCdf(k, lambda) {
   return clamp(sum, 0, 1);
 }
 
+function poissonPmf(k, lambda) {
+  if (!Number.isFinite(lambda) || lambda < 0 || k < 0) return 0;
+  let term = Math.exp(-lambda);
+  for (let i = 1; i <= Math.floor(k); i += 1) {
+    term *= lambda / i;
+  }
+  return term;
+}
+
 function independentProbability(projection, line, side, marketType) {
   if (!projection || !Number.isFinite(line)) return null;
   if (marketType === "passing_touchdowns") {
@@ -983,10 +992,13 @@ function independentProbability(projection, line, side, marketType) {
     const underOrEqual = poissonCdf(integerLine, lambda);
     if (underOrEqual === null) return null;
     if (Math.abs(line - integerLine) < 1e-9) {
-      const exact = Math.exp(-lambda) * (lambda ** integerLine) /
-        Math.max(1, factorial(integerLine));
-      if (side === "over") return clamp(1 - underOrEqual + exact, 0, 1);
-      return clamp(underOrEqual - exact, 0, 1);
+      const exact = poissonPmf(integerLine, lambda);
+      const nonPush = Math.max(1e-9, 1 - exact);
+      const win =
+        side === "over"
+          ? 1 - underOrEqual
+          : underOrEqual - exact;
+      return clamp(win / nonPush, 0, 1);
     }
     return side === "over" ? 1 - underOrEqual : underOrEqual;
   }
@@ -999,16 +1011,14 @@ function independentProbability(projection, line, side, marketType) {
   return side === "over" ? 1 - cdf : cdf;
 }
 
-function factorial(n) {
-  let out = 1;
-  for (let i = 2; i <= n; i += 1) out *= i;
-  return out;
-}
-
-function expectedValue(probability, odds) {
+function expectedValue(probability, odds, pushProbability = 0) {
   const decimal = americanToDecimal(odds);
   if (probability === null || decimal === null) return null;
-  return probability * decimal - 1;
+  const push = clamp(pushProbability || 0, 0, 1);
+  const nonPush = 1 - push;
+  const win = nonPush * probability;
+  const loss = nonPush * (1 - probability);
+  return win * (decimal - 1) - loss;
 }
 
 function pairedBookLines(prop) {
@@ -1079,7 +1089,19 @@ function gradePropMarket(prop, opportunity, {
         1 - 1e-6
       );
       const edge = shadowProbability - marketProbability;
-      const ev = expectedValue(shadowProbability, odds);
+      const pushProbability =
+        prop.statID === "passing_touchdowns" &&
+        Math.abs(row.line - Math.round(row.line)) < 1e-9
+          ? poissonPmf(
+              Math.round(row.line),
+              num(projection.mean) ?? 0
+            )
+          : 0;
+      const ev = expectedValue(
+        shadowProbability,
+        odds,
+        pushProbability
+      );
 
       let shadowStatus = "PASS";
       let reason = "Insufficient calibrated edge.";
@@ -1112,6 +1134,7 @@ function gradePropMarket(prop, opportunity, {
         shadowModelProbability: Number(shadowProbability.toFixed(6)),
         edgePct: Number((edge * 100).toFixed(2)),
         evPct: Number((ev * 100).toFixed(2)),
+        pushProbability: Number(pushProbability.toFixed(6)),
         dataQuality: opportunity.dataQuality,
         status: "PASS",
         shadowStatus,
