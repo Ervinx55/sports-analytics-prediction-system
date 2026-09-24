@@ -100,6 +100,8 @@ SPECIALIST_MIN_TRAIN_ROWS = 12
 SPECIALIST_MIN_VALIDATION_ROWS = 4
 SPECIALIST_MIN_TEST_ROWS = 2
 SPECIALIST_MIN_TRAIN_EVENTS = 3
+SPECIALIST_MIN_VALIDATION_BRIER_GAIN = 0.001
+SPECIALIST_MIN_VALIDATION_LOG_LOSS_GAIN = 0.002
 
 
 def market_specialist_residual_predictions(
@@ -172,6 +174,32 @@ def market_specialist_residual_predictions(
             ),
             seed=SEED + int(fold) * 100 + len(reports),
         )
+        market_validation = clip_probability(
+            val_part["market_fair_probability"].to_numpy(float)
+        )
+        market_validation_metrics = metrics(
+            val_part["target"].to_numpy(dtype=int),
+            market_validation,
+        )
+        validation_brier_gain = (
+            market_validation_metrics["brier"]
+            - selection.validation_metrics["brier"]
+        )
+        validation_log_loss_gain = (
+            market_validation_metrics["log_loss"]
+            - selection.validation_metrics["log_loss"]
+        )
+        accepted = (
+            selection.shrinkage > 0
+            and validation_brier_gain
+            >= SPECIALIST_MIN_VALIDATION_BRIER_GAIN
+            and validation_log_loss_gain
+            >= SPECIALIST_MIN_VALIDATION_LOG_LOSS_GAIN
+        )
+        effective_shrinkage = (
+            float(selection.shrinkage) if accepted else 0.0
+        )
+
         correction = residual_correction_from_model(
             selection.model,
             x_test,
@@ -187,16 +215,26 @@ def market_specialist_residual_predictions(
         selected = residual_corrected_probability(
             market_test,
             correction,
-            selection.shrinkage,
+            effective_shrinkage,
         )
         probability.loc[test_part.index] = selected
         raw_probability.loc[test_part.index] = raw
 
         reports[stat_id] = {
             **base_report,
-            "active": True,
-            "reason": "validated market-specific residual",
-            "shrinkage": float(selection.shrinkage),
+            "active": accepted,
+            "reason": (
+                "validated market-specific residual"
+                if accepted
+                else "validation margin below specialist hurdle"
+            ),
+            "selected_shrinkage": float(selection.shrinkage),
+            "effective_shrinkage": effective_shrinkage,
+            "market_validation": market_validation_metrics,
+            "validation_brier_gain": float(validation_brier_gain),
+            "validation_log_loss_gain":
+                float(validation_log_loss_gain),
+            "shrinkage": effective_shrinkage,
             "params": selection.params,
             "validation": selection.validation_metrics,
             "validation_raw": selection.validation_raw_metrics,
