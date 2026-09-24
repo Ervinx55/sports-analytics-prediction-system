@@ -227,7 +227,7 @@ test("NFL model produces shadow-only team market grades", async () => {
   assert.equal(response.body.eventCount, 1);
   assert.equal(response.body.availableEventCount, 1);
   assert.equal(response.body.marketCount, 6);
-  assert.equal(response.body.events[0].model.version, "NFL Team Markets v2-shadow");
+  assert.equal(response.body.events[0].model.version, "NFL Team Markets v3-shadow");
   assert.equal(response.body.events[0].simulation.iterations, 20000);
   assert.ok(response.body.events[0].model.marketWeight > 0.5);
   assert.equal(response.body.sourceHealth.injuries.status, "UNAVAILABLE");
@@ -245,6 +245,27 @@ test("NFL model produces shadow-only team market grades", async () => {
   );
   assert.ok(
     response.body.events[0].model.weatherAdjustmentPoints < 0
+  );
+  assert.equal(
+    response.body.events[0].model.calibration.shrinkage.moneyline,
+    0
+  );
+  assert.equal(
+    response.body.events[0].model.calibration.shrinkage.spread,
+    0
+  );
+  assert.equal(
+    response.body.events[0].model.calibration.shrinkage.total,
+    0.25
+  );
+  const homeMoneyline = response.body.markets.find(
+    (row) => row.marketType === "moneyline" && row.side === "home"
+  );
+  assert.ok(
+    Math.abs(
+      homeMoneyline.modelProbability -
+      homeMoneyline.marketFairProbability
+    ) < 1e-12
   );
   assert.ok(response.body.markets.every((row) => row.status === "PASS"));
   assert.ok(response.body.markets.every((row) =>

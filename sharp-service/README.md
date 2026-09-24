@@ -60,3 +60,21 @@ nflverse's injury source is not used for current-season adjustments because its
 published status says that feed ended after 2024. The API surfaces this as
 `sourceHealth.injuries.status = "UNAVAILABLE"` and applies zero stale-injury
 penalty rather than silently treating old data as current.
+
+
+### NFL out-of-sample calibration v3
+
+The initial v2 independent blend underperformed the closing market in the
+2024-2025 chronological replay, so it was not promoted. A second calibration
+pass used 2024 only to choose shrinkage and kept 2025 untouched.
+
+The selected shadow shrinkages are:
+
+- moneyline: 0.00 (market probability only),
+- spread: 0.00 (market probability only),
+- total: 0.25 of the dynamic independent contribution.
+
+The 2025 total improvement was positive but very small and did not clear the
+promotion gate, so all NFL markets remain production-ineligible. The independent
+team model is retained for projected scores, diagnostics, and future challenger
+work rather than being allowed to degrade current moneyline/spread probabilities.

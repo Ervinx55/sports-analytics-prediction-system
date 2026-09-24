@@ -163,7 +163,7 @@ export default async function handler(req, res) {
       "public, max-age=0, s-maxage=120, stale-while-revalidate=180"
     );
     return res.status(200).json({
-      version: "NFL Team Markets v2-shadow",
+      version: "NFL Team Markets v3-shadow",
       generatedAt: new Date().toISOString(),
       sport: "FOOTBALL",
       league: "NFL",
@@ -195,7 +195,9 @@ export default async function handler(req, res) {
           "Open-Meteo outdoor forecasts"
         ],
         injuryPolicy:
-          "No current nflverse injury adjustment is applied because the feed ended after 2024."
+          "No current nflverse injury adjustment is applied because the feed ended after 2024.",
+        calibration:
+          "2024 selected market-specific shrinkage; 2025 was untouched. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
       },
       sourceHealth: nflData.sourceHealth,
       marketBooks: BOOKS,
@@ -213,7 +215,7 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : String(error),
-      version: "NFL Team Markets v2-shadow",
+      version: "NFL Team Markets v3-shadow",
       productionEligible: false
     });
   }

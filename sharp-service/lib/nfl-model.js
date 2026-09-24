@@ -6,6 +6,13 @@ const NFLVERSE_DEPTH_CHART_URL = (season) =>
   `https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_${season}.csv`;
 const OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
+const NFL_MARKET_SHRINKAGE = Object.freeze({
+  moneyline: 0,
+  spread: 0,
+  total: 0.25
+});
+const NFL_CALIBRATION_VERSION = "NFL Market Shrinkage Calibration v1";
+
 const STADIUM_COORDINATES = {
   ARI: [33.528, -112.263],
   ATL: [33.755, -84.401],
@@ -961,6 +968,32 @@ function simulateGame({
   };
 }
 
+
+function calibratedProbabilityBlend(
+  marketProbability,
+  independentProbability,
+  dynamicIndependentWeight,
+  shrinkage
+) {
+  if (
+    !Number.isFinite(marketProbability) ||
+    !Number.isFinite(independentProbability)
+  ) {
+    return null;
+  }
+  const effectiveWeight = clamp(
+    dynamicIndependentWeight * shrinkage,
+    0,
+    1
+  );
+  return clamp(
+    marketProbability +
+      effectiveWeight * (independentProbability - marketProbability),
+    1e-6,
+    1 - 1e-6
+  );
+}
+
 function marketPairProbability(side, opponent) {
   return noVigProbability(
     side?.consensus?.odds,
@@ -1201,6 +1234,26 @@ function projectEvent({
   const homeMl = event?.markets?.moneyline?.home;
   const awayMl = event?.markets?.moneyline?.away;
   if (homeMl && awayMl) {
+    const marketHomeMl = marketPairProbability(homeMl, awayMl);
+    const marketAwayMl = marketPairProbability(awayMl, homeMl);
+    const independentHomeMl = 1 - normalCdf(
+      0,
+      independentHomeMargin,
+      13.6
+    );
+    const independentAwayMl = 1 - independentHomeMl;
+    const calibratedHomeMl = calibratedProbabilityBlend(
+      marketHomeMl,
+      independentHomeMl,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.moneyline
+    );
+    const calibratedAwayMl = calibratedProbabilityBlend(
+      marketAwayMl,
+      independentAwayMl,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.moneyline
+    );
     markets.push(candidate({
       eventId: event.eventID,
       marketType: "moneyline",
@@ -1208,7 +1261,7 @@ function projectEvent({
       label: event.matchup.home.name,
       market: homeMl,
       opponentMarket: awayMl,
-      modelProbability: simulation.moneyline.home,
+      modelProbability: calibratedHomeMl,
       dataQuality: quality
     }));
     markets.push(candidate({
@@ -1218,7 +1271,7 @@ function projectEvent({
       label: event.matchup.away.name,
       market: awayMl,
       opponentMarket: homeMl,
-      modelProbability: simulation.moneyline.away,
+      modelProbability: calibratedAwayMl,
       dataQuality: quality
     }));
   }
@@ -1230,6 +1283,32 @@ function projectEvent({
     awaySpread &&
     marketHomeSpread !== null
   ) {
+    const marketHomeCover = marketPairProbability(
+      homeSpread,
+      awaySpread
+    );
+    const marketAwayCover = marketPairProbability(
+      awaySpread,
+      homeSpread
+    );
+    const independentHomeCover = 1 - normalCdf(
+      -marketHomeSpread,
+      independentHomeMargin,
+      13.6
+    );
+    const independentAwayCover = 1 - independentHomeCover;
+    const calibratedHomeCover = calibratedProbabilityBlend(
+      marketHomeCover,
+      independentHomeCover,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.spread
+    );
+    const calibratedAwayCover = calibratedProbabilityBlend(
+      marketAwayCover,
+      independentAwayCover,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.spread
+    );
     markets.push(candidate({
       eventId: event.eventID,
       marketType: "spread",
@@ -1237,7 +1316,7 @@ function projectEvent({
       label: event.matchup.home.name,
       market: homeSpread,
       opponentMarket: awaySpread,
-      modelProbability: simulation.spread.home,
+      modelProbability: calibratedHomeCover,
       line: marketHomeSpread,
       dataQuality: quality
     }));
@@ -1248,7 +1327,7 @@ function projectEvent({
       label: event.matchup.away.name,
       market: awaySpread,
       opponentMarket: homeSpread,
-      modelProbability: simulation.spread.away,
+      modelProbability: calibratedAwayCover,
       line: -marketHomeSpread,
       dataQuality: quality
     }));
@@ -1257,6 +1336,26 @@ function projectEvent({
   const overMarket = event?.markets?.total?.over;
   const underMarket = event?.markets?.total?.under;
   if (overMarket && underMarket && marketTotal !== null) {
+    const marketOver = marketPairProbability(overMarket, underMarket);
+    const marketUnder = marketPairProbability(underMarket, overMarket);
+    const independentOver = 1 - normalCdf(
+      marketTotal,
+      independentTotal,
+      13.8
+    );
+    const independentUnder = 1 - independentOver;
+    const calibratedOver = calibratedProbabilityBlend(
+      marketOver,
+      independentOver,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.total
+    );
+    const calibratedUnder = calibratedProbabilityBlend(
+      marketUnder,
+      independentUnder,
+      independentWeight,
+      NFL_MARKET_SHRINKAGE.total
+    );
     markets.push(candidate({
       eventId: event.eventID,
       marketType: "total",
@@ -1264,7 +1363,7 @@ function projectEvent({
       label: "Over",
       market: overMarket,
       opponentMarket: underMarket,
-      modelProbability: simulation.total.over,
+      modelProbability: calibratedOver,
       line: marketTotal,
       dataQuality: quality
     }));
@@ -1275,7 +1374,7 @@ function projectEvent({
       label: "Under",
       market: underMarket,
       opponentMarket: overMarket,
-      modelProbability: simulation.total.under,
+      modelProbability: calibratedUnder,
       line: marketTotal,
       dataQuality: quality
     }));
@@ -1305,10 +1404,17 @@ function projectEvent({
       sourceHealth
     },
     model: {
-      version: "NFL Team Markets v2-shadow",
+      version: "NFL Team Markets v3-shadow",
       productionEligible: false,
       independentWeight,
       marketWeight,
+      calibration: {
+        version: NFL_CALIBRATION_VERSION,
+        validationSeason: 2024,
+        untouchedTestSeason: 2025,
+        shrinkage: NFL_MARKET_SHRINKAGE,
+        productionEligible: false
+      },
       projectedHomeMargin: Number(projectedHomeMargin.toFixed(3)),
       projectedTotal: Number(projectedTotal.toFixed(3)),
       independentHomeMargin: Number(independentHomeMargin.toFixed(3)),
@@ -1382,6 +1488,7 @@ export {
   NFLVERSE_STATS_URL,
   NFLVERSE_DEPTH_CHART_URL,
   OPEN_METEO_FORECAST_URL,
+  NFL_MARKET_SHRINKAGE,
   normalizeTeam,
   parseCsv,
   seasonForDate,
