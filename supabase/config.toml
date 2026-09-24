@@ -155,3 +155,6 @@ verify_jwt = false
 
 [functions.capture-pitchmix-features]
 verify_jwt = true
+
+[functions.github-ml-training-export]
+verify_jwt = false

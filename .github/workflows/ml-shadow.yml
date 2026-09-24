@@ -2,6 +2,8 @@ name: TensorFlow Shadow Model
 
 on:
   push:
+    branches:
+      - "master"
     paths:
       - "ml/**"
       - "data/ml/**"
@@ -13,9 +15,11 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   train-player-prop-shadow:
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -35,21 +39,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements-ml.txt
 
-      - name: Refresh labeled snapshot from Supabase when configured
+      - name: Refresh labeled snapshot from Supabase via GitHub OIDC
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        shell: bash
+          SUPABASE_URL: "https://yeoxroijaptomomshdii.supabase.co"
+          SUPABASE_ML_EXPORT_AUDIENCE: "edge-lab-supabase-ml-export"
         run: |
-          if [[ -n "$SUPABASE_URL" && ( -n "$SUPABASE_SECRET_KEY" || -n "$SUPABASE_SERVICE_ROLE_KEY" ) ]]; then
-            python ml/export_player_prop_snapshot.py \
-              --output data/ml/player_prop_training_snapshot.csv
-            echo "ML_SNAPSHOT_SOURCE=supabase_live" >> "$GITHUB_ENV"
-          else
-            echo "::notice::Supabase ML export secrets are not configured; using the committed reproducible snapshot."
-            echo "ML_SNAPSHOT_SOURCE=committed_snapshot" >> "$GITHUB_ENV"
-          fi
+          python ml/export_player_prop_snapshot.py \
+            --output data/ml/player_prop_training_snapshot.csv
+          echo "ML_SNAPSHOT_SOURCE=supabase_live_oidc" >> "$GITHUB_ENV"
 
       - name: Run expanding-window walk-forward evaluation
         env:

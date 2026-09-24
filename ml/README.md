@@ -37,12 +37,16 @@ Additional promotion gates require at least 5 walk-forward folds and the
 champion+TensorFlow ensemble must beat the current champion on Brier score in at
 least 60% of folds.
 
-The GitHub Actions workflow also runs daily. When repository secrets
-`SUPABASE_URL` plus either `SUPABASE_SECRET_KEY` or
-`SUPABASE_SERVICE_ROLE_KEY` are configured, it refreshes the labeled snapshot
-through the service-role-only `export_player_prop_training_rows()` RPC before
-evaluation and retraining. If those secrets are unavailable, the job safely uses
-the committed reproducible snapshot and clearly labels the run as such.
+The GitHub Actions workflow also runs daily and now refreshes the labeled
+snapshot without storing a Supabase database secret in GitHub. The job requests
+a short-lived GitHub Actions OIDC token and sends it to the
+`github-ml-training-export` Edge Function. That function verifies the GitHub
+issuer, custom audience, exact repository, `master` ref, workflow identity and
+event type before reading the server-only training view with Supabase's internal
+server credential.
+
+Local administrators can still run `export_player_prop_snapshot.py` with a
+Supabase secret/service-role key, but scheduled GitHub training uses OIDC only.
 
 Scheduled retraining does not automatically promote a model. It only refreshes
 evidence and artifacts; the promotion gates remain authoritative.

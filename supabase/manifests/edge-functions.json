@@ -819,13 +819,29 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "github-ml-training-export",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "0314a48631fe367133cc69ad2bd23a97fa185f7c5d6e388283bfda81dbcf9d24",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/github-ml-training-export/index.ts",
+          "name": "index.ts",
+          "sha256": "a4d7a2e5a2f1054672cb8afbd6724cb10f5ee66af7c26cb4da50c3c55af4399d"
+        }
+      ],
+      "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T09:21:26Z",
+  "final_verified_at": "2026-09-24T10:08:52.938Z",
   "authority_verification": {
     "status": "MATCH",
-    "active_functions": 50,
+    "active_functions": 51,
     "metadata_and_bundle_sha_match": true,
-    "repository_total_edge_functions": 51
+    "repository_total_edge_functions": 52
   }
 }
