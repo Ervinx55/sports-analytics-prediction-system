@@ -2,9 +2,9 @@ import { gunzipSync } from "node:zlib";
 import { normalizeTeam, parseCsv } from "./nfl-model.js";
 
 const NFLVERSE_PLAYER_STATS_URL = (season) =>
-  `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv`;
+  `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv.gz`;
 const NFLVERSE_SNAP_COUNTS_URL = (season) =>
-  `https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_${season}.csv`;
+  `https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_${season}.csv.gz`;
 const NFLVERSE_NGS_URL = (statType) =>
   `https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_${statType}.csv.gz`;
 
