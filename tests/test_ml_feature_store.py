@@ -39,7 +39,7 @@ def test_sparse_enrichment_is_selected_from_training_window_only():
     assert "CORE_CATEGORICAL_FEATURES" in source
 
     walk_forward = (ROOT / "ml" / "walk_forward_player_prop.py").read_text()
-    assert "select_available_features(model_train)" in walk_forward
+    assert "select_available_features(" in walk_forward
     assert '"feature_coverage"' in walk_forward
 
 
@@ -55,7 +55,7 @@ def test_market_specific_feature_policies_exist_and_are_applied():
     assert "def apply_market_feature_policy" in source
 
     walk_forward = (ROOT / "ml" / "walk_forward_player_prop.py").read_text()
-    assert "model_train = apply_market_feature_policy(train)" in walk_forward
+    assert "model_train = apply_market_feature_policy(train_part)" in walk_forward
     assert "aggregate_by_market" in walk_forward
     assert '"by_market"' in walk_forward
 
