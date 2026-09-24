@@ -42,11 +42,11 @@ Deno.serve(async (req) => {
       adminKey(),
     );
 
-    const [eventsResult, cacheResult, circuitResult, locksResult] =
+    const [eventsResult, cacheResult, circuitResult, locksResult, budgetResult] =
       await Promise.all([
         supabase
           .from("provider_request_events")
-          .select("provider,consumer,event_type,status_code,cache_layer,retry_after_seconds,duration_ms,occurred_at")
+          .select("provider,consumer,event_type,status_code,cache_layer,retry_after_seconds,duration_ms,details,occurred_at")
           .gte("occurred_at", since)
           .order("occurred_at", { ascending: false })
           .limit(5000),
@@ -62,9 +62,18 @@ Deno.serve(async (req) => {
           .from("provider_refresh_locks")
           .select("provider,locked_until,updated_at")
           .gt("locked_until", nowIso),
+        supabase
+          .from("provider_request_budget_state")
+          .select("provider,tokens,capacity,refilled_at,last_claim_at,last_denied_at,claimed_count,denied_count,updated_at"),
       ]);
 
-    for (const result of [eventsResult, cacheResult, circuitResult, locksResult]) {
+    for (const result of [
+      eventsResult,
+      cacheResult,
+      circuitResult,
+      locksResult,
+      budgetResult,
+    ]) {
       if (result.error) throw result.error;
     }
 
@@ -72,6 +81,7 @@ Deno.serve(async (req) => {
     const cacheRows = cacheResult.data ?? [];
     const circuits = circuitResult.data ?? [];
     const locks = locksResult.data ?? [];
+    const budgetRows = budgetResult.data ?? [];
 
     const count = (type: string) =>
       events.filter((row: any) => row.event_type === type).length;
@@ -96,6 +106,12 @@ Deno.serve(async (req) => {
     const probeSuccesses = count("PROBE_SUCCESS");
     const probeFailures = count("PROBE_FAILURE");
     const recoveries = count("RECOVERED");
+    const budgetBlocks = count("BUDGET_BLOCKED");
+    const criticalBudgetBlocks = events.filter(
+      (row: any) =>
+        row.event_type === "BUDGET_BLOCKED" &&
+        String(row.details?.priority || "") === "critical",
+    ).length;
 
     const now = Date.now();
     let freshCacheRows = 0;
@@ -153,13 +169,19 @@ Deno.serve(async (req) => {
     const recentStale = lastHour.filter(
       (row: any) => row.event_type === "STALE_SERVED",
     ).length;
+    const recentCriticalBudgetBlocks = lastHour.filter(
+      (row: any) =>
+        row.event_type === "BUDGET_BLOCKED" &&
+        String(row.details?.priority || "") === "critical",
+    ).length;
 
     let status = "IDLE";
     if (openCircuits.length > 0) status = "DEGRADED";
     else if (
       halfOpenCircuits.length > 0 ||
       recentRateLimits > 0 ||
-      recentStale > 0
+      recentStale > 0 ||
+      recentCriticalBudgetBlocks > 0
     ) status = "WATCH";
     else if (events.length > 0 || cacheRows.length > 0) status = "HEALTHY";
 
@@ -180,6 +202,7 @@ Deno.serve(async (req) => {
           "PROBE_STARTED",
           "PROBE_FAILURE",
           "RECOVERED",
+          "BUDGET_BLOCKED",
         ].includes(String(row.event_type))
       )
       .slice(0, 20)
@@ -191,6 +214,7 @@ Deno.serve(async (req) => {
         statusCode: row.status_code,
         cacheLayer: row.cache_layer,
         retryAfterSeconds: row.retry_after_seconds,
+        priority: row.details?.priority ?? null,
       }));
 
     return new Response(
@@ -215,6 +239,8 @@ Deno.serve(async (req) => {
           probeSuccesses,
           probeFailures,
           recoveries,
+          budgetBlocks,
+          criticalBudgetBlocks,
           activeRefreshLocks: locks.length,
           cacheRows: cacheRows.length,
           freshCacheRows,
@@ -239,6 +265,42 @@ Deno.serve(async (req) => {
           open: openCircuits.length > 0,
           halfOpen: halfOpenCircuits.length > 0,
           providers: providerStates,
+        },
+        requestBudget: {
+          shared: budgetRows.length > 0,
+          blockEvents24h: budgetBlocks,
+          criticalBlockEvents24h: criticalBudgetBlocks,
+          recentCriticalBlocks1h: recentCriticalBudgetBlocks,
+          totalClaims: (budgetRows as any[]).reduce(
+            (sum, row) => sum + Number(row.claimed_count || 0),
+            0,
+          ),
+          totalDenials: (budgetRows as any[]).reduce(
+            (sum, row) => sum + Number(row.denied_count || 0),
+            0,
+          ),
+          providers: (budgetRows as any[]).map((row) => {
+            const capacity = Number(row.capacity || 0);
+            const storedTokens = Number(row.tokens || 0);
+            const refilledAt = Date.parse(String(row.refilled_at || ""));
+            const elapsedMs = Number.isFinite(refilledAt)
+              ? Math.max(0, now - refilledAt)
+              : 0;
+            const tokens = Math.min(
+              capacity,
+              storedTokens + elapsedMs * (capacity / 60_000),
+            );
+
+            return {
+              provider: row.provider,
+              capacity,
+              tokensRemaining: Number(tokens.toFixed(2)),
+              lastClaimAt: row.last_claim_at,
+              lastDeniedAt: row.last_denied_at,
+              claimedCount: Number(row.claimed_count || 0),
+              deniedCount: Number(row.denied_count || 0),
+            };
+          }),
         },
         selfHealing: {
           state:
