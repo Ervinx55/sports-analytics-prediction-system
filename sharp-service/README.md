@@ -78,3 +78,27 @@ The 2025 total improvement was positive but very small and did not clear the
 promotion gate, so all NFL markets remain production-ineligible. The independent
 team model is retained for projected scores, diagnostics, and future challenger
 work rather than being allowed to degrade current moneyline/spread probabilities.
+
+
+### NFL player props v1.1
+
+`/api/nflprops` is a shadow-only NFL player-prop challenger covering QB
+passing yards/touchdowns, RB rushing yards, and WR/TE receptions/receiving
+yards. It is market-first: each sportsbook/line is graded separately and the
+independent projection only contributes a provisional, data-quality-scaled
+adjustment in shadow output. Production status and production weight remain
+`PASS` / `0` until historical market calibration clears the fixed promotion
+process.
+
+The shared opportunity engine projects team plays and pass/rush split before
+allocating player opportunity. It uses nflverse weekly player stats, PFR snap
+counts, Next Gen Stats, timestamped depth charts, team/opponent context, game
+market environment, and forecast weather when available. Participation/route
+data is not required live, and unavailable injury data never implies a player
+is healthy.
+
+Every historical feature passes through a point-in-time availability guard.
+The chronological player-prop workflow replays 2024-2025 for projection-error
+validation while intentionally excluding finalized historical weather. It
+cannot authorize production weight until historical sharp player-prop prices
+are available for 2024 calibration and untouched 2025 market validation.
