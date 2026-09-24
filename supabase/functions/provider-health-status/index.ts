@@ -57,7 +57,7 @@ Deno.serve(async (req) => {
           .limit(1000),
         supabase
           .from("provider_circuit_state")
-          .select("provider,consecutive_failures,opened_until,last_status,last_error,last_failure_at,updated_at"),
+          .select("provider,consecutive_failures,opened_until,last_status,last_error,last_failure_at,backoff_seconds,last_probe_at,last_success_at,recovery_count,updated_at"),
         supabase
           .from("provider_refresh_locks")
           .select("provider,locked_until,updated_at")
@@ -92,6 +92,10 @@ Deno.serve(async (req) => {
     const staleServes = count("STALE_SERVED");
     const sharedHits = count("SHARED_HIT");
     const circuitBlocks = count("CIRCUIT_BLOCKED");
+    const probesStarted = count("PROBE_STARTED");
+    const probeSuccesses = count("PROBE_SUCCESS");
+    const probeFailures = count("PROBE_FAILURE");
+    const recoveries = count("RECOVERED");
 
     const now = Date.now();
     let freshCacheRows = 0;
@@ -106,10 +110,36 @@ Deno.serve(async (req) => {
       else expiredCacheRows += 1;
     }
 
-    const openCircuits = (circuits as any[]).filter((row) => {
-      const t = Date.parse(String(row.opened_until || ""));
-      return Number.isFinite(t) && t > now;
+    const providerStates = (circuits as any[]).map((row) => {
+      const openedUntilMs = Date.parse(String(row.opened_until || ""));
+      const isOpen = Number.isFinite(openedUntilMs) && openedUntilMs > now;
+      const failures = Number(row.consecutive_failures || 0);
+      const state = isOpen
+        ? "BACKOFF"
+        : failures > 0
+          ? "HALF_OPEN"
+          : "CLOSED";
+
+      return {
+        provider: row.provider,
+        state,
+        consecutiveFailures: failures,
+        openedUntil: row.opened_until,
+        backoffSeconds: Number(row.backoff_seconds || 0),
+        lastStatus: row.last_status,
+        lastFailureAt: row.last_failure_at,
+        lastProbeAt: row.last_probe_at,
+        lastSuccessAt: row.last_success_at,
+        recoveryCount: Number(row.recovery_count || 0),
+      };
     });
+
+    const openCircuits = providerStates.filter(
+      (row) => row.state === "BACKOFF",
+    );
+    const halfOpenCircuits = providerStates.filter(
+      (row) => row.state === "HALF_OPEN",
+    );
 
     const lastHour = events.filter((row: any) => {
       const t = Date.parse(String(row.occurred_at || ""));
@@ -126,7 +156,11 @@ Deno.serve(async (req) => {
 
     let status = "IDLE";
     if (openCircuits.length > 0) status = "DEGRADED";
-    else if (recentRateLimits > 0 || recentStale > 0) status = "WATCH";
+    else if (
+      halfOpenCircuits.length > 0 ||
+      recentRateLimits > 0 ||
+      recentStale > 0
+    ) status = "WATCH";
     else if (events.length > 0 || cacheRows.length > 0) status = "HEALTHY";
 
     const byConsumer: Record<string, Record<string, number>> = {};
@@ -139,9 +173,14 @@ Deno.serve(async (req) => {
 
     const recentIncidents = (events as any[])
       .filter((row) =>
-        ["UPSTREAM_FAILURE", "STALE_SERVED", "CIRCUIT_BLOCKED"].includes(
-          String(row.event_type),
-        )
+        [
+          "UPSTREAM_FAILURE",
+          "STALE_SERVED",
+          "CIRCUIT_BLOCKED",
+          "PROBE_STARTED",
+          "PROBE_FAILURE",
+          "RECOVERED",
+        ].includes(String(row.event_type))
       )
       .slice(0, 20)
       .map((row) => ({
@@ -172,6 +211,10 @@ Deno.serve(async (req) => {
           staleServes,
           sharedHits,
           circuitBlocks,
+          probesStarted,
+          probeSuccesses,
+          probeFailures,
+          recoveries,
           activeRefreshLocks: locks.length,
           cacheRows: cacheRows.length,
           freshCacheRows,
@@ -194,13 +237,32 @@ Deno.serve(async (req) => {
         },
         circuit: {
           open: openCircuits.length > 0,
-          providers: (circuits as any[]).map((row) => ({
-            provider: row.provider,
-            consecutiveFailures: row.consecutive_failures,
-            openedUntil: row.opened_until,
-            lastStatus: row.last_status,
-            lastFailureAt: row.last_failure_at,
-          })),
+          halfOpen: halfOpenCircuits.length > 0,
+          providers: providerStates,
+        },
+        selfHealing: {
+          state:
+            openCircuits.length > 0
+              ? "BACKOFF"
+              : halfOpenCircuits.length > 0
+                ? "HALF_OPEN"
+                : recoveries > 0
+                  ? "RECOVERED"
+                  : "CLOSED",
+          probesStarted,
+          probeSuccesses,
+          probeFailures,
+          recoveries,
+          nextProbeAt:
+            openCircuits
+              .map((row) => row.openedUntil)
+              .filter(Boolean)
+              .sort()[0] ?? null,
+          maxBackoffSeconds:
+            providerStates.reduce(
+              (max, row) => Math.max(max, Number(row.backoffSeconds || 0)),
+              0,
+            ),
         },
         byConsumer,
         recentIncidents,
