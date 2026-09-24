@@ -1,0 +1,47 @@
+name: NFL Player Props Shadow Backtest
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "sharp-service/lib/nfl-player-props.js"
+      - "sharp-service/api/nflprops.js"
+      - "scripts/nfl/backtest-nfl-player-props.mjs"
+      - ".github/workflows/nfl-player-props-shadow.yml"
+      - "tests/node/nfl-player-props.test.mjs"
+  pull_request:
+    paths:
+      - "sharp-service/lib/nfl-player-props.js"
+      - "sharp-service/api/nflprops.js"
+      - "scripts/nfl/backtest-nfl-player-props.mjs"
+      - ".github/workflows/nfl-player-props-shadow.yml"
+      - "tests/node/nfl-player-props.test.mjs"
+
+permissions:
+  contents: read
+
+jobs:
+  projection-backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run NFL player props chronological backtest
+        run: |
+          node scripts/nfl/backtest-nfl-player-props.mjs \
+            --seasons=2024,2025 \
+            --min-week=4 \
+            --output-dir=artifacts/nfl-player-props-backtest
+
+      - name: Upload NFL player props backtest artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nfl-player-props-shadow-backtest
+          path: artifacts/nfl-player-props-backtest
