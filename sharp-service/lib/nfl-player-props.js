@@ -16,6 +16,17 @@ const PROVISIONAL_INDEPENDENT_WEIGHT = Object.freeze({
   D: 0
 });
 
+const NFL_PROP_MARKET_SHRINKAGE = Object.freeze({
+  passing_yards: 0,
+  passing_touchdowns: 0,
+  rushing_yards: 0,
+  receiving_receptions: 0,
+  receiving_yards: 0
+});
+
+const NFL_PROP_CALIBRATION_VERSION =
+  "NFL Player Props Development Calibration v1";
+
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(String(value).replace("+", "").replace("%", ""));
@@ -1108,8 +1119,11 @@ function gradePropMarket(prop, opportunity, {
 } = {}) {
   const projection = opportunity?.projections?.[prop.statID];
   if (!projection) return [];
-  const weight =
+  const qualityWeight =
     PROVISIONAL_INDEPENDENT_WEIGHT[opportunity.dataQuality] ?? 0;
+  const marketShrinkage =
+    NFL_PROP_MARKET_SHRINKAGE[prop.statID] ?? 0;
+  const weight = qualityWeight * marketShrinkage;
   const candidates = [];
 
   for (const row of pairedBookLines(prop)) {
@@ -1149,7 +1163,10 @@ function gradePropMarket(prop, opportunity, {
       );
 
       let shadowStatus = "PASS";
-      let reason = "Insufficient calibrated edge.";
+      let reason =
+        marketShrinkage === 0
+          ? "2024 development calibration did not justify independent influence; market-only shadow."
+          : "Insufficient calibrated edge.";
       if (opportunity.dataQuality === "D") {
         shadowStatus = "PASS";
         reason = "Data insufficient.";
@@ -1185,7 +1202,10 @@ function gradePropMarket(prop, opportunity, {
         shadowStatus,
         productionEligible: false,
         productionWeight: 0,
-        provisionalIndependentWeight: weight,
+        provisionalQualityWeight: qualityWeight,
+        marketShrinkage,
+        effectiveIndependentWeight: weight,
+        calibrationVersion: NFL_PROP_CALIBRATION_VERSION,
         reason,
         updatedAt: row.updatedAt
       });
@@ -1201,6 +1221,8 @@ export {
   NFLVERSE_NGS_URL,
   PLAYER_PROP_VERSION,
   PROVISIONAL_INDEPENDENT_WEIGHT,
+  NFL_PROP_MARKET_SHRINKAGE,
+  NFL_PROP_CALIBRATION_VERSION,
   normalizePlayerName,
   pointInTimeRows,
   featureEnvelope,
