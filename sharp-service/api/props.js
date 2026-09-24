@@ -2,6 +2,7 @@ import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
+import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 
 const DEFAULT_BOOKS = ["draftkings", "fanduel", "betmgm", "caesars"];
 
@@ -14,7 +15,6 @@ const PROP_PATTERNS = [
   "batting_totalBases-PLAYER_ID-game-ou-under"
 ];
 
-const CACHE_TTL_MS = 60 * 1000;
 const STALE_TTL_MS = 5 * 60 * 1000;
 
 function csv(value, fallback = []) {
@@ -213,6 +213,11 @@ export default async function handler(req, res) {
     defaultLimit: 20,
     priority: "critical"
   });
+  const refreshPolicy = adaptiveRefreshPolicy({
+    startsBefore: req.query.startsBefore ? startsBefore : null,
+    priority: "critical",
+    now
+  });
   const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const params = new URLSearchParams({
@@ -235,8 +240,8 @@ export default async function handler(req, res) {
     const result = await protectedSportsGameOddsFetch({
       url,
       apiKey,
-      freshMs: CACHE_TTL_MS,
-      staleMs: STALE_TTL_MS,
+      freshMs: refreshPolicy.freshMs,
+      staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs),
       timeoutMs: 8_000,
       consumer: "props",
       priority: "critical",
@@ -253,11 +258,11 @@ export default async function handler(req, res) {
 
     res.setHeader(
       "Cache-Control",
-      "public, max-age=0, s-maxage=60, stale-while-revalidate=240, stale-if-error=300"
+      `public, max-age=0, s-maxage=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 3)}, stale-if-error=300`
     );
     res.setHeader(
       "CDN-Cache-Control",
-      "public, max-age=60, stale-while-revalidate=240, stale-if-error=300"
+      `public, max-age=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 3)}, stale-if-error=300`
     );
     res.setHeader("Vercel-Cache-Tag", "edge-lab-props");
     res.setHeader("X-Props-Cache", result.cacheStatus);
@@ -274,13 +279,15 @@ export default async function handler(req, res) {
         layer: result.cacheLayer,
         sharedEnabled: result.sharedEnabled,
         ageSeconds: Number((result.ageMs / 1000).toFixed(1)),
-        freshForSeconds: CACHE_TTL_MS / 1000,
-        staleForSeconds: STALE_TTL_MS / 1000
+        freshForSeconds: refreshPolicy.suggestedSeconds,
+        staleForSeconds:
+          Math.max(STALE_TTL_MS, refreshPolicy.staleMs) / 1000
       },
       servedStale: result.cacheStatus === "STALE",
       circuitOpen: result.circuitOpen,
       recoveryState: result.recoveryState || "CLOSED",
       requestBudget: result.budget || null,
+      refreshPolicy,
       objectOptimization: {
         ...objectPolicy,
         objectsReturned:
@@ -310,6 +317,7 @@ export default async function handler(req, res) {
       budgetBlocked: Boolean(error?.budgetBlocked),
       objectBudgetBlocked: Boolean(error?.objectBudgetBlocked),
       requestBudget: error?.budget || null,
+      refreshPolicy,
       objectOptimization: error?.objectPolicy || objectPolicy,
       cache: {
         status: "MISS",
@@ -318,8 +326,9 @@ export default async function handler(req, res) {
           process.env.SUPABASE_SECRET_KEY ||
           process.env.SUPABASE_SERVICE_ROLE_KEY
         ),
-        freshForSeconds: CACHE_TTL_MS / 1000,
-        staleForSeconds: STALE_TTL_MS / 1000
+        freshForSeconds: refreshPolicy.suggestedSeconds,
+        staleForSeconds:
+          Math.max(STALE_TTL_MS, refreshPolicy.staleMs) / 1000
       }
     });
   }

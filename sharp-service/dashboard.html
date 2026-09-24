@@ -138,7 +138,10 @@
         <div class="sub">Sports Analytics Command Center</div>
       </div>
     </div>
-    <button class="refresh" id="refreshBtn">Refresh</button>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="sub" id="refreshCadence">Auto 60s</span>
+      <button class="refresh" id="refreshBtn">Refresh</button>
+    </div>
   </div>
 
   <div class="healthline">
@@ -1756,6 +1759,11 @@
     $("mGrades").textContent=s.grades??0;
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+    const cadence=Math.max(
+      15,
+      Math.min(300,Number(data.refreshPolicy?.suggestedSeconds||60))
+    );
+    $("refreshCadence").textContent="Auto "+cadence+"s · "+String(data.refreshPolicy?.mode||"NORMAL").replaceAll("_"," ");
     renderMarketCard(data.marketCard||{});
     renderPlays(data.marketCard||{},data.parlayCorrelation||{});
     renderPropPlaysInPlays(data.playerProps||{});
@@ -1811,7 +1819,22 @@
     throw lastError || new Error("Dashboard request failed");
   }
 
-  async function load(){
+  let refreshTimer=null;
+
+  function scheduleNextRefresh(policy){
+    if(refreshTimer) clearTimeout(refreshTimer);
+    const seconds=Math.max(
+      15,
+      Math.min(300,Number(policy?.suggestedSeconds||60))
+    );
+    refreshTimer=setTimeout(()=>load(false),seconds*1000);
+  }
+
+  async function load(manual=false){
+    if(refreshTimer){
+      clearTimeout(refreshTimer);
+      refreshTimer=null;
+    }
     $("refreshBtn").disabled=true;
     $("refreshBtn").textContent="Loading…";
     try{
@@ -1833,11 +1856,11 @@
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
+      scheduleNextRefresh(DATA?.refreshPolicy);
     }
   }
-  $("refreshBtn").addEventListener("click",load);
-  load();
-  setInterval(load,60000);
+  $("refreshBtn").addEventListener("click",()=>load(true));
+  load(false);
 </script>
 </body>
 </html>

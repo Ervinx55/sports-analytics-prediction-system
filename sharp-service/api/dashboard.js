@@ -1,6 +1,10 @@
 import {
   getSportsGameOddsUsageSnapshot
 } from "../lib/provider-protection.js";
+import {
+  adaptiveRefreshPolicy,
+  nearestCandidateStart
+} from "../lib/adaptive-refresh.js";
 
 const BASE =
   "https://yeoxroijaptomomshdii.supabase.co/functions/v1";
@@ -188,9 +192,32 @@ export default async function handler(req, res) {
     [];
   const movementList = sources.movement.data?.movements || [];
 
+  const nearestStartAt = nearestCandidateStart(
+    activeCandidates,
+    now
+  );
+  const objectUsagePct = Number(
+    sources.providerUsage.data?.mostConstrainedObjects?.usagePct
+  );
+  const refreshPolicy = adaptiveRefreshPolicy({
+    nearestStartAt,
+    priority:
+      readyForSharp > 0 || watch > 0 || playCandidates > 0
+        ? "critical"
+        : "normal",
+    now,
+    providerStatus:
+      sources.providerHealth.data?.status || "HEALTHY",
+    recoveryState:
+      sources.providerHealth.data?.selfHealing?.state || "CLOSED",
+    objectUsagePct:
+      Number.isFinite(objectUsagePct) ? objectUsagePct : null
+  });
+
   return res.status(200).json({
     fetchedAt: new Date().toISOString(),
     sport,
+    refreshPolicy,
     summary: {
       activeCandidates: activeCandidates.length,
       readyForSharp,

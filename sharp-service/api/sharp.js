@@ -2,9 +2,9 @@ import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
+import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 
 const DEFAULT_LEAGUES = ["MLB", "NFL", "NBA", "NHL", "NCAAF", "NCAAB", "MLS"];
-const PROVIDER_FRESH_MS = 60 * 1000;
 const PROVIDER_STALE_MS = 5 * 60 * 1000;
 const PROVIDER_CONCURRENCY = 2;
 
@@ -52,7 +52,8 @@ async function fetchLeague({
   apiKey,
   startsAfter,
   startsBefore,
-  objectPolicy
+  objectPolicy,
+  refreshPolicy
 }) {
   const params = new URLSearchParams({
     leagueID: league,
@@ -77,8 +78,8 @@ async function fetchLeague({
     const result = await protectedSportsGameOddsFetch({
       url,
       apiKey,
-      freshMs: PROVIDER_FRESH_MS,
-      staleMs: PROVIDER_STALE_MS,
+      freshMs: refreshPolicy.freshMs,
+      staleMs: Math.max(PROVIDER_STALE_MS, refreshPolicy.staleMs),
       timeoutMs: 7_000,
       consumer: "sharp",
       priority: "background",
@@ -205,6 +206,11 @@ export default async function handler(req, res) {
     priority: "background",
     fanout: leagues.length
   });
+  const refreshPolicy = adaptiveRefreshPolicy({
+    startsBefore: req.query.startsBefore ? startsBefore : null,
+    priority: "background",
+    now
+  });
   const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const results = await mapWithConcurrency(
@@ -219,7 +225,8 @@ export default async function handler(req, res) {
         apiKey,
         startsAfter,
         startsBefore,
-        objectPolicy
+        objectPolicy,
+        refreshPolicy
       })
   );
 
@@ -261,7 +268,7 @@ export default async function handler(req, res) {
 
   res.setHeader(
     "Cache-Control",
-    "public, max-age=0, s-maxage=30, stale-while-revalidate=90, stale-if-error=180"
+    `public, max-age=0, s-maxage=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 2)}, stale-if-error=300`
   );
   res.setHeader("X-Provider-Cache", providerCache.status);
   res.setHeader(
@@ -303,6 +310,7 @@ export default async function handler(req, res) {
     unavailableLeagues,
     books: books.length ? books : "account-entitled bookmakers",
     includeAltLines,
+    refreshPolicy,
     window: { startsAfter, startsBefore },
     objectOptimization: {
       ...objectPolicy,

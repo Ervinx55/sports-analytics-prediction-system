@@ -2,9 +2,9 @@ import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
+import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 
 const DEFAULT_LEAGUES = ["MLB"];
-const PROVIDER_FRESH_MS = 60 * 1000;
 const PROVIDER_STALE_MS = 5 * 60 * 1000;
 const PROVIDER_CONCURRENCY = 2;
 
@@ -271,7 +271,8 @@ async function fetchLeague({
   startsAfter,
   startsBefore,
   priority,
-  objectPolicy
+  objectPolicy,
+  refreshPolicy
 }) {
   const params = new URLSearchParams({
     leagueID: league,
@@ -296,8 +297,8 @@ async function fetchLeague({
     const result = await protectedSportsGameOddsFetch({
       url,
       apiKey,
-      freshMs: PROVIDER_FRESH_MS,
-      staleMs: PROVIDER_STALE_MS,
+      freshMs: refreshPolicy.freshMs,
+      staleMs: Math.max(PROVIDER_STALE_MS, refreshPolicy.staleMs),
       timeoutMs: 7_000,
       consumer: "board",
       priority,
@@ -428,6 +429,12 @@ export default async function handler(req, res) {
     priority,
     fanout: leagues.length
   });
+  const refreshPolicy = adaptiveRefreshPolicy({
+    live,
+    startsBefore: req.query.startsBefore ? startsBefore : null,
+    priority,
+    now
+  });
   const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const results = await mapWithConcurrency(
@@ -443,7 +450,8 @@ export default async function handler(req, res) {
         startsAfter,
         startsBefore,
         priority,
-        objectPolicy
+        objectPolicy,
+        refreshPolicy
       })
   );
 
@@ -479,7 +487,7 @@ export default async function handler(req, res) {
 
   res.setHeader(
     "Cache-Control",
-    "public, max-age=0, s-maxage=30, stale-while-revalidate=90, stale-if-error=180"
+    `public, max-age=0, s-maxage=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 2)}, stale-if-error=300`
   );
   res.setHeader("X-Provider-Cache", providerCache.status);
   res.setHeader(
@@ -494,6 +502,7 @@ export default async function handler(req, res) {
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
     providerPriority: priority,
+    refreshPolicy,
     objectOptimization: {
       ...objectPolicy,
       objectsReturned: available.reduce(
