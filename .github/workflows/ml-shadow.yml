@@ -1,0 +1,55 @@
+name: TensorFlow Shadow Model
+
+on:
+  push:
+    paths:
+      - "ml/**"
+      - "data/ml/**"
+      - "requirements-ml.txt"
+      - ".github/workflows/ml-shadow.yml"
+  workflow_dispatch:
+
+jobs:
+  train-player-prop-shadow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: requirements-ml.txt
+
+      - name: Install ML dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-ml.txt
+
+      - name: Train TensorFlow challenger
+        env:
+          TF_CPP_MIN_LOG_LEVEL: "2"
+          PYTHONHASHSEED: "42"
+        run: |
+          python ml/train_player_prop_tensorflow.py \
+            --data data/ml/player_prop_training_snapshot.csv \
+            --output-dir artifacts/player_prop_tf_shadow
+
+      - name: Publish model evaluation summary
+        if: always()
+        run: |
+          if [ -f artifacts/player_prop_tf_shadow/summary.md ]; then
+            cat artifacts/player_prop_tf_shadow/summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload shadow model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: player-prop-tensorflow-shadow
+          path: artifacts/player_prop_tf_shadow/
+          if-no-files-found: error
+          retention-days: 30
