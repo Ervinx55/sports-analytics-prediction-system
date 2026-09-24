@@ -459,10 +459,15 @@ function playerNgsRows(ngsRows, {
   playerKey,
   playerNormalized,
   season,
-  cutoff
+  cutoff,
+  schedule
 }) {
   const cutoffYear = new Date(cutoff).getUTCFullYear();
-  return (ngsRows || [])
+  return pointInTimeRows(ngsRows, {
+    cutoff,
+    schedule,
+    source: "ngs"
+  })
     .filter((row) => {
       const id = rowPlayerId(row);
       const name = normalizePlayerName(playerName(row));
@@ -702,7 +707,8 @@ function projectPlayerOpportunity({
     playerKey: identity.id,
     playerNormalized: identity.normalized,
     season,
-    cutoff
+    cutoff,
+    schedule
   });
   const ngsAvailable = ngsRows.length > 0;
 
