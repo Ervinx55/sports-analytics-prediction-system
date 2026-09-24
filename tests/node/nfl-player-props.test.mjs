@@ -307,3 +307,23 @@ test("NFL player props API rejects unsupported methods before fetching", async (
   assert.equal(headers.get("allow"), "GET");
   assert.equal(fetchCalls, 0);
 });
+
+
+test("integer passing TD lines condition model probability on non-push outcomes", () => {
+  const projection = { mean: 2 };
+  const over = independentProbability(
+    projection,
+    2,
+    "over",
+    "passing_touchdowns"
+  );
+  const under = independentProbability(
+    projection,
+    2,
+    "under",
+    "passing_touchdowns"
+  );
+  assert.ok(over > 0);
+  assert.ok(under > 0);
+  assert.ok(Math.abs(over + under - 1) < 1e-9);
+});
