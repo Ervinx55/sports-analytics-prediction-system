@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const rows = (model.props ?? []).map((p: any) => ({
       captured_at: capturedAt,
       sport: "MLB",
-      model_version: model.version ?? "MLB Player Props Model v1.1",
+      model_version: model.version ?? "MLB Player Props Model v1.2",
       event_id: p.eventID,
       game_pk: p.gamePk ?? null,
       starts_at: p.startsAt ?? null,
@@ -81,8 +81,23 @@ Deno.serve(async (req) => {
       data_quality: p.dataQuality ?? null,
       status: p.status,
       reason: p.reason ?? null,
+      tf_shadow_model_version:
+        p.tensorflowShadow?.modelVersion ?? null,
+      tf_shadow_probability:
+        p.tensorflowShadow?.probability ?? null,
+      tf_shadow_ensemble_probability:
+        p.tensorflowShadow?.ensembleProbability ?? null,
+      tf_shadow_production_weight:
+        p.tensorflowShadow?.productionWeight ?? null,
+      tf_shadow_selected_validation_weight:
+        p.tensorflowShadow?.selectedValidationWeight ?? null,
+      tf_shadow_eligible_for_production:
+        p.tensorflowShadow?.eligibleForProduction ?? null,
+      tf_shadow_affects_decision:
+        Boolean(p.tensorflowShadow?.affectsDecision),
       raw: {
         projection: p.projection ?? null,
+        tensorflowShadow: p.tensorflowShadow ?? null,
       },
     }));
 

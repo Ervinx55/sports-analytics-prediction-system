@@ -164,19 +164,20 @@
     },
     {
       "slug": "capture-player-props",
-      "version": 1,
+      "version": 3,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "25b5ca52b963de5df3f38b6314cdeb97404089e24bf315fc5c8e2ad65225d67f",
+      "bundle_sha256": "98ecbaf60ca38de3b20b91dce7cb476491ee59a45c7788bed857ba05dec01ba5",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/capture-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "ec9ec3158c76ba27dfe79d59e0a4f8f84aabe163868595e7c6c0d7f80b512cc0"
+          "sha256": "765d5a182a7ed7cbf69f5e5f9efddf60653de74b829e041ae2bf252818649ec0"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-24"
     },
     {
       "slug": "grade-player-props",
@@ -804,7 +805,7 @@
       "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T08:04:00Z",
+  "final_verified_at": "2026-09-24T08:28:20Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 49,
