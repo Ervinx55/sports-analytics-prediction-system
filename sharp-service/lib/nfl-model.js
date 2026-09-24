@@ -180,21 +180,53 @@ function cacheState() {
   return globalThis.__edgeLabNflDataCache;
 }
 
+function retryableFetchStatus(status) {
+  return (
+    status === 0 ||
+    status === 408 ||
+    status === 429 ||
+    status >= 500
+  );
+}
+
+async function fetchWithRetry(url, options, attempts = 3) {
+  let lastError = null;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        ...options,
+        signal: AbortSignal.timeout(45_000)
+      });
+      if (!response.ok) {
+        const error = new Error(`${response.status} fetching ${url}`);
+        error.status = response.status;
+        throw error;
+      }
+      return response;
+    } catch (error) {
+      lastError = error;
+      const status = Number(error?.status || 0);
+      if (!retryableFetchStatus(status) || attempt === attempts) break;
+      await new Promise((resolve) =>
+        setTimeout(resolve, 750 * attempt)
+      );
+    }
+  }
+  throw lastError || new Error(`Failed fetching ${url}`);
+}
+
 async function fetchTextCached(url, ttlMs = 15 * 60 * 1000) {
   const cache = cacheState();
   const now = Date.now();
   const hit = cache.get(url);
   if (hit && now - hit.at < ttlMs) return hit.text;
 
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     headers: { accept: "text/csv,*/*" },
     cache: "no-store"
   });
-  if (!response.ok) {
-    throw new Error(`${response.status} fetching ${url}`);
-  }
   const text = await response.text();
-  cache.set(url, { at: now, text });
+  cache.set(url, { at: Date.now(), text });
   return text;
 }
 
@@ -204,15 +236,12 @@ async function fetchJsonCached(url, ttlMs = 10 * 60 * 1000) {
   const hit = cache.get(url);
   if (hit && now - hit.at < ttlMs) return hit.json;
 
-  const response = await fetch(url, {
+  const response = await fetchWithRetry(url, {
     headers: { accept: "application/json" },
     cache: "no-store"
   });
-  if (!response.ok) {
-    throw new Error(`${response.status} fetching ${url}`);
-  }
   const json = await response.json();
-  cache.set(url, { at: now, json });
+  cache.set(url, { at: Date.now(), json });
   return json;
 }
 
