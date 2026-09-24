@@ -7,6 +7,9 @@
     },
     "api/dashboard.js": {
       "maxDuration": 30
+    },
+    "api/nflmodel.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
