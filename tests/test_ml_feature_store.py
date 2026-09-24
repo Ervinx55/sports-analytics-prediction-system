@@ -29,3 +29,15 @@ def test_exporter_requires_feature_timestamp_and_labels():
     assert '"feature_available_at"' in source
     assert '"won"' in source
     assert "REQUIRED_COLUMNS" in source
+
+
+def test_sparse_enrichment_is_selected_from_training_window_only():
+    source = (ROOT / "ml" / "train_player_prop_tensorflow.py").read_text()
+    assert "MIN_ENRICHED_FEATURE_COVERAGE = 0.20" in source
+    assert "select_available_features(train)" in source
+    assert "CORE_NUMERIC_FEATURES" in source
+    assert "CORE_CATEGORICAL_FEATURES" in source
+
+    walk_forward = (ROOT / "ml" / "walk_forward_player_prop.py").read_text()
+    assert "select_available_features(train)" in walk_forward
+    assert '"feature_coverage"' in walk_forward

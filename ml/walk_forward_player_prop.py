@@ -30,6 +30,7 @@ from train_player_prop_tensorflow import (
     best_ensemble_weight,
     build_preprocessor,
     build_tensorflow_model,
+    select_available_features,
     clip_probability,
     load_training_frame,
     metrics,
@@ -105,7 +106,13 @@ def train_fold(
     ].copy()
     test = frame[frame["event_key"].isin(layout["test_events"])].copy()
 
-    preprocessor = build_preprocessor()
+    numeric_features, categorical_features, feature_coverage = (
+        select_available_features(train)
+    )
+    preprocessor = build_preprocessor(
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+    )
     x_train = preprocessor.fit_transform(train)
     x_validation = preprocessor.transform(validation)
     x_test = preprocessor.transform(test)
@@ -264,6 +271,9 @@ def train_fold(
         "tensorflow_weight": float(weight),
         "xgboost_weight": float(xgb_selection.blend_weight),
         "xgboost_params": xgb_selection.params,
+        "selected_numeric_features": numeric_features,
+        "selected_categorical_features": categorical_features,
+        "feature_coverage": feature_coverage,
         "market_residual_shrinkage":
             float(residual_selection.shrinkage),
         "market_residual_params": residual_selection.params,

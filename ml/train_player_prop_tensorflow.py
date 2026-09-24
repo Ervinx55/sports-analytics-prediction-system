@@ -110,6 +110,24 @@ CATEGORICAL_FEATURES = [
     "game_delay_risk",
 ]
 
+CORE_NUMERIC_FEATURES = {
+    "line",
+    "model_mean",
+    "raw_independent_probability",
+    "model_probability",
+    "push_probability",
+    "market_fair_probability",
+    "edge_pct_points",
+    "best_odds",
+    "exact_line_book_count",
+    "paired_books",
+    "ev_pct",
+    "data_quality",
+    "minutes_to_start",
+}
+CORE_CATEGORICAL_FEATURES = {"stat_id", "side"}
+MIN_ENRICHED_FEATURE_COVERAGE = 0.20
+
 PROMOTION_POLICY = {
     "min_unique_events": 50,
     "min_coverage_days": 14.0,
@@ -285,7 +303,53 @@ def split_by_event(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.Dat
     return train, val, test
 
 
-def build_preprocessor() -> ColumnTransformer:
+def select_available_features(
+    frame: pd.DataFrame,
+    min_coverage: float = MIN_ENRICHED_FEATURE_COVERAGE,
+) -> tuple[list[str], list[str], dict[str, float]]:
+    coverage: dict[str, float] = {}
+    numeric: list[str] = []
+    categorical: list[str] = []
+
+    for feature in NUMERIC_FEATURES:
+        present = (
+            frame[feature].notna()
+            if feature in frame.columns
+            else pd.Series(False, index=frame.index)
+        )
+        ratio = float(present.mean()) if len(frame) else 0.0
+        coverage[feature] = ratio
+        unique = int(frame.loc[present, feature].nunique()) if present.any() else 0
+        if (
+            feature in CORE_NUMERIC_FEATURES
+            or (ratio >= min_coverage and unique >= 2)
+        ):
+            numeric.append(feature)
+
+    for feature in CATEGORICAL_FEATURES:
+        present = (
+            frame[feature].notna()
+            if feature in frame.columns
+            else pd.Series(False, index=frame.index)
+        )
+        ratio = float(present.mean()) if len(frame) else 0.0
+        coverage[feature] = ratio
+        unique = int(frame.loc[present, feature].nunique()) if present.any() else 0
+        if (
+            feature in CORE_CATEGORICAL_FEATURES
+            or (ratio >= min_coverage and unique >= 2)
+        ):
+            categorical.append(feature)
+
+    return numeric, categorical, coverage
+
+
+def build_preprocessor(
+    numeric_features: list[str] | None = None,
+    categorical_features: list[str] | None = None,
+) -> ColumnTransformer:
+    numeric_features = numeric_features or list(NUMERIC_FEATURES)
+    categorical_features = categorical_features or list(CATEGORICAL_FEATURES)
     return ColumnTransformer(
         transformers=[
             (
@@ -303,7 +367,7 @@ def build_preprocessor() -> ColumnTransformer:
                         ("scale", StandardScaler()),
                     ]
                 ),
-                NUMERIC_FEATURES,
+                numeric_features,
             ),
             (
                 "categorical",
@@ -326,7 +390,7 @@ def build_preprocessor() -> ColumnTransformer:
                         ),
                     ]
                 ),
-                CATEGORICAL_FEATURES,
+                categorical_features,
             ),
         ],
         remainder="drop",
@@ -529,7 +593,13 @@ def main() -> None:
     frame = load_training_frame(data_path)
     train, val, test = split_by_event(frame)
 
-    preprocessor = build_preprocessor()
+    numeric_features, categorical_features, feature_coverage = (
+        select_available_features(train)
+    )
+    preprocessor = build_preprocessor(
+        numeric_features=numeric_features,
+        categorical_features=categorical_features,
+    )
     x_train = preprocessor.fit_transform(train)
     x_val = preprocessor.transform(val)
     x_test = preprocessor.transform(test)
@@ -685,8 +755,12 @@ def main() -> None:
             "test_events": int(test["event_key"].nunique()),
         },
         "features": {
-            "numeric": NUMERIC_FEATURES,
-            "categorical": CATEGORICAL_FEATURES,
+            "numeric": numeric_features,
+            "categorical": categorical_features,
+            "candidate_numeric": NUMERIC_FEATURES,
+            "candidate_categorical": CATEGORICAL_FEATURES,
+            "minimum_enriched_coverage": MIN_ENRICHED_FEATURE_COVERAGE,
+            "training_coverage": feature_coverage,
             "transformed_dimension": int(x_train.shape[1]),
             "feature_store": True,
             "coverage": {
@@ -803,7 +877,7 @@ def main() -> None:
             else 0.0
         ),
         "selectedValidationWeight": float(ensemble_weight),
-        "numericFeatures": NUMERIC_FEATURES,
+        "numericFeatures": numeric_features,
         "numericImputerStatistics": np.asarray(
             numeric_imputer.statistics_, dtype=float
         ).round(10).tolist(),
@@ -821,7 +895,7 @@ def main() -> None:
         "numericScale": np.asarray(
             numeric_scaler.scale_, dtype=float
         ).round(10).tolist(),
-        "categoricalFeatures": CATEGORICAL_FEATURES,
+        "categoricalFeatures": categorical_features,
         "categoricalMissingValue": str(categorical_imputer.fill_value),
         "categoricalCategories": [
             [str(value) for value in values]
