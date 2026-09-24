@@ -75,7 +75,7 @@ def test_historical_migration_inventory_is_exact():
         assert (ROOT / expected_path).exists()
 
 
-EXPECTED_EDGE_FUNCTION_COUNT = 50
+EXPECTED_EDGE_FUNCTION_COUNT = 51
 
 
 def test_edge_function_recovery_is_complete_and_configured():
@@ -204,3 +204,31 @@ def test_ml_training_export_rpc_is_service_role_only():
     assert "from public, anon, authenticated" in sql
     assert "grant execute on function public.export_player_prop_training_rows()" in sql
     assert "to service_role" in sql
+
+
+def test_player_prop_feature_store_is_temporal_and_server_only():
+    sql = (
+        ROOT
+        / "supabase"
+        / "migrations"
+        / "20260924091806_add_player_prop_feature_store.sql"
+    ).read_text().lower()
+    assert "security_invoker = true" in sql
+    assert "feature_available_at < s.starts_at" in sql
+    assert "enable row level security" in sql
+    assert "mlb_pitchmix_feature_snapshots" in sql
+    assert "service_role" in sql
+
+
+def test_pitchmix_capture_is_scheduled_and_authenticated():
+    config = tomllib.loads((ROOT / "supabase" / "config.toml").read_text())
+    assert config["functions"]["capture-pitchmix-features"]["verify_jwt"] is True
+    cron = json.loads(
+        (ROOT / "supabase" / "manifests" / "cron-jobs.json").read_text()
+    )
+    match = [
+        item for item in cron["items"]
+        if item["jobname"] == "mlb-pitchmix-features-10min"
+    ]
+    assert len(match) == 1
+    assert match[0]["schedule"] == "*/10 * * * *"

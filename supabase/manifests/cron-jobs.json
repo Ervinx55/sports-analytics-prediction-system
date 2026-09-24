@@ -1,6 +1,6 @@
 {
   "project_ref": "yeoxroijaptomomshdii",
-  "captured_at": "2026-09-23T21:28:53.825Z",
+  "captured_at": "2026-09-24T09:21:26Z",
   "items": [
     {
       "active": true,
@@ -73,6 +73,12 @@
       "jobname": "mlb-model-grading-hourly",
       "schedule": "35 * * * *",
       "command_sha256": "bc3340f43b1aca1353920027a15b07208deb0a80473cfcd0c35a9c1758f336e5"
+    },
+    {
+      "active": true,
+      "jobname": "mlb-pitchmix-features-10min",
+      "schedule": "*/10 * * * *",
+      "command_sha256": "ba6f508c77e405d68ddd0d054552ee47247165a119f0d48ea8d67ab36c70b190"
     },
     {
       "active": true,
@@ -216,6 +222,6 @@
   "final_verified_at": "2026-09-23T23:25:32Z",
   "authority_verification": {
     "status": "MATCH",
-    "job_count": 35
+    "job_count": 36
   }
 }

@@ -803,13 +803,29 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "capture-pitchmix-features",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "ce3481934781248c5bc4655ad51cf0f2186b8a05b3aa594f20c6fb86e132e81c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-pitchmix-features/index.ts",
+          "name": "index.ts",
+          "sha256": "bb792e3805337970a559df2b535421bae651546369ff09cfa57f4d74bad888e4"
+        }
+      ],
+      "deployed_at": "2026-09-24"
     }
   ],
-  "final_verified_at": "2026-09-24T08:28:20Z",
+  "final_verified_at": "2026-09-24T09:21:26Z",
   "authority_verification": {
     "status": "MATCH",
-    "active_functions": 49,
+    "active_functions": 50,
     "metadata_and_bundle_sha_match": true,
-    "repository_total_edge_functions": 50
+    "repository_total_edge_functions": 51
   }
 }

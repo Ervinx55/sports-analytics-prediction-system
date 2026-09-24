@@ -281,14 +281,41 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260924091806",
+      "name": "add_player_prop_feature_store",
+      "path": "supabase/migrations/20260924091806_add_player_prop_feature_store.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260924091911",
+      "name": "fix_player_prop_training_export_targets",
+      "path": "supabase/migrations/20260924091911_fix_player_prop_training_export_targets.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260924092126",
+      "name": "schedule_pitchmix_feature_capture",
+      "path": "supabase/migrations/20260924092126_schedule_pitchmix_feature_capture.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-24T08:43:42Z",
+  "final_verified_at": "2026-09-24T09:21:26Z",
   "authority_verification": {
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 33,
+    "repository_total_migrations": 36,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

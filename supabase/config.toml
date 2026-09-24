@@ -152,3 +152,6 @@ verify_jwt = false
 
 [functions.provider-health-status]
 verify_jwt = false
+
+[functions.capture-pitchmix-features]
+verify_jwt = true
