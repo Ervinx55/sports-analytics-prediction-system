@@ -1,3 +1,4 @@
+import { gunzipSync } from "node:zlib";
 import { normalizeTeam, parseCsv } from "./nfl-model.js";
 
 const NFLVERSE_PLAYER_STATS_URL = (season) =>
@@ -5,7 +6,7 @@ const NFLVERSE_PLAYER_STATS_URL = (season) =>
 const NFLVERSE_SNAP_COUNTS_URL = (season) =>
   `https://github.com/nflverse/nflverse-data/releases/download/snap_counts/snap_counts_${season}.csv`;
 const NFLVERSE_NGS_URL = (statType) =>
-  `https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_${statType}.csv`;
+  `https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_${statType}.csv.gz`;
 
 const PLAYER_PROP_VERSION = "NFL Player Props v1.1-shadow";
 const PROVISIONAL_INDEPENDENT_WEIGHT = Object.freeze({
@@ -197,7 +198,10 @@ async function fetchCsv(url, ttlMs = 15 * 60 * 1000) {
   if (!response.ok) {
     throw new Error(`${response.status} fetching ${url}`);
   }
-  const rows = parseCsv(await response.text());
+  const text = url.endsWith(".gz")
+    ? gunzipSync(Buffer.from(await response.arrayBuffer())).toString("utf8")
+    : await response.text();
+  const rows = parseCsv(text);
   cache.set(url, { at: now, rows });
   return rows;
 }
