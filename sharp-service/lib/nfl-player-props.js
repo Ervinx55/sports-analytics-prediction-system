@@ -185,33 +185,59 @@ function cacheState() {
   return globalThis.__edgeLabNflPlayerCache;
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function fetchCsv(url, ttlMs = 15 * 60 * 1000) {
   const cache = cacheState();
   const now = Date.now();
   const hit = cache.get(url);
   if (hit && now - hit.at < ttlMs) return hit.rows;
 
-  const response = await fetch(url, {
-    headers: { accept: "text/csv,*/*" },
-    cache: "no-store"
-  });
-  if (!response.ok) {
-    throw new Error(`${response.status} fetching ${url}`);
+  let lastError = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: { accept: "text/csv,*/*" },
+        cache: "no-store",
+        signal: AbortSignal.timeout(45_000)
+      });
+      if (!response.ok) {
+        const error = new Error(`${response.status} fetching ${url}`);
+        error.status = response.status;
+        throw error;
+      }
+
+      let text;
+      if (url.endsWith(".gz")) {
+        const bytes = Buffer.from(await response.arrayBuffer());
+        const gzipped =
+          bytes.length >= 2 &&
+          bytes[0] === 0x1f &&
+          bytes[1] === 0x8b;
+        text = (gzipped ? gunzipSync(bytes) : bytes).toString("utf8");
+      } else {
+        text = await response.text();
+      }
+
+      const rows = parseCsv(text);
+      cache.set(url, { at: Date.now(), rows });
+      return rows;
+    } catch (error) {
+      lastError = error;
+      const status = Number(error?.status || 0);
+      const retryable =
+        status === 0 ||
+        status === 408 ||
+        status === 429 ||
+        status >= 500;
+      if (!retryable || attempt === 3) break;
+      await sleep(750 * attempt);
+    }
   }
-  let text;
-  if (url.endsWith(".gz")) {
-    const bytes = Buffer.from(await response.arrayBuffer());
-    const gzipped =
-      bytes.length >= 2 &&
-      bytes[0] === 0x1f &&
-      bytes[1] === 0x8b;
-    text = (gzipped ? gunzipSync(bytes) : bytes).toString("utf8");
-  } else {
-    text = await response.text();
-  }
-  const rows = parseCsv(text);
-  cache.set(url, { at: now, rows });
-  return rows;
+
+  throw lastError || new Error(`Failed fetching ${url}`);
 }
 
 async function optionalCsv(url) {
