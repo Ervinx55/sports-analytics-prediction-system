@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
+      - "sharp-service/lib/nfl-model.js"
       - "sharp-service/lib/nfl-player-props.js"
       - "sharp-service/api/nflprops.js"
       - "scripts/nfl/backtest-nfl-player-props.mjs"
@@ -11,6 +12,7 @@ on:
       - "tests/node/nfl-player-props.test.mjs"
   pull_request:
     paths:
+      - "sharp-service/lib/nfl-model.js"
       - "sharp-service/lib/nfl-player-props.js"
       - "sharp-service/api/nflprops.js"
       - "scripts/nfl/backtest-nfl-player-props.mjs"
