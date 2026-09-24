@@ -759,6 +759,43 @@
       </div>`;
   }
 
+  function freshnessClass(grade){
+    return grade==="A"||grade==="B"?"play":grade==="C"?"pending":"pass";
+  }
+
+  function freshnessPanel(row){
+    const f=row?.freshness;
+    if(!f) return "";
+    const labels={
+      market:"Market",
+      sharp:"Sharp",
+      lineup:"Lineup",
+      weather:"Weather",
+      fusion:"Fusion",
+      prop_market:"Prop market",
+      lineup_role:"Lineup/role",
+      decision_timing:"Timing"
+    };
+    const components=(f.components||[])
+      .filter(x=>x.required||x.timestamp)
+      .map(x=>{
+        const age=x.ageMinutes==null
+          ?"missing"
+          :Number(x.ageMinutes).toFixed(Number(x.ageMinutes)<10?1:0)+"m";
+        const target=Number(x.targetMinutes||0).toFixed(0)+"m";
+        const stale=x.ageMinutes==null||Number(x.ageMinutes)>Number(x.targetMinutes);
+        return (labels[x.name]||x.name)+" "+age+"/"+target+(stale?" !":"");
+      });
+    const action=f.action&&f.action!=="KEEP"
+      ?" · "+String(f.action).replaceAll("_"," ")
+      :"";
+    return `
+      <div class="why ${freshnessClass(f.grade)}" style="margin-top:8px">
+        <strong>FRESHNESS ${esc(f.grade||"—")} · ${f.score==null?"—":Number(f.score).toFixed(0)}/100</strong>${esc(action)}
+        ${components.length?'<div style="margin-top:4px">'+components.map(esc).join(" · ")+'</div>':""}
+      </div>`;
+  }
+
   function renderMarketCard(card){
     const rows=card?.markets||[];
     if(!rows.length){
@@ -798,6 +835,7 @@
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
+                  ${freshnessPanel(m)}
                   ${fusionPanel(m)}
                   ${timingPanel(m)}
                   <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
@@ -916,6 +954,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
           </div>
           <div class="why play">${esc(marketWhy(g))}</div>
+          ${freshnessPanel(g)}
           ${fusionPanel(g)}
           ${timingPanel(g)}
           <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
@@ -981,6 +1020,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
+        ${freshnessPanel(p)}
         ${fusionPanel(p)}
         ${timingPanel(p)}
         ${clvPanel(p)}
@@ -1082,6 +1122,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
+          ${freshnessPanel(p)}
           ${fusionPanel(p)}
         ${timingPanel(p)}
           ${clvPanel(p)}
@@ -1101,6 +1142,7 @@
             <span class="badge watch">PENDING</span>
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
+          ${freshnessPanel(p)}
           ${fusionPanel(p)}
         ${timingPanel(p)}
           ${clvPanel(p)}
@@ -1118,6 +1160,7 @@
             <div class="main">${esc(p.label)}</div>
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
+            ${freshnessPanel(p)}
             ${fusionPanel(p)}
         ${timingPanel(p)}
             ${clvPanel(p)}

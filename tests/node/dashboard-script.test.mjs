@@ -30,3 +30,13 @@ test("provider health observability is wired into the dashboard", () => {
     /renderProviderHealth\([\s\S]*data\.providerHealth\|\|\{\}[\s\S]*data\.providerUsage\|\|null[\s\S]*\)/
   );
 });
+
+
+test("freshness grades are visible on team markets and player props", () => {
+  assert.match(html, /function freshnessPanel\(row\)/);
+  assert.match(html, /FRESHNESS/);
+  assert.match(html, /Prop market/);
+  assert.match(html, /Lineup\/role/);
+  assert.match(html, /freshnessPanel\(m\)/);
+  assert.match(html, /freshnessPanel\(p\)/);
+});
