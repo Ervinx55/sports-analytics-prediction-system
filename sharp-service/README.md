@@ -2,8 +2,14 @@
 
 Deploy this folder as the Vercel project root.
 
-Required environment variable:
-- SPORTS_ODDS_API_KEY
+Odds provider environment variables:
+- SPORTS_ODDS_API_KEY — primary SportsGameOdds provider
+- SHARPAPI_KEY — SharpAPI fallback provider
+
+At least one odds-provider key must be configured for the market board. When
+both are present, Edge Lab uses SportsGameOdds first and automatically falls
+back to SharpAPI for leagues that the primary provider cannot serve. The MLB
+props endpoint follows the same failover order.
 
 Optional:
 - SHARP_MONITOR_TOKEN
@@ -13,7 +19,9 @@ Endpoint:
 
 ## Compact market board
 
-Use `GET /api/board` for a small game-market response containing only:
+Use `GET /api/board` for a small game-market response. The provider chain is
+SportsGameOdds -> SharpAPI; provider identity is surfaced in `source`,
+`providersUsed`, and `providerFailures`. The response contains only:
 - matchup and start time
 - moneyline
 - spread / run line
