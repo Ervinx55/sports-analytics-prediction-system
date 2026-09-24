@@ -227,14 +227,22 @@
       "recoveredFromProduction": false,
       "catchup": true,
       "statementCount": null
+    },
+    {
+      "version": "20260924062118",
+      "name": "add_provider_response_cache",
+      "path": "supabase/migrations/20260924062118_add_provider_response_cache.sql",
+      "sha256": null,
+      "recoveredFromProduction": true,
+      "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-23T23:25:32Z",
+  "final_verified_at": "2026-09-24T06:21:18Z",
   "authority_verification": {
     "status": "MATCH",
-    "production_recorded_historical_migrations": 17,
-    "recovered_historical_migrations": 17,
-    "repository_total_migrations": 27,
+    "production_recorded_historical_migrations": 18,
+    "recovered_historical_migrations": 18,
+    "repository_total_migrations": 28,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
