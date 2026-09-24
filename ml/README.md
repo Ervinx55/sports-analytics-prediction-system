@@ -79,3 +79,27 @@ This challenger remains shadow-only. Its walk-forward score is compared directly
 against the market baseline, because the question is whether the learned
 correction adds information beyond the market—not merely whether it beats a
 weaker internal model.
+
+
+## Leakage-safe historical feature store
+
+Player-prop training now consumes `public.player_prop_feature_store`, a
+security-invoker view that builds the final pregame feature vector from only
+sources observed before first pitch. Each row carries `feature_available_at`;
+training discards any row whose feature timestamp reaches or crosses game start.
+
+Structured features now include:
+
+- opening/current prop line and fair-probability movement,
+- lineup/role confirmation and batting-order position,
+- starter handedness and starter/lineup/catcher change flags,
+- lineup OPS context and bullpen workload scores,
+- temperature, humidity, wind, roof, park and run/HR/hit/K multipliers,
+- prop-specific weather impact and delay risk,
+- optional pitch-mix xwOBA mismatch, arsenal coverage and probability adjustment,
+- source coverage and freshness timing.
+
+Sparse fields are median/constant imputed with explicit missingness indicators.
+Pitch-mix is captured separately every 10 minutes only for games inside the final
+~130-minute pregame window, keeping Baseball Savant work out of the core prop
+capture path.

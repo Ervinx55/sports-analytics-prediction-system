@@ -10,32 +10,21 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
-COLUMNS = [
+REQUIRED_COLUMNS = {
     "observation_id",
-    "captured_at",
+    "feature_available_at",
     "starts_at",
     "event_id",
-    "game_pk",
     "player_id",
     "stat_id",
     "line",
     "side",
-    "model_mean",
-    "raw_independent_probability",
     "model_probability",
-    "push_probability",
     "market_fair_probability",
-    "edge_pct_points",
-    "best_odds",
-    "exact_line_book_count",
-    "paired_books",
-    "ev_pct",
-    "data_quality",
-    "status",
     "won",
     "pushed",
     "outcome",
-]
+}
 
 
 def main() -> None:
@@ -76,13 +65,21 @@ def main() -> None:
     if not isinstance(rows, list) or not rows:
         raise SystemExit("Supabase training export returned no rows.")
 
+    columns = list(rows[0].keys())
+    missing = sorted(REQUIRED_COLUMNS - set(columns))
+    if missing:
+        raise SystemExit(
+            "Supabase training export is missing required columns: "
+            + ", ".join(missing)
+        )
+
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=COLUMNS)
+        writer = csv.DictWriter(handle, fieldnames=columns)
         writer.writeheader()
         for row in rows:
-            writer.writerow({column: row.get(column) for column in COLUMNS})
+            writer.writerow({column: row.get(column) for column in columns})
 
     print(f"SNAPSHOT_ROWS={len(rows)}")
     print("SNAPSHOT_SOURCE=SUPABASE_LIVE")

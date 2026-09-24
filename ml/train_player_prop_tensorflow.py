@@ -20,6 +20,7 @@ import pandas as pd
 import tensorflow as tf
 from sklearn.compose import ColumnTransformer
 from sklearn.linear_model import LogisticRegression
+from sklearn.impute import SimpleImputer
 from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
@@ -48,8 +49,66 @@ NUMERIC_FEATURES = [
     "ev_pct",
     "data_quality",
     "minutes_to_start",
+    "market_open_line",
+    "market_current_line",
+    "line_move_open_to_current",
+    "market_open_fair_probability",
+    "market_current_fair_probability",
+    "market_probability_move_pp",
+    "market_quote_age_minutes",
+    "in_starting_lineup",
+    "batting_order_spot",
+    "is_confirmed_starter",
+    "catcher_change_after_model",
+    "opposing_starter_change_after_model",
+    "opposing_handedness_change_after_model",
+    "verification_data_quality",
+    "own_lineup_avg_ops",
+    "opponent_lineup_avg_ops",
+    "own_bullpen_score",
+    "opponent_bullpen_score",
+    "game_starter_changed",
+    "game_lineup_changed",
+    "game_catcher_changed",
+    "game_handedness_changed",
+    "weather_impact_multiplier",
+    "weather_environment_multiplier",
+    "prop_weather_data_quality",
+    "weather_change_after_model",
+    "temp_f",
+    "humidity_pct",
+    "precip_probability_pct",
+    "wind_mph",
+    "wind_direction_deg",
+    "park_factor",
+    "run_multiplier",
+    "hr_multiplier",
+    "hits_tb_multiplier",
+    "starter_durability_multiplier",
+    "strikeout_opportunity_multiplier",
+    "game_weather_data_quality",
+    "pitchmix_weighted_xwoba_delta",
+    "pitchmix_probability_adjustment",
+    "pitchmix_arsenal_coverage",
+    "pitchmix_usable_usage",
+    "feature_source_count",
 ]
-CATEGORICAL_FEATURES = ["stat_id", "side"]
+CATEGORICAL_FEATURES = [
+    "stat_id",
+    "side",
+    "best_book",
+    "player_role",
+    "player_team_side",
+    "opposing_starter_hand",
+    "own_starter_hand",
+    "own_bullpen_level",
+    "opponent_bullpen_level",
+    "weather_impact_direction",
+    "prop_delay_risk",
+    "roof_status",
+    "wind_class",
+    "game_delay_risk",
+]
 
 PROMOTION_POLICY = {
     "min_unique_events": 50,
@@ -109,8 +168,20 @@ def metrics(y_true: np.ndarray, probs: np.ndarray) -> dict[str, float]:
 
 def load_training_frame(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path)
+
+    # Backward-compatible with the original committed snapshot while preferring
+    # the leakage-safe feature-store timestamps when present.
+    if "observation_captured_at" not in df.columns:
+        if "captured_at" in df.columns:
+            df["observation_captured_at"] = df["captured_at"]
+        else:
+            df["observation_captured_at"] = pd.NaT
+    if "feature_available_at" not in df.columns:
+        df["feature_available_at"] = df["observation_captured_at"]
+
     for col in [
-        "captured_at",
+        "observation_captured_at",
+        "feature_available_at",
         "starts_at",
     ]:
         df[col] = pd.to_datetime(df[col], utc=True, errors="coerce")
@@ -131,23 +202,31 @@ def load_training_frame(path: Path) -> pd.DataFrame:
     df["pushed"] = df["pushed"].map(bool_map).fillna(False)
 
     for col in NUMERIC_FEATURES:
-        if col == "minutes_to_start":
-            continue
+        if col not in df.columns:
+            df[col] = np.nan
         df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    for col in CATEGORICAL_FEATURES:
+        if col not in df.columns:
+            df[col] = np.nan
+
+    df["decision_at"] = df["feature_available_at"].fillna(
+        df["observation_captured_at"]
+    )
 
     df = df[
         df["won"].notna()
         & (~df["pushed"].astype(bool))
         & df["starts_at"].notna()
-        & df["captured_at"].notna()
+        & df["decision_at"].notna()
         & df["model_probability"].notna()
         & df["market_fair_probability"].notna()
     ].copy()
 
-    # Strictly pregame only: no observation captured after scheduled start.
-    df = df[df["captured_at"] < df["starts_at"]].copy()
+    # No source timestamp may reach or cross first pitch.
+    df = df[df["decision_at"] < df["starts_at"]].copy()
     df["minutes_to_start"] = (
-        (df["starts_at"] - df["captured_at"]).dt.total_seconds() / 60.0
+        (df["starts_at"] - df["decision_at"]).dt.total_seconds() / 60.0
     ).clip(lower=0.0, upper=24 * 60.0)
 
     df["event_key"] = df["game_pk"].fillna(df["event_id"]).astype(str)
@@ -163,18 +242,16 @@ def load_training_frame(path: Path) -> pd.DataFrame:
         + df["side"].astype(str)
     )
 
-    # One pregame decision snapshot per actual prop outcome prevents repeated
-    # snapshots of the same result from dominating training/evaluation.
+    # One final-pregame feature vector per unique prop outcome.
     df = (
-        df.sort_values(["outcome_key", "captured_at", "observation_id"])
+        df.sort_values(["outcome_key", "decision_at", "observation_id"])
         .groupby("outcome_key", as_index=False)
         .tail(1)
-        .sort_values(["starts_at", "captured_at", "observation_id"])
+        .sort_values(["starts_at", "decision_at", "observation_id"])
         .reset_index(drop=True)
     )
     df["target"] = df["won"].astype(int)
     return df
-
 
 def split_by_event(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     event_order = (
@@ -215,6 +292,14 @@ def build_preprocessor() -> ColumnTransformer:
                 "numeric",
                 Pipeline(
                     steps=[
+                        (
+                            "impute",
+                            SimpleImputer(
+                                strategy="median",
+                                add_indicator=True,
+                                keep_empty_features=True,
+                            ),
+                        ),
                         ("scale", StandardScaler()),
                     ]
                 ),
@@ -222,7 +307,25 @@ def build_preprocessor() -> ColumnTransformer:
             ),
             (
                 "categorical",
-                OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                Pipeline(
+                    steps=[
+                        (
+                            "impute",
+                            SimpleImputer(
+                                strategy="constant",
+                                fill_value="__MISSING__",
+                                keep_empty_features=True,
+                            ),
+                        ),
+                        (
+                            "encode",
+                            OneHotEncoder(
+                                handle_unknown="ignore",
+                                sparse_output=False,
+                            ),
+                        ),
+                    ]
+                ),
                 CATEGORICAL_FEATURES,
             ),
         ],
@@ -585,6 +688,21 @@ def main() -> None:
             "numeric": NUMERIC_FEATURES,
             "categorical": CATEGORICAL_FEATURES,
             "transformed_dimension": int(x_train.shape[1]),
+            "feature_store": True,
+            "coverage": {
+                "market_movement": float(
+                    frame["market_probability_move_pp"].notna().mean()
+                ),
+                "lineup_role": float(frame["player_role"].notna().mean()),
+                "weather": float(
+                    frame["weather_impact_multiplier"].notna().mean()
+                ),
+                "game_weather": float(frame["temp_f"].notna().mean()),
+                "bullpen": float(frame["own_bullpen_score"].notna().mean()),
+                "pitchmix": float(
+                    frame["pitchmix_weighted_xwoba_delta"].notna().mean()
+                ),
+            },
         },
         "training": {
             "epochs_ran": int(len(history.history.get("loss", []))),
@@ -651,11 +769,12 @@ def main() -> None:
         output_dir / "market_residual_challenger.json"
     )
 
-    numeric_scaler = (
-        preprocessor.named_transformers_["numeric"]
-        .named_steps["scale"]
-    )
-    categorical_encoder = preprocessor.named_transformers_["categorical"]
+    numeric_pipeline = preprocessor.named_transformers_["numeric"]
+    numeric_imputer = numeric_pipeline.named_steps["impute"]
+    numeric_scaler = numeric_pipeline.named_steps["scale"]
+    categorical_pipeline = preprocessor.named_transformers_["categorical"]
+    categorical_imputer = categorical_pipeline.named_steps["impute"]
+    categorical_encoder = categorical_pipeline.named_steps["encode"]
 
     dense_layers = []
     for layer in model.layers:
@@ -672,6 +791,7 @@ def main() -> None:
         )
 
     inference_bundle = {
+        "schemaVersion": 2,
         "model": report["model"],
         "mode": "SHADOW",
         "eligibleForProduction": bool(
@@ -684,6 +804,17 @@ def main() -> None:
         ),
         "selectedValidationWeight": float(ensemble_weight),
         "numericFeatures": NUMERIC_FEATURES,
+        "numericImputerStatistics": np.asarray(
+            numeric_imputer.statistics_, dtype=float
+        ).round(10).tolist(),
+        "numericMissingIndicatorFeatures": (
+            []
+            if numeric_imputer.indicator_ is None
+            else [
+                int(value)
+                for value in numeric_imputer.indicator_.features_.tolist()
+            ]
+        ),
         "numericMean": np.asarray(
             numeric_scaler.mean_, dtype=float
         ).round(10).tolist(),
@@ -691,6 +822,7 @@ def main() -> None:
             numeric_scaler.scale_, dtype=float
         ).round(10).tolist(),
         "categoricalFeatures": CATEGORICAL_FEATURES,
+        "categoricalMissingValue": str(categorical_imputer.fill_value),
         "categoricalCategories": [
             [str(value) for value in values]
             for values in categorical_encoder.categories_
