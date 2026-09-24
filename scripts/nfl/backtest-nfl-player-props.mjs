@@ -467,7 +467,10 @@ async function backtestSeason(season, minWeek) {
 
     for (const [market, actualField] of targetMarkets(target)) {
       const actual = num(target[actualField]);
-      const prediction = num(opportunity.projections?.[market]?.mean);
+      const projection = opportunity.projections?.[market];
+      const prediction = num(
+        projection?.opportunityMean ?? projection?.mean
+      );
       if (actual === null || prediction === null) continue;
 
       const baseline = priorMetricMean({
