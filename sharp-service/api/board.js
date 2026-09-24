@@ -3,6 +3,9 @@ import {
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
+import {
+  fetchSharpApiBoardLeague
+} from "../lib/sharpapi-provider.js";
 
 const DEFAULT_LEAGUES = ["MLB"];
 const PROVIDER_STALE_MS = 5 * 60 * 1000;
@@ -308,6 +311,7 @@ async function fetchLeague({
     return {
       league,
       ok: true,
+      provider: "SportsGameOdds",
       events: (result.payload?.data || []).map(summarizeEvent),
       nextCursor: result.payload?.nextCursor ?? null,
       providerFetchedAt: new Date(result.fetchedAt).toISOString(),
@@ -331,6 +335,7 @@ async function fetchLeague({
     return {
       league,
       ok: false,
+      provider: "SportsGameOdds",
       status: Number(error?.status || 502),
       error:
         error instanceof Error
@@ -393,9 +398,11 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
-  if (!apiKey) {
+  const sharpApiKey = process.env.SHARPAPI_KEY;
+  if (!apiKey && !sharpApiKey) {
     return res.status(500).json({
-      error: "SPORTS_ODDS_API_KEY is not configured on the server"
+      error:
+        "No odds provider is configured. Set SPORTS_ODDS_API_KEY or SHARPAPI_KEY."
     });
   }
 
@@ -422,13 +429,24 @@ export default async function handler(req, res) {
     live,
     req.query.startsBefore ? startsBefore : ""
   );
-  const objectPolicy = await optimizeSportsGameOddsObjectLimit({
-    apiKey,
-    requestedLimit,
-    defaultLimit: 30,
-    priority,
-    fanout: leagues.length
-  });
+  const objectPolicy = apiKey
+    ? await optimizeSportsGameOddsObjectLimit({
+        apiKey,
+        requestedLimit,
+        defaultLimit: 30,
+        priority,
+        fanout: leagues.length
+      })
+    : {
+        requestedLimit,
+        effectiveLimit: requestedLimit,
+        fanout: leagues.length,
+        projectedMaxObjects: 0,
+        priority,
+        pressure: "NOT_CONFIGURED",
+        source: "provider_disabled",
+        blocked: true
+      };
   const refreshPolicy = adaptiveRefreshPolicy({
     live,
     startsBefore: req.query.startsBefore ? startsBefore : null,
@@ -437,53 +455,151 @@ export default async function handler(req, res) {
   });
   const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
-  const results = await mapWithConcurrency(
-    leagues,
-    PROVIDER_CONCURRENCY,
-    (league) =>
-      fetchLeague({
+  const primaryResults = apiKey
+    ? await mapWithConcurrency(
+        leagues,
+        PROVIDER_CONCURRENCY,
+        (league) =>
+          fetchLeague({
+            league,
+            books,
+            limit,
+            apiKey,
+            live,
+            startsAfter,
+            startsBefore,
+            priority,
+            objectPolicy,
+            refreshPolicy
+          })
+      )
+    : leagues.map((league) => ({
         league,
-        books,
-        limit,
-        apiKey,
-        live,
-        startsAfter,
-        startsBefore,
-        priority,
-        objectPolicy,
-        refreshPolicy
-      })
+        ok: false,
+        provider: "SportsGameOdds",
+        status: 503,
+        error: "SPORTS_ODDS_API_KEY missing",
+        objectPolicy
+      }));
+
+  const primaryByLeague = new Map(
+    primaryResults.map((row) => [row.league, row])
   );
+  const fallbackTargets = primaryResults
+    .filter((row) => !row.ok)
+    .map((row) => row.league);
+
+  const sharpFallbackResults = sharpApiKey && fallbackTargets.length
+    ? await mapWithConcurrency(
+        fallbackTargets,
+        1,
+        async (league) => {
+          try {
+            return await fetchSharpApiBoardLeague({
+              apiKey: sharpApiKey,
+              league,
+              books,
+              live,
+              startsAfter,
+              startsBefore,
+              freshMs: Math.max(60_000, refreshPolicy.freshMs),
+              staleMs: Math.max(PROVIDER_STALE_MS, refreshPolicy.staleMs)
+            });
+          } catch (error) {
+            return {
+              league,
+              ok: false,
+              provider: "SharpAPI",
+              status: Number(error?.status || 502),
+              error:
+                error instanceof Error
+                  ? error.message
+                  : "SharpAPI request failed",
+              retryAfterSeconds: error?.retryAfter ?? null
+            };
+          }
+        }
+      )
+    : [];
+
+  const sharpByLeague = new Map(
+    sharpFallbackResults.map((row) => [row.league, row])
+  );
+
+  const results = leagues.map((league) => {
+    const primary = primaryByLeague.get(league);
+    if (primary?.ok) return primary;
+    const fallback = sharpByLeague.get(league);
+    if (fallback?.ok) {
+      return {
+        ...fallback,
+        fallbackFrom: {
+          provider: primary?.provider || "SportsGameOdds",
+          status: primary?.status || null,
+          error: primary?.error || null,
+          objectBudgetBlocked:
+            Boolean(primary?.objectBudgetBlocked)
+        }
+      };
+    }
+    return {
+      ...(fallback || primary || {
+        league,
+        ok: false,
+        provider: "none",
+        status: 503,
+        error: "No odds provider available"
+      }),
+      primaryFailure: primary
+        ? {
+            provider: primary.provider,
+            status: primary.status || null,
+            error: primary.error || null,
+            objectBudgetBlocked:
+              Boolean(primary.objectBudgetBlocked)
+          }
+        : null
+    };
+  });
 
   const available = results.filter((row) => row.ok);
   const unavailable = results
     .filter((row) => !row.ok)
-    .map(
-      ({
-        league,
-        status,
-        error,
-        retryAfterSeconds,
-        circuitOpen,
-        budgetBlocked,
-        objectBudgetBlocked,
-        budget,
-        objectPolicy
-      }) => ({
-        league,
-        status,
-        error,
-        retryAfterSeconds,
-        circuitOpen,
-        budgetBlocked,
-        objectBudgetBlocked,
-        budget,
-        objectPolicy
-      })
-    );
+    .map((row) => ({
+      league: row.league,
+      provider: row.provider || null,
+      status: row.status || null,
+      error: row.error || null,
+      retryAfterSeconds: row.retryAfterSeconds || null,
+      primaryFailure: row.primaryFailure || null
+    }));
+
+  const providerFailures = [
+    ...primaryResults
+      .filter((row) => !row.ok)
+      .map((row) => ({
+        league: row.league,
+        provider: row.provider,
+        status: row.status || null,
+        error: row.error || null,
+        objectBudgetBlocked:
+          Boolean(row.objectBudgetBlocked)
+      })),
+    ...sharpFallbackResults
+      .filter((row) => !row.ok)
+      .map((row) => ({
+        league: row.league,
+        provider: row.provider,
+        status: row.status || null,
+        error: row.error || null
+      }))
+  ];
 
   const events = available.flatMap((row) => row.events);
   const providerCache = summarizeProviderCache(results);
+  const providersUsed = [
+    ...new Set(available.map((row) => row.provider).filter(Boolean))
+  ];
 
   res.setHeader(
     "Cache-Control",
@@ -497,7 +613,14 @@ export default async function handler(req, res) {
 
   return res.status(200).json({
     fetchedAt: new Date().toISOString(),
-    source: "SportsGameOdds v2",
+    source:
+      providersUsed.length === 1
+        ? providersUsed[0]
+        : providersUsed.length > 1
+          ? "multi-provider"
+          : "none",
+    providerChain: ["SportsGameOdds", "SharpAPI"],
+    providersUsed,
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
@@ -515,6 +638,7 @@ export default async function handler(req, res) {
       startsBefore: startsBefore || null
     },
     providerCache,
+    providerFailures,
     unavailableLeagues: unavailable,
     eventCount: events.length,
     events

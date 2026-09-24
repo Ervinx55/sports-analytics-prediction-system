@@ -3,6 +3,9 @@ import {
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
+import {
+  fetchSharpApiMlbProps
+} from "../lib/sharpapi-provider.js";
 
 const DEFAULT_BOOKS = ["draftkings", "fanduel", "betmgm", "caesars"];
 
@@ -188,8 +191,12 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: "SPORTS_ODDS_API_KEY missing" });
+  const sharpApiKey = process.env.SHARPAPI_KEY;
+  if (!apiKey && !sharpApiKey) {
+    return res.status(500).json({
+      error:
+        "No odds provider configured. Set SPORTS_ODDS_API_KEY or SHARPAPI_KEY."
+    });
   }
 
   const books = [...new Set(csv(req.query.books, DEFAULT_BOOKS))].sort();
@@ -207,12 +214,22 @@ export default async function handler(req, res) {
   const startsBefore = req.query.startsBefore
     ? String(req.query.startsBefore)
     : new Date(windowAnchor + 36 * 60 * 60 * 1000).toISOString();
-  const objectPolicy = await optimizeSportsGameOddsObjectLimit({
-    apiKey,
-    requestedLimit,
-    defaultLimit: 20,
-    priority: "critical"
-  });
+  const objectPolicy = apiKey
+    ? await optimizeSportsGameOddsObjectLimit({
+        apiKey,
+        requestedLimit,
+        defaultLimit: 20,
+        priority: "critical"
+      })
+    : {
+        requestedLimit,
+        effectiveLimit: requestedLimit,
+        projectedMaxObjects: 0,
+        priority: "critical",
+        pressure: "NOT_CONFIGURED",
+        source: "provider_disabled",
+        blocked: true
+      };
   const refreshPolicy = adaptiveRefreshPolicy({
     startsBefore: req.query.startsBefore ? startsBefore : null,
     priority: "critical",
@@ -237,6 +254,12 @@ export default async function handler(req, res) {
   const url = `https://api.sportsgameodds.com/v2/events?${params.toString()}`;
 
   try {
+    if (!apiKey) {
+      const error = new Error("SportsGameOdds is not configured");
+      error.status = 503;
+      throw error;
+    }
+
     const result = await protectedSportsGameOddsFetch({
       url,
       apiKey,
@@ -298,6 +321,90 @@ export default async function handler(req, res) {
       upstreamError: result.upstreamError
     });
   } catch (error) {
+    if (sharpApiKey) {
+      try {
+        const fallback = await fetchSharpApiMlbProps({
+          apiKey: sharpApiKey,
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(60_000, refreshPolicy.freshMs),
+          staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs)
+        });
+        const events = fallback.events || [];
+        const body = {
+          fetchedAt: fallback.fetchedAt,
+          version: "MLB Props Board v1.3",
+          source: "SharpAPI",
+          providerChain: ["SportsGameOdds", "SharpAPI"],
+          fallbackFrom: {
+            provider: "SportsGameOdds",
+            status: Number(error?.status || 502),
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error),
+            objectBudgetBlocked:
+              Boolean(error?.objectBudgetBlocked)
+          },
+          books,
+          markets: [
+            "pitching_strikeouts",
+            "batting_hits",
+            "batting_totalBases"
+          ],
+          window: {
+            startsAfter: startsAfter || null,
+            startsBefore: startsBefore || null
+          },
+          eventCount: events.length,
+          propCount: events.reduce(
+            (sum, event) => sum + (event.props?.length || 0),
+            0
+          ),
+          events,
+          cache: {
+            status: fallback.cache?.status || "MISS",
+            layer: fallback.cache?.layer || "upstream",
+            ageSeconds: fallback.cache?.ageSeconds ?? 0,
+            freshForSeconds: refreshPolicy.suggestedSeconds,
+            staleForSeconds:
+              Math.max(STALE_TTL_MS, refreshPolicy.staleMs) / 1000
+          },
+          servedStale:
+            Boolean(fallback.cache?.servedStale),
+          circuitOpen: false,
+          recoveryState: "FALLBACK",
+          requestBudget: null,
+          refreshPolicy,
+          objectOptimization: {
+            ...objectPolicy,
+            objectsReturned: 0,
+            fallbackProvider: "SharpAPI"
+          },
+          upstreamError:
+            fallback.cache?.upstreamError || null
+        };
+
+        res.setHeader(
+          "Cache-Control",
+          `public, max-age=0, s-maxage=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 3)}, stale-if-error=300`
+        );
+        res.setHeader("Vercel-Cache-Tag", "edge-lab-props");
+        res.setHeader("X-Props-Cache", body.cache.status);
+        res.setHeader("X-Odds-Provider", "SharpAPI");
+        return res.status(200).json(body);
+      } catch (fallbackError) {
+        error.sharpApiFallback = {
+          status: Number(fallbackError?.status || 502),
+          message:
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : String(fallbackError)
+        };
+      }
+    }
+
     const status = Number(error?.status || 502);
     const retryAfter = error?.retryAfter ?? null;
     if (retryAfter !== null) {
@@ -312,6 +419,8 @@ export default async function handler(req, res) {
     return res.status(status).json({
       error: error instanceof Error ? error.message : String(error),
       source: "SportsGameOdds v2",
+      providerChain: ["SportsGameOdds", "SharpAPI"],
+      sharpApiFallback: error?.sharpApiFallback || null,
       retryAfterSeconds: retryAfter,
       circuitOpen: Boolean(error?.circuitOpen),
       budgetBlocked: Boolean(error?.budgetBlocked),
