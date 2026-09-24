@@ -1,7 +1,13 @@
+import {
+  protectedSportsGameOddsFetch
+} from "../lib/provider-protection.js";
+
 const DEFAULT_LEAGUES = ["MLB"];
+const PROVIDER_FRESH_MS = 60 * 1000;
+const PROVIDER_STALE_MS = 5 * 60 * 1000;
+const PROVIDER_CONCURRENCY = 2;
 
 const CORE_ODD_IDS = [
-  // Full-game markets (MLB/NFL/etc.)
   "points-away-game-ml-away",
   "points-home-game-ml-home",
   "points-away-game-sp-away",
@@ -11,8 +17,6 @@ const CORE_ODD_IDS = [
   "points-away-game-ml3way-away",
   "points-home-game-ml3way-home",
   "points-all-game-ml3way-draw",
-
-  // Regulation markets (soccer)
   "points-away-reg-sp-away",
   "points-home-reg-sp-home",
   "points-all-reg-ou-over",
@@ -30,6 +34,32 @@ function csv(value, fallback = []) {
     .map((v) => v.trim())
     .filter(Boolean)
     .slice(0, 20);
+}
+
+function unique(values, { upper = false, sort = false } = {}) {
+  const normalized = values.map((value) =>
+    upper ? String(value).toUpperCase() : String(value)
+  );
+  const deduped = [...new Set(normalized)];
+  return sort ? deduped.sort() : deduped;
+}
+
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let next = 0;
+
+  async function worker() {
+    while (true) {
+      const index = next;
+      next += 1;
+      if (index >= items.length) return;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+
+  const workers = Math.min(Math.max(1, limit), Math.max(1, items.length));
+  await Promise.all(Array.from({ length: workers }, () => worker()));
+  return results;
 }
 
 function numOrString(value) {
@@ -215,7 +245,15 @@ function summarizeEvent(event) {
   };
 }
 
-async function fetchLeague({ league, books, limit, apiKey, live, startsAfter, startsBefore }) {
+async function fetchLeague({
+  league,
+  books,
+  limit,
+  apiKey,
+  live,
+  startsAfter,
+  startsBefore
+}) {
   const params = new URLSearchParams({
     leagueID: league,
     oddIDs: CORE_ODD_IDS.join(","),
@@ -231,42 +269,77 @@ async function fetchLeague({ league, books, limit, apiKey, live, startsAfter, st
   if (startsAfter) params.set("startsAfter", startsAfter);
   if (startsBefore) params.set("startsBefore", startsBefore);
 
-  const response = await fetch(
-    `https://api.sportsgameodds.com/v2/events?${params.toString()}`,
-    {
-      headers: {
-        "x-api-key": apiKey,
-        accept: "application/json"
-      },
-      cache: "no-store"
-    }
-  );
+  const url =
+    `https://api.sportsgameodds.com/v2/events?${params.toString()}`;
 
-  const raw = await response.text();
-  let payload;
   try {
-    payload = JSON.parse(raw);
-  } catch {
-    payload = { success: false, error: raw.slice(0, 500) };
-  }
+    const result = await protectedSportsGameOddsFetch({
+      url,
+      apiKey,
+      freshMs: PROVIDER_FRESH_MS,
+      staleMs: PROVIDER_STALE_MS,
+      timeoutMs: 7_000
+    });
 
-  if (!response.ok || payload?.success === false) {
+    return {
+      league,
+      ok: true,
+      events: (result.payload?.data || []).map(summarizeEvent),
+      nextCursor: result.payload?.nextCursor ?? null,
+      providerFetchedAt: new Date(result.fetchedAt).toISOString(),
+      cache: {
+        status: result.cacheStatus,
+        layer: result.cacheLayer,
+        ageSeconds: Number((result.ageMs / 1000).toFixed(1)),
+        sharedEnabled: result.sharedEnabled,
+        circuitOpen: result.circuitOpen,
+        upstreamError: result.upstreamError
+      }
+    };
+  } catch (error) {
     return {
       league,
       ok: false,
-      status: response.status,
+      status: Number(error?.status || 502),
       error:
-        payload?.error ||
-        payload?.message ||
-        "SportsGameOdds request failed"
+        error instanceof Error
+          ? error.message
+          : "SportsGameOdds request failed",
+      retryAfterSeconds: error?.retryAfter ?? null,
+      circuitOpen: Boolean(error?.circuitOpen)
     };
   }
+}
 
+function summarizeProviderCache(results) {
+  const successful = results.filter((row) => row.ok && row.cache);
+  const statusCounts = {};
+  const layerCounts = {};
+
+  for (const row of successful) {
+    statusCounts[row.cache.status] =
+      (statusCounts[row.cache.status] || 0) + 1;
+    layerCounts[row.cache.layer] =
+      (layerCounts[row.cache.layer] || 0) + 1;
+  }
+
+  const statuses = Object.keys(statusCounts);
   return {
-    league,
-    ok: true,
-    events: (payload?.data || []).map(summarizeEvent),
-    nextCursor: payload?.nextCursor ?? null
+    status:
+      statuses.length === 0
+        ? "ERROR"
+        : statuses.length === 1
+        ? statuses[0]
+        : "MIXED",
+    statusCounts,
+    layerCounts,
+    sharedEnabled: successful.some((row) => row.cache.sharedEnabled),
+    circuitOpen: results.some(
+      (row) => row.cache?.circuitOpen || row.circuitOpen
+    ),
+    staleLeagues: successful
+      .filter((row) => row.cache.status === "STALE")
+      .map((row) => row.league)
   };
 }
 
@@ -291,8 +364,10 @@ export default async function handler(req, res) {
     });
   }
 
-  const leagues = csv(req.query.leagues, DEFAULT_LEAGUES);
-  const books = csv(req.query.books, []);
+  const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES), {
+    upper: true
+  });
+  const books = unique(csv(req.query.books, []), { sort: true });
   const limitRaw = Number(req.query.limit || 100);
   const limit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
@@ -301,20 +376,52 @@ export default async function handler(req, res) {
   const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
   const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
 
-  const results = await Promise.all(
-    leagues.map((league) =>
-      fetchLeague({ league, books, limit, apiKey, live, startsAfter, startsBefore })
-    )
+  const results = await mapWithConcurrency(
+    leagues,
+    PROVIDER_CONCURRENCY,
+    (league) =>
+      fetchLeague({
+        league,
+        books,
+        limit,
+        apiKey,
+        live,
+        startsAfter,
+        startsBefore
+      })
   );
 
-  const available = results.filter((r) => r.ok);
+  const available = results.filter((row) => row.ok);
   const unavailable = results
-    .filter((r) => !r.ok)
-    .map(({ league, status, error }) => ({ league, status, error }));
+    .filter((row) => !row.ok)
+    .map(
+      ({
+        league,
+        status,
+        error,
+        retryAfterSeconds,
+        circuitOpen
+      }) => ({
+        league,
+        status,
+        error,
+        retryAfterSeconds,
+        circuitOpen
+      })
+    );
 
-  const events = available.flatMap((r) => r.events);
+  const events = available.flatMap((row) => row.events);
+  const providerCache = summarizeProviderCache(results);
 
-  res.setHeader("Cache-Control", "s-maxage=20, stale-while-revalidate=40");
+  res.setHeader(
+    "Cache-Control",
+    "public, max-age=0, s-maxage=30, stale-while-revalidate=90, stale-if-error=180"
+  );
+  res.setHeader("X-Provider-Cache", providerCache.status);
+  res.setHeader(
+    "X-Provider-Circuit",
+    providerCache.circuitOpen ? "OPEN" : "CLOSED"
+  );
 
   return res.status(200).json({
     fetchedAt: new Date().toISOString(),
@@ -322,7 +429,11 @@ export default async function handler(req, res) {
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
-    window: { startsAfter: startsAfter || null, startsBefore: startsBefore || null },
+    window: {
+      startsAfter: startsAfter || null,
+      startsBefore: startsBefore || null
+    },
+    providerCache,
     unavailableLeagues: unavailable,
     eventCount: events.length,
     events

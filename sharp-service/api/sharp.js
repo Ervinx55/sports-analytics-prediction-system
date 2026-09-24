@@ -1,4 +1,11 @@
+import {
+  protectedSportsGameOddsFetch
+} from "../lib/provider-protection.js";
+
 const DEFAULT_LEAGUES = ["MLB", "NFL", "NBA", "NHL", "NCAAF", "NCAAB", "MLS"];
+const PROVIDER_FRESH_MS = 60 * 1000;
+const PROVIDER_STALE_MS = 5 * 60 * 1000;
+const PROVIDER_CONCURRENCY = 2;
 
 function csv(value, fallback = []) {
   if (!value) return fallback;
@@ -10,7 +17,39 @@ function csv(value, fallback = []) {
     .slice(0, 40);
 }
 
-async function fetchLeague({ league, books, includeAltLines, limit, apiKey }) {
+function unique(values, { upper = false, sort = false } = {}) {
+  const normalized = values.map((value) =>
+    upper ? String(value).toUpperCase() : String(value)
+  );
+  const deduped = [...new Set(normalized)];
+  return sort ? deduped.sort() : deduped;
+}
+
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let next = 0;
+
+  async function worker() {
+    while (true) {
+      const index = next;
+      next += 1;
+      if (index >= items.length) return;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+
+  const workers = Math.min(Math.max(1, limit), Math.max(1, items.length));
+  await Promise.all(Array.from({ length: workers }, () => worker()));
+  return results;
+}
+
+async function fetchLeague({
+  league,
+  books,
+  includeAltLines,
+  limit,
+  apiKey
+}) {
   const params = new URLSearchParams({
     leagueID: league,
     oddsAvailable: "true",
@@ -20,42 +59,81 @@ async function fetchLeague({ league, books, includeAltLines, limit, apiKey }) {
     limit: String(limit)
   });
 
-  // On the free tier, omit bookmakerID by default so SportsGameOdds
-  // automatically returns only the books the account is entitled to use.
   if (books.length) {
     params.set("bookmakerID", books.join(","));
   }
 
-  const upstream = await fetch(`https://api.sportsgameodds.com/v2/events?${params}`, {
-    headers: {
-      "x-api-key": apiKey,
-      "accept": "application/json"
-    },
-    cache: "no-store"
-  });
+  const url =
+    `https://api.sportsgameodds.com/v2/events?${params.toString()}`;
 
-  const raw = await upstream.text();
-  let payload;
   try {
-    payload = JSON.parse(raw);
-  } catch {
-    payload = { error: "Upstream returned non-JSON", body: raw.slice(0, 1000) };
-  }
+    const result = await protectedSportsGameOddsFetch({
+      url,
+      apiKey,
+      freshMs: PROVIDER_FRESH_MS,
+      staleMs: PROVIDER_STALE_MS,
+      timeoutMs: 7_000
+    });
 
-  if (!upstream.ok || payload?.success === false) {
+    return {
+      league,
+      ok: true,
+      data: result.payload?.data ?? [],
+      nextCursor: result.payload?.nextCursor ?? null,
+      providerFetchedAt: new Date(result.fetchedAt).toISOString(),
+      cache: {
+        status: result.cacheStatus,
+        layer: result.cacheLayer,
+        ageSeconds: Number((result.ageMs / 1000).toFixed(1)),
+        sharedEnabled: result.sharedEnabled,
+        circuitOpen: result.circuitOpen,
+        upstreamError: result.upstreamError
+      }
+    };
+  } catch (error) {
     return {
       league,
       ok: false,
-      status: upstream.status,
-      error: payload?.error || payload?.message || "SportsGameOdds request failed"
+      status: Number(error?.status || 502),
+      error:
+        error instanceof Error
+          ? error.message
+          : "SportsGameOdds request failed",
+      retryAfterSeconds: error?.retryAfter ?? null,
+      circuitOpen: Boolean(error?.circuitOpen)
     };
   }
+}
 
+function summarizeProviderCache(results) {
+  const successful = results.filter((row) => row.ok && row.cache);
+  const statusCounts = {};
+  const layerCounts = {};
+
+  for (const row of successful) {
+    statusCounts[row.cache.status] =
+      (statusCounts[row.cache.status] || 0) + 1;
+    layerCounts[row.cache.layer] =
+      (layerCounts[row.cache.layer] || 0) + 1;
+  }
+
+  const statuses = Object.keys(statusCounts);
   return {
-    league,
-    ok: true,
-    data: payload?.data ?? [],
-    nextCursor: payload?.nextCursor ?? null
+    status:
+      statuses.length === 0
+        ? "ERROR"
+        : statuses.length === 1
+        ? statuses[0]
+        : "MIXED",
+    statusCounts,
+    layerCounts,
+    sharedEnabled: successful.some((row) => row.cache.sharedEnabled),
+    circuitOpen: results.some(
+      (row) => row.cache?.circuitOpen || row.circuitOpen
+    ),
+    staleLeagues: successful
+      .filter((row) => row.cache.status === "STALE")
+      .map((row) => row.league)
   };
 }
 
@@ -80,35 +158,83 @@ export default async function handler(req, res) {
     });
   }
 
-  const leagues = csv(req.query.leagues, DEFAULT_LEAGUES);
-  const books = csv(req.query.books, []);
+  const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES), {
+    upper: true
+  });
+  const books = unique(csv(req.query.books, []), { sort: true });
   const includeAltLines = String(req.query.alts || "0") === "1";
   const limitRaw = Number(req.query.limit || 100);
-  const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(100, limitRaw)) : 100;
+  const limit = Number.isFinite(limitRaw)
+    ? Math.max(1, Math.min(100, limitRaw))
+    : 100;
 
-  const results = await Promise.all(
-    leagues.map((league) =>
-      fetchLeague({ league, books, includeAltLines, limit, apiKey })
-    )
+  const results = await mapWithConcurrency(
+    leagues,
+    PROVIDER_CONCURRENCY,
+    (league) =>
+      fetchLeague({
+        league,
+        books,
+        includeAltLines,
+        limit,
+        apiKey
+      })
   );
 
-  const availableLeagues = results.filter((r) => r.ok);
+  const availableLeagues = results.filter((row) => row.ok);
   const unavailableLeagues = results
-    .filter((r) => !r.ok)
-    .map(({ league, status, error }) => ({ league, status, error }));
+    .filter((row) => !row.ok)
+    .map(
+      ({
+        league,
+        status,
+        error,
+        retryAfterSeconds,
+        circuitOpen
+      }) => ({
+        league,
+        status,
+        error,
+        retryAfterSeconds,
+        circuitOpen
+      })
+    );
 
-  const data = availableLeagues.flatMap((r) =>
-    (r.data || []).map((event) => ({ ...event, _requestedLeague: r.league }))
+  const data = availableLeagues.flatMap((row) =>
+    (row.data || []).map((event) => ({
+      ...event,
+      _requestedLeague: row.league
+    }))
   );
 
-  res.setHeader("Cache-Control", "s-maxage=20, stale-while-revalidate=40");
+  const providerCache = summarizeProviderCache(results);
+
+  res.setHeader(
+    "Cache-Control",
+    "public, max-age=0, s-maxage=30, stale-while-revalidate=90, stale-if-error=180"
+  );
+  res.setHeader("X-Provider-Cache", providerCache.status);
+  res.setHeader(
+    "X-Provider-Circuit",
+    providerCache.circuitOpen ? "OPEN" : "CLOSED"
+  );
 
   if (availableLeagues.length === 0) {
+    const retryAfter = unavailableLeagues
+      .map((row) => row.retryAfterSeconds)
+      .filter((value) => Number.isFinite(value))
+      .sort((a, b) => a - b)[0];
+
+    if (retryAfter !== undefined) {
+      res.setHeader("Retry-After", String(retryAfter));
+    }
+
     return res.status(502).json({
       error: "No requested leagues were available from SportsGameOdds",
       fetchedAt: new Date().toISOString(),
       leagues,
       books: books.length ? books : "account-entitled bookmakers",
+      providerCache,
       unavailableLeagues
     });
   }
@@ -117,10 +243,11 @@ export default async function handler(req, res) {
     fetchedAt: new Date().toISOString(),
     source: "SportsGameOdds v2",
     requestedLeagues: leagues,
-    availableLeagues: availableLeagues.map((r) => r.league),
+    availableLeagues: availableLeagues.map((row) => row.league),
     unavailableLeagues,
     books: books.length ? books : "account-entitled bookmakers",
     includeAltLines,
+    providerCache,
     eventCount: data.length,
     data
   });
