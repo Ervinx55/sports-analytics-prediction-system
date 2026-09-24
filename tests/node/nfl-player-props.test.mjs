@@ -1,6 +1,7 @@
 import test, { afterEach } from "node:test";
 import assert from "node:assert/strict";
 
+import nflPropsHandler from "../../sharp-service/api/nflprops.js";
 import {
   gradePropMarket,
   independentProbability,
@@ -265,4 +266,44 @@ test("continuous probability responds monotonically to a harder over line", () =
   const p240 = independentProbability(projection, 240.5, "over", "passing_yards");
   const p270 = independentProbability(projection, 270.5, "over", "passing_yards");
   assert.ok(p240 > p270);
+});
+
+
+test("NFL player props API rejects unsupported methods before fetching", async () => {
+  let fetchCalls = 0;
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => {
+    fetchCalls += 1;
+    throw new Error("fetch should not be called");
+  };
+
+  const headers = new Map();
+  const res = {
+    statusCode: 200,
+    body: null,
+    setHeader(name, value) {
+      headers.set(String(name).toLowerCase(), String(value));
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(body) {
+      this.body = body;
+      return this;
+    }
+  };
+
+  try {
+    await nflPropsHandler(
+      { method: "POST", query: {}, headers: {} },
+      res
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.equal(res.statusCode, 405);
+  assert.equal(headers.get("allow"), "GET");
+  assert.equal(fetchCalls, 0);
 });
