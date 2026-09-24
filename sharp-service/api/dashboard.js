@@ -5,6 +5,9 @@ import {
   adaptiveRefreshPolicy,
   nearestCandidateStart
 } from "../lib/adaptive-refresh.js";
+import {
+  fetchScheduleFallback
+} from "../lib/schedule-fallback.js";
 
 const BASE =
   "https://yeoxroijaptomomshdii.supabase.co/functions/v1";
@@ -176,6 +179,23 @@ export default async function handler(req, res) {
     return !Number.isFinite(t) || t > now - 4 * 60 * 60 * 1000;
   });
 
+  let scheduleFallback = {
+    ok: true,
+    data: { source: null, games: [], supported: false },
+    error: null
+  };
+  if (!activeCandidates.length) {
+    const [scheduleResult] = await Promise.allSettled([
+      fetchScheduleFallback({ sport, hours, now })
+    ]);
+    scheduleFallback = settled(scheduleResult);
+  }
+  sourceHealth.scheduleFallback = {
+    ok: scheduleFallback.ok,
+    error: scheduleFallback.error
+  };
+  const scheduleGames = scheduleFallback.data?.games || [];
+
   const readyForSharp = activeCandidates.filter(
     (c) => c.verification_status === "READY_FOR_SHARP_CHECK"
   ).length;
@@ -193,7 +213,7 @@ export default async function handler(req, res) {
   const movementList = sources.movement.data?.movements || [];
 
   const nearestStartAt = nearestCandidateStart(
-    activeCandidates,
+    activeCandidates.length ? activeCandidates : scheduleGames,
     now
   );
   const objectUsagePct = Number(
@@ -220,6 +240,13 @@ export default async function handler(req, res) {
     refreshPolicy,
     summary: {
       activeCandidates: activeCandidates.length,
+      scheduleGames: scheduleGames.length,
+      dataMode:
+        activeCandidates.length > 0
+          ? "MODEL_MARKETS"
+          : scheduleGames.length > 0
+            ? "SCHEDULE_ONLY"
+            : "EMPTY",
       readyForSharp,
       watch,
       rawPlayCandidates: playCandidates,
@@ -246,6 +273,12 @@ export default async function handler(req, res) {
         sources.sharpGate.data?.summary?.historyCount ?? 0,
     },
     candidates: activeCandidates,
+    games: scheduleGames,
+    scheduleFallback: {
+      source: scheduleFallback.data?.source || null,
+      supported: scheduleFallback.data?.supported ?? false,
+      error: scheduleFallback.error
+    },
     calibration: sources.calibration.data || null,
     marketCalibration: sources.marketCalibration.data || null,
     sharpDisagreementCalibration: sources.sharpDisagreementCalibration.data || null,

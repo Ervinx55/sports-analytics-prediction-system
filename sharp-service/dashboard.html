@@ -834,10 +834,33 @@
       </div>`;
   }
 
-  function renderMarketCard(card){
+  function renderMarketCard(card,games=[]){
     const rows=card?.markets||[];
     if(!rows.length){
-      $("marketCardList").innerHTML='<div class="empty">No graded markets are available yet.</div>';
+      if(games?.length){
+        $("marketCardList").innerHTML=
+          '<div class="card" style="box-shadow:none;margin-bottom:12px">'+
+            '<div class="reason" style="margin-top:0">'+
+              '<strong>Schedule-only mode:</strong> games are connected, but live sportsbook/model markets are temporarily unavailable. No PLAY/PASS decision is being inferred from schedule data.'+
+            '</div>'+
+          '</div>'+
+          games.map(g=>`
+            <div class="card">
+              <div class="candidate-head">
+                <div>
+                  <div class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</div>
+                  <div class="pick">${fmtTime(g.starts_at)} · ${esc(g.status||"Scheduled")}</div>
+                </div>
+                <span class="badge watch">SCHEDULE ONLY</span>
+              </div>
+              <div class="reason">
+                Market prices and model grading are unavailable while the odds-provider object quota is exhausted.
+                Source: ${esc(g.source||"schedule feed")}.
+              </div>
+            </div>`).join("");
+        return;
+      }
+      $("marketCardList").innerHTML='<div class="empty">No graded markets or scheduled games are available yet.</div>';
       return;
     }
 
@@ -1848,7 +1871,7 @@
       Math.min(300,Number(data.refreshPolicy?.suggestedSeconds||60))
     );
     $("refreshCadence").textContent="Auto "+cadence+"s · "+String(data.refreshPolicy?.mode||"NORMAL").replaceAll("_"," ");
-    renderMarketCard(data.marketCard||{});
+    renderMarketCard(data.marketCard||{},data.games||[]);
     renderPlays(data.marketCard||{},data.parlayCorrelation||{});
     renderPropPlaysInPlays(data.playerProps||{});
     renderPlayerProps(data.playerProps||{});
@@ -1872,7 +1895,10 @@
     const providerWatch=providerState==="WATCH";
     const bad=sourceBad||pipelineBad||providerBad;
     $("healthDot").classList.toggle("bad",bad);
-    $("healthText").textContent=bad
+    $("healthText").textContent=
+      data.summary?.dataMode==="SCHEDULE_ONLY"
+      ? "Games connected · market provider quota exhausted"
+      : bad
       ? "Some data sources or pipeline components are degraded"
       : providerWatch
         ? "Provider protection is active with recent warnings"
