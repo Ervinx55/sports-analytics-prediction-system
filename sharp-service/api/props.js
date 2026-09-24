@@ -1,4 +1,5 @@
 import {
+  optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 
@@ -192,12 +193,24 @@ export default async function handler(req, res) {
   }
 
   const books = [...new Set(csv(req.query.books, DEFAULT_BOOKS))].sort();
-  const limitRaw = Number(req.query.limit || 100);
-  const limit = Number.isFinite(limitRaw)
+  const now = Date.now();
+  const limitRaw = Number(req.query.limit || 20);
+  const requestedLimit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
-    : 100;
-  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
-  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
+    : 20;
+  const startsAfter = req.query.startsAfter
+    ? String(req.query.startsAfter)
+    : new Date(now - 8 * 60 * 60 * 1000).toISOString();
+  const startsBefore = req.query.startsBefore
+    ? String(req.query.startsBefore)
+    : new Date(now + 36 * 60 * 60 * 1000).toISOString();
+  const objectPolicy = await optimizeSportsGameOddsObjectLimit({
+    apiKey,
+    requestedLimit,
+    defaultLimit: 20,
+    priority: "critical"
+  });
+  const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const params = new URLSearchParams({
     leagueID: "MLB",
@@ -205,6 +218,7 @@ export default async function handler(req, res) {
     oddsAvailable: "true",
     includeOpenCloseOdds: "true",
     includeAltLines: "true",
+    finalized: "false",
     type: "match",
     limit: String(limit)
   });
@@ -222,7 +236,8 @@ export default async function handler(req, res) {
       staleMs: STALE_TTL_MS,
       timeoutMs: 8_000,
       consumer: "props",
-      priority: "critical"
+      priority: "critical",
+      objectPolicy
     });
 
     const body = buildBody({
@@ -263,6 +278,13 @@ export default async function handler(req, res) {
       circuitOpen: result.circuitOpen,
       recoveryState: result.recoveryState || "CLOSED",
       requestBudget: result.budget || null,
+      objectOptimization: {
+        ...objectPolicy,
+        objectsReturned:
+          result.cacheLayer === "upstream"
+            ? result.objectsReturned || 0
+            : 0
+      },
       upstreamError: result.upstreamError
     });
   } catch (error) {
@@ -283,7 +305,9 @@ export default async function handler(req, res) {
       retryAfterSeconds: retryAfter,
       circuitOpen: Boolean(error?.circuitOpen),
       budgetBlocked: Boolean(error?.budgetBlocked),
+      objectBudgetBlocked: Boolean(error?.objectBudgetBlocked),
       requestBudget: error?.budget || null,
+      objectOptimization: error?.objectPolicy || objectPolicy,
       cache: {
         status: "MISS",
         layer: "none",

@@ -1,3 +1,7 @@
+import {
+  getSportsGameOddsUsageSnapshot
+} from "../lib/provider-protection.js";
+
 const BASE =
   "https://yeoxroijaptomomshdii.supabase.co/functions/v1";
 
@@ -95,7 +99,7 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
-  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, providerHealth, marketCard, playerProps, decisionResults] =
+  const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, providerHealth, providerUsage, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
       fetchJson(urls.calibration),
@@ -116,6 +120,13 @@ export default async function handler(req, res) {
       fetchJson(urls.pipelineHealth),
       fetchJson(urls.sharpSourceHealth),
       fetchJson(urls.providerHealth),
+      process.env.SPORTS_ODDS_API_KEY
+        ? getSportsGameOddsUsageSnapshot(
+            process.env.SPORTS_ODDS_API_KEY
+          )
+        : Promise.reject(
+            new Error("SPORTS_ODDS_API_KEY missing")
+          ),
       fetchJson(urls.marketCard),
       fetchJson(urls.playerProps),
       fetchJson(urls.decisionResults),
@@ -141,6 +152,7 @@ export default async function handler(req, res) {
     pipelineHealth: settled(pipelineHealth),
     sharpSourceHealth: settled(sharpSourceHealth),
     providerHealth: settled(providerHealth),
+    providerUsage: settled(providerUsage),
     marketCard: settled(marketCard),
     playerProps: settled(playerProps),
     decisionResults: settled(decisionResults),
@@ -237,6 +249,7 @@ export default async function handler(req, res) {
       refreshCadenceMinutes: 5,
       sources: {}
     },
+    providerUsage: sources.providerUsage.data || null,
     providerHealth: sources.providerHealth.data || {
       status: "UNKNOWN",
       sharedActivityDetected: false,

@@ -237,6 +237,60 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 1500) {
   }
 }
 
+function quotaNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
+}
+
+function quotaInterval(rateLimits, key, aliases = []) {
+  const row =
+    rateLimits[key] ||
+    aliases.map((alias) => rateLimits[alias]).find(Boolean) ||
+    {};
+  const maxRaw =
+    row["max-entities"] ??
+    row.maxEntities ??
+    row.maxObjects ??
+    null;
+  const currentRaw =
+    row["current-entities"] ??
+    row.currentEntities ??
+    row.currentObjects ??
+    null;
+
+  return {
+    interval: key,
+    unlimited:
+      String(maxRaw || "").toLowerCase() === "unlimited",
+    maxObjects: quotaNumber(maxRaw),
+    currentObjects: quotaNumber(currentRaw)
+  };
+}
+
+function constrainedObjectUsage(objects = {}) {
+  const candidates = Object.values(objects)
+    .filter(
+      (row) =>
+        !row?.unlimited &&
+        Number.isFinite(row?.maxObjects) &&
+        row.maxObjects > 0 &&
+        Number.isFinite(row?.currentObjects)
+    )
+    .map((row) => ({
+      ...row,
+      remainingObjects: Math.max(
+        0,
+        row.maxObjects - row.currentObjects
+      ),
+      usagePct: Number(
+        ((row.currentObjects / row.maxObjects) * 100).toFixed(2)
+      )
+    }))
+    .sort((a, b) => b.usagePct - a.usagePct);
+
+  return candidates[0] || null;
+}
+
 function readUsageLimit(payload) {
   const data = payload?.data || payload || {};
   const rateLimits = data.rateLimits || data.rate_limits || {};
@@ -262,6 +316,24 @@ function readUsageLimit(payload) {
   const unlimited =
     String(maxRaw || "").toLowerCase() === "unlimited";
 
+  const objects = {
+    perHour: quotaInterval(
+      rateLimits,
+      "per-hour",
+      ["perHour", "per_hour"]
+    ),
+    perDay: quotaInterval(
+      rateLimits,
+      "per-day",
+      ["perDay", "per_day"]
+    ),
+    perMonth: quotaInterval(
+      rateLimits,
+      "per-month",
+      ["perMonth", "per_month"]
+    )
+  };
+
   return {
     tier: data.tier || null,
     unlimited,
@@ -272,7 +344,9 @@ function readUsageLimit(payload) {
     currentRequests:
       Number.isFinite(currentRequests) && currentRequests >= 0
         ? currentRequests
-        : null
+        : null,
+    objects,
+    mostConstrainedObjects: constrainedObjectUsage(objects)
   };
 }
 
@@ -338,6 +412,167 @@ async function providerUsage(apiKey) {
     if (state.usage.inFlight === work) {
       state.usage.inFlight = null;
     }
+  }
+}
+
+export async function getSportsGameOddsUsageSnapshot(apiKey) {
+  return providerUsage(apiKey);
+}
+
+function objectPressure(usage) {
+  const constrained = usage?.mostConstrainedObjects;
+  if (!constrained) {
+    return {
+      level: "UNKNOWN",
+      constrained: null
+    };
+  }
+
+  if (constrained.remainingObjects <= 0) {
+    return { level: "EXHAUSTED", constrained };
+  }
+  if (constrained.usagePct >= 95) {
+    return { level: "CRITICAL", constrained };
+  }
+  if (constrained.usagePct >= 85) {
+    return { level: "HIGH", constrained };
+  }
+  if (constrained.usagePct >= 70) {
+    return { level: "MODERATE", constrained };
+  }
+  return { level: "LOW", constrained };
+}
+
+function pressureCap(level, priority, requestedLimit) {
+  const normalized = normalizePriority(priority);
+  const caps = {
+    MODERATE: { critical: 30, normal: 20, background: 10 },
+    HIGH: { critical: 20, normal: 10, background: 5 },
+    CRITICAL: { critical: 10, normal: 5, background: 2 }
+  };
+  return Math.min(
+    requestedLimit,
+    caps[level]?.[normalized] ?? requestedLimit
+  );
+}
+
+export async function optimizeSportsGameOddsObjectLimit({
+  apiKey,
+  requestedLimit,
+  defaultLimit = 20,
+  priority = "normal",
+  fanout = 1
+}) {
+  const requested = clamp(
+    Number.isFinite(Number(requestedLimit))
+      ? Math.floor(Number(requestedLimit))
+      : defaultLimit,
+    1,
+    100
+  );
+  const normalizedPriority = normalizePriority(priority);
+  const normalizedFanout = clamp(
+    Math.floor(Number(fanout) || 1),
+    1,
+    50
+  );
+
+  if (
+    String(process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION || "1") === "0"
+  ) {
+    return {
+      requestedLimit: requested,
+      effectiveLimit: requested,
+      fanout: normalizedFanout,
+      projectedMaxObjects: requested * normalizedFanout,
+      priority: normalizedPriority,
+      pressure: "DISABLED",
+      source: "disabled",
+      blocked: false,
+      constrainedInterval: null,
+      usagePct: null,
+      remainingObjects: null,
+      tier: null
+    };
+  }
+
+  try {
+    const usage = await providerUsage(apiKey);
+    const pressure = objectPressure(usage);
+    const constrained = pressure.constrained;
+
+    if (pressure.level === "EXHAUSTED") {
+      return {
+        requestedLimit: requested,
+        effectiveLimit: 0,
+        fanout: normalizedFanout,
+        projectedMaxObjects: 0,
+        priority: normalizedPriority,
+        pressure: pressure.level,
+        source: "provider_usage",
+        blocked: true,
+        constrainedInterval: constrained?.interval || null,
+        usagePct: constrained?.usagePct ?? null,
+        maxObjects: constrained?.maxObjects ?? null,
+        currentObjects: constrained?.currentObjects ?? null,
+        remainingObjects: constrained?.remainingObjects ?? 0,
+        tier: usage?.tier || null
+      };
+    }
+
+    let effective = pressureCap(
+      pressure.level,
+      normalizedPriority,
+      requested
+    );
+
+    if (
+      constrained &&
+      Number.isFinite(constrained.remainingObjects)
+    ) {
+      effective = Math.min(
+        effective,
+        Math.max(
+          1,
+          Math.floor(
+            constrained.remainingObjects / normalizedFanout
+          )
+        )
+      );
+    }
+
+    return {
+      requestedLimit: requested,
+      effectiveLimit: Math.max(1, effective),
+      fanout: normalizedFanout,
+      projectedMaxObjects:
+        Math.max(1, effective) * normalizedFanout,
+      priority: normalizedPriority,
+      pressure: pressure.level,
+      source: "provider_usage",
+      blocked: false,
+      constrainedInterval: constrained?.interval || null,
+      usagePct: constrained?.usagePct ?? null,
+      maxObjects: constrained?.maxObjects ?? null,
+      currentObjects: constrained?.currentObjects ?? null,
+      remainingObjects: constrained?.remainingObjects ?? null,
+      tier: usage?.tier || null
+    };
+  } catch {
+    return {
+      requestedLimit: requested,
+      effectiveLimit: requested,
+      fanout: normalizedFanout,
+      projectedMaxObjects: requested * normalizedFanout,
+      priority: normalizedPriority,
+      pressure: "UNKNOWN",
+      source: "fallback",
+      blocked: false,
+      constrainedInterval: null,
+      usagePct: null,
+      remainingObjects: null,
+      tier: null
+    };
   }
 }
 
@@ -871,7 +1106,8 @@ export async function protectedSportsGameOddsFetch({
   timeoutMs = 8_000,
   provider = DEFAULT_PROVIDER,
   consumer = "unknown",
-  priority = "normal"
+  priority = "normal",
+  objectPolicy = null
 }) {
   const key = cacheKey({ provider, url, freshMs, staleMs });
   const now = nowMs();
@@ -1168,6 +1404,73 @@ export async function protectedSportsGameOddsFetch({
     const effectivePriority = recovering
       ? "critical"
       : normalizePriority(priority);
+
+    if (objectPolicy?.blocked) {
+      if (config) {
+        await Promise.allSettled([
+          recordProviderEvent(config, {
+            provider,
+            consumer,
+            eventType: "BUDGET_BLOCKED",
+            statusCode: 429,
+            details: {
+              budgetType: "objects",
+              priority: effectivePriority,
+              pressure: objectPolicy.pressure,
+              constrainedInterval:
+                objectPolicy.constrainedInterval,
+              remainingObjects:
+                objectPolicy.remainingObjects
+            }
+          }),
+          leaseClaimed
+            ? releaseSharedRefresh(config, key)
+            : Promise.resolve(),
+          probeLeaseClaimed
+            ? releaseSharedRefresh(config, probeKey)
+            : Promise.resolve()
+        ]);
+      } else if (probeLeaseClaimed) {
+        releaseLocalProbe(provider);
+      }
+
+      const stale = chooseStale({
+        local: localEntry(key),
+        shared,
+        staleMs,
+        now: nowMs()
+      });
+      if (stale) {
+        storeLocal(key, stale.payload, stale.fetchedAt);
+        return {
+          payload: stale.payload,
+          cacheStatus: "STALE",
+          cacheLayer: stale.layer,
+          ageMs: stale.ageMs,
+          fetchedAt: stale.fetchedAt,
+          upstreamError: {
+            status: 429,
+            message: "Provider object quota is exhausted",
+            retryAfterSeconds: 60,
+            circuitOpen: false
+          },
+          circuitOpen: false,
+          recoveryState: recovering ? "HALF_OPEN" : "CLOSED",
+          objectPolicy,
+          sharedEnabled: Boolean(config)
+        };
+      }
+
+      const error = new Error(
+        "Provider object quota is exhausted"
+      );
+      error.status = 429;
+      error.retryAfter = 60;
+      error.objectBudgetBlocked = true;
+      error.objectPolicy = objectPolicy;
+      throw error;
+    }
+
     const budget = await claimProviderBudget(
       config,
       provider,
@@ -1234,6 +1537,7 @@ export async function protectedSportsGameOddsFetch({
           recoveryState:
             recovering ? "HALF_OPEN" : "CLOSED",
           budget,
+          objectPolicy,
           sharedEnabled: Boolean(config)
         };
       }
@@ -1276,6 +1580,12 @@ export async function protectedSportsGameOddsFetch({
         recovering ? 1 : 2
       );
       const upstreamDurationMs = Math.max(0, nowMs() - upstreamStartedAt);
+      const objectsReturned = Math.max(
+        1,
+        Array.isArray(upstream.payload?.data)
+          ? upstream.payload.data.length
+          : 1
+      );
       storeLocal(key, upstream.payload, upstream.fetchedAt);
       const localRecovered = noteLocalSuccess(provider);
       const recovered = recovering || localRecovered;
@@ -1299,7 +1609,17 @@ export async function protectedSportsGameOddsFetch({
             eventType: "UPSTREAM_SUCCESS",
             statusCode: upstream.statusCode,
             cacheLayer: "upstream",
-            durationMs: upstreamDurationMs
+            durationMs: upstreamDurationMs,
+            details: {
+              objectsReturned,
+              priority: effectivePriority,
+              requestedObjectLimit:
+                objectPolicy?.requestedLimit ?? null,
+              effectiveObjectLimit:
+                objectPolicy?.effectiveLimit ?? null,
+              objectPressure:
+                objectPolicy?.pressure ?? null
+            }
           }),
           recovered
             ? recordProviderEvent(config, {
@@ -1336,6 +1656,8 @@ export async function protectedSportsGameOddsFetch({
         circuitOpen: false,
         recoveryState: recovered ? "RECOVERED" : "CLOSED",
         budget,
+        objectsReturned,
+        objectPolicy,
         sharedEnabled: Boolean(config)
       };
     } catch (error) {

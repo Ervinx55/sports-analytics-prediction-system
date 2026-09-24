@@ -20,7 +20,9 @@ const originalEnv = {
   SPORTS_ODDS_CRITICAL_RESERVE:
     process.env.SPORTS_ODDS_CRITICAL_RESERVE,
   SPORTS_ODDS_NORMAL_RESERVE:
-    process.env.SPORTS_ODDS_NORMAL_RESERVE
+    process.env.SPORTS_ODDS_NORMAL_RESERVE,
+  SPORTS_ODDS_OBJECT_OPTIMIZATION:
+    process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION
 };
 
 function jsonResponse(body, status = 200, headers = {}) {
@@ -77,6 +79,7 @@ beforeEach(() => {
   process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "9";
   delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
   delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
+  process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION = "0";
 });
 
 afterEach(() => {
@@ -244,4 +247,43 @@ test("live board traffic is promoted to critical priority", async () => {
   assert.equal(response.body.providerPriority, "critical");
   assert.equal(response.body.unavailableLeagues.length, 0);
   assert.equal(providerCalls, 1);
+});
+
+
+test("sharp defaults to a smaller upcoming-event object window", async () => {
+  let seenUrl = "";
+  globalThis.fetch = async (url) => {
+    seenUrl = String(url);
+    return jsonResponse({ success: true, data: [] });
+  };
+
+  const response = await invoke(sharpHandler, {
+    leagues: "MLB"
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.objectOptimization.requestedLimit, 20);
+  assert.match(seenUrl, /limit=20/);
+  assert.match(seenUrl, /finalized=false/);
+  assert.match(seenUrl, /startsAfter=/);
+  assert.match(seenUrl, /startsBefore=/);
+});
+
+test("board defaults to a 30-event cap and upcoming window", async () => {
+  let seenUrl = "";
+  globalThis.fetch = async (url) => {
+    seenUrl = String(url);
+    return jsonResponse({ success: true, data: [] });
+  };
+
+  const response = await invoke(boardHandler, {
+    leagues: "MLB"
+  });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.objectOptimization.requestedLimit, 30);
+  assert.match(seenUrl, /limit=30/);
+  assert.match(seenUrl, /finalized=false/);
+  assert.match(seenUrl, /startsAfter=/);
+  assert.match(seenUrl, /startsBefore=/);
 });

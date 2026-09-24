@@ -1,4 +1,5 @@
 import {
+  optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 
@@ -269,7 +270,8 @@ async function fetchLeague({
   live,
   startsAfter,
   startsBefore,
-  priority
+  priority,
+  objectPolicy
 }) {
   const params = new URLSearchParams({
     leagueID: league,
@@ -277,6 +279,7 @@ async function fetchLeague({
     oddsAvailable: "true",
     includeOpenCloseOdds: "true",
     includeAltLines: "false",
+    finalized: "false",
     type: "match",
     limit: String(limit)
   });
@@ -297,7 +300,8 @@ async function fetchLeague({
       staleMs: PROVIDER_STALE_MS,
       timeoutMs: 7_000,
       consumer: "board",
-      priority
+      priority,
+      objectPolicy
     });
 
     return {
@@ -314,6 +318,11 @@ async function fetchLeague({
         circuitOpen: result.circuitOpen,
         recoveryState: result.recoveryState || "CLOSED",
         budget: result.budget || null,
+        objectPolicy,
+        objectsReturned:
+          result.cacheLayer === "upstream"
+            ? result.objectsReturned || 0
+            : 0,
         upstreamError: result.upstreamError
       }
     };
@@ -329,7 +338,9 @@ async function fetchLeague({
       retryAfterSeconds: error?.retryAfter ?? null,
       circuitOpen: Boolean(error?.circuitOpen),
       budgetBlocked: Boolean(error?.budgetBlocked),
-      budget: error?.budget || null
+      objectBudgetBlocked: Boolean(error?.objectBudgetBlocked),
+      budget: error?.budget || null,
+      objectPolicy: error?.objectPolicy || objectPolicy
     };
   }
 }
@@ -391,14 +402,30 @@ export default async function handler(req, res) {
     upper: true
   });
   const books = unique(csv(req.query.books, []), { sort: true });
-  const limitRaw = Number(req.query.limit || 100);
-  const limit = Number.isFinite(limitRaw)
+  const now = Date.now();
+  const limitRaw = Number(req.query.limit || 30);
+  const requestedLimit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
-    : 100;
+    : 30;
   const live = String(req.query.live ?? "");
-  const startsAfter = req.query.startsAfter ? String(req.query.startsAfter) : "";
-  const startsBefore = req.query.startsBefore ? String(req.query.startsBefore) : "";
-  const priority = boardPriority(live, startsBefore);
+  const startsAfter = req.query.startsAfter
+    ? String(req.query.startsAfter)
+    : new Date(now - 8 * 60 * 60 * 1000).toISOString();
+  const startsBefore = req.query.startsBefore
+    ? String(req.query.startsBefore)
+    : new Date(now + 48 * 60 * 60 * 1000).toISOString();
+  const priority = boardPriority(
+    live,
+    req.query.startsBefore ? startsBefore : ""
+  );
+  const objectPolicy = await optimizeSportsGameOddsObjectLimit({
+    apiKey,
+    requestedLimit,
+    defaultLimit: 30,
+    priority,
+    fanout: leagues.length
+  });
+  const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const results = await mapWithConcurrency(
     leagues,
@@ -412,7 +439,8 @@ export default async function handler(req, res) {
         live,
         startsAfter,
         startsBefore,
-        priority
+        priority,
+        objectPolicy
       })
   );
 
@@ -427,7 +455,9 @@ export default async function handler(req, res) {
         retryAfterSeconds,
         circuitOpen,
         budgetBlocked,
-        budget
+        objectBudgetBlocked,
+        budget,
+        objectPolicy
       }) => ({
         league,
         status,
@@ -435,7 +465,9 @@ export default async function handler(req, res) {
         retryAfterSeconds,
         circuitOpen,
         budgetBlocked,
-        budget
+        objectBudgetBlocked,
+        budget,
+        objectPolicy
       })
     );
 
@@ -459,6 +491,13 @@ export default async function handler(req, res) {
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
     providerPriority: priority,
+    objectOptimization: {
+      ...objectPolicy,
+      objectsReturned: available.reduce(
+        (sum, row) => sum + Number(row.cache?.objectsReturned || 0),
+        0
+      )
+    },
     window: {
       startsAfter: startsAfter || null,
       startsBefore: startsBefore || null

@@ -1,4 +1,5 @@
 import {
+  optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 
@@ -48,14 +49,20 @@ async function fetchLeague({
   books,
   includeAltLines,
   limit,
-  apiKey
+  apiKey,
+  startsAfter,
+  startsBefore,
+  objectPolicy
 }) {
   const params = new URLSearchParams({
     leagueID: league,
     oddsAvailable: "true",
     includeOpenCloseOdds: "true",
     includeAltLines: includeAltLines ? "true" : "false",
+    finalized: "false",
     type: "match",
+    startsAfter,
+    startsBefore,
     limit: String(limit)
   });
 
@@ -74,7 +81,8 @@ async function fetchLeague({
       staleMs: PROVIDER_STALE_MS,
       timeoutMs: 7_000,
       consumer: "sharp",
-      priority: "background"
+      priority: "background",
+      objectPolicy
     });
 
     return {
@@ -91,6 +99,11 @@ async function fetchLeague({
         circuitOpen: result.circuitOpen,
         recoveryState: result.recoveryState || "CLOSED",
         budget: result.budget || null,
+        objectPolicy,
+        objectsReturned:
+          result.cacheLayer === "upstream"
+            ? result.objectsReturned || 0
+            : 0,
         upstreamError: result.upstreamError
       }
     };
@@ -106,7 +119,9 @@ async function fetchLeague({
       retryAfterSeconds: error?.retryAfter ?? null,
       circuitOpen: Boolean(error?.circuitOpen),
       budgetBlocked: Boolean(error?.budgetBlocked),
-      budget: error?.budget || null
+      objectBudgetBlocked: Boolean(error?.objectBudgetBlocked),
+      budget: error?.budget || null,
+      objectPolicy: error?.objectPolicy || objectPolicy
     };
   }
 }
@@ -169,10 +184,25 @@ export default async function handler(req, res) {
   });
   const books = unique(csv(req.query.books, []), { sort: true });
   const includeAltLines = String(req.query.alts || "0") === "1";
-  const limitRaw = Number(req.query.limit || 100);
-  const limit = Number.isFinite(limitRaw)
+  const now = Date.now();
+  const limitRaw = Number(req.query.limit || 20);
+  const requestedLimit = Number.isFinite(limitRaw)
     ? Math.max(1, Math.min(100, limitRaw))
-    : 100;
+    : 20;
+  const startsAfter = req.query.startsAfter
+    ? String(req.query.startsAfter)
+    : new Date(now - 8 * 60 * 60 * 1000).toISOString();
+  const startsBefore = req.query.startsBefore
+    ? String(req.query.startsBefore)
+    : new Date(now + 72 * 60 * 60 * 1000).toISOString();
+  const objectPolicy = await optimizeSportsGameOddsObjectLimit({
+    apiKey,
+    requestedLimit,
+    defaultLimit: 20,
+    priority: "background",
+    fanout: leagues.length
+  });
+  const limit = Math.max(1, objectPolicy.effectiveLimit || 1);
 
   const results = await mapWithConcurrency(
     leagues,
@@ -183,7 +213,10 @@ export default async function handler(req, res) {
         books,
         includeAltLines,
         limit,
-        apiKey
+        apiKey,
+        startsAfter,
+        startsBefore,
+        objectPolicy
       })
   );
 
@@ -198,7 +231,9 @@ export default async function handler(req, res) {
         retryAfterSeconds,
         circuitOpen,
         budgetBlocked,
-        budget
+        objectBudgetBlocked,
+        budget,
+        objectPolicy
       }) => ({
         league,
         status,
@@ -206,7 +241,9 @@ export default async function handler(req, res) {
         retryAfterSeconds,
         circuitOpen,
         budgetBlocked,
-        budget
+        objectBudgetBlocked,
+        budget,
+        objectPolicy
       })
     );
 
@@ -263,6 +300,14 @@ export default async function handler(req, res) {
     unavailableLeagues,
     books: books.length ? books : "account-entitled bookmakers",
     includeAltLines,
+    window: { startsAfter, startsBefore },
+    objectOptimization: {
+      ...objectPolicy,
+      objectsReturned: availableLeagues.reduce(
+        (sum, row) => sum + Number(row.cache?.objectsReturned || 0),
+        0
+      )
+    },
     providerCache,
     eventCount: data.length,
     data

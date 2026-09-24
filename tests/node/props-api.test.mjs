@@ -19,7 +19,9 @@ const originalEnv = {
   SPORTS_ODDS_CRITICAL_RESERVE:
     process.env.SPORTS_ODDS_CRITICAL_RESERVE,
   SPORTS_ODDS_NORMAL_RESERVE:
-    process.env.SPORTS_ODDS_NORMAL_RESERVE
+    process.env.SPORTS_ODDS_NORMAL_RESERVE,
+  SPORTS_ODDS_OBJECT_OPTIMIZATION:
+    process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION
 };
 
 function jsonResponse(body, status = 200, headers = {}) {
@@ -75,6 +77,7 @@ beforeEach(() => {
   process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE = "9";
   delete process.env.SPORTS_ODDS_CRITICAL_RESERVE;
   delete process.env.SPORTS_ODDS_NORMAL_RESERVE;
+  process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION = "0";
   Date.now = originalDateNow;
   globalThis.setTimeout = originalSetTimeout;
 });
@@ -394,6 +397,7 @@ test("half-open recovery allows only one local provider probe", async () => {
 
 test("auto-discovers provider request capacity and caches usage lookup", async () => {
   delete process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE;
+  process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION = "0";
 
   let usageCalls = 0;
   let providerCalls = 0;
@@ -436,4 +440,104 @@ test("auto-discovers provider request capacity and caches usage lookup", async (
   assert.equal(first.body.requestBudget.providerRateLimit.currentRequests, 4);
   assert.equal(usageCalls, 1);
   assert.equal(providerCalls, 2);
+});
+
+
+test("object pressure shrinks an oversized critical props query", async () => {
+  process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION = "1";
+
+  let eventUrl = "";
+  globalThis.fetch = async (url) => {
+    const text = String(url);
+    if (text.includes("/v2/account/usage")) {
+      return jsonResponse({
+        success: true,
+        data: {
+          tier: "amateur",
+          rateLimits: {
+            "per-minute": {
+              "max-requests": 10,
+              "current-requests": 1,
+              "max-entities": "unlimited"
+            },
+            "per-hour": {
+              "max-entities": 1000,
+              "current-entities": 960
+            },
+            "per-day": {
+              "max-entities": 3000,
+              "current-entities": 1000
+            },
+            "per-month": {
+              "max-entities": 2500,
+              "current-entities": 1200
+            }
+          }
+        }
+      });
+    }
+    if (text.startsWith("https://api.sportsgameodds.com/v2/events")) {
+      eventUrl = text;
+      return jsonResponse({ success: true, data: [] });
+    }
+    throw new Error("Unexpected URL: " + text);
+  };
+
+  const response = await invoke({ limit: "100" });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(response.body.objectOptimization.pressure, "CRITICAL");
+  assert.equal(response.body.objectOptimization.effectiveLimit, 10);
+  assert.match(eventUrl, /limit=10/);
+  assert.match(eventUrl, /finalized=false/);
+  assert.match(eventUrl, /startsAfter=/);
+  assert.match(eventUrl, /startsBefore=/);
+});
+
+test("object usage parser reports the most constrained interval", async () => {
+  process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION = "1";
+
+  globalThis.fetch = async (url) => {
+    const text = String(url);
+    if (text.includes("/v2/account/usage")) {
+      return jsonResponse({
+        success: true,
+        data: {
+          tier: "rookie",
+          rateLimits: {
+            "per-minute": {
+              "max-requests": 50,
+              "current-requests": 2
+            },
+            "per-hour": {
+              "max-entities": 250000,
+              "current-entities": 125000
+            },
+            "per-day": {
+              "max-entities": 3000000,
+              "current-entities": 300000
+            },
+            "per-month": {
+              "max-entities": 100000,
+              "current-entities": 82000
+            }
+          }
+        }
+      });
+    }
+    if (text.startsWith("https://api.sportsgameodds.com/v2/events")) {
+      return jsonResponse({ success: true, data: [] });
+    }
+    throw new Error("Unexpected URL: " + text);
+  };
+
+  const response = await invoke({ limit: "100" });
+
+  assert.equal(response.statusCode, 200);
+  assert.equal(
+    response.body.objectOptimization.constrainedInterval,
+    "per-month"
+  );
+  assert.equal(response.body.objectOptimization.pressure, "MODERATE");
+  assert.equal(response.body.objectOptimization.effectiveLimit, 30);
 });

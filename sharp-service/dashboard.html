@@ -394,12 +394,13 @@
         </div>
         <span class="badge neutral" id="providerHealthBadge">UNKNOWN</span>
       </div>
-      <div class="metrics" style="grid-template-columns:repeat(5,1fr);margin-top:12px;margin-bottom:10px">
+      <div class="metrics" style="grid-template-columns:repeat(6,1fr);margin-top:12px;margin-bottom:10px">
         <div class="metric"><div class="label">Upstream</div><div class="value" id="phUpstream">—</div><div class="hint">attempts / 24h</div></div>
         <div class="metric"><div class="label">429s</div><div class="value" id="ph429">—</div><div class="hint">rate limits / 24h</div></div>
         <div class="metric"><div class="label">Shared Hits</div><div class="value" id="phShared">—</div><div class="hint">cross-instance cache</div></div>
         <div class="metric"><div class="label">Stale</div><div class="value" id="phStale">—</div><div class="hint">stale serves / 24h</div></div>
         <div class="metric"><div class="label">Cache Rows</div><div class="value" id="phCache">—</div><div class="hint">fresh / stale</div></div>
+        <div class="metric"><div class="label">Objects</div><div class="value" id="phObjects">—</div><div class="hint">most constrained</div></div>
       </div>
       <div id="providerHealthDetail" class="reason"></div>
       <div id="providerIncidentList" style="margin-top:10px"></div>
@@ -1635,7 +1636,7 @@
       </div>`;
   }
 
-  function renderProviderHealth(ph){
+  function renderProviderHealth(ph,providerUsage){
     const status=String(ph?.status||"UNKNOWN");
     const badge=$("providerHealthBadge");
     badge.textContent=status;
@@ -1651,6 +1652,10 @@
     $("phShared").textContent=s.sharedHits??0;
     $("phStale").textContent=s.staleServes??0;
     $("phCache").textContent=(s.freshCacheRows??0)+" / "+(s.staleCacheRows??0);
+    const objectUsage=providerUsage?.mostConstrainedObjects||null;
+    $("phObjects").textContent=objectUsage
+      ? Number(objectUsage.usagePct??0).toFixed(1)+"%"
+      : "—";
 
     const circuit=ph?.circuit||{};
     const heal=ph?.selfHealing||{};
@@ -1672,6 +1677,11 @@
           : "local auto-discovery · 9/min safe fallback"
       )+" · blocks "+esc(requestBudget.blockEvents24h??s.budgetBlocks??0)+" · critical blocks "+esc(requestBudget.criticalBlockEvents24h??s.criticalBudgetBlocks??0)+"</div>"+
       "<div><strong>Priority:</strong> props CRITICAL · live/near-start board CRITICAL · normal board NORMAL · broad sharp BACKGROUND</div>"+
+      "<div><strong>Object usage:</strong> "+(
+        objectUsage
+          ? esc(objectUsage.currentObjects??0)+"/"+esc(objectUsage.maxObjects??"—")+" · "+esc(objectUsage.interval||"interval")+" · "+esc(Number(objectUsage.usagePct??0).toFixed(1))+"%"
+          : "usage data unavailable"
+      )+" · tier "+esc(providerUsage?.tier||"—")+"</div>"+
       "<div><strong>Latest provider success:</strong> "+fmtTime(ph?.latest?.upstreamSuccessAt)+" · latest failure "+fmtTime(ph?.latest?.upstreamFailureAt)+"</div>"+
       (!ph?.sharedActivityDetected
         ? '<div style="margin-top:7px;color:var(--amber)">Shared Supabase telemetry has no activity yet. The Vercel odds APIs may still be operating on their safe local-cache fallback until the server-side Supabase secret is available there.</div>'
@@ -1755,7 +1765,10 @@
     renderMovements(data.movements||[]);
     renderDecisionResults(data.decisionResults||{});
     renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration,data.decisionTimingCalibration,data.modelGovernance,data.outcomeAttribution);
-    renderProviderHealth(data.providerHealth||{});
+    renderProviderHealth(
+      data.providerHealth||{},
+      data.providerUsage||null
+    );
     renderSystem(data.system,data.sharpSourceHealth,data.modelGovernance,data.pipelineHealth);
     const health=Object.values(data.system?.sourceHealth||{});
     const sourceBad=health.some(x=>!x.ok);
