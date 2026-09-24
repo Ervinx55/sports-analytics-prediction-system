@@ -8,6 +8,7 @@ held-out game-level test set.
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import math
 import os
@@ -503,6 +504,66 @@ def main() -> None:
     model.save(output_dir / "model.keras")
     joblib.dump(preprocessor, output_dir / "preprocessor.joblib")
     joblib.dump(logistic, output_dir / "logistic_sanity.joblib")
+
+    numeric_scaler = (
+        preprocessor.named_transformers_["numeric"]
+        .named_steps["scale"]
+    )
+    categorical_encoder = preprocessor.named_transformers_["categorical"]
+
+    dense_layers = []
+    for layer in model.layers:
+        weights = layer.get_weights()
+        if len(weights) != 2:
+            continue
+        dense_layers.append(
+            {
+                "name": layer.name,
+                "activation": layer.activation.__name__,
+                "kernel": np.asarray(weights[0], dtype=float).round(10).tolist(),
+                "bias": np.asarray(weights[1], dtype=float).round(10).tolist(),
+            }
+        )
+
+    inference_bundle = {
+        "model": report["model"],
+        "mode": "SHADOW",
+        "eligibleForProduction": bool(
+            promotion["eligible_for_production"]
+        ),
+        "productionWeight": (
+            float(ensemble_weight)
+            if promotion["eligible_for_production"]
+            else 0.0
+        ),
+        "selectedValidationWeight": float(ensemble_weight),
+        "numericFeatures": NUMERIC_FEATURES,
+        "numericMean": np.asarray(
+            numeric_scaler.mean_, dtype=float
+        ).round(10).tolist(),
+        "numericScale": np.asarray(
+            numeric_scaler.scale_, dtype=float
+        ).round(10).tolist(),
+        "categoricalFeatures": CATEGORICAL_FEATURES,
+        "categoricalCategories": [
+            [str(value) for value in values]
+            for values in categorical_encoder.categories_
+        ],
+        "layers": dense_layers,
+        "coverage": report["coverage"],
+        "promotion": promotion,
+        "testMetrics": test_metrics,
+    }
+    bundle_text = json.dumps(
+        inference_bundle,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    (output_dir / "inference_bundle.json").write_text(
+        json.dumps(inference_bundle, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
     (output_dir / "metrics.json").write_text(
         json.dumps(report, indent=2, sort_keys=True),
         encoding="utf-8",
@@ -547,6 +608,8 @@ def main() -> None:
         ],
     }
     print("ML_SHADOW_SUMMARY=" + json.dumps(compact, sort_keys=True))
+    bundle_b64 = base64.b64encode(bundle_text.encode("utf-8")).decode("ascii")
+    print("ML_SHADOW_BUNDLE_B64=" + bundle_b64)
 
 
 if __name__ == "__main__":
