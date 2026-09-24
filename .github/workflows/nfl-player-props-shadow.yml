@@ -30,6 +30,10 @@ jobs:
   projection-backtest:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        season: [2024, 2025]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -42,12 +46,12 @@ jobs:
       - name: Run NFL player props chronological backtest
         run: |
           node scripts/nfl/backtest-nfl-player-props.mjs \
-            --seasons=2024,2025 \
+            --seasons=${{ matrix.season }} \
             --min-week=4 \
-            --output-dir=artifacts/nfl-player-props-backtest
+            --output-dir=artifacts/nfl-player-props-backtest-${{ matrix.season }}
 
       - name: Upload NFL player props backtest artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nfl-player-props-shadow-backtest
-          path: artifacts/nfl-player-props-backtest
+          name: nfl-player-props-shadow-backtest-${{ matrix.season }}
+          path: artifacts/nfl-player-props-backtest-${{ matrix.season }}
