@@ -133,12 +133,31 @@ function summarizeProviderEvent(event) {
 
     if (PLAYER_MARKETS.includes(odd.statID)) {
       const playerID = odd.playerID || odd.statEntityID || null;
+      const providerPlayer =
+        (playerID && event.players?.[playerID]) || null;
+      const homeTeamID = event.teams?.home?.teamID ?? null;
+      const awayTeamID = event.teams?.away?.teamID ?? null;
+      const providerTeamID = providerPlayer?.teamID ?? null;
+      const teamSide =
+        providerTeamID && providerTeamID === homeTeamID
+          ? "home"
+          : providerTeamID && providerTeamID === awayTeamID
+            ? "away"
+            : null;
       const key = `${odd.statID}|${playerID || playerNameFromOdd(odd)}`;
       if (!props.has(key)) {
         props.set(key, {
           statID: odd.statID,
           playerID,
-          playerName: playerNameFromOdd(odd),
+          playerName:
+            providerPlayer?.name ||
+            [providerPlayer?.firstName, providerPlayer?.lastName]
+              .filter(Boolean)
+              .join(" ") ||
+            playerNameFromOdd(odd),
+          playerPosition: providerPlayer?.position ?? null,
+          providerTeamID,
+          teamSide,
           marketName: odd.marketName ?? null,
           over: null,
           under: null
@@ -345,9 +364,41 @@ export default async function handler(req, res) {
           prop.playerName,
           eventTeams
         );
-        const opponent = eventTeams.find((team) => team !== identity.team);
+        const effectiveTeam =
+          prop.teamSide === "home"
+            ? normalizeTeam(
+                event?.matchup?.home?.name ||
+                event?.matchup?.home?.short
+              )
+            : prop.teamSide === "away"
+              ? normalizeTeam(
+                  event?.matchup?.away?.name ||
+                  event?.matchup?.away?.short
+                )
+              : identity.team;
+        const opponent = eventTeams.find(
+          (team) => team !== effectiveTeam
+        );
+        const providerTeam =
+          prop.teamSide === "home"
+            ? eventTeams.find((team) =>
+                team === normalizeTeam(
+                  event?.matchup?.home?.name ||
+                  event?.matchup?.home?.short
+                )
+              )
+            : prop.teamSide === "away"
+              ? eventTeams.find((team) =>
+                  team === normalizeTeam(
+                    event?.matchup?.away?.name ||
+                    event?.matchup?.away?.short
+                  )
+                )
+              : null;
         const opportunity = projectPlayerOpportunity({
           playerName: prop.playerName,
+          preferredTeam: providerTeam,
+          preferredPosition: prop.playerPosition,
           event,
           schedule: nflData.schedule,
           season,
