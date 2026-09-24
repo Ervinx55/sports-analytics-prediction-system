@@ -9,6 +9,7 @@ on:
       - "sharp-service/lib/nfl-model.js"
       - "sharp-service/api/nflmodel.js"
       - "scripts/nfl/backtest-nfl-team-markets.mjs"
+      - "scripts/nfl/calibrate-nfl-market-shrinkage.mjs"
       - ".github/workflows/nfl-shadow.yml"
       - "tests/node/nfl-model.test.mjs"
   schedule:
@@ -37,8 +38,13 @@ jobs:
             --min-week=4 \
             --output-dir=artifacts/nfl-backtest
 
+      - name: Calibrate NFL independent-market shrinkage
+        run: node scripts/nfl/calibrate-nfl-market-shrinkage.mjs
+
       - name: Upload NFL backtest artifacts
         uses: actions/upload-artifact@v4
         with:
           name: nfl-shadow-backtest
-          path: artifacts/nfl-backtest
+          path: |
+            artifacts/nfl-backtest
+            artifacts/nfl-calibration

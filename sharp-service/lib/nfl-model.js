@@ -1063,7 +1063,8 @@ function projectEvent({
   season,
   weatherContext = null,
   sourceHealth = null,
-  disableAvailabilityAdjustments = false
+  disableAvailabilityAdjustments = false,
+  simulationIterations = 20000
 }) {
   const away = normalizeTeam(
     event?.matchup?.away?.name || event?.matchup?.away?.short
@@ -1183,7 +1184,8 @@ function projectEvent({
     projectedHomeMargin,
     projectedTotal,
     homeSpread: marketHomeSpread,
-    totalLine: marketTotal
+    totalLine: marketTotal,
+    iterations: simulationIterations
   });
 
   const quality = dataQuality(
@@ -1315,6 +1317,7 @@ function projectEvent({
       qbAdjustmentPoints: Number(qbAdjustment.toFixed(3)),
       weatherAdjustmentPoints: Number(weatherAdjustment.toFixed(3)),
       availabilityAdjustmentApplied: !disableAvailabilityAdjustments,
+      simulationIterations,
       dataQuality: Number(quality.toFixed(3))
     },
     simulation,
