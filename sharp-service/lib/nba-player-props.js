@@ -1,6 +1,10 @@
 import {
   resolveOfficialAvailability
 } from "./nba-injury-report.js";
+import {
+  applyNbaPropGameContext,
+  buildNbaPropGameContext
+} from "./nba-prop-context.js";
 
 const BDL_STATS_URL = "https://api.balldontlie.io/v1/stats";
 const BDL_INJURIES_URL =
@@ -9,7 +13,7 @@ const NBA_OFFICIAL_INJURY_PAGE =
   "https://official.nba.com/nba-injury-report-2025-26-season/";
 
 const NBA_PLAYER_PROP_VERSION =
-  "NBA Player Props v1-shadow";
+  "NBA Player Props v1.1-shadow";
 
 const DIRECT_FIELDS = Object.freeze({
   points: "pts",
@@ -263,6 +267,25 @@ function projectionFromHistory(
     usable.slice(0, 8),
     (row) => parseMinutes(row?.min)
   );
+  const shortMinutes = weightedMean(
+    usable.slice(0, Math.min(3, usable.length)),
+    (row) => parseMinutes(row?.min)
+  );
+  const longMinutes = weightedMean(
+    usable.slice(0, Math.min(8, usable.length)),
+    (row) => parseMinutes(row?.min)
+  );
+  const minutesDelta =
+    Number.isFinite(shortMinutes) &&
+    Number.isFinite(longMinutes)
+      ? shortMinutes - longMinutes
+      : null;
+  const minutesTrendRatio =
+    Number.isFinite(shortMinutes) &&
+    Number.isFinite(longMinutes) &&
+    longMinutes > 0
+      ? shortMinutes / longMinutes
+      : null;
   const perMinuteRate = weightedMean(
     usable.slice(0, 8),
     (row) => {
@@ -338,6 +361,32 @@ function projectionFromHistory(
     .map((row) => parseMinutes(row?.min))
     .filter(Number.isFinite);
   const minutesSd = sampleSd(minutesHistory);
+  const roleChangeDetected =
+    Number.isFinite(minutesDelta) &&
+    Number.isFinite(minutesTrendRatio) &&
+    Math.abs(minutesDelta) >= 4.5 &&
+    (
+      minutesTrendRatio <= 0.86 ||
+      minutesTrendRatio >= 1.14
+    );
+  const roleStability =
+    roleChangeDetected
+      ? clamp(
+          1 -
+            Math.min(
+              0.6,
+              Math.abs(minutesDelta) / 20
+            ),
+          0.35,
+          0.75
+        )
+      : Number.isFinite(minutesSd)
+      ? clamp(
+          1 - minutesSd / 18,
+          0.5,
+          1
+        )
+      : 0.75;
 
   const latestTeam =
     usable[0]?.team?.full_name ||
@@ -357,6 +406,25 @@ function projectionFromHistory(
       Number.isFinite(projectedMinutes)
         ? Number(projectedMinutes.toFixed(3))
         : null,
+    shortMinutes:
+      Number.isFinite(shortMinutes)
+        ? Number(shortMinutes.toFixed(3))
+        : null,
+    longMinutes:
+      Number.isFinite(longMinutes)
+        ? Number(longMinutes.toFixed(3))
+        : null,
+    minutesDelta:
+      Number.isFinite(minutesDelta)
+        ? Number(minutesDelta.toFixed(3))
+        : null,
+    minutesTrendRatio:
+      Number.isFinite(minutesTrendRatio)
+        ? Number(minutesTrendRatio.toFixed(4))
+        : null,
+    roleChangeDetected,
+    roleStability:
+      Number(roleStability.toFixed(3)),
     minutesSd:
       Number.isFinite(minutesSd)
         ? Number(minutesSd.toFixed(3))
@@ -434,11 +502,17 @@ function normalCdf(x, mean, sd) {
 function independentProbability(
   projection,
   side,
-  line
+  line,
+  meanOverride = null
 ) {
+  const mean =
+    Number.isFinite(meanOverride)
+      ? meanOverride
+      : projection?.mean;
+
   if (
     !projection?.available ||
-    !Number.isFinite(projection.mean) ||
+    !Number.isFinite(mean) ||
     !Number.isFinite(projection.sd) ||
     !Number.isFinite(line)
   ) {
@@ -449,7 +523,7 @@ function independentProbability(
     1 -
     normalCdf(
       line,
-      projection.mean,
+      mean,
       projection.sd
     );
   return side === "over" ? over : 1 - over;
@@ -494,6 +568,195 @@ function expectedValue(probability, odds) {
     return null;
   }
   return probability * decimal - 1;
+}
+
+function median(values) {
+  const usable = values
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  if (!usable.length) return null;
+  const middle =
+    Math.floor(usable.length / 2);
+  return usable.length % 2
+    ? usable[middle]
+    : (
+        usable[middle - 1] +
+        usable[middle]
+      ) / 2;
+}
+
+function quoteAgeMinutes(
+  updatedAt,
+  now = new Date()
+) {
+  const updated =
+    Date.parse(updatedAt || "");
+  if (!Number.isFinite(updated)) {
+    return null;
+  }
+  return Math.max(
+    0,
+    (
+      now.getTime() -
+      updated
+    ) / 60000
+  );
+}
+
+function marketIntegrity(
+  pairs,
+  pair,
+  side,
+  now = new Date()
+) {
+  const sameLine = (pairs || [])
+    .filter(
+      (row) =>
+        Number.isFinite(row?.line) &&
+        Math.abs(
+          row.line - pair.line
+        ) < 1e-9
+    );
+
+  const probabilities =
+    sameLine
+      .map((row) =>
+        noVigProbability(
+          side === "over"
+            ? row.overOdds
+            : row.underOdds,
+          side === "over"
+            ? row.underOdds
+            : row.overOdds
+        )
+      )
+      .filter(Number.isFinite);
+
+  const candidateProbability =
+    noVigProbability(
+      side === "over"
+        ? pair.overOdds
+        : pair.underOdds,
+      side === "over"
+        ? pair.underOdds
+        : pair.overOdds
+    );
+  const consensusProbability =
+    median(probabilities);
+  const probabilityRange =
+    probabilities.length
+      ? Math.max(...probabilities) -
+        Math.min(...probabilities)
+      : null;
+  const probabilityDeviation =
+    Number.isFinite(candidateProbability) &&
+    Number.isFinite(consensusProbability)
+      ? Math.abs(
+          candidateProbability -
+          consensusProbability
+        )
+      : null;
+
+  const lineValues = (pairs || [])
+    .map((row) => row?.line)
+    .filter(Number.isFinite);
+  const lineRange =
+    lineValues.length
+      ? Math.max(...lineValues) -
+        Math.min(...lineValues)
+      : null;
+
+  const ageMinutes =
+    quoteAgeMinutes(
+      pair?.updatedAt,
+      now
+    );
+  const stale =
+    Number.isFinite(ageMinutes) &&
+    ageMinutes > 30;
+  const isolatedLine =
+    sameLine.length < 2;
+  const highDisagreement =
+    Number.isFinite(probabilityRange) &&
+    probabilityRange >= 0.10;
+  const priceOutlier =
+    Number.isFinite(probabilityDeviation) &&
+    probabilityDeviation >= 0.055;
+  const staleOutlier =
+    stale && priceOutlier;
+
+  let score = 1;
+  if (isolatedLine) score -= 0.35;
+  if (stale) score -= 0.20;
+  if (priceOutlier) score -= 0.15;
+  if (highDisagreement) score -= 0.20;
+  if (ageMinutes === null) score -= 0.05;
+
+  score = clamp(score, 0, 1);
+
+  return {
+    score:
+      Number(score.toFixed(3)),
+    blocked:
+      isolatedLine ||
+      staleOutlier ||
+      highDisagreement,
+    pairedBooks:
+      sameLine.length,
+    exactLine:
+      pair.line,
+    lineRange:
+      Number.isFinite(lineRange)
+        ? Number(lineRange.toFixed(3))
+        : null,
+    consensusFairProbability:
+      Number.isFinite(consensusProbability)
+        ? Number(
+            consensusProbability.toFixed(6)
+          )
+        : null,
+    candidateFairProbability:
+      Number.isFinite(candidateProbability)
+        ? Number(
+            candidateProbability.toFixed(6)
+          )
+        : null,
+    probabilityRangePctPoints:
+      Number.isFinite(probabilityRange)
+        ? Number(
+            (
+              probabilityRange * 100
+            ).toFixed(3)
+          )
+        : null,
+    probabilityDeviationPctPoints:
+      Number.isFinite(probabilityDeviation)
+        ? Number(
+            (
+              probabilityDeviation * 100
+            ).toFixed(3)
+          )
+        : null,
+    quoteAgeMinutes:
+      Number.isFinite(ageMinutes)
+        ? Number(
+            ageMinutes.toFixed(1)
+          )
+        : null,
+    stale,
+    isolatedLine,
+    highDisagreement,
+    priceOutlier,
+    staleOutlier,
+    reason:
+      isolatedLine
+        ? "Exact line is isolated to one paired sportsbook."
+        : staleOutlier
+        ? "Quote is both stale and materially off the same-line cross-book consensus."
+        : highDisagreement
+        ? "Same-line sportsbooks disagree too widely on no-vig probability."
+        : "Market integrity gate is clear."
+  };
 }
 
 function exactPairs(prop) {
@@ -707,6 +970,13 @@ function qualityScore({
     score += 0.08;
   }
 
+  if (
+    Number.isFinite(projection.roleStability)
+  ) {
+    score *=
+      0.82 +
+      0.18 * projection.roleStability;
+  }
   if (injury?.officialReportParsed) {
     score += 0.08;
   } else {
@@ -714,6 +984,9 @@ function qualityScore({
   }
   if (injury?.availabilityBlocked) {
     score = Math.min(score, 0.35);
+  }
+  if (projection.roleChangeDetected) {
+    score = Math.min(score, 0.69);
   }
 
   return clamp(score, 0, 1);
@@ -723,7 +996,8 @@ function gradeProp({
   event,
   prop,
   projection,
-  injury
+  injury,
+  now = new Date()
 }) {
   const pairs = exactPairs(prop);
   const lineCounts = new Map();
@@ -749,7 +1023,14 @@ function gradeProp({
         side === "over"
           ? pair.underOdds
           : pair.overOdds;
-      const independent =
+      const rawIndependent =
+        independentProbability(
+          projection,
+          side,
+          pair.line,
+          projection?.rawMean
+        );
+      const shadowIndependent =
         independentProbability(
           projection,
           side,
@@ -761,24 +1042,44 @@ function gradeProp({
           opponentOdds
         );
       const edge =
-        Number.isFinite(independent) &&
+        Number.isFinite(shadowIndependent) &&
         Number.isFinite(marketFair)
-          ? independent - marketFair
+          ? shadowIndependent - marketFair
           : null;
       const ev =
-        Number.isFinite(independent)
-          ? expectedValue(independent, odds)
+        Number.isFinite(shadowIndependent)
+          ? expectedValue(shadowIndependent, odds)
           : null;
-      const dataQuality = qualityScore({
-        projection,
-        pairedBooks,
-        injury
-      });
+      const baseDataQuality =
+        qualityScore({
+          projection,
+          pairedBooks,
+          injury
+        });
+      const integrity =
+        marketIntegrity(
+          pairs,
+          pair,
+          side,
+          now
+        );
+      const dataQuality =
+        clamp(
+          baseDataQuality *
+            (
+              0.8 +
+              0.2 * integrity.score
+            ),
+          0,
+          1
+        );
 
       const shadowPlay =
         projection?.available &&
         injury?.resolvedForPlay === true &&
         injury?.availabilityBlocked !== true &&
+        integrity.blocked !== true &&
+        integrity.score >= 0.55 &&
         dataQuality >= 0.72 &&
         pairedBooks >= 2 &&
         edge !== null &&
@@ -814,12 +1115,12 @@ function gradeProp({
             ? Number(marketFair.toFixed(6))
             : null,
         rawIndependentProbability:
-          Number.isFinite(independent)
-            ? Number(independent.toFixed(6))
+          Number.isFinite(rawIndependent)
+            ? Number(rawIndependent.toFixed(6))
             : null,
         shadowModelProbability:
-          Number.isFinite(independent)
-            ? Number(independent.toFixed(6))
+          Number.isFinite(shadowIndependent)
+            ? Number(shadowIndependent.toFixed(6))
             : marketFair,
         edgePct:
           edge === null
@@ -829,16 +1130,40 @@ function gradeProp({
           ev === null
             ? null
             : Number((ev * 100).toFixed(3)),
+        rawProjectionMean:
+          projection?.rawMean ?? projection?.mean ?? null,
         projectionMean:
           projection?.mean ?? null,
+        contextChallengerMean:
+          projection?.contextChallengerMean ?? null,
+        contextSignal:
+          projection?.contextSignal ?? null,
+        contextShadowWeight:
+          projection?.contextShadowWeight ?? 0,
+        gameContext:
+          projection?.gameContext ?? null,
         projectionSd:
           projection?.sd ?? null,
         projectedMinutes:
           projection?.projectedMinutes ?? null,
+        roleChangeDetected:
+          Boolean(
+            projection?.roleChangeDetected
+          ),
+        roleStability:
+          projection?.roleStability ?? null,
+        minutesDelta:
+          projection?.minutesDelta ?? null,
         historyGames:
           projection?.historyGames ?? 0,
         dataQuality:
           Number(dataQuality.toFixed(3)),
+        baseDataQuality:
+          Number(
+            baseDataQuality.toFixed(3)
+          ),
+        marketIntegrity:
+          integrity,
         injury,
         shadowStatus:
           shadowPlay ? "PLAY" : "PASS",
@@ -855,7 +1180,11 @@ function gradeProp({
           : injury?.resolvedForPlay !== true
           ? injury?.reason ||
             "Official availability is unresolved."
-          : "NBA player-prop v1 production is disabled; shadow edge, market depth, or data-quality threshold was not met."
+          : integrity.blocked
+          ? integrity.reason
+          : projection?.roleChangeDetected
+          ? "Recent minutes indicate a material role change; shadow PLAY is blocked until the role stabilizes."
+          : "NBA player-prop v1.1 production is disabled; shadow edge, market depth, integrity, role stability, or data-quality threshold was not met."
       });
     }
   }
@@ -1104,6 +1433,9 @@ function projectPropEvent({
   statsRows = [],
   injuries = [],
   officialReport = null,
+  boardEvent = null,
+  games = [],
+  season = null,
   now = new Date()
 }) {
   const candidates = [];
@@ -1121,13 +1453,28 @@ function projectPropEvent({
       prop,
       event.startsAt
     );
-    const projection =
+    const baseProjection =
       projectionFromHistory(
         history,
         prop.statID,
         {
           beforeAt: event.startsAt
         }
+      );
+    const gameContext =
+      buildNbaPropGameContext({
+        propEvent: event,
+        boardEvent,
+        games,
+        season,
+        playerTeamName:
+          baseProjection?.teamName || null
+      });
+    const projection =
+      applyNbaPropGameContext(
+        baseProjection,
+        prop.statID,
+        gameContext
       );
     const secondary = injuryForPlayer(
       injuries,
@@ -1151,7 +1498,8 @@ function projectPropEvent({
       event,
       prop,
       projection,
-      injury
+      injury,
+      now
     });
     candidates.push(...playerCandidates);
     players.push({
@@ -1182,6 +1530,8 @@ export {
   recentPlayerRows,
   projectionFromHistory,
   independentProbability,
+  quoteAgeMinutes,
+  marketIntegrity,
   exactPairs,
   injuryForPlayer,
   officialInjuryContext,

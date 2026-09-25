@@ -24,6 +24,9 @@ import {
   normalizeTeam,
   seasonForDate
 } from "../lib/nba-model.js";
+import {
+  matchBoardEvent
+} from "../lib/nba-prop-context.js";
 
 const DEFAULT_BOOKS = [
   "draftkings",
@@ -33,6 +36,8 @@ const DEFAULT_BOOKS = [
 ];
 
 const STALE_TTL_MS = 10 * 60 * 1000;
+const DEFAULT_BOARD_URL =
+  "https://sports-analytics-prediction-system-tau.vercel.app/api/board";
 
 const SGO_STAT_IDS = Object.freeze({
   points: "points",
@@ -476,6 +481,94 @@ async function resolvePropProvider({
   throw error;
 }
 
+async function fetchBoardContext({
+  books,
+  startsAfter,
+  startsBefore
+}) {
+  const base =
+    process.env.EDGE_LAB_BOARD_URL ||
+    DEFAULT_BOARD_URL;
+  const params = new URLSearchParams({
+    leagues: "NBA",
+    books: books.join(","),
+    startsAfter,
+    startsBefore
+  });
+
+  try {
+    const response = await fetch(
+      `${base}?${params.toString()}`,
+      {
+        headers: {
+          accept: "application/json"
+        },
+        cache: "no-store",
+        signal:
+          AbortSignal.timeout(8_000)
+      }
+    );
+    const raw = await response.text();
+    let body;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      body = {};
+    }
+
+    if (!response.ok) {
+      return {
+        events: [],
+        sourceHealth: {
+          status: "UNAVAILABLE",
+          source: "Edge Lab board",
+          error:
+            `Board request failed (${response.status})`
+        }
+      };
+    }
+
+    const events = (
+      Array.isArray(body?.events)
+        ? body.events
+        : []
+    ).filter(
+      (event) =>
+        String(
+          event?.league || ""
+        ).toUpperCase() === "NBA"
+    );
+
+    return {
+      events,
+      sourceHealth: {
+        status:
+          events.length
+            ? "HEALTHY"
+            : "EMPTY",
+        source: "Edge Lab board",
+        eventCount: events.length,
+        providersUsed:
+          body?.providersUsed || [],
+        providerFailures:
+          body?.providerFailures || []
+      }
+    };
+  } catch (error) {
+    return {
+      events: [],
+      sourceHealth: {
+        status: "UNAVAILABLE",
+        source: "Edge Lab board",
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error)
+      }
+    };
+  }
+}
+
 function relevantHistoryIds(
   events,
   games,
@@ -673,11 +766,21 @@ export default async function handler(
         refreshPolicy
       });
 
-    const nbaGames = await loadNbaGames({
-      season,
-      targetAt: startsBefore,
-      lookbackDays: 30
-    });
+    const [
+      nbaGames,
+      boardContext
+    ] = await Promise.all([
+      loadNbaGames({
+        season,
+        targetAt: startsBefore,
+        lookbackDays: 30
+      }),
+      fetchBoardContext({
+        books,
+        startsAfter,
+        startsBefore
+      })
+    ]);
 
     const ids = relevantHistoryIds(
       provider.events,
@@ -723,6 +826,14 @@ export default async function handler(
             statsRows: stats.rows,
             injuries: injuries.rows,
             officialReport,
+            boardEvent:
+              matchBoardEvent(
+                event,
+                boardContext.events
+              ),
+            games:
+              nbaGames.games,
+            season,
             now: new Date()
           })
       );
@@ -788,7 +899,9 @@ export default async function handler(
         exactBookLineGrading: true,
         sameBookNoVig: true,
         projectionFlow:
-          "recent minutes + per-minute production + rolling direct production -> stat distribution -> exact book/line probability",
+          "recent minutes + per-minute production + rolling direct production + conservative NBA game-environment challenger -> stat distribution -> exact book/line probability",
+        gameContextPolicy:
+          "NBA v1.1 preserves the raw history-only projection and separately applies a capped game-context challenger using game total, spread/implied team total, opponent recent points allowed, recent scoring environment, and rest/fatigue. The full context signal is capped at +/-5% and receives only 25% shadow weight pending chronological validation.",
         comboProps:
           "built from the same underlying game rows for internal consistency",
         injuryPolicy:
@@ -814,6 +927,8 @@ export default async function handler(
         games:
           nbaGames.sourceHealth?.games ||
           null,
+        gameContext:
+          boardContext.sourceHealth,
         playerStats:
           stats.sourceHealth,
         injuries: {
@@ -851,7 +966,19 @@ export default async function handler(
         injuryRows:
           injuries.rows.length,
         officialInjuryEntries:
-          officialReport?.entries?.length || 0
+          officialReport?.entries?.length || 0,
+        gameContextEvents:
+          boardContext.events.length,
+        matchedGameContextEvents:
+          eventModels.filter(
+            (event) =>
+              event.players?.some(
+                (player) =>
+                  player?.projection
+                    ?.gameContext
+                    ?.boardMatched
+              )
+          ).length
       },
       eventCount:
         eventModels.length,

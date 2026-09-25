@@ -855,16 +855,16 @@
     },
     {
       "slug": "capture-nba-player-props",
-      "version": 1,
+      "version": 2,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "61b63ca6ca48c94b3fd84c345ed3fd2922369c679e4cb4574bf97f99c0128957",
+      "bundle_sha256": "518b81410782c1501fcd2a7cc01c8f74830125f9c7b727957ac536ace4327418",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/capture-nba-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "439401357b29349336347afb715792eddc384d4e22f9f471234eea0adb5bf54a"
+          "sha256": "3236a83099a1ce8f3f26e953e1453bf0d01224f3ba83191de5c3670252b9f3be"
         }
       ],
       "recovered_at": "2026-09-25",
