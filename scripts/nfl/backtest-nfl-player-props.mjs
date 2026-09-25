@@ -11,6 +11,9 @@ import {
   normalizePlayerName,
   projectPlayerOpportunity
 } from "../../sharp-service/lib/nfl-player-props.js";
+import {
+  scheduleKickoffIso
+} from "../../sharp-service/lib/nfl-schedule-time.js";
 
 function argValue(name, fallback) {
   const prefix = `--${name}=`;
@@ -100,9 +103,13 @@ function scheduleGame(schedule, season, week, team) {
 function eventFromGame(game) {
   const spreadLine = num(game.spread_line);
   const totalLine = num(game.total_line);
+  const kickoff = scheduleKickoffIso(game);
   return {
     eventID: game.game_id,
-    startsAt: `${game.gameday}T23:59:00Z`,
+    startsAt: kickoff.startsAt,
+    kickoffSource: kickoff.source,
+    conservativeKickoffFallback:
+      kickoff.conservativeFallback,
     matchup: {
       away: {
         name: game.away_team,
@@ -671,7 +678,7 @@ async function main() {
     seasons,
     minWeek,
     leakagePolicy:
-      "Target-game statistics are unavailable until the following day. Snap counts, NGS, and depth-chart rows are filtered by their live-availability timestamps before each historical kickoff.",
+      "Target-game statistics are unavailable until the following day. Historical nflverse gameday+gametime is converted from Eastern Time to exact UTC kickoff; snap counts, NGS, and depth-chart rows are filtered by live-availability timestamps before that kickoff. Missing gametime falls back conservatively to 00:00Z on game day.",
     historicalWeatherPolicy:
       "Historical finalized weather is intentionally excluded because it is not equivalent to a pregame forecast.",
     developmentPolicy:
