@@ -154,7 +154,7 @@ NBA team markets remain shadow-only: production weight is zero until the 2024
 chronological development replay is frozen, 2025 holdout validation is run, and
 historical market-price validation is available.
 
-### NBA player props v1
+### NBA player props v1.1
 
 Use `GET /api/nbaprops` for the NBA player-prop shadow engine. Supported
 markets include points, rebounds, assists, threes made, blocks, steals,
@@ -176,6 +176,18 @@ as Available, Probable, Questionable, Doubtful, Out, Not Listed, or Not Yet
 Submitted. Questionable/unsubmitted/unresolved statuses block a shadow PLAY;
 Out/Doubtful hard-block it. A secondary injury feed may add context but cannot
 override a conflicting official report.
+
+NBA v1.1 adds a conservative game-environment challenger. It preserves the
+history-only raw projection and separately evaluates game total/spread, implied
+team total, opponent recent points allowed, recent scoring environment, and
+rest/fatigue. The full context challenger is capped at +/-5% of the raw stat
+mean and receives only 25% shadow weight. Historical development replay must
+beat v1 itself before the context layer can be accepted.
+
+v1.1 also adds a downgrade-only market-integrity gate. Exact-line isolation,
+stale outlier prices, and severe same-line no-vig disagreement can reduce
+quality or block a shadow PLAY, but market integrity can never create an edge or
+upgrade a PASS by itself.
 
 Every NBA prop remains production PASS / weight 0 until chronological
 projection validation, untouched holdout validation, and historical exact
