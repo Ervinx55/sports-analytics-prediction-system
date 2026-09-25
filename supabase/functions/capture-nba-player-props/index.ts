@@ -187,10 +187,22 @@ function observationRows(model: any, capturedAt: string) {
             candidate?.contextShadowWeight ?? 0,
           gameContext:
             candidate?.gameContext ?? null,
-          projectionSd: candidate?.projectionSd ?? null,
-          projectedMinutes: candidate?.projectedMinutes ?? null,
-          historyGames: candidate?.historyGames ?? null,
-          injury: candidate?.injury ?? null,
+          marketIntegrity:
+            candidate?.marketIntegrity ?? null,
+          projectionSd:
+            candidate?.projectionSd ?? null,
+          projectedMinutes:
+            candidate?.projectedMinutes ?? null,
+          roleChangeDetected:
+            candidate?.roleChangeDetected ?? false,
+          roleStability:
+            candidate?.roleStability ?? null,
+          minutesDelta:
+            candidate?.minutesDelta ?? null,
+          historyGames:
+            candidate?.historyGames ?? null,
+          injury:
+            candidate?.injury ?? null,
           providerFailures: model?.providerFailures ?? [],
         },
       };
