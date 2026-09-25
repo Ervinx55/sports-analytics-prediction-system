@@ -18,6 +18,14 @@ import {
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
+import {
+  fetchSharpApiBoardLeague,
+  fetchSharpApiNflProps
+} from "../lib/sharpapi-provider.js";
+import {
+  fetchTheOddsApiBoardLeague,
+  fetchTheOddsApiNflProps
+} from "../lib/the-odds-api-provider.js";
 
 const DEFAULT_BOOKS = [
   "draftkings",
@@ -221,6 +229,212 @@ function summarizeProviderEvent(event) {
   };
 }
 
+function mergePropAndBoardEvents(propEvents = [], boardEvents = []) {
+  const boardByProviderID = new Map(
+    boardEvents
+      .filter((event) => event?.providerEventID)
+      .map((event) => [String(event.providerEventID), event])
+  );
+
+  return propEvents.map((event) => {
+    const board = event?.providerEventID
+      ? boardByProviderID.get(String(event.providerEventID))
+      : null;
+    return {
+      ...event,
+      status: board?.status || event.status,
+      matchup: board?.matchup || event.matchup,
+      markets: board?.markets || event.markets || {
+        spread: { away: null, home: null },
+        total: { over: null, under: null }
+      }
+    };
+  });
+}
+
+async function resolveNflPropProvider({
+  sportsGameOddsKey,
+  sharpApiKey,
+  theOddsApiKey,
+  books,
+  startsAfter,
+  startsBefore,
+  refreshPolicy,
+  objectPolicy,
+  providerUrl
+}) {
+  const failures = [];
+
+  if (sportsGameOddsKey) {
+    try {
+      const provider = await protectedSportsGameOddsFetch({
+        url: providerUrl,
+        apiKey: sportsGameOddsKey,
+        freshMs: refreshPolicy.freshMs,
+        staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs),
+        timeoutMs: 8_000,
+        consumer: "nfl-player-props",
+        priority: "critical",
+        objectPolicy
+      });
+      const events = (provider.payload?.data || [])
+        .map(summarizeProviderEvent)
+        .filter(
+          (event) =>
+            event.league === "NFL" &&
+            event.props.length > 0
+        );
+      if (events.length) {
+        return {
+          source: "SportsGameOdds",
+          events,
+          cacheStatus: provider.cacheStatus,
+          cacheLayer: provider.cacheLayer,
+          servedStale: provider.cacheStatus === "STALE",
+          objectsReturned:
+            provider.cacheLayer === "upstream"
+              ? provider.objectsReturned || 0
+              : 0,
+          failures
+        };
+      }
+      failures.push({
+        provider: "SportsGameOdds",
+        status: 204,
+        error: "No usable NFL player props returned"
+      });
+    } catch (error) {
+      failures.push({
+        provider: "SportsGameOdds",
+        status: Number(error?.status || 502),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+        objectBudgetBlocked:
+          Boolean(error?.objectBudgetBlocked)
+      });
+    }
+  }
+
+  if (sharpApiKey) {
+    try {
+      const [props, board] = await Promise.all([
+        fetchSharpApiNflProps({
+          apiKey: sharpApiKey,
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(60_000, refreshPolicy.freshMs),
+          staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs)
+        }),
+        fetchSharpApiBoardLeague({
+          apiKey: sharpApiKey,
+          league: "NFL",
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(60_000, refreshPolicy.freshMs),
+          staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs)
+        })
+      ]);
+      const events = mergePropAndBoardEvents(
+        props.events,
+        board.events
+      );
+      if (events.length) {
+        return {
+          source: "SharpAPI",
+          events,
+          cacheStatus: props.cache?.status || "MIXED",
+          cacheLayer: props.cache?.layer || "local/upstream",
+          servedStale: Boolean(props.cache?.servedStale),
+          objectsReturned: 0,
+          failures
+        };
+      }
+      failures.push({
+        provider: "SharpAPI",
+        status: 204,
+        error: "No usable NFL player props returned"
+      });
+    } catch (error) {
+      failures.push({
+        provider: "SharpAPI",
+        status: Number(error?.status || 502),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error)
+      });
+    }
+  }
+
+  if (theOddsApiKey) {
+    try {
+      const [props, board] = await Promise.all([
+        fetchTheOddsApiNflProps({
+          apiKey: theOddsApiKey,
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(5 * 60_000, refreshPolicy.freshMs),
+          staleMs: Math.max(20 * 60_000, refreshPolicy.staleMs)
+        }),
+        fetchTheOddsApiBoardLeague({
+          apiKey: theOddsApiKey,
+          league: "NFL",
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(5 * 60_000, refreshPolicy.freshMs),
+          staleMs: Math.max(20 * 60_000, refreshPolicy.staleMs)
+        })
+      ]);
+      const events = mergePropAndBoardEvents(
+        props.events,
+        board.events
+      );
+      if (events.length) {
+        return {
+          source: "The Odds API",
+          events,
+          cacheStatus: props.cache?.status || "MIXED",
+          cacheLayer: props.cache?.layer || "local/upstream",
+          servedStale: Boolean(props.cache?.servedStale),
+          objectsReturned: 0,
+          usage: props.usage || null,
+          failures
+        };
+      }
+      failures.push({
+        provider: "The Odds API",
+        status: 204,
+        error: "No usable NFL player props returned"
+      });
+    } catch (error) {
+      failures.push({
+        provider: "The Odds API",
+        status: Number(error?.status || 502),
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+        quotaBlocked: Boolean(error?.quotaBlocked)
+      });
+    }
+  }
+
+  const error = new Error(
+    "No configured odds provider returned usable NFL player props"
+  );
+  error.status = failures.some((row) => row.status === 429)
+    ? 429
+    : 502;
+  error.providerFailures = failures;
+  throw error;
+}
+
 function dateWindow(query) {
   const startsAfter = query.startsAfter
     ? String(query.startsAfter)
@@ -238,9 +452,12 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
-  if (!apiKey) {
+  const sharpApiKey = process.env.SHARPAPI_KEY;
+  const theOddsApiKey = process.env.THE_ODDS_API_KEY;
+  if (!apiKey && !sharpApiKey && !theOddsApiKey) {
     return res.status(500).json({
-      error: "SPORTS_ODDS_API_KEY missing",
+      error:
+        "No NFL player-prop odds provider is configured",
       version: PLAYER_PROP_VERSION,
       productionEligible: false
     });
@@ -255,12 +472,21 @@ export default async function handler(req, res) {
       Math.min(100, Number(req.query.limit || 20) || 20)
     );
 
-    const objectPolicy = await optimizeSportsGameOddsObjectLimit({
-      apiKey,
-      requestedLimit,
-      defaultLimit: 20,
-      priority: "critical"
-    });
+    const objectPolicy = apiKey
+      ? await optimizeSportsGameOddsObjectLimit({
+          apiKey,
+          requestedLimit,
+          defaultLimit: 20,
+          priority: "critical"
+        })
+      : {
+          requestedLimit,
+          effectiveLimit: requestedLimit,
+          priority: "critical",
+          pressure: "NOT_CONFIGURED",
+          source: "provider_disabled",
+          blocked: true
+        };
     const refreshPolicy = adaptiveRefreshPolicy({
       startsBefore: req.query.startsBefore ? startsBefore : null,
       priority: "critical",
@@ -286,23 +512,22 @@ export default async function handler(req, res) {
       `https://api.sportsgameodds.com/v2/events?${params.toString()}`;
 
     const [provider, nflData, playerData] = await Promise.all([
-      protectedSportsGameOddsFetch({
-        url: providerUrl,
-        apiKey,
-        freshMs: refreshPolicy.freshMs,
-        staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs),
-        timeoutMs: 8_000,
-        consumer: "nfl-player-props",
-        priority: "critical",
-        objectPolicy
+      resolveNflPropProvider({
+        sportsGameOddsKey: apiKey,
+        sharpApiKey,
+        theOddsApiKey,
+        books,
+        startsAfter,
+        startsBefore,
+        refreshPolicy,
+        objectPolicy,
+        providerUrl
       }),
       loadNflData(season),
       loadNflPlayerData(season)
     ]);
 
-    const events = (provider.payload?.data || [])
-      .map(summarizeProviderEvent)
-      .filter((event) => event.league === "NFL" && event.props.length > 0);
+    const events = provider.events || [];
 
     const teams = new Set();
     for (const event of events) {
@@ -454,8 +679,12 @@ export default async function handler(req, res) {
       "Cache-Control",
       `public, max-age=0, s-maxage=${refreshPolicy.suggestedSeconds}, stale-while-revalidate=${Math.max(60, refreshPolicy.suggestedSeconds * 3)}`
     );
-    res.setHeader("X-NFL-Props-Cache", provider.cacheStatus);
-    res.setHeader("X-Provider-Cache-Layer", provider.cacheLayer);
+    res.setHeader("X-NFL-Props-Cache", provider.cacheStatus || "MIXED");
+    res.setHeader(
+      "X-Provider-Cache-Layer",
+      provider.cacheLayer || "multi"
+    );
+    res.setHeader("X-Odds-Provider", provider.source);
 
     return res.status(200).json({
       version: PLAYER_PROP_VERSION,
@@ -466,6 +695,8 @@ export default async function handler(req, res) {
       productionEligible: false,
       productionWeight: 0,
       modelState: "SHADOW_ONLY",
+      oddsProvider: provider.source,
+      providerFailures: provider.failures || [],
       calibrationState: "DEVELOPMENT_CALIBRATED_HOLDOUT_LOCKED",
       methodology: {
         marketFirst: true,
@@ -516,9 +747,17 @@ export default async function handler(req, res) {
         ...playerData.sourceHealth,
         teamModel: nflData.sourceHealth,
         provider: {
+          source: provider.source,
+          chain: [
+            "SportsGameOdds",
+            "SharpAPI",
+            "The Odds API"
+          ],
           status: provider.cacheStatus,
           layer: provider.cacheLayer,
-          servedStale: provider.cacheStatus === "STALE"
+          servedStale: Boolean(provider.servedStale),
+          failures: provider.failures || [],
+          usage: provider.usage || null
         }
       },
       leagueBaseline: baseline,
@@ -536,9 +775,11 @@ export default async function handler(req, res) {
       objectOptimization: {
         ...objectPolicy,
         objectsReturned:
+          provider.source === "SportsGameOdds" &&
           provider.cacheLayer === "upstream"
             ? provider.objectsReturned || 0
-            : 0
+            : 0,
+        activeProvider: provider.source
       }
     });
   } catch (error) {
@@ -547,7 +788,8 @@ export default async function handler(req, res) {
       version: PLAYER_PROP_VERSION,
       productionEligible: false,
       productionWeight: 0,
-      modelState: "SHADOW_ONLY"
+      modelState: "SHADOW_ONLY",
+      providerFailures: error?.providerFailures || []
     });
   }
 }
