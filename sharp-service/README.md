@@ -4,12 +4,20 @@ Deploy this folder as the Vercel project root.
 
 Odds provider environment variables:
 - SPORTS_ODDS_API_KEY — primary SportsGameOdds provider
-- SHARPAPI_KEY — SharpAPI fallback provider
+- SHARPAPI_KEY — secondary SharpAPI provider
+- THE_ODDS_API_KEY — tertiary The Odds API provider
 
 At least one odds-provider key must be configured for the market board. When
-both are present, Edge Lab uses SportsGameOdds first and automatically falls
-back to SharpAPI for leagues that the primary provider cannot serve. The MLB
-props endpoint follows the same failover order.
+multiple providers are present, Edge Lab uses the failover chain
+SportsGameOdds -> SharpAPI -> The Odds API. A provider that errors or returns
+zero usable events does not stop the chain. The MLB props endpoint follows the
+same provider order.
+
+Optional The Odds API quota controls:
+- THE_ODDS_API_CREDIT_RESERVE — credits to preserve before blocking new paid
+  upstream calls (default 50)
+- THE_ODDS_API_MAX_PROP_EVENTS — maximum MLB events queried for player props
+  per fallback refresh (default 2)
 
 Optional:
 - SHARP_MONITOR_TOKEN
@@ -20,8 +28,10 @@ Endpoint:
 ## Compact market board
 
 Use `GET /api/board` for a small game-market response. The provider chain is
-SportsGameOdds -> SharpAPI; provider identity is surfaced in `source`,
-`providersUsed`, and `providerFailures`. The response contains only:
+SportsGameOdds -> SharpAPI -> The Odds API; provider identity is surfaced in
+`source`, `providersUsed`, and `providerFailures`. The Odds API usage
+snapshot is also returned so quota pressure can be monitored. The response
+contains only:
 - matchup and start time
 - moneyline
 - spread / run line
