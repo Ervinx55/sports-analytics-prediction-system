@@ -17,6 +17,9 @@ import {
   projectPropEvent
 } from "../lib/nba-player-props.js";
 import {
+  loadOfficialNbaInjuryReport
+} from "../lib/nba-injury-report.js";
+import {
   loadNbaGames,
   normalizeTeam,
   seasonForDate
@@ -563,6 +566,16 @@ function relevantHistoryIds(
   };
 }
 
+function shouldFetchOfficialReport(events) {
+  const now = Date.now();
+  return (events || []).some((event) => {
+    const starts = Date.parse(event?.startsAt || "");
+    if (!Number.isFinite(starts)) return false;
+    const hours = (starts - now) / 3600000;
+    return hours >= -4 && hours <= 36;
+  });
+}
+
 function defaultWindow(query) {
   const now = Date.now();
   return {
@@ -674,7 +687,8 @@ export default async function handler(
 
     const [
       stats,
-      injuries
+      injuries,
+      officialReport
     ] = await Promise.all([
       loadNbaPlayerStats({
         apiKey: bdlKey,
@@ -683,7 +697,22 @@ export default async function handler(
       loadNbaInjuries({
         apiKey: bdlKey,
         teamIds: ids.teamIds
-      })
+      }),
+      shouldFetchOfficialReport(provider.events)
+        ? loadOfficialNbaInjuryReport({
+            now: new Date()
+          })
+        : Promise.resolve({
+            parsed: false,
+            source: "NBA Official",
+            sourceUrl: null,
+            reportTimestamp: null,
+            entries: [],
+            submittedTeams: [],
+            unsubmittedTeams: [],
+            error:
+              "Outside the official injury-report polling window."
+          })
     ]);
 
     const eventModels =
@@ -692,7 +721,9 @@ export default async function handler(
           projectPropEvent({
             event,
             statsRows: stats.rows,
-            injuries: injuries.rows
+            injuries: injuries.rows,
+            officialReport,
+            now: new Date()
           })
       );
 
@@ -787,11 +818,24 @@ export default async function handler(
           stats.sourceHealth,
         injuries: {
           official: {
-            status: "UNPARSED",
+            status:
+              officialReport?.parsed
+                ? "HEALTHY"
+                : "UNAVAILABLE",
             source: "NBA Official",
             authority: true,
-            reason:
-              "Player-level official report extraction is not yet enabled in v1; unresolved status blocks shadow PLAY."
+            sourceUrl:
+              officialReport?.sourceUrl || null,
+            reportTimestamp:
+              officialReport?.reportTimestamp || null,
+            entryCount:
+              officialReport?.entryCount ||
+              officialReport?.entries?.length ||
+              0,
+            unsubmittedTeams:
+              officialReport?.unsubmittedTeams || [],
+            error:
+              officialReport?.error || null
           },
           secondary:
             injuries.sourceHealth
@@ -805,7 +849,9 @@ export default async function handler(
         playerStatRows:
           stats.rows.length,
         injuryRows:
-          injuries.rows.length
+          injuries.rows.length,
+        officialInjuryEntries:
+          officialReport?.entries?.length || 0
       },
       eventCount:
         eventModels.length,
