@@ -166,3 +166,26 @@ test("NBA settlement waits until official game status is final", () => {
   assert.equal(settled.ready, false);
   assert.match(settled.reason, /not final/i);
 });
+
+
+test("NBA zero-minute string participation settles as VOID", () => {
+  const dnp = structuredClone(boxscore);
+  const bench = dnp.game.awayTeam.players.find(
+    (player) => player.name === "Bench Player"
+  );
+  bench.played = "0";
+  bench.statistics.minutes = "PT00M00.00S";
+
+  const settled = settleObservation(
+    observation({
+      player_name: "Bench Player",
+      player_id: "BENCH_PLAYER_999_NBA",
+      side: "under",
+      line: 4.5
+    }),
+    dnp
+  );
+
+  assert.equal(settled.outcome, "VOID");
+  assert.equal(settled.actualValue, null);
+});
