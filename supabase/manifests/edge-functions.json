@@ -835,6 +835,23 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "capture-nfl-player-props",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "0e9a1e6c2ce403d7403cad52edf0d0ab0669453928ff8d4841e9fe33930c935e",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-nfl-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "3661c995db9304b0796b6ae9788d2d7117f0027184e5d28c79a5229f55f86c2e"
+        }
+      ],
+      "recovered_at": "2026-09-25",
+      "deployed_at": "2026-09-25"
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",
