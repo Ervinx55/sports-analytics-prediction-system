@@ -97,6 +97,21 @@ function scheduleGame(schedule, season, week, team) {
   ) || null;
 }
 
+const EASTERN_WALL_TIME_FORMATTER = new Intl.DateTimeFormat(
+  "en-US",
+  {
+    timeZone: "America/New_York",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }
+);
+const historicalKickoffCache = new Map();
+
 function zonedWallTimeToIso(
   dateText,
   timeText,
@@ -127,16 +142,19 @@ function zonedWallTimeToIso(
     desired.second
   );
   let guess = desiredAsUtc;
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23"
-  });
+  const formatter =
+    timeZone === "America/New_York"
+      ? EASTERN_WALL_TIME_FORMATTER
+      : new Intl.DateTimeFormat("en-US", {
+          timeZone,
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hourCycle: "h23"
+        });
 
   for (let iteration = 0; iteration < 2; iteration += 1) {
     const parts = Object.fromEntries(
@@ -160,16 +178,26 @@ function zonedWallTimeToIso(
 }
 
 function historicalKickoffIso(game) {
+  const key =
+    game.game_id ||
+    `${game.gameday}|${game.gametime || ""}|${game.home_team}|${game.away_team}`;
+  if (historicalKickoffCache.has(key)) {
+    return historicalKickoffCache.get(key);
+  }
+
   const exact = zonedWallTimeToIso(
     game.gameday,
     game.gametime,
     "America/New_York"
   );
-  if (exact) return exact;
+  const value =
+    exact ||
+    // Conservative fallback: noon UTC on game day. This intentionally
+    // excludes uncertain same-day features rather than allowing leakage.
+    `${game.gameday}T12:00:00Z`;
 
-  // Conservative fallback: noon UTC on game day. This intentionally
-  // excludes uncertain same-day features rather than allowing leakage.
-  return `${game.gameday}T12:00:00Z`;
+  historicalKickoffCache.set(key, value);
+  return value;
 }
 
 function eventFromGame(game) {
