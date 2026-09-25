@@ -7,6 +7,7 @@ import {
   teamSnapshot
 } from "../../sharp-service/lib/nfl-model.js";
 import {
+  NFL_PROP_V2_RESIDUAL_WEIGHTS,
   loadNflPlayerData,
   normalizePlayerName,
   projectPlayerOpportunity
@@ -310,7 +311,9 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
       rmse: null,
       bias: null,
       baselineMae: null,
-      maeImprovementVsRollingMean: null
+      baselineRmse: null,
+      maeImprovementVsRollingMean: null,
+      rmseImprovementVsRollingMean: null
     };
   }
 
@@ -319,6 +322,7 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
   let signed = 0;
   let modelRows = 0;
   let baselineAbsolute = 0;
+  let baselineSquared = 0;
   let baselineRows = 0;
 
   for (const row of rows) {
@@ -332,7 +336,9 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
     }
 
     if (Number.isFinite(row.baseline)) {
-      baselineAbsolute += Math.abs(row.baseline - row.actual);
+      const baselineError = row.baseline - row.actual;
+      baselineAbsolute += Math.abs(baselineError);
+      baselineSquared += baselineError ** 2;
       baselineRows += 1;
     }
   }
@@ -340,6 +346,10 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
   const mae = modelRows > 0 ? absolute / modelRows : null;
   const baselineMae =
     baselineRows > 0 ? baselineAbsolute / baselineRows : null;
+  const baselineRmse =
+    baselineRows > 0
+      ? Math.sqrt(baselineSquared / baselineRows)
+      : null;
 
   return {
     rows: modelRows,
@@ -348,10 +358,109 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
     bias: modelRows > 0 ? signed / modelRows : null,
     baselineRows,
     baselineMae,
+    baselineRmse,
     maeImprovementVsRollingMean:
       baselineMae === null || mae === null
         ? null
-        : baselineMae - mae
+        : baselineMae - mae,
+    rmseImprovementVsRollingMean:
+      baselineRmse === null || modelRows === 0
+        ? null
+        : baselineRmse - Math.sqrt(squared / modelRows)
+  };
+}
+
+function pairedAbsoluteErrorImprovement(rows, weight) {
+  const values = rows
+    .filter(
+      (row) =>
+        Number.isFinite(row.actual) &&
+        Number.isFinite(row.prediction) &&
+        Number.isFinite(row.baseline)
+    )
+    .map((row) => {
+      const model = anchoredPrediction(row, weight);
+      return (
+        Math.abs(row.baseline - row.actual) -
+        Math.abs(model - row.actual)
+      );
+    });
+
+  if (values.length < 2) {
+    return {
+      rows: values.length,
+      mean: null,
+      standardError: null,
+      lower95: null,
+      upper95: null
+    };
+  }
+
+  const avg =
+    values.reduce((sum, value) => sum + value, 0) /
+    values.length;
+  const variance =
+    values.reduce(
+      (sum, value) => sum + (value - avg) ** 2,
+      0
+    ) /
+    (values.length - 1);
+  const standardError = Math.sqrt(variance / values.length);
+  const margin = 1.96 * standardError;
+
+  return {
+    rows: values.length,
+    mean: avg,
+    standardError,
+    lower95: avg - margin,
+    upper95: avg + margin
+  };
+}
+
+function frozenHoldoutValidation(rows, weight) {
+  const frozenWeight = Number(weight) || 0;
+  const eligible = rows.filter(
+    (row) =>
+      Number.isFinite(row.actual) &&
+      Number.isFinite(row.prediction) &&
+      Number.isFinite(row.baseline)
+  );
+  const result = metrics(eligible, (row) =>
+    anchoredPrediction(row, frozenWeight)
+  );
+  const paired = pairedAbsoluteErrorImprovement(
+    eligible,
+    frozenWeight
+  );
+  const minimumMaeImprovement =
+    Number.isFinite(result.baselineMae)
+      ? Math.max(0.01, result.baselineMae * 0.0025)
+      : Number.POSITIVE_INFINITY;
+
+  const qualified =
+    frozenWeight > 0 &&
+    eligible.length >= 100 &&
+    Number.isFinite(result.maeImprovementVsRollingMean) &&
+    result.maeImprovementVsRollingMean >=
+      minimumMaeImprovement &&
+    Number.isFinite(result.rmseImprovementVsRollingMean) &&
+    result.rmseImprovementVsRollingMean >= 0 &&
+    Number.isFinite(paired.lower95) &&
+    paired.lower95 > 0;
+
+  return {
+    frozenWeight,
+    eligibleRows: eligible.length,
+    minimumMaeImprovement,
+    metrics: result,
+    pairedAbsoluteErrorImprovement: paired,
+    qualified,
+    reason:
+      frozenWeight <= 0
+        ? "No 2024 residual weight was frozen for this market."
+        : qualified
+          ? "Frozen 2024 weight cleared the untouched 2025 projection holdout gate."
+          : "Frozen 2024 weight failed at least one pre-registered 2025 holdout criterion."
   };
 }
 
@@ -661,6 +770,21 @@ async function main() {
   }
 
   const aggregateMetrics = aggregate(seasonReports);
+  const holdoutValidation =
+    seasonReports.length === 1 &&
+    seasonReports[0].season === 2025
+      ? Object.fromEntries(
+          Object.entries(
+            seasonReports[0].rowsByMarket
+          ).map(([market, rows]) => [
+            market,
+            frozenHoldoutValidation(
+              rows,
+              NFL_PROP_V2_RESIDUAL_WEIGHTS[market] ?? 0
+            )
+          ])
+        )
+      : null;
   const compactSeasons = seasonReports.map((season) => ({
     season: season.season,
     minWeek: season.minWeek,
@@ -681,7 +805,9 @@ async function main() {
     historicalWeatherPolicy:
       "Historical finalized weather is intentionally excluded because it is not equivalent to a pregame forecast.",
     developmentPolicy:
-      "Within 2024, weeks 4-10 select a residual weight and weeks 11+ must independently confirm improvement over the rolling player baseline. 2025 is not used by this development workflow.",
+      "Within 2024, weeks 4-10 select a residual weight and weeks 11+ must independently confirm improvement over the rolling player baseline.",
+    holdoutPolicy:
+      "For untouched 2025, frozen 2024 weights must have at least 100 eligible rows, improve MAE by max(0.01, 0.25% of baseline MAE), not worsen RMSE, and have a positive 95% lower bound for paired absolute-error improvement. No weight may be retuned from 2025.",
     marketCalibrationAvailable: false,
     promotion: {
       productionEligible: false,
@@ -694,6 +820,7 @@ async function main() {
       seasonReports.length === 1 && seasonReports[0].season === 2024
         ? seasonReports[0].developmentCalibration
         : null,
+    holdoutValidation,
     seasonsDetail: compactSeasons
   };
 
@@ -753,6 +880,7 @@ async function main() {
       JSON.stringify({
         aggregate: aggregateMetrics,
         developmentCalibration: report.developmentCalibration,
+        holdoutValidation: report.holdoutValidation,
         seasons: compactSeasons,
         promotion: report.promotion
       })
