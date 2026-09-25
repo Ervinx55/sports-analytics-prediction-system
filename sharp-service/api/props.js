@@ -337,6 +337,13 @@ export default async function handler(req, res) {
           staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs)
         });
         const events = fallback.events || [];
+        if (!events.length) {
+          const noData = new Error(
+            "SharpAPI returned no usable MLB prop markets"
+          );
+          noData.status = 502;
+          throw noData;
+        }
         const body = {
           fetchedAt: fallback.fetchedAt,
           version: "MLB Props Board v1.3",
