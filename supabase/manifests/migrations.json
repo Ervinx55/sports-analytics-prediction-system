@@ -349,7 +349,7 @@
       "version": "20260925062619",
       "name": "add_sport_to_player_prop_feedback_v2",
       "path": "supabase/migrations/20260925062619_add_sport_to_player_prop_feedback_v2.sql",
-      "sha256": null,
+      "sha256": "38e21d6c3a9b095952cbe5a59f6b8a28455939a18a4c88f869c26db765599c4b",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
@@ -358,18 +358,27 @@
       "version": "20260925063434",
       "name": "register_nba_player_prop_feedback_components",
       "path": "supabase/migrations/20260925063434_register_nba_player_prop_feedback_components.sql",
-      "sha256": null,
+      "sha256": "7385d769557b95b6541821aa1f0145f6981fbef82229b9448b9c93bf5fe8aac3",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260925073838",
+      "name": "isolate_player_prop_latest_by_sport",
+      "path": "supabase/migrations/20260925073838_isolate_player_prop_latest_by_sport.sql",
+      "sha256": "8a9c23bfa9bb1eafa71c696c0cada728bc96d9295e1a123b3a7d1be475c132b9",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-25T06:39:22.178Z",
+  "final_verified_at": "2026-09-25T07:38:38Z",
   "authority_verification": {
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 38,
+    "repository_total_migrations": 43,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
