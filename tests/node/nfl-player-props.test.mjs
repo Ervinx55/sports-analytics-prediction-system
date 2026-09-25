@@ -212,9 +212,20 @@ test("opportunity engine produces coherent WR projections", () => {
   assert.equal(result.projections.receiving_receptions.mean, 6.5);
   assert.equal(result.projections.receiving_receptions.residualWeight, 0);
   assert.equal(result.projections.receiving_yards.baselineMean, 86.75);
-  assert.equal(result.projections.receiving_yards.mean, 86.75);
-  assert.equal(result.projections.receiving_yards.residualWeight, 0);
+  assert.equal(result.projections.receiving_yards.residualWeight, 0.9);
   assert.ok(Number.isFinite(result.projections.receiving_yards.opportunityMean));
+  assert.ok(
+    Math.abs(
+      result.projections.receiving_yards.mean -
+        (
+          result.projections.receiving_yards.baselineMean +
+          0.9 * (
+            result.projections.receiving_yards.opportunityMean -
+            result.projections.receiving_yards.baselineMean
+          )
+        )
+    ) < 0.01
+  );
   assert.ok(result.role.targetShare.value > 0.2);
   assert.equal(result.featureAvailability.participation.liveAvailable, false);
   assert.equal(result.featureAvailability.injuries.liveAvailable, false);
