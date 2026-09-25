@@ -8,6 +8,10 @@ import {
   projectionFromHistory,
   statValue
 } from "../../sharp-service/lib/nba-player-props.js";
+import {
+  applyNbaPropGameContext,
+  buildNbaPropGameContext
+} from "../../sharp-service/lib/nba-prop-context.js";
 
 function argValue(name, fallback = null) {
   const prefix = `--${name}=`;
@@ -39,6 +43,87 @@ function gameTime(row) {
       ? `${row.game.date}T23:59:59Z`
       : "")
   );
+}
+
+function buildHistoricalGames(rows) {
+  const teamById = new Map();
+  for (const row of rows || []) {
+    if (row?.team?.id != null) {
+      teamById.set(
+        Number(row.team.id),
+        row.team
+      );
+    }
+  }
+
+  const games = new Map();
+  for (const row of rows || []) {
+    const game = row?.game;
+    if (!game?.id || games.has(game.id)) {
+      continue;
+    }
+
+    const homeTeam =
+      game?.home_team ||
+      teamById.get(
+        Number(game?.home_team_id)
+      ) ||
+      null;
+    const visitorTeam =
+      game?.visitor_team ||
+      teamById.get(
+        Number(game?.visitor_team_id)
+      ) ||
+      null;
+
+    if (!homeTeam || !visitorTeam) {
+      continue;
+    }
+
+    games.set(game.id, {
+      ...game,
+      home_team: homeTeam,
+      visitor_team: visitorTeam,
+      status:
+        game?.status || "Final",
+      status_state:
+        game?.status_state || "final"
+    });
+  }
+
+  return [...games.values()];
+}
+
+function targetEvent(target) {
+  const game = target?.game || {};
+  const home = game?.home_team;
+  const away = game?.visitor_team;
+
+  if (!home || !away) return null;
+
+  return {
+    eventID:
+      `historical-nba:${game.id}`,
+    startsAt:
+      game?.datetime ||
+      (game?.date
+        ? `${game.date}T23:59:59Z`
+        : null),
+    matchup: {
+      home: {
+        name:
+          home?.full_name ||
+          home?.abbreviation ||
+          null
+      },
+      away: {
+        name:
+          away?.full_name ||
+          away?.abbreviation ||
+          null
+      }
+    }
+  };
 }
 
 function rollingBaseline(rows, statID, limit = 4) {
@@ -108,6 +193,47 @@ function promotionDecision(model, baseline) {
   };
 }
 
+function challengerPromotionDecision(
+  challenger,
+  incumbent
+) {
+  const minimumRows = 100;
+
+  if (
+    challenger.rows < minimumRows ||
+    !Number.isFinite(challenger.mae) ||
+    !Number.isFinite(incumbent.mae)
+  ) {
+    return {
+      accepted: false,
+      reason:
+        "Insufficient chronological development rows for v1.1 context validation.",
+      minimumRows,
+      maeImprovementVsV1: null
+    };
+  }
+
+  const improvement =
+    incumbent.mae - challenger.mae;
+  const threshold = Math.max(
+    0.01,
+    incumbent.mae * 0.0025
+  );
+
+  return {
+    accepted: improvement >= threshold,
+    reason:
+      improvement >= threshold
+        ? "Historical context challenger beats the existing NBA prop v1 raw model by the required development margin."
+        : "Historical context challenger does not beat NBA prop v1 by the required development margin.",
+    minimumRows,
+    minimumMaeImprovement:
+      threshold,
+    maeImprovementVsV1:
+      improvement
+  };
+}
+
 export function backtestPlayerStats(
   rows,
   {
@@ -119,6 +245,9 @@ export function backtestPlayerStats(
     .filter((row) => num(row?.game?.season) === season)
     .filter((row) => Number.isFinite(gameTime(row)))
     .sort((a, b) => gameTime(a) - gameTime(b));
+
+  const historicalGames =
+    buildHistoricalGames(seasonRows);
 
   const byPlayer = new Map();
   for (const row of seasonRows) {
@@ -154,6 +283,34 @@ export function backtestPlayerStats(
               minimumGames: minimumPriorGames
             }
           );
+
+          const historicalEvent =
+            targetEvent(target);
+          const context =
+            historicalEvent
+              ? buildNbaPropGameContext({
+                  propEvent:
+                    historicalEvent,
+                  boardEvent: null,
+                  games:
+                    historicalGames,
+                  season,
+                  playerTeamName:
+                    target?.team?.full_name ||
+                    target?.team?.abbreviation ||
+                    projection?.teamName ||
+                    null
+                })
+              : {
+                  available: false
+                };
+          const contextProjection =
+            applyNbaPropGameContext(
+              projection,
+              statID,
+              context
+            );
+
           const baseline = rollingBaseline(
             prior,
             statID,
@@ -174,6 +331,18 @@ export function backtestPlayerStats(
             gameDate: target?.game?.date || null,
             actual,
             model: projection.mean,
+            contextModel:
+              contextProjection?.mean ??
+              projection.mean,
+            contextAvailable:
+              Boolean(
+                contextProjection
+                  ?.gameContext
+                  ?.available
+              ),
+            contextSignal:
+              contextProjection
+                ?.contextSignal ?? null,
             baseline,
             historyGames: prior.length,
             projectedMinutes:
@@ -190,10 +359,32 @@ export function backtestPlayerStats(
   const markets = {};
   for (const statID of SUPPORTED_STATS) {
     const marketRows = rowsByMarket[statID];
-    const model = metrics(marketRows, "model");
-    const baseline = metrics(marketRows, "baseline");
+    const model = metrics(
+      marketRows,
+      "model"
+    );
+    const contextChallenger = metrics(
+      marketRows.filter(
+        (row) =>
+          row.contextAvailable
+      ),
+      "contextModel"
+    );
+    const contextIncumbent = metrics(
+      marketRows.filter(
+        (row) =>
+          row.contextAvailable
+      ),
+      "model"
+    );
+    const baseline = metrics(
+      marketRows,
+      "baseline"
+    );
     markets[statID] = {
       model,
+      contextChallenger,
+      contextIncumbent,
       baseline,
       maeImprovement:
         Number.isFinite(model.mae) &&
@@ -205,13 +396,22 @@ export function backtestPlayerStats(
         Number.isFinite(baseline.rmse)
           ? baseline.rmse - model.rmse
           : null,
-      promotion: promotionDecision(model, baseline)
+      promotion:
+        promotionDecision(
+          model,
+          baseline
+        ),
+      contextPromotion:
+        challengerPromotionDecision(
+          contextChallenger,
+          contextIncumbent
+        )
     };
   }
 
   return {
     version:
-      "NBA Player Props v1 chronological development backtest",
+      "NBA Player Props v1.1 context challenger development backtest",
     modelVersion: NBA_PLAYER_PROP_VERSION,
     season,
     minimumPriorGames,
@@ -219,7 +419,7 @@ export function backtestPlayerStats(
     holdoutTouched: false,
     marketPriceValidationAvailable: false,
     marketPricePolicy:
-      "This development replay validates raw stat projections only. It does not claim betting edge because exact historical sportsbook prices are not part of this input.",
+      "This development replay validates raw stat projections and the historical opponent/scoring-environment/rest subset of the v1.1 context challenger. Historical game-market totals/spreads and exact sportsbook prop prices are not part of this input, so live market-implied context and betting edge remain unvalidated.",
     markets,
     rowsByMarket
   };
@@ -314,14 +514,14 @@ function markdown(report) {
     `Season: ${report.season}`,
     `Holdout: ${report.holdoutSeason} (untouched)`,
     "",
-    "| Market | Rows | Model MAE | Baseline MAE | MAE gain | Model RMSE | Baseline RMSE | Accepted |",
-    "|---|---:|---:|---:|---:|---:|---:|:---:|"
+    "| Market | Rows | v1 MAE | Context MAE | Baseline MAE | Context gain vs v1 | v1 accepted | Context accepted |",
+    "|---|---:|---:|---:|---:|---:|:---:|:---:|"
   ];
 
   for (const statID of SUPPORTED_STATS) {
     const item = report.markets[statID];
     lines.push(
-      `| ${statID} | ${item.model.rows} | ${fmt(item.model.mae, 3)} | ${fmt(item.baseline.mae, 3)} | ${fmt(item.maeImprovement, 3)} | ${fmt(item.model.rmse, 3)} | ${fmt(item.baseline.rmse, 3)} | ${item.promotion.accepted ? "yes" : "no"} |`
+      `| ${statID} | ${item.model.rows} | ${fmt(item.model.mae, 3)} | ${fmt(item.contextChallenger.mae, 3)} | ${fmt(item.baseline.mae, 3)} | ${fmt(item.contextPromotion.maeImprovementVsV1, 3)} | ${item.promotion.accepted ? "yes" : "no"} | ${item.contextPromotion.accepted ? "yes" : "no"} |`
     );
   }
 
