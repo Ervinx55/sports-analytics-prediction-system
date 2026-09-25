@@ -10,6 +10,7 @@ import {
   exactPairs,
   marketIntegrity,
   officialInjuryContext,
+  qualityScore,
   gradeProp
 } from "../../sharp-service/lib/nba-player-props.js";
 
@@ -459,4 +460,39 @@ test("NBA market integrity keeps fresh aligned multi-book lines clear", () => {
   assert.equal(integrity.highDisagreement, false);
   assert.equal(integrity.blocked, false);
   assert.ok(integrity.score >= 0.9);
+});
+
+
+test("NBA role-change guard caps quality after a sudden minutes jump", () => {
+  const roleHistory = [
+    statRow({ id: 80, date: "2026-10-18", pts: 28, reb: 8, ast: 5, fg3m: 4, blk: 1, stl: 1, turnover: 2, min: "36:00" }),
+    statRow({ id: 79, date: "2026-10-16", pts: 27, reb: 8, ast: 5, fg3m: 3, blk: 1, stl: 1, turnover: 2, min: "36:30" }),
+    statRow({ id: 78, date: "2026-10-14", pts: 26, reb: 7, ast: 4, fg3m: 3, blk: 1, stl: 1, turnover: 2, min: "35:30" }),
+    statRow({ id: 77, date: "2026-10-12", pts: 15, reb: 5, ast: 3, fg3m: 2, blk: 0, stl: 1, turnover: 1, min: "20:00" }),
+    statRow({ id: 76, date: "2026-10-10", pts: 14, reb: 5, ast: 3, fg3m: 2, blk: 0, stl: 1, turnover: 1, min: "19:30" }),
+    statRow({ id: 75, date: "2026-10-08", pts: 16, reb: 5, ast: 3, fg3m: 2, blk: 0, stl: 1, turnover: 1, min: "20:30" }),
+    statRow({ id: 74, date: "2026-10-06", pts: 15, reb: 4, ast: 3, fg3m: 2, blk: 0, stl: 1, turnover: 1, min: "20:00" }),
+    statRow({ id: 73, date: "2026-10-04", pts: 14, reb: 4, ast: 2, fg3m: 1, blk: 0, stl: 1, turnover: 1, min: "19:00" })
+  ];
+
+  const projection = projectionFromHistory(
+    roleHistory,
+    "points",
+    { beforeAt: "2026-10-20T23:30:00Z" }
+  );
+
+  assert.equal(projection.roleChangeDetected, true);
+  assert.ok(projection.minutesDelta >= 4.5);
+  assert.ok(projection.roleStability < 0.75);
+
+  const quality = qualityScore({
+    projection,
+    pairedBooks: 3,
+    injury: {
+      officialReportParsed: true,
+      availabilityBlocked: false
+    }
+  });
+
+  assert.ok(quality <= 0.69);
 });
