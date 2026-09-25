@@ -101,12 +101,7 @@ function theOddsApiState(usage, configured) {
   };
 }
 
-export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    res.setHeader("Allow", "GET");
-    return res.status(405).json({ error: "GET only" });
-  }
-
+export async function buildProviderStatus() {
   const configured = configuredProviders();
   let sportsUsage = null;
   let sportsUsageError = null;
@@ -156,16 +151,27 @@ export default async function handler(req, res) {
     ["READY", "AWAITING_FIRST_RESPONSE"].includes(provider.status)
   );
 
-  res.setHeader(
-    "Cache-Control",
-    "public, max-age=0, s-maxage=30, stale-while-revalidate=60"
-  );
-
-  return res.status(200).json({
+  return {
     generatedAt: new Date().toISOString(),
     providerChain: PROVIDER_CHAIN,
     configured,
     oddsProviderReady,
     providers
-  });
+  };
+}
+
+export default async function handler(req, res) {
+  if (req.method !== "GET") {
+    res.setHeader("Allow", "GET");
+    return res.status(405).json({ error: "GET only" });
+  }
+
+  const body = await buildProviderStatus();
+
+  res.setHeader(
+    "Cache-Control",
+    "public, max-age=0, s-maxage=30, stale-while-revalidate=60"
+  );
+
+  return res.status(200).json(body);
 }
