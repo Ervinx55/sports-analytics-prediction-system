@@ -36,6 +36,9 @@ verify_jwt = false
 [functions.capture-player-props]
 verify_jwt = true
 
+[functions.capture-nfl-player-props]
+verify_jwt = true
+
 [functions.grade-player-props]
 verify_jwt = true
 
