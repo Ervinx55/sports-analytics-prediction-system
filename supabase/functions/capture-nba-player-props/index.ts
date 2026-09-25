@@ -129,7 +129,7 @@ function observationRows(model: any, capturedAt: string) {
       return {
         captured_at: capturedAt,
         sport: "NBA",
-        model_version: model?.version ?? "NBA Player Props v1-shadow",
+        model_version: model?.version ?? "NBA Player Props v1.1-shadow",
         event_id: candidate?.eventID,
         game_pk: null,
         starts_at: candidate?.startsAt ?? null,
