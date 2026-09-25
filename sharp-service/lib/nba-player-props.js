@@ -1,3 +1,7 @@
+import {
+  resolveOfficialAvailability
+} from "./nba-injury-report.js";
+
 const BDL_STATS_URL = "https://api.balldontlie.io/v1/stats";
 const BDL_INJURIES_URL =
   "https://api.balldontlie.io/v1/player_injuries";
@@ -281,9 +285,15 @@ function projectionFromHistory(
     .filter(Number.isFinite);
   const minutesSd = sampleSd(minutesHistory);
 
+  const latestTeam =
+    usable[0]?.team?.full_name ||
+    usable[0]?.team?.abbreviation ||
+    null;
+
   return {
     available: Number.isFinite(mean),
     statID,
+    teamName: latestTeam,
     mean:
       Number.isFinite(mean)
         ? Number(mean.toFixed(4))
@@ -501,32 +511,102 @@ function injuryForPlayer(
 function officialInjuryContext({
   playerName: targetPlayer,
   gameDate,
-  secondary
+  teamName = null,
+  officialReport = null,
+  secondary,
+  now = new Date()
 }) {
   const secondaryStatus =
     secondary?.secondaryStatus || null;
-  const clearlyUnavailable = [
+  const secondaryBlocked = [
     "OUT",
     "DOUBTFUL"
   ].includes(secondaryStatus);
+
+  const official =
+    resolveOfficialAvailability(
+      officialReport,
+      {
+        playerName: targetPlayer,
+        teamName,
+        now
+      }
+    );
+
+  const officialResolved =
+    official?.officialReportParsed === true &&
+    official?.resolvedForPlay === true;
+  const officialBlocked =
+    official?.availabilityBlocked === true;
+  const conflict =
+    officialResolved &&
+    secondaryBlocked;
+
+  if (
+    official?.officialReportParsed === true
+  ) {
+    return {
+      playerName: targetPlayer,
+      gameDate: gameDate || null,
+      authority: "NBA Official",
+      authorityPage:
+        official?.sourceUrl || null,
+      officialStatus:
+        official?.officialStatus || null,
+      officialReportParsed: true,
+      reportTimestamp:
+        official?.reportTimestamp || null,
+      reportAgeMinutes:
+        official?.reportAgeMinutes ?? null,
+      secondaryStatus,
+      secondarySource:
+        secondary?.secondarySource || null,
+      description:
+        secondary?.description || null,
+      returnDate:
+        secondary?.returnDate || null,
+      conflict,
+      availabilityBlocked:
+        officialBlocked ||
+        conflict,
+      resolvedForPlay:
+        officialResolved &&
+        !conflict,
+      reason:
+        conflict
+          ? `Official report and secondary injury feed conflict (${official.officialStatus} vs ${secondaryStatus}); shadow PLAY is blocked.`
+          : official?.reason ||
+            "Official NBA availability is unresolved.",
+      reasonDetail:
+        official?.reasonDetail || null
+    };
+  }
 
   return {
     playerName: targetPlayer,
     gameDate: gameDate || null,
     authority: "NBA Official",
-    authorityPage: NBA_OFFICIAL_INJURY_PAGE,
+    authorityPage:
+      official?.sourceUrl || null,
     officialStatus: null,
     officialReportParsed: false,
+    reportTimestamp: null,
+    reportAgeMinutes: null,
     secondaryStatus,
     secondarySource:
       secondary?.secondarySource || null,
-    description: secondary?.description || null,
-    returnDate: secondary?.returnDate || null,
-    availabilityBlocked: clearlyUnavailable,
+    description:
+      secondary?.description || null,
+    returnDate:
+      secondary?.returnDate || null,
+    conflict: false,
+    availabilityBlocked:
+      secondaryBlocked,
     resolvedForPlay: false,
-    reason: clearlyUnavailable
-      ? `Secondary injury feed lists player as ${secondaryStatus}; shadow PLAY is blocked.`
-      : "Official NBA injury report has not yet been parsed for this player; projection may be shown but shadow PLAY is blocked."
+    reason: secondaryBlocked
+      ? `Secondary injury feed lists player as ${secondaryStatus}; official report is unresolved and shadow PLAY is blocked.`
+      : official?.reason ||
+        "Official NBA injury report has not yet been parsed for this player; projection may be shown but shadow PLAY is blocked."
   };
 }
 
@@ -952,7 +1032,9 @@ function playerRowsForProp(
 function projectPropEvent({
   event,
   statsRows = [],
-  injuries = []
+  injuries = [],
+  officialReport = null,
+  now = new Date()
 }) {
   const candidates = [];
   const players = [];
@@ -988,7 +1070,11 @@ function projectPropEvent({
           event.startsAt
             ? String(event.startsAt).slice(0, 10)
             : null,
-        secondary
+        teamName:
+          projection?.teamName || null,
+        officialReport,
+        secondary,
+        now
       });
 
     const playerCandidates = gradeProp({
