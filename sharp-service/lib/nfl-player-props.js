@@ -28,11 +28,11 @@ const NFL_PROP_CALIBRATION_VERSION =
   "NFL Player Props Development Calibration v1";
 
 const NFL_PROP_V2_RESIDUAL_WEIGHTS = Object.freeze({
-  passing_yards: 0,
+  passing_yards: 0.25,
   passing_touchdowns: 0,
   rushing_yards: 0,
   receiving_receptions: 0,
-  receiving_yards: 0
+  receiving_yards: 0.90
 });
 
 const NFL_PROP_V2_BASELINE_FIELDS = Object.freeze({
@@ -44,7 +44,7 @@ const NFL_PROP_V2_BASELINE_FIELDS = Object.freeze({
 });
 
 const NFL_PROP_V2_VERSION =
-  "NFL Player Props v2 baseline-anchored shadow";
+  "NFL Player Props v2.1 baseline-anchored shadow";
 
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
