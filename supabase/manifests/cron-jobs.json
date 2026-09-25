@@ -1,6 +1,6 @@
 {
   "project_ref": "yeoxroijaptomomshdii",
-  "captured_at": "2026-09-24T09:21:26Z",
+  "captured_at": "2026-09-25T05:02:31.915028Z",
   "items": [
     {
       "active": true,
@@ -90,7 +90,7 @@
       "active": true,
       "jobname": "mlb-player-prop-quote-retention-daily",
       "schedule": "55 9 * * *",
-      "command_sha256": "d1b141b7d6f9f06ca7e4934fb3c008b91f14a477889a56c04207a6285fb6395a"
+      "command_sha256": "329b2599e3c2b6b3a86348466dff535918e3631b7f86c093bf093d16cab5357d"
     },
     {
       "active": true,
