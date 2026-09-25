@@ -13,7 +13,7 @@ const NBA_OFFICIAL_INJURY_PAGE =
   "https://official.nba.com/nba-injury-report-2025-26-season/";
 
 const NBA_PLAYER_PROP_VERSION =
-  "NBA Player Props v1-shadow";
+  "NBA Player Props v1.1-shadow";
 
 const DIRECT_FIELDS = Object.freeze({
   points: "pts",
