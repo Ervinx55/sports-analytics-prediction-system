@@ -177,6 +177,16 @@ function observationRows(model: any, capturedAt: string) {
             candidate?.productionEligible ?? model?.productionEligible ?? false,
           productionWeight:
             candidate?.productionWeight ?? model?.productionWeight ?? 0,
+          rawProjectionMean:
+            candidate?.rawProjectionMean ?? null,
+          contextChallengerMean:
+            candidate?.contextChallengerMean ?? null,
+          contextSignal:
+            candidate?.contextSignal ?? null,
+          contextShadowWeight:
+            candidate?.contextShadowWeight ?? 0,
+          gameContext:
+            candidate?.gameContext ?? null,
           projectionSd: candidate?.projectionSd ?? null,
           projectedMinutes: candidate?.projectedMinutes ?? null,
           historyGames: candidate?.historyGames ?? null,
