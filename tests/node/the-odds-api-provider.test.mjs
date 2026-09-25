@@ -5,6 +5,7 @@ import {
   fetchTheOddsApiBoardLeague,
   fetchTheOddsApiMlbProps,
   fetchTheOddsApiNflProps,
+  fetchTheOddsApiNbaProps,
   getTheOddsApiUsageSnapshot,
   normalizeTheOddsApiBoard
 } from "../../sharp-service/lib/the-odds-api-provider.js";
@@ -422,6 +423,133 @@ test("The Odds API NFL props request and normalize v2 markets", async () => {
       ).over.books.draftkings.line,
       279.5
     );
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+
+test("The Odds API NBA props request and normalize core markets", async () => {
+  const originalFetch = globalThis.fetch;
+  const seen = [];
+
+  globalThis.fetch = async (url) => {
+    const raw = String(url);
+    seen.push(raw);
+
+    if (/basketball_nba\/events\?/.test(raw)) {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({
+          "x-requests-remaining": "480",
+          "x-requests-used": "20",
+          "x-requests-last": "0"
+        }),
+        async text() {
+          return JSON.stringify([{
+            id: "evt-nba-1",
+            sport_key: "basketball_nba",
+            sport_title: "NBA",
+            commence_time: "2026-10-20T23:30:00Z",
+            home_team: "Boston Celtics",
+            away_team: "Los Angeles Lakers"
+          }]);
+        }
+      };
+    }
+
+    return {
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        "x-requests-remaining": "468",
+        "x-requests-used": "32",
+        "x-requests-last": "12"
+      }),
+      async text() {
+        return JSON.stringify({
+          id: "evt-nba-1",
+          sport_key: "basketball_nba",
+          sport_title: "NBA",
+          commence_time: "2026-10-20T23:30:00Z",
+          home_team: "Boston Celtics",
+          away_team: "Los Angeles Lakers",
+          bookmakers: [{
+            key: "draftkings",
+            title: "DraftKings",
+            markets: [
+              {
+                key: "player_points",
+                outcomes: [
+                  { name: "Over", description: "Jayson Tatum", price: -115, point: 27.5 },
+                  { name: "Under", description: "Jayson Tatum", price: -105, point: 27.5 }
+                ]
+              },
+              {
+                key: "player_rebounds",
+                outcomes: [
+                  { name: "Over", description: "Jayson Tatum", price: -110, point: 8.5 },
+                  { name: "Under", description: "Jayson Tatum", price: -110, point: 8.5 }
+                ]
+              },
+              {
+                key: "player_assists",
+                outcomes: [
+                  { name: "Over", description: "Jayson Tatum", price: 100, point: 5.5 },
+                  { name: "Under", description: "Jayson Tatum", price: -130, point: 5.5 }
+                ]
+              },
+              {
+                key: "player_threes",
+                outcomes: [
+                  { name: "Over", description: "Jayson Tatum", price: -120, point: 3.5 },
+                  { name: "Under", description: "Jayson Tatum", price: -110, point: 3.5 }
+                ]
+              },
+              {
+                key: "player_points_rebounds_assists",
+                outcomes: [
+                  { name: "Over", description: "Jayson Tatum", price: -110, point: 41.5 },
+                  { name: "Under", description: "Jayson Tatum", price: -110, point: 41.5 }
+                ]
+              }
+            ]
+          }]
+        });
+      }
+    };
+  };
+
+  try {
+    const result = await fetchTheOddsApiNbaProps({
+      apiKey: "test-key-nba",
+      books: ["draftkings"],
+      startsAfter: "2026-10-20T12:00:00Z",
+      startsBefore: "2026-10-21T06:00:00Z"
+    });
+
+    assert.equal(result.source, "The Odds API");
+    assert.equal(result.league, "NBA");
+    assert.equal(result.events.length, 1);
+    assert.match(seen[0], /basketball_nba\/events\?/);
+    assert.match(seen[1], /player_points/);
+    assert.match(seen[1], /player_rebounds/);
+    assert.match(seen[1], /player_assists/);
+    assert.match(seen[1], /player_points_rebounds_assists/);
+
+    const props = result.events[0].props;
+    const ids = new Set(props.map((prop) => prop.statID));
+    assert.ok(ids.has("points"));
+    assert.ok(ids.has("rebounds"));
+    assert.ok(ids.has("assists"));
+    assert.ok(ids.has("threes_made"));
+    assert.ok(ids.has("points_rebounds_assists"));
+
+    const points = props.find((prop) => prop.statID === "points");
+    assert.equal(points.playerName, "Jayson Tatum");
+    assert.equal(points.over.books.draftkings.line, 27.5);
+    assert.equal(points.under.books.draftkings.odds, -105);
   } finally {
     globalThis.fetch = originalFetch;
   }

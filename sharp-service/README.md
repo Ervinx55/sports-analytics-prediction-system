@@ -19,7 +19,9 @@ Optional The Odds API quota controls:
 - THE_ODDS_API_MAX_PROP_EVENTS — maximum MLB events queried for player props
   per fallback refresh (default 2)
 
-Optional:
+Optional model-data variables:
+- BALLDONTLIE_API_KEY — NBA game-history source; game player stats and injury
+  enrichment require a BALLDONTLIE tier that exposes those endpoints
 - SHARP_MONITOR_TOKEN
 
 Endpoint:
@@ -133,3 +135,50 @@ The chronological player-prop workflow replays 2024-2025 for projection-error
 validation while intentionally excluding finalized historical weather. It
 cannot authorize production weight until historical sharp player-prop prices
 are available for 2024 calibration and untouched 2025 market validation.
+
+
+## NBA shadow models
+
+### NBA team markets v1
+
+Use `GET /api/nbamodel` for the NBA team-market shadow engine. It evaluates
+moneyline, spread, and total markets from the shared Edge Lab board. Every
+sportsbook and exact line is graded independently.
+
+The independent v1 signal uses rolling scoring margin, points scored/allowed,
+home-court advantage, rest days, back-to-backs, schedule density, and 20,000
+deterministic simulations. When NBA game history is unavailable the endpoint
+degrades to market-only probabilities instead of fabricating team strength.
+
+NBA team markets remain shadow-only: production weight is zero until the 2024
+chronological development replay is frozen, 2025 holdout validation is run, and
+historical market-price validation is available.
+
+### NBA player props v1
+
+Use `GET /api/nbaprops` for the NBA player-prop shadow engine. Supported
+markets include points, rebounds, assists, threes made, blocks, steals,
+turnovers, blocks+steals, PRA, points+rebounds, points+assists, and
+rebounds+assists.
+
+NBA prop odds use SportsGameOdds -> SharpAPI -> The Odds API failover. Exact
+book/line pairs are preserved and no-vig probability is calculated from the
+same sportsbook when both sides of the same line are available.
+
+When game-level player history is available, v1 combines rolling direct
+production, projected minutes, per-minute production, and a conservative
+offensive-involvement proxy derived from FGA/FTA/turnovers. Combination props
+are built from the same underlying game rows.
+
+Official NBA injury-report PDFs are the availability authority. The service
+discovers the latest report, extracts its PDF text, and resolves player status
+as Available, Probable, Questionable, Doubtful, Out, Not Listed, or Not Yet
+Submitted. Questionable/unsubmitted/unresolved statuses block a shadow PLAY;
+Out/Doubtful hard-block it. A secondary injury feed may add context but cannot
+override a conflicting official report.
+
+Every NBA prop remains production PASS / weight 0 until chronological
+projection validation, untouched holdout validation, and historical exact
+sportsbook-price validation are complete. The Supabase
+`capture-nba-player-props` function is deployed but intentionally unscheduled
+until `/api/nbaprops` is live in production.

@@ -852,6 +852,23 @@
       ],
       "recovered_at": "2026-09-25",
       "deployed_at": "2026-09-25"
+    },
+    {
+      "slug": "capture-nba-player-props",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "61b63ca6ca48c94b3fd84c345ed3fd2922369c679e4cb4574bf97f99c0128957",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-nba-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "439401357b29349336347afb715792eddc384d4e22f9f471234eea0adb5bf54a"
+        }
+      ],
+      "recovered_at": "2026-09-25",
+      "deployed_at": "2026-09-25"
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",
@@ -859,6 +876,6 @@
     "status": "MATCH",
     "active_functions": 51,
     "metadata_and_bundle_sha_match": true,
-    "repository_total_edge_functions": 52
+    "repository_total_edge_functions": 54
   }
 }

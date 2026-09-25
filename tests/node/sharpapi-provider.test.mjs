@@ -5,7 +5,8 @@ import {
   fetchSharpApiOdds,
   normalizeSharpApiBoardRows,
   normalizeSharpApiMlbPropRows,
-  normalizeSharpApiNflPropRows
+  normalizeSharpApiNflPropRows,
+  normalizeSharpApiNbaPropRows
 } from "../../sharp-service/lib/sharpapi-provider.js";
 
 afterEach(() => {
@@ -337,4 +338,57 @@ test("SharpAPI NFL props normalize supported v2 markets", () => {
   assert.equal(passing.playerName, "Patrick Mahomes");
   assert.equal(passing.over.books.draftkings.line, 279.5);
   assert.equal(passing.under.books.draftkings.line, 279.5);
+});
+
+
+test("SharpAPI NBA props normalize core stat and combo markets", () => {
+  const rows = [
+    ["player_points", "points", "Jayson Tatum", "over", 27.5, -115],
+    ["player_points", "points", "Jayson Tatum", "under", 27.5, -105],
+    ["player_rebounds", "rebounds", "Jayson Tatum", "over", 8.5, -110],
+    ["player_assists", "assists", "Jayson Tatum", "over", 5.5, 100],
+    ["player_three_pointers_made", "three_pointers_made", "Jayson Tatum", "over", 3.5, -120],
+    ["player_points_rebounds_assists", "points_rebounds_assists", "Jayson Tatum", "over", 41.5, -110],
+    ["player_blocks_steals", "blocks_steals", "Jayson Tatum", "over", 1.5, -105]
+  ].map(([market_type, stat_category, player_name, selection_type, line, odds_american]) => ({
+    sportsbook: "draftkings",
+    event_id: "nba_lal_bos_2026-10-20",
+    sport: "basketball",
+    league: "nba",
+    home_team: "Boston Celtics",
+    away_team: "Los Angeles Lakers",
+    market_type,
+    stat_category,
+    player_name,
+    selection_type,
+    selection: selection_type === "over" ? "Over" : "Under",
+    odds_american,
+    line,
+    event_start_time: "2026-10-20T23:30:00Z",
+    timestamp: "2026-10-20T21:00:00Z",
+    is_live: false
+  }));
+
+  const events = normalizeSharpApiNbaPropRows(rows, {
+    books: ["draftkings"]
+  });
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].league, "NBA");
+  assert.equal(events[0].sport, "BASKETBALL");
+
+  const ids = new Set(events[0].props.map((prop) => prop.statID));
+  assert.ok(ids.has("points"));
+  assert.ok(ids.has("rebounds"));
+  assert.ok(ids.has("assists"));
+  assert.ok(ids.has("threes_made"));
+  assert.ok(ids.has("points_rebounds_assists"));
+  assert.ok(ids.has("blocks_steals"));
+
+  const points = events[0].props.find(
+    (prop) => prop.statID === "points"
+  );
+  assert.equal(points.playerName, "Jayson Tatum");
+  assert.equal(points.over.books.draftkings.line, 27.5);
+  assert.equal(points.under.books.draftkings.odds, -105);
 });

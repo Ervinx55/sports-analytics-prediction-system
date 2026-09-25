@@ -48,6 +48,21 @@ const NFL_PROP_MARKETS = Object.freeze({
   player_reception_yds: "receiving_yards"
 });
 
+const NBA_PROP_MARKETS = Object.freeze({
+  player_points: "points",
+  player_rebounds: "rebounds",
+  player_assists: "assists",
+  player_threes: "threes_made",
+  player_blocks: "blocks",
+  player_steals: "steals",
+  player_turnovers: "turnovers",
+  player_blocks_steals: "blocks_steals",
+  player_points_rebounds_assists: "points_rebounds_assists",
+  player_points_rebounds: "points_rebounds",
+  player_points_assists: "points_assists",
+  player_rebounds_assists: "rebounds_assists"
+});
+
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(String(value).replace("+", ""));
@@ -942,6 +957,15 @@ export async function fetchTheOddsApiNflProps(options) {
     league: "NFL",
     marketMap: NFL_PROP_MARKETS,
     sport: "FOOTBALL"
+  });
+}
+
+export async function fetchTheOddsApiNbaProps(options) {
+  return fetchTheOddsApiProps({
+    ...options,
+    league: "NBA",
+    marketMap: NBA_PROP_MARKETS,
+    sport: "BASKETBALL"
   });
 }
 
