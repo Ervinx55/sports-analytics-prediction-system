@@ -804,21 +804,21 @@
     },
     {
       "slug": "refresh-nba-player-prop-clv",
-      "version": 1,
+      "version": 2,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "f479c00d5782ecf8e6e0681c3232653564304c885c0f7c83f9bd912f4237ca5e",
+      "bundle_sha256": "48158e01472dc8538751e15fe5e09f130055a2a0f0446004441a31f062a790c2",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/refresh-nba-player-prop-clv/index.ts",
           "name": "index.ts",
-          "sha256": "4c6d3b1af2a27ad18b35eab71857b8cdf9d90acaed3d8a78c7370b8ef031656c"
+          "sha256": "a89bc23422188b5b847b815e77a3c9b48e9c7f98011c558b2158acd53c5d1bf5"
         },
         {
           "path": "supabase/functions/refresh-nba-player-prop-clv/nba-clv.js",
           "name": "nba-clv.js",
-          "sha256": "c2f9755dd200f0295652df912dc40f6b78ae99d96ebfb1b01cd7f18cea206f3e"
+          "sha256": "7ac04e89ccd68045416e98b81b55ab824893fa831ca59461ad246e30dfc6ec46"
         }
       ],
       "deployed_at": "2026-09-25"
@@ -952,7 +952,7 @@
       "recovered_at": "2026-09-23"
     }
   ],
-  "final_verified_at": "2026-09-25T06:45:49.312Z",
+  "final_verified_at": "2026-09-25T07:39:37Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 58,

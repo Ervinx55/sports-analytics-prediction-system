@@ -1,6 +1,6 @@
 {
   "project_ref": "yeoxroijaptomomshdii",
-  "captured_at": "2026-09-23T21:28:53.825Z",
+  "captured_at": "2026-09-25T07:39:00Z",
   "tables": [
     {
       "name": "candidate_grades",
@@ -115,7 +115,7 @@
     {
       "name": "player_prop_clv",
       "schema": "public",
-      "structure_sha256": "a664729f25b92ce39a87f417c78c1e10301a68958baf3130d501adf83cca13cb"
+      "structure_sha256": "5ae847bea60bebb051fe5b85ca88f33e6033f3792e076ca6ab049ab2563b9d1e"
     },
     {
       "name": "player_prop_decision_fusion_shadow",
@@ -135,7 +135,7 @@
     {
       "name": "player_prop_results",
       "schema": "public",
-      "structure_sha256": "5410d0e5079b6b5adeb1ca27f413aa4425fcd47574b15f749809137d8cb43a51"
+      "structure_sha256": "9697e72a48554785888f9ba4ef42e67815e1cc2fbabe73f3d682226f4b4501d7"
     },
     {
       "name": "player_prop_verification_shadow",
@@ -278,7 +278,7 @@
       "name": "player_prop_clv_latest",
       "schema": "public",
       "security_invoker": true,
-      "definition_sha256": "f3abf4c87dd7c514c753855d1223690b04028b2ae4eb50d978bcb9aa63b079f4"
+      "definition_sha256": "1ea9d38d005f5947d0b03e0e37401318b575851384999dbc80d1fa600f26cb72"
     },
     {
       "name": "player_prop_decision_fusion_latest",
@@ -290,7 +290,7 @@
       "name": "player_prop_latest",
       "schema": "public",
       "security_invoker": true,
-      "definition_sha256": "64eda9cbc751efd7cb798d1f4bdc89f6889b0f2bd48b9090102cd2142a4823db"
+      "definition_sha256": "c2615acba8f0659d6bbd956821720f6dd2c2c33acfe5f101d1a908c29e9c673e"
     },
     {
       "name": "player_prop_latest_results",
@@ -1039,6 +1039,12 @@
       "definition_sha256": "85b5ab81407060abc70d9e5274b4b8b231e2d42cf9f3f98a38413f429c678545"
     },
     {
+      "name": "player_prop_clv_sport_final_idx",
+      "table": "player_prop_clv",
+      "schema": "public",
+      "definition_sha256": "506bb4c584775994bab1f421a83d05756cd41832e381a4cec42c7d403c65f914"
+    },
+    {
       "name": "player_prop_decision_fusion_shadow_pkey",
       "table": "player_prop_decision_fusion_shadow",
       "schema": "public",
@@ -1087,6 +1093,12 @@
       "definition_sha256": "222f79f9f3a4d363ee65df2954a3a7a092a862f200d9ac50fa82a9f471c8919c"
     },
     {
+      "name": "player_prop_lookup_sport_idx",
+      "table": "player_prop_observations",
+      "schema": "public",
+      "definition_sha256": "436318222638a57da7e45ad62302e5a4387cdb599b240567ff01d0e23a2a2280"
+    },
+    {
       "name": "player_prop_observations_pkey",
       "table": "player_prop_observations",
       "schema": "public",
@@ -1103,6 +1115,12 @@
       "table": "player_prop_results",
       "schema": "public",
       "definition_sha256": "7eae5c911d1863f8904fc0cef9d47b6a6a68e3880eb1d60af01af2b924451a73"
+    },
+    {
+      "name": "player_prop_results_sport_graded_idx",
+      "table": "player_prop_results",
+      "schema": "public",
+      "definition_sha256": "39ebf9db78d0157a1bd10d1f3ae24ad1721dabfeda1886ae10b80f122be19667"
     },
     {
       "name": "player_prop_verification_shadow_pkey",

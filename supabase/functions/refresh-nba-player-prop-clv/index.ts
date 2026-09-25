@@ -160,18 +160,20 @@ Deno.serve(async (req) => {
 
     if (obsError) throw obsError;
 
-    const eventIds = [
-      ...new Set(
-        (observations ?? [])
-          .map((row: any) => String(row.event_id || ""))
-          .filter(Boolean)
-      )
-    ];
+    const observationStarts = (observations ?? [])
+      .map((row: any) => Date.parse(row?.starts_at || ""))
+      .filter(Number.isFinite);
 
     const quoteHistory: any[] = [];
-    if (eventIds.length) {
+    if (observationStarts.length) {
       const historySince = new Date(
         now.getTime() - 24 * 3600_000
+      ).toISOString();
+      const marketStartsAfter = new Date(
+        Math.min(...observationStarts) - 4 * 3600_000
+      ).toISOString();
+      const marketStartsBefore = new Date(
+        Math.max(...observationStarts) + 4 * 3600_000
       ).toISOString();
 
       for (let offset = 0; offset < 50000; offset += 1000) {
@@ -179,7 +181,8 @@ Deno.serve(async (req) => {
           .from("player_prop_market_quotes")
           .select("*")
           .eq("sport", "NBA")
-          .in("event_id", eventIds)
+          .gte("starts_at", marketStartsAfter)
+          .lte("starts_at", marketStartsBefore)
           .gte("observed_at", historySince)
           .order("observed_at", { ascending: true })
           .range(offset, offset + 999);
