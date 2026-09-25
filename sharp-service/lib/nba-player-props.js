@@ -38,6 +38,17 @@ const SUPPORTED_STATS = Object.freeze([
   ...Object.keys(COMBO_FIELDS)
 ]);
 
+const USAGE_SENSITIVE_STATS = new Set([
+  "points",
+  "assists",
+  "threes_made",
+  "turnovers",
+  "points_rebounds_assists",
+  "points_rebounds",
+  "points_assists",
+  "rebounds_assists"
+]);
+
 const cache =
   globalThis.__edgeLabNbaPlayerCache ||
   (globalThis.__edgeLabNbaPlayerCache = new Map());
@@ -146,6 +157,26 @@ function recentPlayerRows(
     .slice(0, limit);
 }
 
+function usageProxy(row) {
+  const minutes = parseMinutes(row?.min);
+  const fga = num(row?.fga);
+  const fta = num(row?.fta);
+  const turnovers = num(row?.turnover);
+  if (
+    !(minutes > 0) ||
+    fga === null ||
+    fta === null ||
+    turnovers === null
+  ) {
+    return null;
+  }
+  return (
+    fga +
+    0.44 * fta +
+    turnovers
+  ) / minutes;
+}
+
 function weightedMean(rows, getter) {
   let numerator = 0;
   let denominator = 0;
@@ -249,10 +280,33 @@ function projectionFromHistory(
       ? projectedMinutes * perMinuteRate
       : null;
 
+  const usageLong = weightedMean(
+    usable.slice(0, Math.min(8, usable.length)),
+    usageProxy
+  );
+  const usageShort = weightedMean(
+    usable.slice(0, Math.min(4, usable.length)),
+    usageProxy
+  );
+  const usageRatio =
+    Number.isFinite(usageLong) &&
+    usageLong > 0 &&
+    Number.isFinite(usageShort)
+      ? usageShort / usageLong
+      : null;
+  const usageAdjustedProjection =
+    USAGE_SENSITIVE_STATS.has(statID) &&
+    Number.isFinite(minuteProjection) &&
+    Number.isFinite(usageRatio)
+      ? minuteProjection *
+        clamp(usageRatio, 0.92, 1.08)
+      : null;
+
   const candidates = [
-    { value: directLong, weight: 0.45 },
-    { value: directShort, weight: 0.30 },
-    { value: minuteProjection, weight: 0.25 }
+    { value: directLong, weight: 0.42 },
+    { value: directShort, weight: 0.28 },
+    { value: minuteProjection, weight: 0.20 },
+    { value: usageAdjustedProjection, weight: 0.10 }
   ].filter((row) => Number.isFinite(row.value));
 
   const weightTotal = candidates.reduce(
@@ -322,6 +376,22 @@ function projectionFromHistory(
     minuteProjection:
       Number.isFinite(minuteProjection)
         ? Number(minuteProjection.toFixed(4))
+        : null,
+    usageProxyLong:
+      Number.isFinite(usageLong)
+        ? Number(usageLong.toFixed(5))
+        : null,
+    usageProxyShort:
+      Number.isFinite(usageShort)
+        ? Number(usageShort.toFixed(5))
+        : null,
+    usageRatio:
+      Number.isFinite(usageRatio)
+        ? Number(usageRatio.toFixed(4))
+        : null,
+    usageAdjustedProjection:
+      Number.isFinite(usageAdjustedProjection)
+        ? Number(usageAdjustedProjection.toFixed(4))
         : null,
     historyGames: usable.length,
     modelVersion: NBA_PLAYER_PROP_VERSION
@@ -1108,6 +1178,7 @@ export {
   normalizePlayerName,
   parseMinutes,
   statValue,
+  usageProxy,
   recentPlayerRows,
   projectionFromHistory,
   independentProbability,
