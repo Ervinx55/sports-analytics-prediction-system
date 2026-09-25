@@ -1379,9 +1379,31 @@ export default async function handler(req, res) {
         side: candidateSideName(d, c.side),
         sideKey: c.side,
         modelDecision: c.market.modelDecision,
+        marketSource: {
+          provider:
+            c.market.provider ??
+            d.marketSource?.provider ??
+            decision?.marketSource?.source ??
+            null,
+          providerEventID:
+            d.marketSource?.providerEventID ?? null,
+          providersUsed:
+            d.marketSource?.providersUsed ??
+            decision?.marketSource?.providersUsed ??
+            [],
+          providerChain:
+            d.marketSource?.providerChain ??
+            decision?.marketSource?.providerChain ??
+            []
+        },
         currentModelPrice: {
           bestBook: c.market.bestBook,
           bestOdds: c.market.bestOdds,
+          provider:
+            c.market.provider ??
+            d.marketSource?.provider ??
+            decision?.marketSource?.source ??
+            null,
           modelProbability: c.market.modelProbability,
           edgePctPoints: c.market.edgePctPoints,
           evPct: c.market.evPct,
@@ -1529,6 +1551,8 @@ export default async function handler(req, res) {
       fetchedAt: new Date().toISOString(),
       version: "Final Verification v7.1",
       date,
+      marketSource:
+        decision?.marketSource ?? null,
       method: {
         officialSource:
           "MLB Stats live feed for game status, starters, batting orders, venue/weather, and prior-game box scores",
