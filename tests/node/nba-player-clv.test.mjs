@@ -7,7 +7,8 @@ import {
   latestAt,
   marketMetrics,
   openingRefs,
-  quoteMatchesObservation
+  quoteMatchesObservation,
+  sameGameIdentity
 } from "../../supabase/functions/refresh-nba-player-prop-clv/nba-clv.js";
 
 const quotes = [
@@ -141,6 +142,58 @@ test("NBA CLV quote matching uses event, player, and stat", () => {
       { ...quotes[0], player_name: "Jaylen Brown" },
       observation
     ),
+    false
+  );
+});
+
+
+test("NBA CLV matches the same game across provider event IDs", () => {
+  const quote = {
+    ...quotes[0],
+    event_id: "sharpapi:abc",
+    starts_at: "2026-10-20T23:30:00Z",
+    away_team: "Los Angeles Lakers",
+    home_team: "Boston Celtics"
+  };
+  const observation = {
+    event_id: "theoddsapi:xyz",
+    starts_at: "2026-10-20T23:30:00Z",
+    away_team: "Los Angeles Lakers",
+    home_team: "Boston Celtics",
+    player_id: "other-provider-player-id",
+    player_name: "Jayson Tatum",
+    stat_id: "points"
+  };
+
+  assert.equal(
+    sameGameIdentity(quote, observation),
+    true
+  );
+  assert.equal(
+    quoteMatchesObservation(quote, observation),
+    true
+  );
+});
+
+test("NBA CLV does not cross-match same teams outside the game window", () => {
+  const quote = {
+    ...quotes[0],
+    event_id: "provider-a",
+    starts_at: "2026-10-20T23:30:00Z",
+    away_team: "Los Angeles Lakers",
+    home_team: "Boston Celtics"
+  };
+  const observation = {
+    event_id: "provider-b",
+    starts_at: "2026-10-22T23:30:00Z",
+    away_team: "Los Angeles Lakers",
+    home_team: "Boston Celtics",
+    player_name: "Jayson Tatum",
+    stat_id: "points"
+  };
+
+  assert.equal(
+    sameGameIdentity(quote, observation),
     false
   );
 });
