@@ -43,6 +43,14 @@ const NFL_PROP_V2_BASELINE_FIELDS = Object.freeze({
   receiving_yards: "receiving_yards"
 });
 
+const NFL_PROP_V2_BASELINE_WINDOWS = Object.freeze({
+  passing_yards: 4,
+  passing_touchdowns: 4,
+  rushing_yards: 4,
+  receiving_receptions: 4,
+  receiving_yards: 4
+});
+
 const NFL_PROP_V2_VERSION =
   "NFL Player Props v2.1 baseline-anchored shadow";
 
@@ -595,7 +603,8 @@ function anchorProjectionToBaseline(
   projection,
   baselineMean,
   residualWeight,
-  statID
+  statID,
+  baselineWindow = 4
 ) {
   if (!projection) return projection;
   const opportunityMean = num(projection.mean);
@@ -612,6 +621,7 @@ function anchorProjectionToBaseline(
         ? Number(opportunityMean.toFixed(3))
         : null,
       residualWeight: null,
+      baselineWindow,
       anchored: false,
       modelVersion: NFL_PROP_V2_VERSION
     };
@@ -628,6 +638,7 @@ function anchorProjectionToBaseline(
       baselineMean: Number(baselineMean.toFixed(3)),
       opportunityMean: Number(opportunityMean.toFixed(3)),
       residualWeight: weight,
+      baselineWindow,
       anchored: true,
       statID,
       modelVersion: NFL_PROP_V2_VERSION
@@ -645,6 +656,7 @@ function anchorProjectionToBaseline(
     baselineMean: Number(baselineMean.toFixed(3)),
     opportunityMean: Number(opportunityMean.toFixed(3)),
     residualWeight: weight,
+    baselineWindow,
     anchored: true,
     statID,
     modelVersion: NFL_PROP_V2_VERSION
@@ -661,18 +673,21 @@ function applyV2ResidualAnchors(
     NFL_PROP_V2_BASELINE_FIELDS
   )) {
     if (!projections[statID]) continue;
+    const baselineWindow =
+      NFL_PROP_V2_BASELINE_WINDOWS[statID] ?? 4;
     const baselineMean = rollingPlayerBaseline(
       history,
       field,
       season,
       team,
-      4
+      baselineWindow
     );
     projections[statID] = anchorProjectionToBaseline(
       projections[statID],
       baselineMean,
       NFL_PROP_V2_RESIDUAL_WEIGHTS[statID] ?? 0,
-      statID
+      statID,
+      baselineWindow
     );
   }
   return projections;
@@ -1356,6 +1371,7 @@ export {
   NFL_PROP_MARKET_SHRINKAGE,
   NFL_PROP_CALIBRATION_VERSION,
   NFL_PROP_V2_RESIDUAL_WEIGHTS,
+  NFL_PROP_V2_BASELINE_WINDOWS,
   NFL_PROP_V2_VERSION,
   normalizePlayerName,
   pointInTimeRows,
