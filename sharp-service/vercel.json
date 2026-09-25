@@ -21,5 +21,11 @@
       "source": "/dashboard/",
       "destination": "/dashboard.html"
     }
-  ]
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "master": true,
+      "*": false
+    }
+  }
 }
