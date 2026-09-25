@@ -72,3 +72,145 @@ test("NBA player props backtest is chronological and keeps 2025 untouched", () =
     Number.isFinite(report.markets.points.baseline.mae)
   );
 });
+
+
+function contextualRow({
+  statId,
+  playerId,
+  firstName,
+  lastName,
+  teamId,
+  teamName,
+  teamAbbreviation,
+  gameId,
+  date,
+  homeTeamId,
+  visitorTeamId,
+  homeScore,
+  visitorScore,
+  pts
+}) {
+  return {
+    id: statId,
+    min: "36:00",
+    fga: 18,
+    fta: 6,
+    turnover: 3,
+    pts,
+    reb: 8,
+    ast: 5,
+    fg3m: 3,
+    blk: 1,
+    stl: 1,
+    player: {
+      id: playerId,
+      first_name: firstName,
+      last_name: lastName
+    },
+    team: {
+      id: teamId,
+      full_name: teamName,
+      abbreviation: teamAbbreviation
+    },
+    game: {
+      id: gameId,
+      date,
+      season: 2024,
+      datetime: `${date}T23:30:00Z`,
+      home_team_id: homeTeamId,
+      visitor_team_id: visitorTeamId,
+      home_team_score: homeScore,
+      visitor_team_score: visitorScore
+    }
+  };
+}
+
+test("NBA v1.1 context backtest reconstructs opponent history point-in-time", () => {
+  const rows = [];
+  const dates = [
+    "2024-10-22",
+    "2024-10-24",
+    "2024-10-26",
+    "2024-10-28",
+    "2024-10-30",
+    "2024-11-01",
+    "2024-11-03"
+  ];
+
+  dates.forEach((date, index) => {
+    const gameId = 100 + index;
+    const bostonHome = index % 2 === 0;
+    const homeTeamId = bostonHome ? 2 : 14;
+    const visitorTeamId = bostonHome ? 14 : 2;
+    const homeScore = bostonHome
+      ? 116 + index
+      : 109 + index;
+    const visitorScore = bostonHome
+      ? 108 + index
+      : 114 + index;
+
+    rows.push(
+      contextualRow({
+        statId: 1000 + index * 2,
+        playerId: 200,
+        firstName: "Boston",
+        lastName: "Player",
+        teamId: 2,
+        teamName: "Boston Celtics",
+        teamAbbreviation: "BOS",
+        gameId,
+        date,
+        homeTeamId,
+        visitorTeamId,
+        homeScore,
+        visitorScore,
+        pts: 22 + index
+      }),
+      contextualRow({
+        statId: 1001 + index * 2,
+        playerId: 300,
+        firstName: "Laker",
+        lastName: "Player",
+        teamId: 14,
+        teamName: "Los Angeles Lakers",
+        teamAbbreviation: "LAL",
+        gameId,
+        date,
+        homeTeamId,
+        visitorTeamId,
+        homeScore,
+        visitorScore,
+        pts: 20 + index
+      })
+    );
+  });
+
+  const report = backtestPlayerStats(rows, {
+    season: 2024,
+    minimumPriorGames: 4
+  });
+
+  assert.equal(report.holdoutTouched, false);
+  assert.equal(report.markets.points.model.rows, 6);
+  assert.ok(
+    report.markets.points.contextChallenger.rows > 0
+  );
+  assert.ok(
+    report.rowsByMarket.points.some(
+      (item) => item.contextAvailable === true
+    )
+  );
+  assert.ok(
+    report.rowsByMarket.points
+      .filter((item) => item.contextAvailable)
+      .every(
+        (item) =>
+          Number.isFinite(item.contextSignal) &&
+          item.gameID >= 104
+      )
+  );
+  assert.equal(
+    typeof report.markets.points.contextPromotion.accepted,
+    "boolean"
+  );
+});
