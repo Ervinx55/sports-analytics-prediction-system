@@ -326,6 +326,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260925050326",
+      "name": "register_nfl_player_prop_capture_component",
+      "path": "supabase/migrations/20260925050326_register_nfl_player_prop_capture_component.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
