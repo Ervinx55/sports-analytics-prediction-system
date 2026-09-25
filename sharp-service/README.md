@@ -200,3 +200,36 @@ projection validation, untouched holdout validation, and historical exact
 sportsbook-price validation are complete. The Supabase
 `capture-nba-player-props` function is deployed but intentionally unscheduled
 until `/api/nbaprops` is live in production.
+
+
+### NBA player-prop feedback loop
+
+NBA player props have a separate result/market feedback pipeline built on the
+shared prop ledgers:
+
+- `grade-nba-player-props` resolves the official NBA game from the league
+  schedule, reads the final official live-data boxscore, and grades the exact
+  observation as W/L/PUSH. A player who never enters the game is recorded as
+  `VOID`; a DNP is never treated as a zero-stat UNDER win.
+- `refresh-nba-player-prop-clv` records pregame sportsbook snapshots and
+  tracks opening, current, and closing line/price CLV for the same player,
+  stat, side, and exact decision line. Closing snapshots older than 15 minutes
+  are classified `STALE_CLOSE` rather than accepted as valid CLV.
+- `nba-player-prop-calibration` compares the v1 raw probability, v1.1
+  context probability, and market no-vig probability with Brier score,
+  log loss, and calibration buckets. PUSH and VOID remain visible in operating
+  counts but are excluded from binary probability scoring.
+- `nba-player-prop-feedback-status` exposes settlement coverage, unresolved
+  observations, outcome counts, CLV health, close freshness, and per-book quote
+  health.
+
+The feedback/calibration views can be segmented by stat, side, role-stability
+state, market-integrity state, CLV classification, and upstream PLAY/PASS
+status. NBA results and CLV share the existing prop tables but carry an
+explicit `sport = NBA` dimension; existing MLB CLV endpoints are explicitly
+scoped to `MLB` so the two sports cannot contaminate each other's metrics.
+
+These functions are deployed to Supabase but the NBA pipeline registry remains
+disabled until `/api/nbaprops` is available in production. There is no
+automatic model promotion: feedback can diagnose or validate a challenger, but
+it cannot change NBA production weight from zero.

@@ -344,14 +344,32 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260925062619",
+      "name": "add_sport_to_player_prop_feedback_v2",
+      "path": "supabase/migrations/20260925062619_add_sport_to_player_prop_feedback_v2.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260925063434",
+      "name": "register_nba_player_prop_feedback_components",
+      "path": "supabase/migrations/20260925063434_register_nba_player_prop_feedback_components.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-24T09:21:26Z",
+  "final_verified_at": "2026-09-25T06:39:22.178Z",
   "authority_verification": {
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 36,
+    "repository_total_migrations": 38,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
