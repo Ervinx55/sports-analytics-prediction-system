@@ -308,6 +308,24 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260925045727",
+      "name": "archive_player_prop_market_quotes",
+      "path": "supabase/migrations/20260925045727_archive_player_prop_market_quotes.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20260925045757",
+      "name": "archive_player_prop_market_quotes_retention",
+      "path": "supabase/migrations/20260925045757_archive_player_prop_market_quotes_retention.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
