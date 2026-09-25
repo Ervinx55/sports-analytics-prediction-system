@@ -294,10 +294,29 @@ export function normalizeSharpApiBoardRows(rows, {
     );
 }
 
-function propStatID(row) {
+function propStatID(row, league = "MLB") {
   const type = String(row?.market_type || "").toLowerCase();
   const category = String(row?.stat_category || "").toLowerCase();
   const combined = `${type}|${category}`;
+
+  if (String(league).toUpperCase() === "NFL") {
+    if (/pass(ing)?[_ ]?(yards|yds)/.test(combined)) {
+      return "passing_yards";
+    }
+    if (/pass(ing)?[_ ]?(touchdowns|tds)/.test(combined)) {
+      return "passing_touchdowns";
+    }
+    if (/rush(ing)?[_ ]?(yards|yds)/.test(combined)) {
+      return "rushing_yards";
+    }
+    if (/receptions?/.test(combined)) {
+      return "receiving_receptions";
+    }
+    if (/receiv(ing|e)?[_ ]?(yards|yds)/.test(combined)) {
+      return "receiving_yards";
+    }
+    return null;
+  }
 
   if (/strikeout/.test(combined) && !/batter.*strikeout/.test(combined)) {
     return "pitching_strikeouts";
@@ -316,7 +335,8 @@ function propStatID(row) {
   return null;
 }
 
-export function normalizeSharpApiMlbPropRows(rows, {
+export function normalizeSharpApiPropRows(rows, {
+  league = "MLB",
   books = [],
   startsAfter = null,
   startsBefore = null,
@@ -330,7 +350,7 @@ export function normalizeSharpApiMlbPropRows(rows, {
   const events = new Map();
 
   for (const row of rows || []) {
-    const statID = propStatID(row);
+    const statID = propStatID(row, league);
     if (!statID) continue;
 
     const side = String(row?.selection_type || "").toLowerCase();
@@ -357,8 +377,11 @@ export function normalizeSharpApiMlbPropRows(rows, {
         eventID: `sharpapi:${eventID}`,
         providerEventID: eventID,
         provider: "SharpAPI",
-        sport: "BASEBALL",
-        league: "MLB",
+        sport:
+          String(league).toUpperCase() === "NFL"
+            ? "FOOTBALL"
+            : "BASEBALL",
+        league: String(league).toUpperCase(),
         startsAt,
         status: {
           started:
@@ -630,18 +653,33 @@ export async function fetchSharpApiBoardLeague(options) {
   };
 }
 
-export async function fetchSharpApiMlbProps(options) {
+export function normalizeSharpApiMlbPropRows(rows, options = {}) {
+  return normalizeSharpApiPropRows(rows, {
+    ...options,
+    league: "MLB"
+  });
+}
+
+export function normalizeSharpApiNflPropRows(rows, options = {}) {
+  return normalizeSharpApiPropRows(rows, {
+    ...options,
+    league: "NFL"
+  });
+}
+
+async function fetchSharpApiProps(options, league) {
   const result = await fetchSharpApiOdds({
     ...options,
-    league: "MLB",
+    league,
     market: "props"
   });
-  const events = normalizeSharpApiMlbPropRows(
+  const events = normalizeSharpApiPropRows(
     result.payload?.data || [],
-    options
+    { ...options, league }
   );
   return {
     source: "SharpAPI",
+    league,
     events,
     fetchedAt: new Date(result.fetchedAt).toISOString(),
     cache: {
@@ -652,4 +690,12 @@ export async function fetchSharpApiMlbProps(options) {
       upstreamError: result.upstreamError || null
     }
   };
+}
+
+export async function fetchSharpApiMlbProps(options) {
+  return fetchSharpApiProps(options, "MLB");
+}
+
+export async function fetchSharpApiNflProps(options) {
+  return fetchSharpApiProps(options, "NFL");
 }
