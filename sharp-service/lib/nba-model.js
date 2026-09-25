@@ -578,7 +578,13 @@ function gradeQuote({
       modelProbability === null
         ? null
         : expectedValue(modelProbability, quote.odds);
-    const bookCount = linePeerCount(sideMarket, quote.line);
+    const bookCount = quote.line === null
+      ? rows.length
+      : rows.filter(
+          (row) =>
+            row.line !== null &&
+            Math.abs(row.line - quote.line) < 1e-9
+        ).length;
 
     const shadowPlay =
       dataQuality >= 0.66 &&
