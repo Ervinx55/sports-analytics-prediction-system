@@ -194,13 +194,47 @@ function actualStat(player, statId) {
   return total;
 }
 
+function isoDurationSeconds(value) {
+  const text = String(value || "").trim();
+  const match = text.match(
+    /^PT(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?$/i
+  );
+  if (!match) return null;
+
+  const hours = Number(match[1] || 0);
+  const minutes = Number(match[2] || 0);
+  const seconds = Number(match[3] || 0);
+  const total =
+    hours * 3600 +
+    minutes * 60 +
+    seconds;
+
+  return Number.isFinite(total)
+    ? total
+    : null;
+}
+
 function playerParticipated(player) {
   if (!player) return false;
-  if (player?.played === true || String(player?.played).toLowerCase() === "true") {
+
+  const played = player?.played;
+  if (
+    played === true ||
+    played === 1 ||
+    String(played).toLowerCase() === "true" ||
+    String(played) === "1"
+  ) {
     return true;
   }
-  const minutes = String(player?.statistics?.minutes || "");
-  return /^PT(?=.*\d)/.test(minutes) && !/^PT0M(?:0+(?:\.0+)?)?S?$/.test(minutes);
+
+  const duration = isoDurationSeconds(
+    player?.statistics?.minutes
+  );
+  if (duration !== null) {
+    return duration > 0;
+  }
+
+  return false;
 }
 
 function settleObservation(observation, boxscore) {
@@ -287,6 +321,7 @@ export {
   findScheduleGame,
   findBoxscorePlayer,
   actualStat,
+  isoDurationSeconds,
   playerParticipated,
   settleObservation
 };
