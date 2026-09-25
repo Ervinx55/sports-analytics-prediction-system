@@ -358,7 +358,7 @@
       "version": "20260925063434",
       "name": "register_nba_player_prop_feedback_components",
       "path": "supabase/migrations/20260925063434_register_nba_player_prop_feedback_components.sql",
-      "sha256": "58108561e363ab8f73cc5fab0c945cd450d27d1ded27f6bff3c9ee4375cf7167",
+      "sha256": "7385d769557b95b6541821aa1f0145f6981fbef82229b9448b9c93bf5fe8aac3",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
