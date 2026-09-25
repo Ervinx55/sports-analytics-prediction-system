@@ -506,6 +506,195 @@ function expectedValue(probability, odds) {
   return probability * decimal - 1;
 }
 
+function median(values) {
+  const usable = values
+    .filter(Number.isFinite)
+    .sort((a, b) => a - b);
+  if (!usable.length) return null;
+  const middle =
+    Math.floor(usable.length / 2);
+  return usable.length % 2
+    ? usable[middle]
+    : (
+        usable[middle - 1] +
+        usable[middle]
+      ) / 2;
+}
+
+function quoteAgeMinutes(
+  updatedAt,
+  now = new Date()
+) {
+  const updated =
+    Date.parse(updatedAt || "");
+  if (!Number.isFinite(updated)) {
+    return null;
+  }
+  return Math.max(
+    0,
+    (
+      now.getTime() -
+      updated
+    ) / 60000
+  );
+}
+
+function marketIntegrity(
+  pairs,
+  pair,
+  side,
+  now = new Date()
+) {
+  const sameLine = (pairs || [])
+    .filter(
+      (row) =>
+        Number.isFinite(row?.line) &&
+        Math.abs(
+          row.line - pair.line
+        ) < 1e-9
+    );
+
+  const probabilities =
+    sameLine
+      .map((row) =>
+        noVigProbability(
+          side === "over"
+            ? row.overOdds
+            : row.underOdds,
+          side === "over"
+            ? row.underOdds
+            : row.overOdds
+        )
+      )
+      .filter(Number.isFinite);
+
+  const candidateProbability =
+    noVigProbability(
+      side === "over"
+        ? pair.overOdds
+        : pair.underOdds,
+      side === "over"
+        ? pair.underOdds
+        : pair.overOdds
+    );
+  const consensusProbability =
+    median(probabilities);
+  const probabilityRange =
+    probabilities.length
+      ? Math.max(...probabilities) -
+        Math.min(...probabilities)
+      : null;
+  const probabilityDeviation =
+    Number.isFinite(candidateProbability) &&
+    Number.isFinite(consensusProbability)
+      ? Math.abs(
+          candidateProbability -
+          consensusProbability
+        )
+      : null;
+
+  const lineValues = (pairs || [])
+    .map((row) => row?.line)
+    .filter(Number.isFinite);
+  const lineRange =
+    lineValues.length
+      ? Math.max(...lineValues) -
+        Math.min(...lineValues)
+      : null;
+
+  const ageMinutes =
+    quoteAgeMinutes(
+      pair?.updatedAt,
+      now
+    );
+  const stale =
+    Number.isFinite(ageMinutes) &&
+    ageMinutes > 30;
+  const isolatedLine =
+    sameLine.length < 2;
+  const highDisagreement =
+    Number.isFinite(probabilityRange) &&
+    probabilityRange >= 0.10;
+  const priceOutlier =
+    Number.isFinite(probabilityDeviation) &&
+    probabilityDeviation >= 0.055;
+  const staleOutlier =
+    stale && priceOutlier;
+
+  let score = 1;
+  if (isolatedLine) score -= 0.35;
+  if (stale) score -= 0.20;
+  if (priceOutlier) score -= 0.15;
+  if (highDisagreement) score -= 0.20;
+  if (ageMinutes === null) score -= 0.05;
+
+  score = clamp(score, 0, 1);
+
+  return {
+    score:
+      Number(score.toFixed(3)),
+    blocked:
+      isolatedLine ||
+      staleOutlier ||
+      highDisagreement,
+    pairedBooks:
+      sameLine.length,
+    exactLine:
+      pair.line,
+    lineRange:
+      Number.isFinite(lineRange)
+        ? Number(lineRange.toFixed(3))
+        : null,
+    consensusFairProbability:
+      Number.isFinite(consensusProbability)
+        ? Number(
+            consensusProbability.toFixed(6)
+          )
+        : null,
+    candidateFairProbability:
+      Number.isFinite(candidateProbability)
+        ? Number(
+            candidateProbability.toFixed(6)
+          )
+        : null,
+    probabilityRangePctPoints:
+      Number.isFinite(probabilityRange)
+        ? Number(
+            (
+              probabilityRange * 100
+            ).toFixed(3)
+          )
+        : null,
+    probabilityDeviationPctPoints:
+      Number.isFinite(probabilityDeviation)
+        ? Number(
+            (
+              probabilityDeviation * 100
+            ).toFixed(3)
+          )
+        : null,
+    quoteAgeMinutes:
+      Number.isFinite(ageMinutes)
+        ? Number(
+            ageMinutes.toFixed(1)
+          )
+        : null,
+    stale,
+    isolatedLine,
+    highDisagreement,
+    priceOutlier,
+    staleOutlier,
+    reason:
+      isolatedLine
+        ? "Exact line is isolated to one paired sportsbook."
+        : staleOutlier
+        ? "Quote is both stale and materially off the same-line cross-book consensus."
+        : highDisagreement
+        ? "Same-line sportsbooks disagree too widely on no-vig probability."
+        : "Market integrity gate is clear."
+  };
+}
+
 function exactPairs(prop) {
   const rows = [];
   const overBooks = prop?.over?.books || {};
@@ -733,7 +922,8 @@ function gradeProp({
   event,
   prop,
   projection,
-  injury
+  injury,
+  now = new Date()
 }) {
   const pairs = exactPairs(prop);
   const lineCounts = new Map();
@@ -786,16 +976,36 @@ function gradeProp({
         Number.isFinite(shadowIndependent)
           ? expectedValue(shadowIndependent, odds)
           : null;
-      const dataQuality = qualityScore({
-        projection,
-        pairedBooks,
-        injury
-      });
+      const baseDataQuality =
+        qualityScore({
+          projection,
+          pairedBooks,
+          injury
+        });
+      const integrity =
+        marketIntegrity(
+          pairs,
+          pair,
+          side,
+          now
+        );
+      const dataQuality =
+        clamp(
+          baseDataQuality *
+            (
+              0.8 +
+              0.2 * integrity.score
+            ),
+          0,
+          1
+        );
 
       const shadowPlay =
         projection?.available &&
         injury?.resolvedForPlay === true &&
         injury?.availabilityBlocked !== true &&
+        integrity.blocked !== true &&
+        integrity.score >= 0.55 &&
         dataQuality >= 0.72 &&
         pairedBooks >= 2 &&
         edge !== null &&
@@ -866,6 +1076,12 @@ function gradeProp({
           projection?.historyGames ?? 0,
         dataQuality:
           Number(dataQuality.toFixed(3)),
+        baseDataQuality:
+          Number(
+            baseDataQuality.toFixed(3)
+          ),
+        marketIntegrity:
+          integrity,
         injury,
         shadowStatus:
           shadowPlay ? "PLAY" : "PASS",
@@ -882,7 +1098,9 @@ function gradeProp({
           : injury?.resolvedForPlay !== true
           ? injury?.reason ||
             "Official availability is unresolved."
-          : "NBA player-prop v1 production is disabled; shadow edge, market depth, or data-quality threshold was not met."
+          : integrity.blocked
+          ? integrity.reason
+          : "NBA player-prop v1.1 production is disabled; shadow edge, market depth, integrity, or data-quality threshold was not met."
       });
     }
   }
@@ -1196,7 +1414,8 @@ function projectPropEvent({
       event,
       prop,
       projection,
-      injury
+      injury,
+      now
     });
     candidates.push(...playerCandidates);
     players.push({
@@ -1227,6 +1446,8 @@ export {
   recentPlayerRows,
   projectionFromHistory,
   independentProbability,
+  quoteAgeMinutes,
+  marketIntegrity,
   exactPairs,
   injuryForPlayer,
   officialInjuryContext,
