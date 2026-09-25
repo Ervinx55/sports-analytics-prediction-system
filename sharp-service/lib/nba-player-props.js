@@ -267,6 +267,25 @@ function projectionFromHistory(
     usable.slice(0, 8),
     (row) => parseMinutes(row?.min)
   );
+  const shortMinutes = weightedMean(
+    usable.slice(0, Math.min(3, usable.length)),
+    (row) => parseMinutes(row?.min)
+  );
+  const longMinutes = weightedMean(
+    usable.slice(0, Math.min(8, usable.length)),
+    (row) => parseMinutes(row?.min)
+  );
+  const minutesDelta =
+    Number.isFinite(shortMinutes) &&
+    Number.isFinite(longMinutes)
+      ? shortMinutes - longMinutes
+      : null;
+  const minutesTrendRatio =
+    Number.isFinite(shortMinutes) &&
+    Number.isFinite(longMinutes) &&
+    longMinutes > 0
+      ? shortMinutes / longMinutes
+      : null;
   const perMinuteRate = weightedMean(
     usable.slice(0, 8),
     (row) => {
@@ -342,6 +361,32 @@ function projectionFromHistory(
     .map((row) => parseMinutes(row?.min))
     .filter(Number.isFinite);
   const minutesSd = sampleSd(minutesHistory);
+  const roleChangeDetected =
+    Number.isFinite(minutesDelta) &&
+    Number.isFinite(minutesTrendRatio) &&
+    Math.abs(minutesDelta) >= 4.5 &&
+    (
+      minutesTrendRatio <= 0.86 ||
+      minutesTrendRatio >= 1.14
+    );
+  const roleStability =
+    roleChangeDetected
+      ? clamp(
+          1 -
+            Math.min(
+              0.6,
+              Math.abs(minutesDelta) / 20
+            ),
+          0.35,
+          0.75
+        )
+      : Number.isFinite(minutesSd)
+      ? clamp(
+          1 - minutesSd / 18,
+          0.5,
+          1
+        )
+      : 0.75;
 
   const latestTeam =
     usable[0]?.team?.full_name ||
@@ -361,6 +406,25 @@ function projectionFromHistory(
       Number.isFinite(projectedMinutes)
         ? Number(projectedMinutes.toFixed(3))
         : null,
+    shortMinutes:
+      Number.isFinite(shortMinutes)
+        ? Number(shortMinutes.toFixed(3))
+        : null,
+    longMinutes:
+      Number.isFinite(longMinutes)
+        ? Number(longMinutes.toFixed(3))
+        : null,
+    minutesDelta:
+      Number.isFinite(minutesDelta)
+        ? Number(minutesDelta.toFixed(3))
+        : null,
+    minutesTrendRatio:
+      Number.isFinite(minutesTrendRatio)
+        ? Number(minutesTrendRatio.toFixed(4))
+        : null,
+    roleChangeDetected,
+    roleStability:
+      Number(roleStability.toFixed(3)),
     minutesSd:
       Number.isFinite(minutesSd)
         ? Number(minutesSd.toFixed(3))
@@ -906,6 +970,17 @@ function qualityScore({
     score += 0.08;
   }
 
+  if (
+    Number.isFinite(projection.roleStability)
+  ) {
+    score *=
+      0.82 +
+      0.18 * projection.roleStability;
+  }
+  if (projection.roleChangeDetected) {
+    score = Math.min(score, 0.69);
+  }
+
   if (injury?.officialReportParsed) {
     score += 0.08;
   } else {
@@ -1072,6 +1147,14 @@ function gradeProp({
           projection?.sd ?? null,
         projectedMinutes:
           projection?.projectedMinutes ?? null,
+        roleChangeDetected:
+          Boolean(
+            projection?.roleChangeDetected
+          ),
+        roleStability:
+          projection?.roleStability ?? null,
+        minutesDelta:
+          projection?.minutesDelta ?? null,
         historyGames:
           projection?.historyGames ?? 0,
         dataQuality:
@@ -1100,7 +1183,9 @@ function gradeProp({
             "Official availability is unresolved."
           : integrity.blocked
           ? integrity.reason
-          : "NBA player-prop v1.1 production is disabled; shadow edge, market depth, integrity, or data-quality threshold was not met."
+          : projection?.roleChangeDetected
+          ? "Recent minutes indicate a material role change; shadow PLAY is blocked until the role stabilizes."
+          : "NBA player-prop v1.1 production is disabled; shadow edge, market depth, integrity, role stability, or data-quality threshold was not met."
       });
     }
   }
