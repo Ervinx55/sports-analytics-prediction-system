@@ -194,9 +194,32 @@ const RESIDUAL_WEIGHT_GRID = Array.from(
   (_, index) => index / 20
 );
 
-function anchoredPrediction(row, weight) {
-  if (!Number.isFinite(row.baseline)) return row.prediction;
-  return row.baseline + weight * (row.prediction - row.baseline);
+const BASELINE_WINDOWS = [3, 4, 5, 6, 8];
+
+const V21_INCUMBENT = Object.freeze({
+  passing_yards: { baselineWindow: 4, residualWeight: 0.25 },
+  passing_touchdowns: { baselineWindow: 4, residualWeight: 0 },
+  rushing_yards: { baselineWindow: 4, residualWeight: 0 },
+  receiving_receptions: { baselineWindow: 4, residualWeight: 0 },
+  receiving_yards: { baselineWindow: 4, residualWeight: 0.90 }
+});
+
+function rowBaseline(row, baselineWindow = 4) {
+  const keyed = row?.baselines?.[baselineWindow];
+  if (Number.isFinite(keyed)) return keyed;
+  return baselineWindow === 4 && Number.isFinite(row?.baseline)
+    ? row.baseline
+    : null;
+}
+
+function anchoredPrediction(
+  row,
+  weight,
+  baselineWindow = 4
+) {
+  const baseline = rowBaseline(row, baselineWindow);
+  if (!Number.isFinite(baseline)) return row.prediction;
+  return baseline + weight * (row.prediction - baseline);
 }
 
 function metrics(rows, predictionFn = (row) => row.prediction) {
@@ -252,15 +275,20 @@ function metrics(rows, predictionFn = (row) => row.prediction) {
   };
 }
 
-function residualCalibration(rows, {
+function residualCalibration(rows, market, {
   calibrationMaxWeek = 10,
   validationMinWeek = 11
 } = {}) {
+  const incumbent =
+    V21_INCUMBENT[market] ||
+    { baselineWindow: 4, residualWeight: 0 };
   const eligible = rows.filter(
     (row) =>
       Number.isFinite(row.actual) &&
       Number.isFinite(row.prediction) &&
-      Number.isFinite(row.baseline)
+      BASELINE_WINDOWS.some((window) =>
+        Number.isFinite(rowBaseline(row, window))
+      )
   );
   const calibrationRows = eligible.filter(
     (row) => Number(row.week) <= calibrationMaxWeek
@@ -269,77 +297,138 @@ function residualCalibration(rows, {
     (row) => Number(row.week) >= validationMinWeek
   );
 
+  const incumbentCalibration = metrics(
+    calibrationRows,
+    (row) =>
+      anchoredPrediction(
+        row,
+        incumbent.residualWeight,
+        incumbent.baselineWindow
+      )
+  );
+  const incumbentValidation = metrics(
+    validationRows,
+    (row) =>
+      anchoredPrediction(
+        row,
+        incumbent.residualWeight,
+        incumbent.baselineWindow
+      )
+  );
+
   if (calibrationRows.length < 25 || validationRows.length < 25) {
     return {
-      selectedWeight: 0,
-      acceptedWeight: 0,
+      selectedBaselineWindow: incumbent.baselineWindow,
+      selectedWeight: incumbent.residualWeight,
+      acceptedBaselineWindow: incumbent.baselineWindow,
+      acceptedWeight: incumbent.residualWeight,
       calibrationRows: calibrationRows.length,
       validationRows: validationRows.length,
       accepted: false,
       reason: "Insufficient split-development rows.",
-      calibration: metrics(calibrationRows, (row) =>
-        anchoredPrediction(row, 0)
-      ),
-      validation: metrics(validationRows, (row) =>
-        anchoredPrediction(row, 0)
-      )
+      incumbent,
+      incumbentCalibration,
+      incumbentValidation
     };
   }
 
-  const candidates = RESIDUAL_WEIGHT_GRID.map((weight) => ({
-    weight,
-    metrics: metrics(calibrationRows, (row) =>
-      anchoredPrediction(row, weight)
+  const candidates = BASELINE_WINDOWS.flatMap(
+    (baselineWindow) =>
+      RESIDUAL_WEIGHT_GRID.map((weight) => ({
+        baselineWindow,
+        weight,
+        metrics: metrics(
+          calibrationRows,
+          (row) =>
+            anchoredPrediction(
+              row,
+              weight,
+              baselineWindow
+            )
+        )
+      }))
+  )
+    .filter((candidate) =>
+      Number.isFinite(candidate.metrics.mae)
     )
-  })).sort((a, b) => {
-    const aMae = Number.isFinite(a.metrics.mae)
-      ? a.metrics.mae
-      : Number.POSITIVE_INFINITY;
-    const bMae = Number.isFinite(b.metrics.mae)
-      ? b.metrics.mae
-      : Number.POSITIVE_INFINITY;
-    return aMae - bMae || a.weight - b.weight;
-  });
+    .sort((a, b) => {
+      const maeDiff = a.metrics.mae - b.metrics.mae;
+      if (Math.abs(maeDiff) > 1e-12) return maeDiff;
+      const incumbentDistanceA =
+        Math.abs(a.baselineWindow - incumbent.baselineWindow) +
+        Math.abs(a.weight - incumbent.residualWeight);
+      const incumbentDistanceB =
+        Math.abs(b.baselineWindow - incumbent.baselineWindow) +
+        Math.abs(b.weight - incumbent.residualWeight);
+      if (incumbentDistanceA !== incumbentDistanceB) {
+        return incumbentDistanceA - incumbentDistanceB;
+      }
+      return a.weight - b.weight;
+    });
 
   const selected = candidates[0];
-  const validation = metrics(validationRows, (row) =>
-    anchoredPrediction(row, selected.weight)
-  );
-  const baselineValidation = metrics(validationRows, (row) =>
-    anchoredPrediction(row, 0)
+  const validation = metrics(
+    validationRows,
+    (row) =>
+      anchoredPrediction(
+        row,
+        selected.weight,
+        selected.baselineWindow
+      )
   );
   const improvement =
     Number.isFinite(validation.mae) &&
-    Number.isFinite(baselineValidation.mae)
-      ? baselineValidation.mae - validation.mae
+    Number.isFinite(incumbentValidation.mae)
+      ? incumbentValidation.mae - validation.mae
       : null;
   const minimumImprovement =
-    Number.isFinite(baselineValidation.mae)
-      ? Math.max(0.01, baselineValidation.mae * 0.0025)
+    Number.isFinite(incumbentValidation.mae)
+      ? Math.max(0.01, incumbentValidation.mae * 0.0025)
       : Number.POSITIVE_INFINITY;
+  const changed =
+    selected.baselineWindow !== incumbent.baselineWindow ||
+    Math.abs(selected.weight - incumbent.residualWeight) > 1e-12;
   const accepted =
-    selected.weight > 0 &&
+    changed &&
     Number.isFinite(improvement) &&
     improvement >= minimumImprovement;
-  const acceptedWeight = accepted ? selected.weight : 0;
+
+  const acceptedBaselineWindow = accepted
+    ? selected.baselineWindow
+    : incumbent.baselineWindow;
+  const acceptedWeight = accepted
+    ? selected.weight
+    : incumbent.residualWeight;
 
   return {
+    selectedBaselineWindow: selected.baselineWindow,
     selectedWeight: selected.weight,
+    acceptedBaselineWindow,
     acceptedWeight,
     calibrationRows: calibrationRows.length,
     validationRows: validationRows.length,
     accepted,
     reason: accepted
-      ? "Residual weight beat the rolling baseline on the later 2024 development split."
-      : "Selected residual weight failed the later 2024 development gate; keep baseline-only.",
+      ? "Challenger baseline window/residual pair beat NFL Props v2.1 on the later 2024 development split."
+      : "Challenger failed to beat NFL Props v2.1 by the required margin; keep the incumbent.",
+    incumbent,
     minimumValidationImprovement: minimumImprovement,
     calibration: selected.metrics,
     validation,
-    validationImprovementVsBaseline: improvement,
-    acceptedValidation: metrics(validationRows, (row) =>
-      anchoredPrediction(row, acceptedWeight)
+    incumbentCalibration,
+    incumbentValidation,
+    validationImprovementVsIncumbent: improvement,
+    acceptedValidation: metrics(
+      validationRows,
+      (row) =>
+        anchoredPrediction(
+          row,
+          acceptedWeight,
+          acceptedBaselineWindow
+        )
     ),
     grid: candidates.map((candidate) => ({
+      baselineWindow: candidate.baselineWindow,
       weight: candidate.weight,
       mae: candidate.metrics.mae
     }))
@@ -473,14 +562,21 @@ async function backtestSeason(season, minWeek) {
       );
       if (actual === null || prediction === null) continue;
 
-      const baseline = priorMetricMean({
-        rows: playerRows,
-        schedule: nflData.schedule,
-        targetRow: target,
-        season,
-        week,
-        field: actualField
-      });
+      const baselines = Object.fromEntries(
+        BASELINE_WINDOWS.map((limit) => [
+          limit,
+          priorMetricMean({
+            rows: playerRows,
+            schedule: nflData.schedule,
+            targetRow: target,
+            season,
+            week,
+            field: actualField,
+            limit
+          })
+        ])
+      );
+      const baseline = baselines[4];
 
       rowsByMarket[market].push({
         season,
@@ -493,7 +589,8 @@ async function backtestSeason(season, minWeek) {
         dataQuality: opportunity.dataQuality,
         prediction,
         actual,
-        baseline
+        baseline,
+        baselines
       });
     }
   }
@@ -507,7 +604,7 @@ async function backtestSeason(season, minWeek) {
   const developmentCalibration = Object.fromEntries(
     Object.entries(rowsByMarket).map(([market, rows]) => [
       market,
-      residualCalibration(rows)
+      residualCalibration(rows, market)
     ])
   );
 
@@ -569,7 +666,7 @@ async function main() {
   }));
 
   const report = {
-    version: "NFL Player Props v2 baseline-anchored development backtest",
+    version: "NFL Player Props v2.2 baseline-window challenger backtest",
     generatedAt: new Date().toISOString(),
     seasons,
     minWeek,
@@ -578,7 +675,7 @@ async function main() {
     historicalWeatherPolicy:
       "Historical finalized weather is intentionally excluded because it is not equivalent to a pregame forecast.",
     developmentPolicy:
-      "Within 2024, weeks 4-10 select a residual weight and weeks 11+ must independently confirm improvement over the rolling player baseline. 2025 is not used by this development workflow.",
+      "Within 2024, weeks 4-10 select a rolling baseline window (3/4/5/6/8 games) plus residual weight. Weeks 11+ must beat the frozen NFL Props v2.1 incumbent by the promotion margin. 2025 remains untouched.",
     marketCalibrationAvailable: false,
     promotion: {
       productionEligible: false,
@@ -606,9 +703,15 @@ async function main() {
         version: report.version,
         policy: report.developmentPolicy,
         markets: report.developmentCalibration,
-        frozenWeights: Object.fromEntries(
+        frozenParameters: Object.fromEntries(
           Object.entries(report.developmentCalibration).map(
-            ([market, item]) => [market, item.acceptedWeight]
+            ([market, item]) => [
+              market,
+              {
+                baselineWindow: item.acceptedBaselineWindow,
+                residualWeight: item.acceptedWeight
+              }
+            ]
           )
         )
       }, null, 2) + "\n"
