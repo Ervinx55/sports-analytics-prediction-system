@@ -97,12 +97,87 @@ function scheduleGame(schedule, season, week, team) {
   ) || null;
 }
 
+function zonedWallTimeToIso(
+  dateText,
+  timeText,
+  timeZone = "America/New_York"
+) {
+  const dateMatch = String(dateText || "").match(
+    /^(\d{4})-(\d{2})-(\d{2})$/
+  );
+  const timeMatch = String(timeText || "").match(
+    /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+  );
+  if (!dateMatch || !timeMatch) return null;
+
+  const desired = {
+    year: Number(dateMatch[1]),
+    month: Number(dateMatch[2]),
+    day: Number(dateMatch[3]),
+    hour: Number(timeMatch[1]),
+    minute: Number(timeMatch[2]),
+    second: Number(timeMatch[3] || 0)
+  };
+  const desiredAsUtc = Date.UTC(
+    desired.year,
+    desired.month - 1,
+    desired.day,
+    desired.hour,
+    desired.minute,
+    desired.second
+  );
+  let guess = desiredAsUtc;
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  });
+
+  for (let iteration = 0; iteration < 2; iteration += 1) {
+    const parts = Object.fromEntries(
+      formatter
+        .formatToParts(new Date(guess))
+        .filter((part) => part.type !== "literal")
+        .map((part) => [part.type, part.value])
+    );
+    const observedAsUtc = Date.UTC(
+      Number(parts.year),
+      Number(parts.month) - 1,
+      Number(parts.day),
+      Number(parts.hour),
+      Number(parts.minute),
+      Number(parts.second)
+    );
+    guess += desiredAsUtc - observedAsUtc;
+  }
+
+  return new Date(guess).toISOString();
+}
+
+function historicalKickoffIso(game) {
+  const exact = zonedWallTimeToIso(
+    game.gameday,
+    game.gametime,
+    "America/New_York"
+  );
+  if (exact) return exact;
+
+  // Conservative fallback: noon UTC on game day. This intentionally
+  // excludes uncertain same-day features rather than allowing leakage.
+  return `${game.gameday}T12:00:00Z`;
+}
+
 function eventFromGame(game) {
   const spreadLine = num(game.spread_line);
   const totalLine = num(game.total_line);
   return {
     eventID: game.game_id,
-    startsAt: `${game.gameday}T23:59:00Z`,
+    startsAt: historicalKickoffIso(game),
     matchup: {
       away: {
         name: game.away_team,
@@ -189,7 +264,17 @@ function priorMetricMean({
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
-function metrics(rows) {
+const RESIDUAL_WEIGHT_GRID = Array.from(
+  { length: 21 },
+  (_, index) => index / 20
+);
+
+function anchoredPrediction(row, weight) {
+  if (!Number.isFinite(row.baseline)) return row.prediction;
+  return row.baseline + weight * (row.prediction - row.baseline);
+}
+
+function metrics(rows, predictionFn = (row) => row.prediction) {
   if (!rows.length) {
     return {
       rows: 0,
@@ -204,14 +289,19 @@ function metrics(rows) {
   let absolute = 0;
   let squared = 0;
   let signed = 0;
+  let modelRows = 0;
   let baselineAbsolute = 0;
   let baselineRows = 0;
 
   for (const row of rows) {
-    const error = row.prediction - row.actual;
-    absolute += Math.abs(error);
-    squared += error ** 2;
-    signed += error;
+    const prediction = predictionFn(row);
+    if (Number.isFinite(prediction)) {
+      const error = prediction - row.actual;
+      absolute += Math.abs(error);
+      squared += error ** 2;
+      signed += error;
+      modelRows += 1;
+    }
 
     if (Number.isFinite(row.baseline)) {
       baselineAbsolute += Math.abs(row.baseline - row.actual);
@@ -219,19 +309,115 @@ function metrics(rows) {
     }
   }
 
-  const mae = absolute / rows.length;
+  const mae = modelRows > 0 ? absolute / modelRows : null;
   const baselineMae =
     baselineRows > 0 ? baselineAbsolute / baselineRows : null;
 
   return {
-    rows: rows.length,
+    rows: modelRows,
     mae,
-    rmse: Math.sqrt(squared / rows.length),
-    bias: signed / rows.length,
+    rmse: modelRows > 0 ? Math.sqrt(squared / modelRows) : null,
+    bias: modelRows > 0 ? signed / modelRows : null,
     baselineRows,
     baselineMae,
     maeImprovementVsRollingMean:
-      baselineMae === null ? null : baselineMae - mae
+      baselineMae === null || mae === null
+        ? null
+        : baselineMae - mae
+  };
+}
+
+function residualCalibration(rows, {
+  calibrationMaxWeek = 10,
+  validationMinWeek = 11
+} = {}) {
+  const eligible = rows.filter(
+    (row) =>
+      Number.isFinite(row.actual) &&
+      Number.isFinite(row.prediction) &&
+      Number.isFinite(row.baseline)
+  );
+  const calibrationRows = eligible.filter(
+    (row) => Number(row.week) <= calibrationMaxWeek
+  );
+  const validationRows = eligible.filter(
+    (row) => Number(row.week) >= validationMinWeek
+  );
+
+  if (calibrationRows.length < 25 || validationRows.length < 25) {
+    return {
+      selectedWeight: 0,
+      acceptedWeight: 0,
+      calibrationRows: calibrationRows.length,
+      validationRows: validationRows.length,
+      accepted: false,
+      reason: "Insufficient split-development rows.",
+      calibration: metrics(calibrationRows, (row) =>
+        anchoredPrediction(row, 0)
+      ),
+      validation: metrics(validationRows, (row) =>
+        anchoredPrediction(row, 0)
+      )
+    };
+  }
+
+  const candidates = RESIDUAL_WEIGHT_GRID.map((weight) => ({
+    weight,
+    metrics: metrics(calibrationRows, (row) =>
+      anchoredPrediction(row, weight)
+    )
+  })).sort((a, b) => {
+    const aMae = Number.isFinite(a.metrics.mae)
+      ? a.metrics.mae
+      : Number.POSITIVE_INFINITY;
+    const bMae = Number.isFinite(b.metrics.mae)
+      ? b.metrics.mae
+      : Number.POSITIVE_INFINITY;
+    return aMae - bMae || a.weight - b.weight;
+  });
+
+  const selected = candidates[0];
+  const validation = metrics(validationRows, (row) =>
+    anchoredPrediction(row, selected.weight)
+  );
+  const baselineValidation = metrics(validationRows, (row) =>
+    anchoredPrediction(row, 0)
+  );
+  const improvement =
+    Number.isFinite(validation.mae) &&
+    Number.isFinite(baselineValidation.mae)
+      ? baselineValidation.mae - validation.mae
+      : null;
+  const minimumImprovement =
+    Number.isFinite(baselineValidation.mae)
+      ? Math.max(0.01, baselineValidation.mae * 0.0025)
+      : Number.POSITIVE_INFINITY;
+  const accepted =
+    selected.weight > 0 &&
+    Number.isFinite(improvement) &&
+    improvement >= minimumImprovement;
+  const acceptedWeight = accepted ? selected.weight : 0;
+
+  return {
+    selectedWeight: selected.weight,
+    acceptedWeight,
+    calibrationRows: calibrationRows.length,
+    validationRows: validationRows.length,
+    accepted,
+    reason: accepted
+      ? "Residual weight beat the rolling baseline on the later 2024 development split."
+      : "Selected residual weight failed the later 2024 development gate; keep baseline-only.",
+    minimumValidationImprovement: minimumImprovement,
+    calibration: selected.metrics,
+    validation,
+    validationImprovementVsBaseline: improvement,
+    acceptedValidation: metrics(validationRows, (row) =>
+      anchoredPrediction(row, acceptedWeight)
+    ),
+    grid: candidates.map((candidate) => ({
+      weight: candidate.weight,
+      mae: candidate.metrics.mae
+    }))
   };
 }
 
@@ -356,7 +542,10 @@ async function backtestSeason(season, minWeek) {
 
     for (const [market, actualField] of targetMarkets(target)) {
       const actual = num(target[actualField]);
-      const prediction = num(opportunity.projections?.[market]?.mean);
+      const projection = opportunity.projections?.[market];
+      const prediction = num(
+        projection?.opportunityMean ?? projection?.mean
+      );
       if (actual === null || prediction === null) continue;
 
       const baseline = priorMetricMean({
@@ -390,6 +579,12 @@ async function backtestSeason(season, minWeek) {
       metrics(rows)
     ])
   );
+  const developmentCalibration = Object.fromEntries(
+    Object.entries(rowsByMarket).map(([market, rows]) => [
+      market,
+      residualCalibration(rows)
+    ])
+  );
 
   return {
     season,
@@ -398,6 +593,7 @@ async function backtestSeason(season, minWeek) {
     skippedNoGame,
     qualityCounts,
     marketMetrics,
+    developmentCalibration,
     rowsByMarket
   };
 }
@@ -443,18 +639,21 @@ async function main() {
     targetPlayers: season.targetPlayers,
     skippedNoGame: season.skippedNoGame,
     qualityCounts: season.qualityCounts,
-    marketMetrics: season.marketMetrics
+    marketMetrics: season.marketMetrics,
+    developmentCalibration: season.developmentCalibration
   }));
 
   const report = {
-    version: "NFL Player Opportunity Engine v1.1 chronological backtest",
+    version: "NFL Player Props v2 baseline-anchored development backtest",
     generatedAt: new Date().toISOString(),
     seasons,
     minWeek,
     leakagePolicy:
-      "Target-game statistics are unavailable until the following day. Snap counts, NGS, and depth-chart rows are filtered by their live-availability timestamps before each historical kickoff.",
+      "Target-game statistics are unavailable until the following day. Snap counts, NGS, and depth-chart rows are filtered by their live-availability timestamps before the actual scheduled kickoff (nflverse gametime, Eastern); missing kickoff times use a conservative noon-UTC cutoff.",
     historicalWeatherPolicy:
       "Historical finalized weather is intentionally excluded because it is not equivalent to a pregame forecast.",
+    developmentPolicy:
+      "Within 2024, weeks 4-10 select a residual weight and weeks 11+ must independently confirm improvement over the rolling player baseline. 2025 is not used by this development workflow.",
     marketCalibrationAvailable: false,
     promotion: {
       productionEligible: false,
@@ -463,6 +662,10 @@ async function main() {
         "Historical sharp player-prop line/price snapshots have not yet been ingested. This report validates raw projection error only and cannot authorize production betting weight."
     },
     aggregate: aggregateMetrics,
+    developmentCalibration:
+      seasonReports.length === 1 && seasonReports[0].season === 2024
+        ? seasonReports[0].developmentCalibration
+        : null,
     seasonsDetail: compactSeasons
   };
 
@@ -471,6 +674,21 @@ async function main() {
     path.join(outputDir, "report.json"),
     JSON.stringify(report, null, 2) + "\n"
   );
+  if (report.developmentCalibration) {
+    fs.writeFileSync(
+      path.join(outputDir, "v2-calibration.json"),
+      JSON.stringify({
+        version: report.version,
+        policy: report.developmentPolicy,
+        markets: report.developmentCalibration,
+        frozenWeights: Object.fromEntries(
+          Object.entries(report.developmentCalibration).map(
+            ([market, item]) => [market, item.acceptedWeight]
+          )
+        )
+      }, null, 2) + "\n"
+    );
+  }
 
   const lines = [
     "# NFL Player Props Walk-Forward Backtest",
@@ -506,6 +724,7 @@ async function main() {
     "NFL_PLAYER_PROPS_BACKTEST_SUMMARY=" +
       JSON.stringify({
         aggregate: aggregateMetrics,
+        developmentCalibration: report.developmentCalibration,
         seasons: compactSeasons,
         promotion: report.promotion
       })
