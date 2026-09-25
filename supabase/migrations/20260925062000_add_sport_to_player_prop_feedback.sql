@@ -14,7 +14,6 @@ create or replace view public.player_prop_clv_latest
 with (security_invoker = true) as
 select
   c.observation_id,
-  c.sport,
   c.refreshed_at,
   c.finalized_at,
   c.finalized,
@@ -54,7 +53,8 @@ select
   c.same_book_price_clv_pp,
   c.best_market_price_clv_pp,
   c.clv_classification,
-  c.raw
+  c.raw,
+  c.sport
 from public.player_prop_clv c
 join public.player_prop_latest p
   on p.id = c.observation_id;
