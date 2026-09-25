@@ -1,6 +1,10 @@
 import {
   resolveOfficialAvailability
 } from "./nba-injury-report.js";
+import {
+  applyNbaPropGameContext,
+  buildNbaPropGameContext
+} from "./nba-prop-context.js";
 
 const BDL_STATS_URL = "https://api.balldontlie.io/v1/stats";
 const BDL_INJURIES_URL =
@@ -434,11 +438,17 @@ function normalCdf(x, mean, sd) {
 function independentProbability(
   projection,
   side,
-  line
+  line,
+  meanOverride = null
 ) {
+  const mean =
+    Number.isFinite(meanOverride)
+      ? meanOverride
+      : projection?.mean;
+
   if (
     !projection?.available ||
-    !Number.isFinite(projection.mean) ||
+    !Number.isFinite(mean) ||
     !Number.isFinite(projection.sd) ||
     !Number.isFinite(line)
   ) {
@@ -449,7 +459,7 @@ function independentProbability(
     1 -
     normalCdf(
       line,
-      projection.mean,
+      mean,
       projection.sd
     );
   return side === "over" ? over : 1 - over;
@@ -749,7 +759,14 @@ function gradeProp({
         side === "over"
           ? pair.underOdds
           : pair.overOdds;
-      const independent =
+      const rawIndependent =
+        independentProbability(
+          projection,
+          side,
+          pair.line,
+          projection?.rawMean
+        );
+      const shadowIndependent =
         independentProbability(
           projection,
           side,
@@ -761,13 +778,13 @@ function gradeProp({
           opponentOdds
         );
       const edge =
-        Number.isFinite(independent) &&
+        Number.isFinite(shadowIndependent) &&
         Number.isFinite(marketFair)
-          ? independent - marketFair
+          ? shadowIndependent - marketFair
           : null;
       const ev =
-        Number.isFinite(independent)
-          ? expectedValue(independent, odds)
+        Number.isFinite(shadowIndependent)
+          ? expectedValue(shadowIndependent, odds)
           : null;
       const dataQuality = qualityScore({
         projection,
@@ -814,12 +831,12 @@ function gradeProp({
             ? Number(marketFair.toFixed(6))
             : null,
         rawIndependentProbability:
-          Number.isFinite(independent)
-            ? Number(independent.toFixed(6))
+          Number.isFinite(rawIndependent)
+            ? Number(rawIndependent.toFixed(6))
             : null,
         shadowModelProbability:
-          Number.isFinite(independent)
-            ? Number(independent.toFixed(6))
+          Number.isFinite(shadowIndependent)
+            ? Number(shadowIndependent.toFixed(6))
             : marketFair,
         edgePct:
           edge === null
@@ -829,8 +846,18 @@ function gradeProp({
           ev === null
             ? null
             : Number((ev * 100).toFixed(3)),
+        rawProjectionMean:
+          projection?.rawMean ?? projection?.mean ?? null,
         projectionMean:
           projection?.mean ?? null,
+        contextChallengerMean:
+          projection?.contextChallengerMean ?? null,
+        contextSignal:
+          projection?.contextSignal ?? null,
+        contextShadowWeight:
+          projection?.contextShadowWeight ?? 0,
+        gameContext:
+          projection?.gameContext ?? null,
         projectionSd:
           projection?.sd ?? null,
         projectedMinutes:
@@ -1104,6 +1131,9 @@ function projectPropEvent({
   statsRows = [],
   injuries = [],
   officialReport = null,
+  boardEvent = null,
+  games = [],
+  season = null,
   now = new Date()
 }) {
   const candidates = [];
@@ -1121,13 +1151,28 @@ function projectPropEvent({
       prop,
       event.startsAt
     );
-    const projection =
+    const baseProjection =
       projectionFromHistory(
         history,
         prop.statID,
         {
           beforeAt: event.startsAt
         }
+      );
+    const gameContext =
+      buildNbaPropGameContext({
+        propEvent: event,
+        boardEvent,
+        games,
+        season,
+        playerTeamName:
+          baseProjection?.teamName || null
+      });
+    const projection =
+      applyNbaPropGameContext(
+        baseProjection,
+        prop.statID,
+        gameContext
       );
     const secondary = injuryForPlayer(
       injuries,
