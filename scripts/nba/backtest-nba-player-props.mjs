@@ -94,8 +94,14 @@ function buildHistoricalGames(rows) {
   return [...games.values()];
 }
 
-function targetEvent(target) {
-  const game = target?.game || {};
+function targetEvent(
+  target,
+  gameById = new Map()
+) {
+  const rawGame = target?.game || {};
+  const game =
+    gameById.get(rawGame?.id) ||
+    rawGame;
   const home = game?.home_team;
   const away = game?.visitor_team;
 
@@ -248,6 +254,12 @@ export function backtestPlayerStats(
 
   const historicalGames =
     buildHistoricalGames(seasonRows);
+  const historicalGameById =
+    new Map(
+      historicalGames.map(
+        (game) => [game.id, game]
+      )
+    );
 
   const byPlayer = new Map();
   for (const row of seasonRows) {
@@ -285,7 +297,10 @@ export function backtestPlayerStats(
           );
 
           const historicalEvent =
-            targetEvent(target);
+            targetEvent(
+              target,
+              historicalGameById
+            );
           const context =
             historicalEvent
               ? buildNbaPropGameContext({
