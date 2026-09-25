@@ -34,11 +34,13 @@ Deno.serve(async(req)=>{
       {data:quotes,error:qe}
     ]=await Promise.all([
       supabase.from("player_prop_clv").select("*")
+        .eq("sport","MLB")
         .gte("starts_at",since)
         .order("starts_at",{ascending:false})
         .limit(5000),
       supabase.from("player_prop_market_quotes")
         .select("observed_at,book,event_id,player_id,stat_id,side,line,odds")
+        .eq("sport","MLB")
         .gte("observed_at",quoteSince)
         .order("observed_at",{ascending:false})
         .limit(10000)
