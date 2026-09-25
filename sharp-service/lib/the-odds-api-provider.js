@@ -40,6 +40,14 @@ const MLB_PROP_MARKETS = Object.freeze({
   batter_total_bases: "batting_totalBases"
 });
 
+const NFL_PROP_MARKETS = Object.freeze({
+  player_pass_yds: "passing_yards",
+  player_pass_tds: "passing_touchdowns",
+  player_rush_yds: "rushing_yards",
+  player_receptions: "receiving_receptions",
+  player_reception_yds: "receiving_yards"
+});
+
 function num(value) {
   if (value === null || value === undefined || value === "") return null;
   const parsed = Number(String(value).replace("+", ""));
@@ -682,7 +690,11 @@ function propSideContainer({
   return sideContainer(side, market, books);
 }
 
-function normalizePropEvent(event, books) {
+function normalizePropEvent(event, books, {
+  league = "MLB",
+  marketMap = MLB_PROP_MARKETS,
+  sport = "BASEBALL"
+} = {}) {
   const groups = new Map();
   const wantedBooks = new Set(
     requestedProviderBooks(books)
@@ -698,7 +710,7 @@ function normalizePropEvent(event, books) {
 
     for (const market of bookmaker?.markets || []) {
       const statID =
-        MLB_PROP_MARKETS[String(market?.key || "")];
+        marketMap[String(market?.key || "")];
       if (!statID) continue;
 
       for (const outcome of market?.outcomes || []) {
@@ -761,8 +773,8 @@ function normalizePropEvent(event, books) {
     eventID: `theodds:${event.id}`,
     providerEventID: event.id,
     provider: "The Odds API",
-    sport: "BASEBALL",
-    league: "MLB",
+    sport,
+    league: String(league).toUpperCase(),
     startsAt: event?.commence_time || null,
     status: {
       started:
@@ -789,8 +801,11 @@ function normalizePropEvent(event, books) {
   };
 }
 
-export async function fetchTheOddsApiMlbProps({
+async function fetchTheOddsApiProps({
   apiKey,
+  league,
+  marketMap,
+  sport,
   books = [],
   startsAfter = null,
   startsBefore = null,
@@ -803,7 +818,13 @@ export async function fetchTheOddsApiMlbProps({
     throw error;
   }
 
-  const sportKey = SPORT_KEYS.MLB;
+  const sportKey = SPORT_KEYS[String(league).toUpperCase()];
+  if (!sportKey) {
+    const error = new Error(`Unsupported The Odds API league: ${league}`);
+    error.status = 400;
+    throw error;
+  }
+
   const eventsResult = await fetchEvents({
     apiKey,
     sportKey,
@@ -844,7 +865,7 @@ export async function fetchTheOddsApiMlbProps({
     .slice(0, eventCap);
 
   const providerBooks = requestedProviderBooks(books);
-  const marketKeys = Object.keys(MLB_PROP_MARKETS);
+  const marketKeys = Object.keys(marketMap);
   const normalizedEvents = [];
   const usageRows = [];
 
@@ -877,7 +898,12 @@ export async function fetchTheOddsApiMlbProps({
     usageRows.push(result.usage || null);
     const normalized = normalizePropEvent(
       result.payload,
-      books
+      books,
+      {
+        league,
+        marketMap,
+        sport
+      }
     );
     if (normalized.props.length) {
       normalizedEvents.push(normalized);
@@ -886,6 +912,7 @@ export async function fetchTheOddsApiMlbProps({
 
   return {
     source: "The Odds API",
+    league,
     events: normalizedEvents,
     fetchedAt: new Date().toISOString(),
     eventCap,
@@ -898,6 +925,24 @@ export async function fetchTheOddsApiMlbProps({
       servedStale: false
     }
   };
+}
+
+export async function fetchTheOddsApiMlbProps(options) {
+  return fetchTheOddsApiProps({
+    ...options,
+    league: "MLB",
+    marketMap: MLB_PROP_MARKETS,
+    sport: "BASEBALL"
+  });
+}
+
+export async function fetchTheOddsApiNflProps(options) {
+  return fetchTheOddsApiProps({
+    ...options,
+    league: "NFL",
+    marketMap: NFL_PROP_MARKETS,
+    sport: "FOOTBALL"
+  });
 }
 
 export function getTheOddsApiUsageSnapshot() {

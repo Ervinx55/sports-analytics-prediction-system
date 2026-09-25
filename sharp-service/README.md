@@ -98,7 +98,7 @@ team model is retained for projected scores, diagnostics, and future challenger
 work rather than being allowed to degrade current moneyline/spread probabilities.
 
 
-### NFL player props v1.1
+### NFL player props v2.1
 
 `/api/nflprops` is a shadow-only NFL player-prop challenger covering QB
 passing yards/touchdowns, RB rushing yards, and WR/TE receptions/receiving
@@ -114,6 +114,19 @@ counts, Next Gen Stats, timestamped depth charts, team/opponent context, game
 market environment, and forecast weather when available. Participation/route
 data is not required live, and unavailable injury data never implies a player
 is healthy.
+
+
+NFL player-prop odds use the same resilient provider order as the Edge Lab
+board: SportsGameOdds -> SharpAPI -> The Odds API. The fallback adapters
+normalize passing yards, passing touchdowns, rushing yards, receptions, and
+receiving yards into the same exact book/line contract before grading. The Odds
+API remains tertiary and respects the configured credit reserve/event cap.
+
+The 2024 split-development calibration accepts a 0.25 opportunity residual for
+passing yards and 0.90 for receiving yards. Passing touchdowns, rushing yards,
+and receptions remain baseline-only. These projection weights do not authorize
+production betting influence; production weight remains zero pending historical
+sharp prop-price validation.
 
 Every historical feature passes through a point-in-time availability guard.
 The chronological player-prop workflow replays 2024-2025 for projection-error

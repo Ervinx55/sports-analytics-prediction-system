@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   fetchTheOddsApiBoardLeague,
   fetchTheOddsApiMlbProps,
+  fetchTheOddsApiNflProps,
   getTheOddsApiUsageSnapshot,
   normalizeTheOddsApiBoard
 } from "../../sharp-service/lib/the-odds-api-provider.js";
@@ -290,6 +291,137 @@ test("The Odds API MLB props use free events discovery then event odds", async (
     assert.equal(hits.over.books.draftkings.line, 0.5);
     assert.equal(totalBases.over.books.draftkings.line, 1.5);
     assert.equal(result.usage.remaining, 494);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+
+test("The Odds API NFL props request and normalize v2 markets", async () => {
+  const originalFetch = globalThis.fetch;
+  const seen = [];
+
+  globalThis.fetch = async (url) => {
+    const raw = String(url);
+    seen.push(raw);
+
+    if (/americanfootball_nfl\/events\?/.test(raw)) {
+      return {
+        ok: true,
+        status: 200,
+        headers: new Headers({
+          "x-requests-remaining": "490",
+          "x-requests-used": "10",
+          "x-requests-last": "0"
+        }),
+        async text() {
+          return JSON.stringify([{
+            id: "evt-nfl-1",
+            sport_key: "americanfootball_nfl",
+            sport_title: "NFL",
+            commence_time: "2026-09-27T20:20:00Z",
+            home_team: "Buffalo Bills",
+            away_team: "Kansas City Chiefs"
+          }]);
+        }
+      };
+    }
+
+    return {
+      ok: true,
+      status: 200,
+      headers: new Headers({
+        "x-requests-remaining": "485",
+        "x-requests-used": "15",
+        "x-requests-last": "5"
+      }),
+      async text() {
+        return JSON.stringify({
+          id: "evt-nfl-1",
+          sport_key: "americanfootball_nfl",
+          sport_title: "NFL",
+          commence_time: "2026-09-27T20:20:00Z",
+          home_team: "Buffalo Bills",
+          away_team: "Kansas City Chiefs",
+          bookmakers: [{
+            key: "draftkings",
+            title: "DraftKings",
+            markets: [
+              {
+                key: "player_pass_yds",
+                outcomes: [
+                  { name: "Over", description: "Patrick Mahomes", price: -110, point: 279.5 },
+                  { name: "Under", description: "Patrick Mahomes", price: -110, point: 279.5 }
+                ]
+              },
+              {
+                key: "player_pass_tds",
+                outcomes: [
+                  { name: "Over", description: "Patrick Mahomes", price: 115, point: 2.5 },
+                  { name: "Under", description: "Patrick Mahomes", price: -145, point: 2.5 }
+                ]
+              },
+              {
+                key: "player_rush_yds",
+                outcomes: [
+                  { name: "Over", description: "Isiah Pacheco", price: -115, point: 67.5 }
+                ]
+              },
+              {
+                key: "player_receptions",
+                outcomes: [
+                  { name: "Over", description: "Travis Kelce", price: -120, point: 5.5 }
+                ]
+              },
+              {
+                key: "player_reception_yds",
+                outcomes: [
+                  { name: "Over", description: "Travis Kelce", price: -110, point: 64.5 }
+                ]
+              }
+            ]
+          }]
+        });
+      }
+    };
+  };
+
+  try {
+    const result = await fetchTheOddsApiNflProps({
+      apiKey: "test-key-nfl",
+      books: ["draftkings"],
+      startsAfter: "2026-09-27T12:00:00Z",
+      startsBefore: "2026-09-28T06:00:00Z"
+    });
+
+    assert.equal(result.source, "The Odds API");
+    assert.equal(result.league, "NFL");
+    assert.equal(result.events.length, 1);
+    assert.match(seen[0], /americanfootball_nfl\/events\?/);
+    assert.match(
+      seen[1],
+      /markets=player_pass_yds%2Cplayer_pass_tds%2Cplayer_rush_yds%2Cplayer_receptions%2Cplayer_reception_yds/
+    );
+
+    const ids = new Set(
+      result.events[0].props.map((prop) => prop.statID)
+    );
+    assert.deepEqual(
+      [...ids].sort(),
+      [
+        "passing_touchdowns",
+        "passing_yards",
+        "receiving_receptions",
+        "receiving_yards",
+        "rushing_yards"
+      ]
+    );
+    assert.equal(
+      result.events[0].props.find(
+        (prop) => prop.statID === "passing_yards"
+      ).over.books.draftkings.line,
+      279.5
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
