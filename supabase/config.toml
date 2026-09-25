@@ -45,6 +45,9 @@ verify_jwt = true
 [functions.grade-player-props]
 verify_jwt = true
 
+[functions.grade-nba-player-props]
+verify_jwt = true
+
 [functions.player-prop-card]
 verify_jwt = false
 
@@ -126,10 +129,19 @@ verify_jwt = false
 [functions.refresh-player-prop-clv]
 verify_jwt = true
 
+[functions.refresh-nba-player-prop-clv]
+verify_jwt = true
+
 [functions.player-prop-clv-status]
 verify_jwt = false
 
 [functions.player-prop-clv-calibration]
+verify_jwt = false
+
+[functions.nba-player-prop-calibration]
+verify_jwt = false
+
+[functions.nba-player-prop-feedback-status]
 verify_jwt = false
 
 [functions.parlay-correlation-status]
