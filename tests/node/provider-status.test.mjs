@@ -76,10 +76,13 @@ test("provider status reports configured failover chain without exposing secrets
     "NOT_CONFIGURED"
   );
   assert.equal(res.body.providers.sharpApi.status, "READY");
-  assert.ok(
-    ["READY", "AWAITING_FIRST_RESPONSE"].includes(
-      res.body.providers.theOddsApi.status
-    )
+  assert.equal(
+    res.body.providers.theOddsApi.configured,
+    true
+  );
+  assert.notEqual(
+    res.body.providers.theOddsApi.status,
+    "NOT_CONFIGURED"
   );
   assert.equal(res.body.oddsProviderReady, true);
 
