@@ -10,6 +10,9 @@
     },
     "api/nflmodel.js": {
       "maxDuration": 30
+    },
+    "api/nbamodel.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
