@@ -262,10 +262,10 @@
     },
     {
       "slug": "grade-nba-player-props",
-      "version": 1,
+      "version": 2,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "b2c7c4e5497478e6055bca66d709edcd78f805beb772e14b4bca7e0ee8306ef6",
+      "bundle_sha256": "201cc499907319634ff44827172b8c6d55507de0a53083aba98eae61d7640630",
       "entrypoint": "index.ts",
       "files": [
         {
@@ -276,7 +276,7 @@
         {
           "path": "supabase/functions/grade-nba-player-props/nba-player-results.js",
           "name": "nba-player-results.js",
-          "sha256": "78645f3538276e7e5e05507e68b0f1fc9817c76514d53d7f6152ec52befd1f4d"
+          "sha256": "3cf5ca49b484b07d0f5d59fb1d77b3970d952532e174feb22b1f9cbcdc879212"
         }
       ],
       "deployed_at": "2026-09-25"
@@ -952,7 +952,7 @@
       "recovered_at": "2026-09-23"
     }
   ],
-  "final_verified_at": "2026-09-25T06:38:12.270Z",
+  "final_verified_at": "2026-09-25T06:45:49.312Z",
   "authority_verification": {
     "status": "MATCH",
     "active_functions": 58,
