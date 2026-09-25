@@ -977,10 +977,6 @@ function qualityScore({
       0.82 +
       0.18 * projection.roleStability;
   }
-  if (projection.roleChangeDetected) {
-    score = Math.min(score, 0.69);
-  }
-
   if (injury?.officialReportParsed) {
     score += 0.08;
   } else {
@@ -988,6 +984,9 @@ function qualityScore({
   }
   if (injury?.availabilityBlocked) {
     score = Math.min(score, 0.35);
+  }
+  if (projection.roleChangeDetected) {
+    score = Math.min(score, 0.69);
   }
 
   return clamp(score, 0, 1);
