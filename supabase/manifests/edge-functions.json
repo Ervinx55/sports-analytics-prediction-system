@@ -18,38 +18,6 @@
       "recovered_at": "2026-09-23"
     },
     {
-      "slug": "market-movement",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "9c0563364eea722917ae7f4989ab080a1b16815ac0f0434895e836be24ae8b7f",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/market-movement/index.ts",
-          "name": "index.ts",
-          "sha256": "a2bfe754dbe0abebfb3f89b5f2d2c5125ecfc8353676c18917a64c67c1c46546"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "market-alerts",
-      "version": 3,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "7162cb4120241829acb4076f7a4f872c8194ad66e45b24a5d4580e7b1227ff66",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/market-alerts/index.ts",
-          "name": "index.ts",
-          "sha256": "8e74b6763e41fc6a56390a5c7c66e66a382c4ee6a3de519eac6d2bcfa718c1f1"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
       "slug": "capture-model-audit",
       "version": 5,
       "status": "ACTIVE",
@@ -66,49 +34,84 @@
       "recovered_at": "2026-09-23"
     },
     {
-      "slug": "grade-model-audit",
+      "slug": "capture-nba-player-props",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "518b81410782c1501fcd2a7cc01c8f74830125f9c7b727957ac536ace4327418",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-nba-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "3236a83099a1ce8f3f26e953e1453bf0d01224f3ba83191de5c3670252b9f3be"
+        }
+      ],
+      "recovered_at": "2026-09-25",
+      "deployed_at": "2026-09-25"
+    },
+    {
+      "slug": "capture-nfl-player-props",
       "version": 1,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "609af7add2c480072833194554588898bc44ee18b17cb0147bc53d8e3c87499a",
+      "bundle_sha256": "0e9a1e6c2ce403d7403cad52edf0d0ab0669453928ff8d4841e9fe33930c935e",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/grade-model-audit/index.ts",
+          "path": "supabase/functions/capture-nfl-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "9668bae81531bfd1e1af4a423e9207b843396a58a56d79a05629869ced0a2264"
+          "sha256": "3661c995db9304b0796b6ae9788d2d7117f0027184e5d28c79a5229f55f86c2e"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-25",
+      "deployed_at": "2026-09-25"
     },
     {
-      "slug": "model-calibration",
-      "version": 1,
+      "slug": "capture-pitchmix-features",
+      "version": 2,
       "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "8434085ceac4f46ad308d8caaca833d2595526dc195d1e51ee6e32ef8594029c",
+      "verify_jwt": true,
+      "bundle_sha256": "ce3481934781248c5bc4655ad51cf0f2186b8a05b3aa594f20c6fb86e132e81c",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/model-calibration/index.ts",
+          "path": "supabase/functions/capture-pitchmix-features/index.ts",
           "name": "index.ts",
-          "sha256": "6314a7b27f86bd2dbeee8b38f872b290b1cc87667b0f1b38e1391e7a0ee0b291"
+          "sha256": "bb792e3805337970a559df2b535421bae651546369ff09cfa57f4d74bad888e4"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "deployed_at": "2026-09-24"
     },
     {
-      "slug": "latest-model-audit",
-      "version": 1,
+      "slug": "capture-player-props",
+      "version": 3,
       "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "83591df79172b7c9a6a412507c56fd4250e0152d5b07d3439a75dae12d54eb5f",
+      "verify_jwt": true,
+      "bundle_sha256": "98ecbaf60ca38de3b20b91dce7cb476491ee59a45c7788bed857ba05dec01ba5",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/latest-model-audit/index.ts",
+          "path": "supabase/functions/capture-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "a558549150da8b5395a219c34c72628f969363834541d45a5fc5eb22a8ec5012"
+          "sha256": "765d5a182a7ed7cbf69f5e5f9efddf60653de74b829e041ae2bf252818649ec0"
+        }
+      ],
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "capture-sharp-clv",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "2e22108cf4b8b723cbb5f0b85e0f930f8fe9ffe84f14eadd0a4921e07a869625",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-sharp-clv/index.ts",
+          "name": "index.ts",
+          "sha256": "32874d82b50232d0a22153a188a6f37c0a3e2f03e881d0e13b30af9b8f881787"
         }
       ],
       "recovered_at": "2026-09-23"
@@ -130,17 +133,246 @@
       "recovered_at": "2026-09-23"
     },
     {
-      "slug": "sharp-gate-history",
-      "version": 3,
+      "slug": "decision-fusion-calibration",
+      "version": 1,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "89b41728935e850523d2b168f60ea38f7f68e9816c201f528d83e5e7ff95dec6",
+      "bundle_sha256": "5b752aa4698726b6d11ba3e2737c6cf88239f07deee0efc7e56b90360f47f306",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/sharp-gate-history/index.ts",
+          "path": "supabase/functions/decision-fusion-calibration/index.ts",
           "name": "index.ts",
-          "sha256": "305da46c2031b2b3da2c0343d68c57f8ecf38ac98d581707bfc4d18cc8b278fe"
+          "sha256": "c0e9293c56427e1cfae8a312db74aa5bce50b26f2d1a6bf9c8e374030e11df67"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-fusion-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "deec29ad9e087e52202d7a6baad413afbcb2eeb74779194e46adace56b0f4d03",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-fusion-status/index.ts",
+          "name": "index.ts",
+          "sha256": "2fe9f806267df8acb590bd8ecd6145727f7ab53c72b6d7d65c73b0c58912e294"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-results",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "d19efc4c15fe80db496c0f1e975dab5acd22fb7e048d9c1f2019f16c05f8d108",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-results/index.ts",
+          "name": "index.ts",
+          "sha256": "9c84475e9bad038d7208f6c58aa6597ddd9603be84bcb6a75c4b344bfc7aa961"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-timing-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "231191bcc9a4586aef396c9cee1da2e24d88122b924e31b957b10ba14d87e70a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-timing-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "2d59972bbf1c03c76d82a245b7b0ec0a9a7c21dd8acba678b54b10187f688b2f"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "decision-timing-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "c47a91582a9566a8d7623ea44fe5b1aeecc7c31ec8daf46b2c60f179c7e0d4c7",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/decision-timing-status/index.ts",
+          "name": "index.ts",
+          "sha256": "075cbda5252e4d8a97f35adbb440030a834b10f2b0906af19451b777874c5d0b"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "evaluate-sharp-gate",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "3a97ded1ebaec2220283de84b5b7078b0ac744f2f9e0245b2d3bfad0e2f81537",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/evaluate-sharp-gate/index.ts",
+          "name": "index.ts",
+          "sha256": "ca4e98772128ebe67d4c60751bcac0f8aeaec83c5418615739ca89f7f54591d1"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "github-ml-training-export",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "0314a48631fe367133cc69ad2bd23a97fa185f7c5d6e388283bfda81dbcf9d24",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/github-ml-training-export/index.ts",
+          "name": "index.ts",
+          "sha256": "a4d7a2e5a2f1054672cb8afbd6724cb10f5ee66af7c26cb4da50c3c55af4399d"
+        }
+      ],
+      "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "grade-model-audit",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "609af7add2c480072833194554588898bc44ee18b17cb0147bc53d8e3c87499a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-model-audit/index.ts",
+          "name": "index.ts",
+          "sha256": "9668bae81531bfd1e1af4a423e9207b843396a58a56d79a05629869ced0a2264"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "grade-nba-player-props",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "b2c7c4e5497478e6055bca66d709edcd78f805beb772e14b4bca7e0ee8306ef6",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-nba-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "11ed676a36561c4e3a6d098e98674a54fd619807a1ba23e517eda1657700e174"
+        },
+        {
+          "path": "supabase/functions/grade-nba-player-props/nba-player-results.js",
+          "name": "nba-player-results.js",
+          "sha256": "78645f3538276e7e5e05507e68b0f1fc9817c76514d53d7f6152ec52befd1f4d"
+        }
+      ],
+      "deployed_at": "2026-09-25"
+    },
+    {
+      "slug": "grade-player-props",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "0659019156b720156c7954106eb912cee5688151d7460af33eb05069aec3977e",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-player-props/index.ts",
+          "name": "index.ts",
+          "sha256": "d83901207fe2a7a9527478c5dd982c09b18053f5d35d1e635ef5cfdf259c9e13"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "grade-team-markets",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "a86195334bc0f54b76afaca08e2a0aa01015d7531402ebf93a1c3a5f03e5c076",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/grade-team-markets/index.ts",
+          "name": "index.ts",
+          "sha256": "520fc208b7bd41c482c163d014b3a56a9bae3834cfd890c429c4206cac73ef35"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "ingest-sharp-board",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "d00d70401c540252484213cbaa442f6d55550b386474cd52d603cbb4b81953fc",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/ingest-sharp-board/index.ts",
+          "name": "index.ts",
+          "sha256": "b4644cd801bb56809f67c1c41e075e6c4b76405ac22abcf4af47feba24c82b8b"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "latest-model-audit",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "83591df79172b7c9a6a412507c56fd4250e0152d5b07d3439a75dae12d54eb5f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/latest-model-audit/index.ts",
+          "name": "index.ts",
+          "sha256": "a558549150da8b5395a219c34c72628f969363834541d45a5fc5eb22a8ec5012"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-alerts",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "7162cb4120241829acb4076f7a4f872c8194ad66e45b24a5d4580e7b1227ff66",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-alerts/index.ts",
+          "name": "index.ts",
+          "sha256": "8e74b6763e41fc6a56390a5c7c66e66a382c4ee6a3de519eac6d2bcfa718c1f1"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-calibration",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b0195704af2ee7fb553e27f69d38cbcba6b62e531f02e38ce906622df1f908b9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "c9fd91f82a04f4278d5f0bd12ff346813b21b4eff8a8350aa6a16733c519d518"
         }
       ],
       "recovered_at": "2026-09-23"
@@ -163,34 +395,246 @@
       "deployed_at": "2026-09-24"
     },
     {
-      "slug": "capture-player-props",
-      "version": 3,
+      "slug": "market-movement",
+      "version": 1,
       "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "98ecbaf60ca38de3b20b91dce7cb476491ee59a45c7788bed857ba05dec01ba5",
+      "verify_jwt": false,
+      "bundle_sha256": "9c0563364eea722917ae7f4989ab080a1b16815ac0f0434895e836be24ae8b7f",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/capture-player-props/index.ts",
+          "path": "supabase/functions/market-movement/index.ts",
           "name": "index.ts",
-          "sha256": "765d5a182a7ed7cbf69f5e5f9efddf60653de74b829e041ae2bf252818649ec0"
+          "sha256": "a2bfe754dbe0abebfb3f89b5f2d2c5125ecfc8353676c18917a64c67c1c46546"
         }
       ],
-      "recovered_at": "2026-09-23",
-      "deployed_at": "2026-09-24"
+      "recovered_at": "2026-09-23"
     },
     {
-      "slug": "grade-player-props",
+      "slug": "market-policy-calibration",
       "version": 2,
       "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "0659019156b720156c7954106eb912cee5688151d7460af33eb05069aec3977e",
+      "verify_jwt": false,
+      "bundle_sha256": "b08c52885810eab842a121c4fde934ba9fb13150d8db2152ee030e267aa9a322",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/grade-player-props/index.ts",
+          "path": "supabase/functions/market-policy-calibration/index.ts",
           "name": "index.ts",
-          "sha256": "d83901207fe2a7a9527478c5dd982c09b18053f5d35d1e635ef5cfdf259c9e13"
+          "sha256": "e2b1727b042f70315f67336886c25acbb70b231e9b20f1d3b53387b56959be7c"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "market-uncertainty",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "c0f2f10b287fa0a2666e0a4fc0eaf66c0971a60cb3eb3100077d6596d1020cc9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/market-uncertainty/index.ts",
+          "name": "index.ts",
+          "sha256": "7071ef77cc1a7cce07997c2861f5750d2861aaa9d7b70b7bfb3d065301c23a60"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-verification-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "32454e52ea2b98112b8293904c2ffc2b4aa84246e4c811c1ecfe396d44491e66",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-verification-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "013b8ce8b7bfe470f5f137c23255a6cf22ffaed87f8b2037ae1fd0b17f405159"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-verification-status",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "e54eb1005f8e869fe3278dd5cb0df8f7fb0b0ae5c561c735c645617ff63bdf03",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-verification-status/index.ts",
+          "name": "index.ts",
+          "sha256": "f09942df39e487f8d6de4684dc52c2309d3fa14a2e162eac660c89e5751677ea"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-weather-park-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b0b44d7b54aeb569844cac9d88cda3115774248bc25c120551e2f99ea87e61b9",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-weather-park-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "3fd22d1dca325500b5ddcf58d0d1721226415374325c32292194ba4dab307c92"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "mlb-weather-park-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "cbdfa086b53d1393ea416dc6699fa1a2bf5b247706b1d0f92e68f6ef1996fd45",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/mlb-weather-park-status/index.ts",
+          "name": "index.ts",
+          "sha256": "23dadb8f30ea4c6523cc397bb518a25a93a751b586ea0b20699724b629512fca"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "model-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "8434085ceac4f46ad308d8caaca833d2595526dc195d1e51ee6e32ef8594029c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/model-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "6314a7b27f86bd2dbeee8b38f872b290b1cc87667b0f1b38e1391e7a0ee0b291"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "model-governance-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "fd2c04a5b8c07331eb823b550d3c744dfdfa1835f71e4bf8682ab30f662f10b2",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/model-governance-status/index.ts",
+          "name": "index.ts",
+          "sha256": "9ad7b0a4c1ce128ddad4f57181676673e18f65375f14b8996db97c08f12460e9"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "nba-player-prop-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "c96bd1427f96408dff9b126132d75513d7afa456fa64473eaeb4c6ce7d94c934",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/nba-player-prop-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "fcbffc59e327d36fbf9db14fdf8a5ac1d8d7a6b3d86a39b93b7c98f5568e2207"
+        },
+        {
+          "path": "supabase/functions/nba-player-prop-calibration/nba-calibration.js",
+          "name": "nba-calibration.js",
+          "sha256": "8f6f0d091f07484b00c9f087d0b358ff113b5d20484ef6b9009ddafec50fbc8d"
+        }
+      ],
+      "deployed_at": "2026-09-25"
+    },
+    {
+      "slug": "nba-player-prop-feedback-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "f8103b5fc4c3be3c369b7336e5a8739f39033003405479a745895e2d0656c994",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/nba-player-prop-feedback-status/index.ts",
+          "name": "index.ts",
+          "sha256": "133068f66f279978da00c3117f3f2277e18325fe6044bc06680fe80625e5a1b3"
+        }
+      ],
+      "deployed_at": "2026-09-25"
+    },
+    {
+      "slug": "outcome-attribution-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "39acbdc58da219d74b8725080b84662fac2d470f7ae242b2fffac18838e7dc2c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/outcome-attribution-status/index.ts",
+          "name": "index.ts",
+          "sha256": "6d6ad2a1a6b8719861ccb873e45057dc6cc0a35abd2d994bb6d2f786c3251bc6"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "parlay-correlation-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "e4e724cbf8980ded949613b9256bb96e72e9cdf19f1934f4dad6468c8a835bec",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/parlay-correlation-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "f0efbbc3930418b70e0d436da1ff782082326d271d302a9cd4c8a1d878086ce0"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "parlay-correlation-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "b4ab5a9ed92fe362f2c60ffb1d34373a43a27332250699d4326bb35a4c51ab99",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/parlay-correlation-status/index.ts",
+          "name": "index.ts",
+          "sha256": "5676c93692abfb2998f7a621e78857707bbda61a8eaad9895c111455fe75dd63"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "pipeline-health-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "dd9732190d1f0a32ac9a3eb46397b75a0764898797488c318b3070b99065ab10",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/pipeline-health-status/index.ts",
+          "name": "index.ts",
+          "sha256": "a48433b4dab87bc1726d36d2f1061415ff77994cafc8ad6c100942d59942383c"
         }
       ],
       "recovered_at": "2026-09-23"
@@ -213,369 +657,51 @@
       "deployed_at": "2026-09-24"
     },
     {
-      "slug": "grade-team-markets",
-      "version": 2,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "a86195334bc0f54b76afaca08e2a0aa01015d7531402ebf93a1c3a5f03e5c076",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/grade-team-markets/index.ts",
-          "name": "index.ts",
-          "sha256": "520fc208b7bd41c482c163d014b3a56a9bae3834cfd890c429c4206cac73ef35"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "decision-results",
-      "version": 3,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "d19efc4c15fe80db496c0f1e975dab5acd22fb7e048d9c1f2019f16c05f8d108",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/decision-results/index.ts",
-          "name": "index.ts",
-          "sha256": "9c84475e9bad038d7208f6c58aa6597ddd9603be84bcb6a75c4b344bfc7aa961"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "evaluate-sharp-gate",
-      "version": 2,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "3a97ded1ebaec2220283de84b5b7078b0ac744f2f9e0245b2d3bfad0e2f81537",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/evaluate-sharp-gate/index.ts",
-          "name": "index.ts",
-          "sha256": "ca4e98772128ebe67d4c60751bcac0f8aeaec83c5418615739ca89f7f54591d1"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "market-calibration",
-      "version": 3,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "b0195704af2ee7fb553e27f69d38cbcba6b62e531f02e38ce906622df1f908b9",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/market-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "c9fd91f82a04f4278d5f0bd12ff346813b21b4eff8a8350aa6a16733c519d518"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-sharp-sources",
-      "version": 4,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "89ad4e51c28d3a32c4db4cd75216fb44d153681cc3caa4aab6e6c00b5f58831f",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-sharp-sources/index.ts",
-          "name": "index.ts",
-          "sha256": "10f01469e0b2bb20ea935efcc51feab0316524905d7b100b62f3f2a522a1cdd3"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "sharp-source-health",
+      "slug": "player-prop-clv-calibration",
       "version": 2,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "1ce87f58b20a1363aa9be1647afe51e5a45c7bd917912116f5f53c09117b0f89",
+      "bundle_sha256": "bc29ac585a299612dcc4eed92c73f6868c0ce4064f6397eed2cd108358c2a5ef",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/sharp-source-health/index.ts",
+          "path": "supabase/functions/player-prop-clv-calibration/index.ts",
           "name": "index.ts",
-          "sha256": "6a044e8bcd4c154b8a04c03cedfc53f43755a7217e3e0128332138cc34f525b5"
+          "sha256": "69430c722d3215788718b95780ee15abe241099bf3311e40222caf3e15437621"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-25"
     },
     {
-      "slug": "ingest-sharp-board",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "d00d70401c540252484213cbaa442f6d55550b386474cd52d603cbb4b81953fc",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/ingest-sharp-board/index.ts",
-          "name": "index.ts",
-          "sha256": "b4644cd801bb56809f67c1c41e075e6c4b76405ac22abcf4af47feba24c82b8b"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "capture-sharp-clv",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "2e22108cf4b8b723cbb5f0b85e0f930f8fe9ffe84f14eadd0a4921e07a869625",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/capture-sharp-clv/index.ts",
-          "name": "index.ts",
-          "sha256": "32874d82b50232d0a22153a188a6f37c0a3e2f03e881d0e13b30af9b8f881787"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "sharp-movement",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "066b23b0de698383e800b88a4c284a849378e8e526b2c9bad1e14bb3c9db1e53",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/sharp-movement/index.ts",
-          "name": "index.ts",
-          "sha256": "67f9d3af671968f86a9e7754b6f2de2e7a4a394cc739e84f91583ff49e9314c6"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "market-uncertainty",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "c0f2f10b287fa0a2666e0a4fc0eaf66c0971a60cb3eb3100077d6596d1020cc9",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/market-uncertainty/index.ts",
-          "name": "index.ts",
-          "sha256": "7071ef77cc1a7cce07997c2861f5750d2861aaa9d7b70b7bfb3d065301c23a60"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "market-policy-calibration",
+      "slug": "player-prop-clv-status",
       "version": 2,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "b08c52885810eab842a121c4fde934ba9fb13150d8db2152ee030e267aa9a322",
+      "bundle_sha256": "aef09529fc929ea5353d4dc807d3f07fad082517cf6a56ce7107dcbc8186b613",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/market-policy-calibration/index.ts",
+          "path": "supabase/functions/player-prop-clv-status/index.ts",
           "name": "index.ts",
-          "sha256": "e2b1727b042f70315f67336886c25acbb70b231e9b20f1d3b53387b56959be7c"
+          "sha256": "37e9214401082f2a753d2cbbb20fab95be784898e2cbef7d491fe815d60ca7e3"
         }
       ],
-      "recovered_at": "2026-09-23"
+      "recovered_at": "2026-09-23",
+      "deployed_at": "2026-09-25"
     },
     {
-      "slug": "price-sensitivity",
+      "slug": "player-prop-fusion-calibration",
       "version": 1,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "b21e52c131386c8d465c14b20dc18c7d83dc8ae780a82018aea3ddda94384535",
+      "bundle_sha256": "9d405cd657c46e4f6ceac090d1d25a51b1775f064ba1c605709101dfdfeafabb",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/price-sensitivity/index.ts",
+          "path": "supabase/functions/player-prop-fusion-calibration/index.ts",
           "name": "index.ts",
-          "sha256": "6872b54981c6bb45836b5c3fb1edd8ba4c6c46b8c84889b7664d63414b11b6f5"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-mlb-verification-gate",
-      "version": 5,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "51e51f7eda9430f15499ef2f648e29fd854a2545d4033c712a4d8b11428ab915",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-mlb-verification-gate/index.ts",
-          "name": "index.ts",
-          "sha256": "ecf4c8e4fb89ec4df0cc4b7494b35ce16f635a51c4637d8735099c64571f9ac3"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "mlb-verification-status",
-      "version": 2,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "e54eb1005f8e869fe3278dd5cb0df8f7fb0b0ae5c561c735c645617ff63bdf03",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/mlb-verification-status/index.ts",
-          "name": "index.ts",
-          "sha256": "f09942df39e487f8d6de4684dc52c2309d3fa14a2e162eac660c89e5751677ea"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "mlb-verification-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "32454e52ea2b98112b8293904c2ffc2b4aa84246e4c811c1ecfe396d44491e66",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/mlb-verification-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "013b8ce8b7bfe470f5f137c23255a6cf22ffaed87f8b2037ae1fd0b17f405159"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-mlb-weather-park",
-      "version": 3,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "aedff2262017969736d580b2b6f8c3041265d6ebcb665274dd33b4c4083e40b4",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-mlb-weather-park/index.ts",
-          "name": "index.ts",
-          "sha256": "709117e8a8487dd57275b885553fb99d4ef9ea24b5c8a1633d453b2386df1dbd"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "mlb-weather-park-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "cbdfa086b53d1393ea416dc6699fa1a2bf5b247706b1d0f92e68f6ef1996fd45",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/mlb-weather-park-status/index.ts",
-          "name": "index.ts",
-          "sha256": "23dadb8f30ea4c6523cc397bb518a25a93a751b586ea0b20699724b629512fca"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "mlb-weather-park-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "b0b44d7b54aeb569844cac9d88cda3115774248bc25c120551e2f99ea87e61b9",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/mlb-weather-park-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "3fd22d1dca325500b5ddcf58d0d1721226415374325c32292194ba4dab307c92"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-sharp-disagreement-shadow",
-      "version": 2,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "3503491c34c185ea7f1577d2b498c17a7ef8e3270b4ada1d46bebee8eb5550bb",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-sharp-disagreement-shadow/index.ts",
-          "name": "index.ts",
-          "sha256": "005461fb74db13bc0116c9474fec6630a263a599e4d84b740d5d0ce2775b573a"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "sharp-disagreement-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "d17d2500c07ba962ef4c68848114d812efc13905a850351091fd7134a1ca4e10",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/sharp-disagreement-status/index.ts",
-          "name": "index.ts",
-          "sha256": "54c45bc44601b6782751d134690243ea6f6d85ac828098f77f63851f29e2e7fb"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "sharp-disagreement-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "4752d71532771afd0bed70231c81576f23042c6bba5c138bff09d4069dcb579c",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/sharp-disagreement-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "b87305eb32efb7ccbaff29efd123930e5242f8fc832b710640d8c7b93451a826"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "decision-fusion-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "deec29ad9e087e52202d7a6baad413afbcb2eeb74779194e46adace56b0f4d03",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/decision-fusion-status/index.ts",
-          "name": "index.ts",
-          "sha256": "2fe9f806267df8acb590bd8ecd6145727f7ab53c72b6d7d65c73b0c58912e294"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "decision-fusion-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "5b752aa4698726b6d11ba3e2737c6cf88239f07deee0efc7e56b90360f47f306",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/decision-fusion-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "c0e9293c56427e1cfae8a312db74aa5bce50b26f2d1a6bf9c8e374030e11df67"
+          "sha256": "f7ef535f2102cbb79c1b6e577adaa7f594c45f89489cff1acbe11a5d3823b795"
         }
       ],
       "recovered_at": "2026-09-23"
@@ -597,193 +723,17 @@
       "recovered_at": "2026-09-23"
     },
     {
-      "slug": "player-prop-fusion-calibration",
+      "slug": "price-sensitivity",
       "version": 1,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "9d405cd657c46e4f6ceac090d1d25a51b1775f064ba1c605709101dfdfeafabb",
+      "bundle_sha256": "b21e52c131386c8d465c14b20dc18c7d83dc8ae780a82018aea3ddda94384535",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/player-prop-fusion-calibration/index.ts",
+          "path": "supabase/functions/price-sensitivity/index.ts",
           "name": "index.ts",
-          "sha256": "f7ef535f2102cbb79c1b6e577adaa7f594c45f89489cff1acbe11a5d3823b795"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-player-prop-clv",
-      "version": 2,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "a24834ff01bf8a222a7f966ec6e53f3ef9a9ac081c9ec4acd85d53d97aefc92a",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-player-prop-clv/index.ts",
-          "name": "index.ts",
-          "sha256": "fa97de211870bc85071b6c2b5c5b3266949c3173510c11e43dee511f56b628ce"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "player-prop-clv-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "da80072ba8f4d7205a74be3a5b9d2488356d67aae96ae7d9aeceab94e7f6df9b",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/player-prop-clv-status/index.ts",
-          "name": "index.ts",
-          "sha256": "f6e58e78d234f1dddb60a5da2e1029751894573a2b3e139035a3304502ac360f"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "player-prop-clv-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "7210c41b9e5ebcef183bdec789b4cdcd571bef5c915c238afa5ca9a9cbffeb2d",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/player-prop-clv-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "795a8744dc786347fdda3146d121598a1b48dab910ca6ebe344969256fda3b1b"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "parlay-correlation-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "b4ab5a9ed92fe362f2c60ffb1d34373a43a27332250699d4326bb35a4c51ab99",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/parlay-correlation-status/index.ts",
-          "name": "index.ts",
-          "sha256": "5676c93692abfb2998f7a621e78857707bbda61a8eaad9895c111455fe75dd63"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "parlay-correlation-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "e4e724cbf8980ded949613b9256bb96e72e9cdf19f1934f4dad6468c8a835bec",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/parlay-correlation-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "f0efbbc3930418b70e0d436da1ff782082326d271d302a9cd4c8a1d878086ce0"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "decision-timing-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "c47a91582a9566a8d7623ea44fe5b1aeecc7c31ec8daf46b2c60f179c7e0d4c7",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/decision-timing-status/index.ts",
-          "name": "index.ts",
-          "sha256": "075cbda5252e4d8a97f35adbb440030a834b10f2b0906af19451b777874c5d0b"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "decision-timing-calibration",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "231191bcc9a4586aef396c9cee1da2e24d88122b924e31b957b10ba14d87e70a",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/decision-timing-calibration/index.ts",
-          "name": "index.ts",
-          "sha256": "2d59972bbf1c03c76d82a245b7b0ec0a9a7c21dd8acba678b54b10187f688b2f"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "refresh-model-governance",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": true,
-      "bundle_sha256": "052842df22893e226f34ec9fb20f58131ca4cc0ef8a9180490a78cef17a00161",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/refresh-model-governance/index.ts",
-          "name": "index.ts",
-          "sha256": "04d5a82ccda48f37cd46b04bfb00805146a818ab2fbee376b67a63b078ff7816"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "model-governance-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "fd2c04a5b8c07331eb823b550d3c744dfdfa1835f71e4bf8682ab30f662f10b2",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/model-governance-status/index.ts",
-          "name": "index.ts",
-          "sha256": "9ad7b0a4c1ce128ddad4f57181676673e18f65375f14b8996db97c08f12460e9"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "outcome-attribution-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "39acbdc58da219d74b8725080b84662fac2d470f7ae242b2fffac18838e7dc2c",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/outcome-attribution-status/index.ts",
-          "name": "index.ts",
-          "sha256": "6d6ad2a1a6b8719861ccb873e45057dc6cc0a35abd2d994bb6d2f786c3251bc6"
-        }
-      ],
-      "recovered_at": "2026-09-23"
-    },
-    {
-      "slug": "pipeline-health-status",
-      "version": 1,
-      "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "dd9732190d1f0a32ac9a3eb46397b75a0764898797488c318b3070b99065ab10",
-      "entrypoint": "index.ts",
-      "files": [
-        {
-          "path": "supabase/functions/pipeline-health-status/index.ts",
-          "name": "index.ts",
-          "sha256": "a48433b4dab87bc1726d36d2f1061415ff77994cafc8ad6c100942d59942383c"
+          "sha256": "6872b54981c6bb45836b5c3fb1edd8ba4c6c46b8c84889b7664d63414b11b6f5"
         }
       ],
       "recovered_at": "2026-09-23"
@@ -805,77 +755,208 @@
       "deployed_at": "2026-09-24"
     },
     {
-      "slug": "capture-pitchmix-features",
-      "version": 2,
+      "slug": "refresh-mlb-verification-gate",
+      "version": 5,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "ce3481934781248c5bc4655ad51cf0f2186b8a05b3aa594f20c6fb86e132e81c",
+      "bundle_sha256": "51e51f7eda9430f15499ef2f648e29fd854a2545d4033c712a4d8b11428ab915",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/capture-pitchmix-features/index.ts",
+          "path": "supabase/functions/refresh-mlb-verification-gate/index.ts",
           "name": "index.ts",
-          "sha256": "bb792e3805337970a559df2b535421bae651546369ff09cfa57f4d74bad888e4"
+          "sha256": "ecf4c8e4fb89ec4df0cc4b7494b35ce16f635a51c4637d8735099c64571f9ac3"
         }
       ],
-      "deployed_at": "2026-09-24"
+      "recovered_at": "2026-09-23"
     },
     {
-      "slug": "github-ml-training-export",
-      "version": 2,
+      "slug": "refresh-mlb-weather-park",
+      "version": 3,
       "status": "ACTIVE",
-      "verify_jwt": false,
-      "bundle_sha256": "0314a48631fe367133cc69ad2bd23a97fa185f7c5d6e388283bfda81dbcf9d24",
+      "verify_jwt": true,
+      "bundle_sha256": "aedff2262017969736d580b2b6f8c3041265d6ebcb665274dd33b4c4083e40b4",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/github-ml-training-export/index.ts",
+          "path": "supabase/functions/refresh-mlb-weather-park/index.ts",
           "name": "index.ts",
-          "sha256": "a4d7a2e5a2f1054672cb8afbd6724cb10f5ee66af7c26cb4da50c3c55af4399d"
+          "sha256": "709117e8a8487dd57275b885553fb99d4ef9ea24b5c8a1633d453b2386df1dbd"
         }
       ],
-      "deployed_at": "2026-09-24"
+      "recovered_at": "2026-09-23"
     },
     {
-      "slug": "capture-nfl-player-props",
+      "slug": "refresh-model-governance",
       "version": 1,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "0e9a1e6c2ce403d7403cad52edf0d0ab0669453928ff8d4841e9fe33930c935e",
+      "bundle_sha256": "052842df22893e226f34ec9fb20f58131ca4cc0ef8a9180490a78cef17a00161",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/capture-nfl-player-props/index.ts",
+          "path": "supabase/functions/refresh-model-governance/index.ts",
           "name": "index.ts",
-          "sha256": "3661c995db9304b0796b6ae9788d2d7117f0027184e5d28c79a5229f55f86c2e"
+          "sha256": "04d5a82ccda48f37cd46b04bfb00805146a818ab2fbee376b67a63b078ff7816"
         }
       ],
-      "recovered_at": "2026-09-25",
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-nba-player-prop-clv",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "f479c00d5782ecf8e6e0681c3232653564304c885c0f7c83f9bd912f4237ca5e",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-nba-player-prop-clv/index.ts",
+          "name": "index.ts",
+          "sha256": "4c6d3b1af2a27ad18b35eab71857b8cdf9d90acaed3d8a78c7370b8ef031656c"
+        },
+        {
+          "path": "supabase/functions/refresh-nba-player-prop-clv/nba-clv.js",
+          "name": "nba-clv.js",
+          "sha256": "c2f9755dd200f0295652df912dc40f6b78ae99d96ebfb1b01cd7f18cea206f3e"
+        }
+      ],
       "deployed_at": "2026-09-25"
     },
     {
-      "slug": "capture-nba-player-props",
+      "slug": "refresh-player-prop-clv",
       "version": 2,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "518b81410782c1501fcd2a7cc01c8f74830125f9c7b727957ac536ace4327418",
+      "bundle_sha256": "a24834ff01bf8a222a7f966ec6e53f3ef9a9ac081c9ec4acd85d53d97aefc92a",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/functions/capture-nba-player-props/index.ts",
+          "path": "supabase/functions/refresh-player-prop-clv/index.ts",
           "name": "index.ts",
-          "sha256": "3236a83099a1ce8f3f26e953e1453bf0d01224f3ba83191de5c3670252b9f3be"
+          "sha256": "fa97de211870bc85071b6c2b5c5b3266949c3173510c11e43dee511f56b628ce"
         }
       ],
-      "recovered_at": "2026-09-25",
-      "deployed_at": "2026-09-25"
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-sharp-disagreement-shadow",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "3503491c34c185ea7f1577d2b498c17a7ef8e3270b4ada1d46bebee8eb5550bb",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-sharp-disagreement-shadow/index.ts",
+          "name": "index.ts",
+          "sha256": "005461fb74db13bc0116c9474fec6630a263a599e4d84b740d5d0ce2775b573a"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "refresh-sharp-sources",
+      "version": 4,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "bundle_sha256": "89ad4e51c28d3a32c4db4cd75216fb44d153681cc3caa4aab6e6c00b5f58831f",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/refresh-sharp-sources/index.ts",
+          "name": "index.ts",
+          "sha256": "10f01469e0b2bb20ea935efcc51feab0316524905d7b100b62f3f2a522a1cdd3"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-disagreement-calibration",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "4752d71532771afd0bed70231c81576f23042c6bba5c138bff09d4069dcb579c",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-disagreement-calibration/index.ts",
+          "name": "index.ts",
+          "sha256": "b87305eb32efb7ccbaff29efd123930e5242f8fc832b710640d8c7b93451a826"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-disagreement-status",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "d17d2500c07ba962ef4c68848114d812efc13905a850351091fd7134a1ca4e10",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-disagreement-status/index.ts",
+          "name": "index.ts",
+          "sha256": "54c45bc44601b6782751d134690243ea6f6d85ac828098f77f63851f29e2e7fb"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-gate-history",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "89b41728935e850523d2b168f60ea38f7f68e9816c201f528d83e5e7ff95dec6",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-gate-history/index.ts",
+          "name": "index.ts",
+          "sha256": "305da46c2031b2b3da2c0343d68c57f8ecf38ac98d581707bfc4d18cc8b278fe"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-movement",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "066b23b0de698383e800b88a4c284a849378e8e526b2c9bad1e14bb3c9db1e53",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-movement/index.ts",
+          "name": "index.ts",
+          "sha256": "67f9d3af671968f86a9e7754b6f2de2e7a4a394cc739e84f91583ff49e9314c6"
+        }
+      ],
+      "recovered_at": "2026-09-23"
+    },
+    {
+      "slug": "sharp-source-health",
+      "version": 2,
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "bundle_sha256": "1ce87f58b20a1363aa9be1647afe51e5a45c7bd917912116f5f53c09117b0f89",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/sharp-source-health/index.ts",
+          "name": "index.ts",
+          "sha256": "6a044e8bcd4c154b8a04c03cedfc53f43755a7217e3e0128332138cc34f525b5"
+        }
+      ],
+      "recovered_at": "2026-09-23"
     }
   ],
-  "final_verified_at": "2026-09-24T10:08:52.938Z",
+  "final_verified_at": "2026-09-25T06:38:12.270Z",
   "authority_verification": {
     "status": "MATCH",
-    "active_functions": 51,
+    "active_functions": 58,
     "metadata_and_bundle_sha_match": true,
-    "repository_total_edge_functions": 54
+    "repository_total_edge_functions": 58
   }
 }
