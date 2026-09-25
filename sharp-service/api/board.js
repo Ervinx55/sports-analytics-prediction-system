@@ -253,6 +253,26 @@ function summarizeEvent(event) {
   };
 }
 
+function hasUsableEvents(row) {
+  return Boolean(row?.ok && (row.events || []).length);
+}
+
+function isStaleProviderRow(row) {
+  return String(row?.cache?.status || "").toUpperCase() === "STALE";
+}
+
+export function shouldFallbackFromPrimary(row, sharpApiConfigured) {
+  if (!hasUsableEvents(row)) return true;
+  return Boolean(sharpApiConfigured && isStaleProviderRow(row));
+}
+
+function shouldUseSharpOverPrimary(primary, sharp) {
+  if (!hasUsableEvents(sharp)) return false;
+  if (!hasUsableEvents(primary)) return true;
+  if (!isStaleProviderRow(primary)) return false;
+  return !isStaleProviderRow(sharp);
+}
+
 function boardPriority(live, startsBefore) {
   if (live === "true") return "critical";
 
@@ -491,10 +511,8 @@ export default async function handler(req, res) {
     primaryResults.map((row) => [row.league, row])
   );
   const fallbackTargets = primaryResults
-    .filter(
-      (row) =>
-        !row.ok ||
-        !(row.events || []).length
+    .filter((row) =>
+      shouldFallbackFromPrimary(row, Boolean(sharpApiKey))
     )
     .map((row) => row.league);
 
@@ -536,11 +554,15 @@ export default async function handler(req, res) {
   );
 
   const theOddsTargets = fallbackTargets.filter((league) => {
+    const primary = primaryByLeague.get(league);
     const sharp = sharpByLeague.get(league);
-    return (
-      !sharp?.ok ||
-      !(sharp.events || []).length
-    );
+
+    // Do not spend The Odds API credits merely to replace a usable stale
+    // SportsGameOdds cache. The free SharpAPI fallback may replace stale
+    // primary data, but the metered tertiary provider is reserved for a
+    // true absence of usable primary/secondary odds.
+    if (hasUsableEvents(primary)) return false;
+    return !hasUsableEvents(sharp);
   });
 
   const theOddsFallbackResults =
@@ -590,12 +612,16 @@ export default async function handler(req, res) {
 
   const results = leagues.map((league) => {
     const primary = primaryByLeague.get(league);
-    if (primary?.ok && (primary.events || []).length) {
+    const sharp = sharpByLeague.get(league);
+
+    if (
+      hasUsableEvents(primary) &&
+      !shouldUseSharpOverPrimary(primary, sharp)
+    ) {
       return primary;
     }
 
-    const sharp = sharpByLeague.get(league);
-    if (sharp?.ok && (sharp.events || []).length) {
+    if (shouldUseSharpOverPrimary(primary, sharp)) {
       return {
         ...sharp,
         fallbackFrom: {
@@ -603,7 +629,9 @@ export default async function handler(req, res) {
           status: primary?.status || null,
           error: primary?.error || null,
           objectBudgetBlocked:
-            Boolean(primary?.objectBudgetBlocked)
+            Boolean(primary?.objectBudgetBlocked),
+          cacheStatus: primary?.cache?.status || null,
+          cacheAgeSeconds: primary?.cache?.ageSeconds ?? null
         }
       };
     }
