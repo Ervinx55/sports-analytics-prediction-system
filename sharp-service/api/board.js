@@ -491,7 +491,11 @@ export default async function handler(req, res) {
     primaryResults.map((row) => [row.league, row])
   );
   const fallbackTargets = primaryResults
-    .filter((row) => !row.ok)
+    .filter(
+      (row) =>
+        !row.ok ||
+        !(row.events || []).length
+    )
     .map((row) => row.league);
 
   const sharpFallbackResults = sharpApiKey && fallbackTargets.length
@@ -533,7 +537,10 @@ export default async function handler(req, res) {
 
   const theOddsTargets = fallbackTargets.filter((league) => {
     const sharp = sharpByLeague.get(league);
-    return !sharp?.ok;
+    return (
+      !sharp?.ok ||
+      !(sharp.events || []).length
+    );
   });
 
   const theOddsFallbackResults =
@@ -583,10 +590,12 @@ export default async function handler(req, res) {
 
   const results = leagues.map((league) => {
     const primary = primaryByLeague.get(league);
-    if (primary?.ok) return primary;
+    if (primary?.ok && (primary.events || []).length) {
+      return primary;
+    }
 
     const sharp = sharpByLeague.get(league);
-    if (sharp?.ok) {
+    if (sharp?.ok && (sharp.events || []).length) {
       return {
         ...sharp,
         fallbackFrom: {
@@ -600,7 +609,7 @@ export default async function handler(req, res) {
     }
 
     const third = theOddsByLeague.get(league);
-    if (third?.ok) {
+    if (third?.ok && (third.events || []).length) {
       return {
         ...third,
         fallbackFrom: [
