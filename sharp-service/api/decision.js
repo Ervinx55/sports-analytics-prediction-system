@@ -415,6 +415,18 @@ export default async function handler(req, res) {
           away: e.matchup?.away?.name,
           home: e.matchup?.home?.name,
         },
+        marketSource: {
+          provider:
+            e.provider ??
+            board.source ??
+            null,
+          providerEventID:
+            e.providerEventID ?? null,
+          providersUsed:
+            board.providersUsed ?? [],
+          providerChain:
+            board.providerChain ?? [],
+        },
         probablePitchers: {
           away: {
             id: g?.teams?.away?.probablePitcher?.id ?? null,
@@ -472,6 +484,10 @@ export default async function handler(req, res) {
             ),
             bestBook: awayBest.book,
             bestOdds: awayBest.odds,
+            provider:
+              e.provider ??
+              board.source ??
+              null,
             modelProbability: Number(modelAway.toFixed(4)),
             edgePctPoints: Number((awayEdge * 100).toFixed(2)),
             evPct: awayEv === null ? null : Number((awayEv * 100).toFixed(2)),
@@ -507,6 +523,10 @@ export default async function handler(req, res) {
             ),
             bestBook: homeBest.book,
             bestOdds: homeBest.odds,
+            provider:
+              e.provider ??
+              board.source ??
+              null,
             modelProbability: Number(modelHome.toFixed(4)),
             edgePctPoints: Number((homeEdge * 100).toFixed(2)),
             evPct: homeEv === null ? null : Number((homeEv * 100).toFixed(2)),
@@ -534,6 +554,12 @@ export default async function handler(req, res) {
     return res.status(200).json({
       fetchedAt: new Date().toISOString(),
       model: "MLB Decision Engine v1",
+      marketSource: {
+        source: board.source ?? null,
+        providersUsed: board.providersUsed ?? [],
+        providerChain: board.providerChain ?? [],
+        providerFailures: board.providerFailures ?? []
+      },
       method: {
         independentBaseball:
           "expected-record/log5 team strength + home field + probable starter ERA/WHIP",
