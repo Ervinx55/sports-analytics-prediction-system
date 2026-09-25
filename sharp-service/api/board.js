@@ -6,6 +6,10 @@ import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 import {
   fetchSharpApiBoardLeague
 } from "../lib/sharpapi-provider.js";
+import {
+  fetchTheOddsApiBoardLeague,
+  getTheOddsApiUsageSnapshot
+} from "../lib/the-odds-api-provider.js";
 
 const DEFAULT_LEAGUES = ["MLB"];
 const PROVIDER_STALE_MS = 5 * 60 * 1000;
@@ -399,10 +403,11 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
   const sharpApiKey = process.env.SHARPAPI_KEY;
-  if (!apiKey && !sharpApiKey) {
+  const theOddsApiKey = process.env.THE_ODDS_API_KEY;
+  if (!apiKey && !sharpApiKey && !theOddsApiKey) {
     return res.status(500).json({
       error:
-        "No odds provider is configured. Set SPORTS_ODDS_API_KEY or SHARPAPI_KEY."
+        "No odds provider is configured. Set SPORTS_ODDS_API_KEY, SHARPAPI_KEY, or THE_ODDS_API_KEY."
     });
   }
 
@@ -526,13 +531,64 @@ export default async function handler(req, res) {
     sharpFallbackResults.map((row) => [row.league, row])
   );
 
+  const theOddsTargets = fallbackTargets.filter((league) => {
+    const sharp = sharpByLeague.get(league);
+    return !sharp?.ok;
+  });
+
+  const theOddsFallbackResults =
+    theOddsApiKey && theOddsTargets.length
+      ? await mapWithConcurrency(
+          theOddsTargets,
+          1,
+          async (league) => {
+            try {
+              return await fetchTheOddsApiBoardLeague({
+                apiKey: theOddsApiKey,
+                league,
+                books,
+                live,
+                startsAfter,
+                startsBefore,
+                freshMs: Math.max(
+                  5 * 60 * 1000,
+                  refreshPolicy.freshMs
+                ),
+                staleMs: Math.max(
+                  20 * 60 * 1000,
+                  refreshPolicy.staleMs
+                )
+              });
+            } catch (error) {
+              return {
+                league,
+                ok: false,
+                provider: "The Odds API",
+                status: Number(error?.status || 502),
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "The Odds API request failed",
+                quotaBlocked: Boolean(error?.quotaBlocked),
+                usage: error?.usage || null
+              };
+            }
+          }
+        )
+      : [];
+
+  const theOddsByLeague = new Map(
+    theOddsFallbackResults.map((row) => [row.league, row])
+  );
+
   const results = leagues.map((league) => {
     const primary = primaryByLeague.get(league);
     if (primary?.ok) return primary;
-    const fallback = sharpByLeague.get(league);
-    if (fallback?.ok) {
+
+    const sharp = sharpByLeague.get(league);
+    if (sharp?.ok) {
       return {
-        ...fallback,
+        ...sharp,
         fallbackFrom: {
           provider: primary?.provider || "SportsGameOdds",
           status: primary?.status || null,
@@ -542,8 +598,34 @@ export default async function handler(req, res) {
         }
       };
     }
+
+    const third = theOddsByLeague.get(league);
+    if (third?.ok) {
+      return {
+        ...third,
+        fallbackFrom: [
+          primary
+            ? {
+                provider: primary.provider,
+                status: primary.status || null,
+                error: primary.error || null,
+                objectBudgetBlocked:
+                  Boolean(primary.objectBudgetBlocked)
+              }
+            : null,
+          sharp
+            ? {
+                provider: sharp.provider,
+                status: sharp.status || null,
+                error: sharp.error || null
+              }
+            : null
+        ].filter(Boolean)
+      };
+    }
+
     return {
-      ...(fallback || primary || {
+      ...(third || sharp || primary || {
         league,
         ok: false,
         provider: "none",
@@ -558,6 +640,13 @@ export default async function handler(req, res) {
             objectBudgetBlocked:
               Boolean(primary.objectBudgetBlocked)
           }
+        : null,
+      secondaryFailure: sharp
+        ? {
+            provider: sharp.provider,
+            status: sharp.status || null,
+            error: sharp.error || null
+          }
         : null
     };
   });
@@ -571,7 +660,8 @@ export default async function handler(req, res) {
       status: row.status || null,
       error: row.error || null,
       retryAfterSeconds: row.retryAfterSeconds || null,
-      primaryFailure: row.primaryFailure || null
+      primaryFailure: row.primaryFailure || null,
+      secondaryFailure: row.secondaryFailure || null
     }));
 
   const providerFailures = [
@@ -592,6 +682,16 @@ export default async function handler(req, res) {
         provider: row.provider,
         status: row.status || null,
         error: row.error || null
+      })),
+    ...theOddsFallbackResults
+      .filter((row) => !row.ok)
+      .map((row) => ({
+        league: row.league,
+        provider: row.provider,
+        status: row.status || null,
+        error: row.error || null,
+        quotaBlocked: Boolean(row.quotaBlocked),
+        usage: row.usage || null
       }))
   ];
 
@@ -619,7 +719,11 @@ export default async function handler(req, res) {
         : providersUsed.length > 1
           ? "multi-provider"
           : "none",
-    providerChain: ["SportsGameOdds", "SharpAPI"],
+    providerChain: [
+      "SportsGameOdds",
+      "SharpAPI",
+      "The Odds API"
+    ],
     providersUsed,
     endpoint: "compact-board",
     requestedLeagues: leagues,
@@ -639,6 +743,7 @@ export default async function handler(req, res) {
     },
     providerCache,
     providerFailures,
+    theOddsApiUsage: getTheOddsApiUsageSnapshot(),
     unavailableLeagues: unavailable,
     eventCount: events.length,
     events
