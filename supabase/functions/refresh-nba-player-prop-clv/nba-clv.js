@@ -41,6 +41,47 @@ function normalizePlayer(value) {
     .replace(/[^a-z0-9]/g, "");
 }
 
+function normalizeTeam(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function sameGameIdentity(quote, observation) {
+  if (
+    quote?.event_id &&
+    observation?.event_id &&
+    quote.event_id === observation.event_id
+  ) {
+    return true;
+  }
+
+  const quoteAway = normalizeTeam(quote?.away_team);
+  const quoteHome = normalizeTeam(quote?.home_team);
+  const obsAway = normalizeTeam(observation?.away_team);
+  const obsHome = normalizeTeam(observation?.home_team);
+
+  if (
+    !quoteAway ||
+    !quoteHome ||
+    quoteAway !== obsAway ||
+    quoteHome !== obsHome
+  ) {
+    return false;
+  }
+
+  const quoteStart = Date.parse(String(quote?.starts_at || ""));
+  const obsStart = Date.parse(String(observation?.starts_at || ""));
+  if (
+    !Number.isFinite(quoteStart) ||
+    !Number.isFinite(obsStart)
+  ) {
+    return false;
+  }
+
+  return Math.abs(quoteStart - obsStart) <= 4 * 60 * 60 * 1000;
+}
+
 function latestAt(quotes, cutoffMs) {
   const map = new Map();
   for (const quote of quotes || []) {
@@ -167,7 +208,7 @@ function clvClass(finalized, close, lineClv, fairClv, sameBookClv, ageMinutes) {
 }
 
 function quoteMatchesObservation(quote, observation) {
-  if (quote.event_id !== observation.event_id) return false;
+  if (!sameGameIdentity(quote, observation)) return false;
   if (quote.stat_id !== observation.stat_id) return false;
   const quotePlayer = normalizePlayer(quote.player_name);
   const obsPlayer = normalizePlayer(observation.player_name);
@@ -190,6 +231,8 @@ export {
   median,
   eqLine,
   normalizePlayer,
+  normalizeTeam,
+  sameGameIdentity,
   latestAt,
   openingRefs,
   marketMetrics,
