@@ -8,7 +8,7 @@ const NFLVERSE_SNAP_COUNTS_URL = (season) =>
 const NFLVERSE_NGS_URL = (statType) =>
   `https://github.com/nflverse/nflverse-data/releases/download/nextgen_stats/ngs_${statType}.csv.gz`;
 
-const PLAYER_PROP_VERSION = "NFL Player Props v1.1-shadow";
+const PLAYER_PROP_VERSION = "NFL Player Props v2.1-shadow";
 const PROVISIONAL_INDEPENDENT_WEIGHT = Object.freeze({
   A: 0.35,
   B: 0.20,
