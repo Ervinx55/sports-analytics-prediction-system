@@ -211,8 +211,10 @@ test("opportunity engine produces coherent WR projections", () => {
   assert.equal(result.projections.receiving_receptions.baselineMean, 6.5);
   assert.equal(result.projections.receiving_receptions.mean, 6.5);
   assert.equal(result.projections.receiving_receptions.residualWeight, 0);
+  assert.equal(result.projections.receiving_receptions.baselineWindow, 4);
   assert.equal(result.projections.receiving_yards.baselineMean, 86.75);
   assert.equal(result.projections.receiving_yards.residualWeight, 0.9);
+  assert.equal(result.projections.receiving_yards.baselineWindow, 4);
   assert.ok(Number.isFinite(result.projections.receiving_yards.opportunityMean));
   assert.ok(
     Math.abs(
