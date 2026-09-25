@@ -13,6 +13,9 @@
     },
     "api/nbamodel.js": {
       "maxDuration": 30
+    },
+    "api/nbaprops.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
