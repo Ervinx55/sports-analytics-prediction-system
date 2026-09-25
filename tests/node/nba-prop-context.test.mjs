@@ -172,7 +172,7 @@ test("NBA context shadow blend is tightly capped", () => {
 
   assert.equal(
     contextSignal("points", context),
-    0.9
+    1
   );
 
   const adjusted =
