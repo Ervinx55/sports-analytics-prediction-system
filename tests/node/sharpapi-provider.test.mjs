@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import {
   fetchSharpApiOdds,
   normalizeSharpApiBoardRows,
-  normalizeSharpApiMlbPropRows
+  normalizeSharpApiMlbPropRows,
+  normalizeSharpApiNflPropRows
 } from "../../sharp-service/lib/sharpapi-provider.js";
 
 afterEach(() => {
@@ -282,4 +283,58 @@ test("SharpAPI requests use API key header and documented filters", async () => 
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+
+test("SharpAPI NFL props normalize supported v2 markets", () => {
+  const rows = [
+    ["player_passing_yards", "passing_yards", "Patrick Mahomes", "over", 279.5, -110],
+    ["player_passing_yards", "passing_yards", "Patrick Mahomes", "under", 279.5, -110],
+    ["player_passing_touchdowns", "passing_touchdowns", "Patrick Mahomes", "over", 2.5, 115],
+    ["player_rushing_yards", "rushing_yards", "Isiah Pacheco", "over", 67.5, -115],
+    ["player_receptions", "receptions", "Travis Kelce", "over", 5.5, -120],
+    ["player_receiving_yards", "receiving_yards", "Travis Kelce", "over", 64.5, -110]
+  ].map(([market_type, stat_category, player_name, selection_type, line, odds_american]) => ({
+    sportsbook: "draftkings",
+    event_id: "nfl_kc_buf_2026-09-27",
+    sport: "football",
+    league: "nfl",
+    home_team: "Buffalo Bills",
+    away_team: "Kansas City Chiefs",
+    market_type,
+    stat_category,
+    player_name,
+    selection_type,
+    selection: selection_type === "over" ? "Over" : "Under",
+    odds_american,
+    line,
+    event_start_time: "2026-09-27T20:20:00Z",
+    timestamp: "2026-09-27T18:00:00Z",
+    is_live: false
+  }));
+
+  const events = normalizeSharpApiNflPropRows(rows, {
+    books: ["draftkings"]
+  });
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].league, "NFL");
+  assert.equal(events[0].sport, "FOOTBALL");
+  const ids = new Set(events[0].props.map((prop) => prop.statID));
+  assert.deepEqual(
+    [...ids].sort(),
+    [
+      "passing_touchdowns",
+      "passing_yards",
+      "receiving_receptions",
+      "receiving_yards",
+      "rushing_yards"
+    ]
+  );
+  const passing = events[0].props.find(
+    (prop) => prop.statID === "passing_yards"
+  );
+  assert.equal(passing.playerName, "Patrick Mahomes");
+  assert.equal(passing.over.books.draftkings.line, 279.5);
+  assert.equal(passing.under.books.draftkings.line, 279.5);
 });
