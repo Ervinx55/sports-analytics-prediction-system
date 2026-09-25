@@ -466,13 +466,13 @@ export default async function handler(req, res) {
       productionEligible: false,
       productionWeight: 0,
       modelState: "SHADOW_ONLY",
-      calibrationState: "UNCALIBRATED_CHALLENGER",
+      calibrationState: "DEVELOPMENT_CALIBRATED_HOLDOUT_LOCKED",
       methodology: {
         marketFirst: true,
         distinctBookLines: true,
         pointInTimeGuard: true,
         projectionFlow:
-          "team plays -> pass/rush split -> player role share -> opportunity -> efficiency -> distribution",
+          "rolling player baseline -> validated residual adjustment from team plays/pass-rush split/player role/opponent/weather -> distribution",
         liveSources: [
           "nflverse weekly player stats",
           "PFR snap counts via nflverse",
@@ -491,6 +491,13 @@ export default async function handler(req, res) {
           C: 0.10,
           D: 0
         },
+        calibratedResidualWeights: {
+          passing_yards: 0.25,
+          passing_touchdowns: 0,
+          rushing_yards: 0,
+          receiving_receptions: 0,
+          receiving_yards: 0.90
+        },
         calibratedMarketShrinkage: {
           passing_yards: 0,
           passing_touchdowns: 0,
@@ -499,7 +506,7 @@ export default async function handler(req, res) {
           receiving_yards: 0
         },
         calibrationFinding:
-          "2024 development replay did not justify independent influence over the baseline. All five markets remain market-only in shadow output.",
+          "2024 split-development validation accepted a 0.25 opportunity residual for passing yards and 0.90 for receiving yards. Passing TDs, rushing yards, and receptions remain baseline-only. Market influence remains locked to zero until historical sharp prop prices are available.",
         promotionPolicy:
           "No production influence until a revised challenger is calibrated on development data and then clears untouched holdout validation against historical sharp prop prices."
       },
