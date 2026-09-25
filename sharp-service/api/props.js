@@ -6,6 +6,10 @@ import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 import {
   fetchSharpApiMlbProps
 } from "../lib/sharpapi-provider.js";
+import {
+  fetchTheOddsApiMlbProps,
+  getTheOddsApiUsageSnapshot
+} from "../lib/the-odds-api-provider.js";
 
 const DEFAULT_BOOKS = ["draftkings", "fanduel", "betmgm", "caesars"];
 
@@ -192,10 +196,11 @@ export default async function handler(req, res) {
 
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
   const sharpApiKey = process.env.SHARPAPI_KEY;
-  if (!apiKey && !sharpApiKey) {
+  const theOddsApiKey = process.env.THE_ODDS_API_KEY;
+  if (!apiKey && !sharpApiKey && !theOddsApiKey) {
     return res.status(500).json({
       error:
-        "No odds provider configured. Set SPORTS_ODDS_API_KEY or SHARPAPI_KEY."
+        "No odds provider configured. Set SPORTS_ODDS_API_KEY, SHARPAPI_KEY, or THE_ODDS_API_KEY."
     });
   }
 
@@ -332,11 +337,22 @@ export default async function handler(req, res) {
           staleMs: Math.max(STALE_TTL_MS, refreshPolicy.staleMs)
         });
         const events = fallback.events || [];
+        if (!events.length) {
+          const noData = new Error(
+            "SharpAPI returned no usable MLB prop markets"
+          );
+          noData.status = 502;
+          throw noData;
+        }
         const body = {
           fetchedAt: fallback.fetchedAt,
           version: "MLB Props Board v1.3",
           source: "SharpAPI",
-          providerChain: ["SportsGameOdds", "SharpAPI"],
+          providerChain: [
+            "SportsGameOdds",
+            "SharpAPI",
+            "The Odds API"
+          ],
           fallbackFrom: {
             provider: "SportsGameOdds",
             status: Number(error?.status || 502),
@@ -405,6 +421,142 @@ export default async function handler(req, res) {
       }
     }
 
+    if (theOddsApiKey) {
+      try {
+        const fallback = await fetchTheOddsApiMlbProps({
+          apiKey: theOddsApiKey,
+          books,
+          startsAfter,
+          startsBefore,
+          freshMs: Math.max(
+            10 * 60 * 1000,
+            refreshPolicy.freshMs
+          ),
+          staleMs: Math.max(
+            20 * 60 * 1000,
+            refreshPolicy.staleMs
+          )
+        });
+        const events = fallback.events || [];
+        const body = {
+          fetchedAt: fallback.fetchedAt,
+          version: "MLB Props Board v1.4",
+          source: "The Odds API",
+          providerChain: [
+            "SportsGameOdds",
+            "SharpAPI",
+            "The Odds API"
+          ],
+          fallbackFrom: [
+            {
+              provider: "SportsGameOdds",
+              status: Number(error?.status || 502),
+              error:
+                error instanceof Error
+                  ? error.message
+                  : String(error),
+              objectBudgetBlocked:
+                Boolean(error?.objectBudgetBlocked)
+            },
+            error?.sharpApiFallback
+              ? {
+                  provider: "SharpAPI",
+                  status:
+                    error.sharpApiFallback.status || 502,
+                  error:
+                    error.sharpApiFallback.message || null
+                }
+              : null
+          ].filter(Boolean),
+          books,
+          markets: [
+            "pitching_strikeouts",
+            "batting_hits",
+            "batting_totalBases"
+          ],
+          window: {
+            startsAfter: startsAfter || null,
+            startsBefore: startsBefore || null
+          },
+          eventCount: events.length,
+          propCount: events.reduce(
+            (sum, event) =>
+              sum + (event.props?.length || 0),
+            0
+          ),
+          events,
+          cache: {
+            status:
+              fallback.cache?.status || "MIXED",
+            layer:
+              fallback.cache?.layer ||
+              "local/upstream",
+            ageSeconds:
+              fallback.cache?.ageSeconds ?? 0,
+            freshForSeconds:
+              Math.max(
+                600,
+                refreshPolicy.suggestedSeconds
+              ),
+            staleForSeconds:
+              Math.max(
+                20 * 60 * 1000,
+                refreshPolicy.staleMs
+              ) / 1000
+          },
+          servedStale:
+            Boolean(fallback.cache?.servedStale),
+          circuitOpen: false,
+          recoveryState: "FALLBACK",
+          requestBudget: null,
+          theOddsApiUsage:
+            fallback.usage ||
+            getTheOddsApiUsageSnapshot(),
+          refreshPolicy,
+          objectOptimization: {
+            ...objectPolicy,
+            objectsReturned: 0,
+            fallbackProvider: "The Odds API"
+          },
+          upstreamError:
+            fallback.cache?.upstreamError || null
+        };
+
+        res.setHeader(
+          "Cache-Control",
+          "public, max-age=0, s-maxage=600, stale-while-revalidate=1200, stale-if-error=1200"
+        );
+        res.setHeader(
+          "Vercel-Cache-Tag",
+          "edge-lab-props"
+        );
+        res.setHeader(
+          "X-Props-Cache",
+          body.cache.status
+        );
+        res.setHeader(
+          "X-Odds-Provider",
+          "The Odds API"
+        );
+        return res.status(200).json(body);
+      } catch (fallbackError) {
+        error.theOddsApiFallback = {
+          status: Number(
+            fallbackError?.status || 502
+          ),
+          message:
+            fallbackError instanceof Error
+              ? fallbackError.message
+              : String(fallbackError),
+          quotaBlocked:
+            Boolean(fallbackError?.quotaBlocked),
+          usage:
+            fallbackError?.usage ||
+            getTheOddsApiUsageSnapshot()
+        };
+      }
+    }
+
     const status = Number(error?.status || 502);
     const retryAfter = error?.retryAfter ?? null;
     if (retryAfter !== null) {
@@ -419,8 +571,16 @@ export default async function handler(req, res) {
     return res.status(status).json({
       error: error instanceof Error ? error.message : String(error),
       source: "SportsGameOdds v2",
-      providerChain: ["SportsGameOdds", "SharpAPI"],
+      providerChain: [
+            "SportsGameOdds",
+            "SharpAPI",
+            "The Odds API"
+          ],
       sharpApiFallback: error?.sharpApiFallback || null,
+      theOddsApiFallback:
+        error?.theOddsApiFallback || null,
+      theOddsApiUsage:
+        getTheOddsApiUsageSnapshot(),
       retryAfterSeconds: retryAfter,
       circuitOpen: Boolean(error?.circuitOpen),
       budgetBlocked: Boolean(error?.budgetBlocked),
