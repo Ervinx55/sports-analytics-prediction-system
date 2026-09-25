@@ -362,14 +362,23 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260925073838",
+      "name": "isolate_player_prop_latest_by_sport",
+      "path": "supabase/migrations/20260925073838_isolate_player_prop_latest_by_sport.sql",
+      "sha256": "8a9c23bfa9bb1eafa71c696c0cada728bc96d9295e1a123b3a7d1be475c132b9",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
-  "final_verified_at": "2026-09-25T07:30:00Z",
+  "final_verified_at": "2026-09-25T07:38:38Z",
   "authority_verification": {
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 42,
+    "repository_total_migrations": 43,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
