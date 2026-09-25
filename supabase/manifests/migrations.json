@@ -335,6 +335,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260925055553",
+      "name": "register_nba_player_prop_capture_component",
+      "path": "supabase/migrations/20260925055553_register_nba_player_prop_capture_component.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
