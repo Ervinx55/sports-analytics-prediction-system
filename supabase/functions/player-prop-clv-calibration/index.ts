@@ -76,14 +76,17 @@ Deno.serve(async(req)=>{
       {data:obs,error:oe}
     ]=await Promise.all([
       supabase.from("player_prop_clv").select("*")
+        .eq("sport","MLB")
         .eq("finalized",true).gte("starts_at",since).limit(20000),
       supabase.from("player_prop_results").select("observation_id,outcome,graded_at")
+        .eq("sport","MLB")
         .gte("graded_at",since).limit(20000),
       supabase.from("player_prop_decision_fusion_shadow")
         .select("observation_id,player_role,fusion_state,conflict_code")
         .gte("source_captured_at",since).limit(20000),
       supabase.from("player_prop_observations")
         .select("id,status,stat_id,side,data_quality")
+        .eq("sport","MLB")
         .gte("captured_at",since).limit(20000)
     ]);
     if(ce) throw ce;if(re) throw re;if(fe) throw fe;if(oe) throw oe;
