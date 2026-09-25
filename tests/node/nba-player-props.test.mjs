@@ -8,6 +8,7 @@ import {
   projectionFromHistory,
   statValue,
   exactPairs,
+  marketIntegrity,
   officialInjuryContext,
   gradeProp
 } from "../../sharp-service/lib/nba-player-props.js";
@@ -360,4 +361,102 @@ test("NBA props API rejects unsupported methods before fetching", async () => {
   const response = await invoke({}, "POST");
   assert.equal(response.statusCode, 405);
   assert.equal(calls, 0);
+});
+
+
+test("NBA market integrity blocks isolated exact lines", () => {
+  const pairs = exactPairs(prop());
+  const isolated = pairs.find(
+    (row) => row.book === "fanduel"
+  );
+  const integrity = marketIntegrity(
+    pairs,
+    isolated,
+    "over",
+    new Date("2026-10-20T21:05:00Z")
+  );
+
+  assert.equal(integrity.pairedBooks, 1);
+  assert.equal(integrity.isolatedLine, true);
+  assert.equal(integrity.blocked, true);
+});
+
+test("NBA market integrity blocks stale cross-book price outliers", () => {
+  const pairs = [
+    {
+      book: "draftkings",
+      line: 28.5,
+      overOdds: 160,
+      underOdds: -210,
+      updatedAt: "2026-10-20T19:00:00Z"
+    },
+    {
+      book: "fanduel",
+      line: 28.5,
+      overOdds: -110,
+      underOdds: -110,
+      updatedAt: "2026-10-20T21:00:00Z"
+    },
+    {
+      book: "betmgm",
+      line: 28.5,
+      overOdds: -115,
+      underOdds: -105,
+      updatedAt: "2026-10-20T21:01:00Z"
+    }
+  ];
+
+  const integrity = marketIntegrity(
+    pairs,
+    pairs[0],
+    "over",
+    new Date("2026-10-20T21:05:00Z")
+  );
+
+  assert.equal(integrity.stale, true);
+  assert.equal(integrity.priceOutlier, true);
+  assert.equal(integrity.staleOutlier, true);
+  assert.equal(integrity.blocked, true);
+  assert.ok(
+    integrity.probabilityDeviationPctPoints > 5
+  );
+});
+
+test("NBA market integrity keeps fresh aligned multi-book lines clear", () => {
+  const pairs = [
+    {
+      book: "draftkings",
+      line: 28.5,
+      overOdds: -110,
+      underOdds: -110,
+      updatedAt: "2026-10-20T21:02:00Z"
+    },
+    {
+      book: "fanduel",
+      line: 28.5,
+      overOdds: -105,
+      underOdds: -115,
+      updatedAt: "2026-10-20T21:01:00Z"
+    },
+    {
+      book: "betmgm",
+      line: 28.5,
+      overOdds: -112,
+      underOdds: -108,
+      updatedAt: "2026-10-20T21:00:00Z"
+    }
+  ];
+
+  const integrity = marketIntegrity(
+    pairs,
+    pairs[0],
+    "over",
+    new Date("2026-10-20T21:05:00Z")
+  );
+
+  assert.equal(integrity.pairedBooks, 3);
+  assert.equal(integrity.stale, false);
+  assert.equal(integrity.highDisagreement, false);
+  assert.equal(integrity.blocked, false);
+  assert.ok(integrity.score >= 0.9);
 });
