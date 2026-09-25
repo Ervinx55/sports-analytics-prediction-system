@@ -189,6 +189,12 @@ stale outlier prices, and severe same-line no-vig disagreement can reduce
 quality or block a shadow PLAY, but market integrity can never create an edge or
 upgrade a PASS by itself.
 
+A separate role-stability guard compares the recent 3-game minutes role with
+the longer 8-game window. A material minutes shift is surfaced explicitly and
+caps data quality below the shadow-PLAY threshold until the role stabilizes.
+This guard can only downgrade a candidate; it cannot increase the projection or
+create an edge.
+
 Every NBA prop remains production PASS / weight 0 until chronological
 projection validation, untouched holdout validation, and historical exact
 sportsbook-price validation are complete. The Supabase
