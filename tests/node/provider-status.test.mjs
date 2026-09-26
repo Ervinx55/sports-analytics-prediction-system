@@ -84,6 +84,7 @@ test("provider status reports configured failover chain without exposing secrets
     res.body.providers.theOddsApi.status,
     "NOT_CONFIGURED"
   );
+  assert.equal(res.body.providers.theOddsApi.status, "AWAITING_FIRST_RESPONSE");
   assert.equal(res.body.oddsProviderReady, true);
 
   const serialized = JSON.stringify(res.body);

@@ -99,7 +99,9 @@ test("NFL simulation is deterministic for the same event", () => {
   assert.ok(a.moneyline.home > 0.5);
 });
 
-test("NFL model produces shadow-only team market grades", async () => {
+test("NFL model produces shadow-only team market grades", async (t) => {
+  // Keep the fixture inside the forecast window regardless of the run date.
+  t.mock.method(Date, "now", () => Date.parse("2026-09-24T12:00:00Z"));
   process.env.EDGE_LAB_BOARD_URL = "https://edge.test/api/board";
 
   const schedule = [
@@ -246,6 +248,8 @@ test("NFL model produces shadow-only team market grades", async () => {
   assert.ok(
     response.body.events[0].model.weatherAdjustmentPoints < 0
   );
+  assert.equal(response.body.events[0].gameContext.weather.available, true);
+  assert.equal(response.body.events[0].gameContext.weather.windMph, 18);
   assert.equal(
     response.body.events[0].model.calibration.shrinkage.moneyline,
     0
