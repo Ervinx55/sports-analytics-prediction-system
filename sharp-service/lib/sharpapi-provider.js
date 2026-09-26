@@ -489,6 +489,12 @@ function storeCache(key, payload) {
 }
 
 async function fetchPage(url, apiKey, timeoutMs) {
+  if (state.retryAt > Date.now()) {
+    const error = new Error("SharpAPI rate-limit cooldown is active");
+    error.status = 429;
+    error.retryAfter = Math.ceil((state.retryAt - Date.now()) / 1000);
+    throw error;
+  }
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -515,9 +521,15 @@ async function fetchPage(url, apiKey, timeoutMs) {
         `SharpAPI request failed (${response.status})`
       );
       error.status = response.status;
-      error.retryAfter = Number(
-        response.headers.get("retry-after") || 0
-      ) || null;
+      const retryHeader = response.headers.get("retry-after");
+      const retrySeconds = retryHeader && /^\d+(?:\.\d+)?$/.test(retryHeader)
+        ? Number(retryHeader)
+        : (Date.parse(retryHeader || "") - Date.now()) / 1000;
+      error.retryAfter = Number.isFinite(retrySeconds) && retrySeconds > 0
+        ? Math.ceil(retrySeconds) : null;
+      if (response.status === 429) {
+        state.retryAt = Date.now() + (error.retryAfter || 60) * 1000;
+      }
       throw error;
     }
     return payload;
@@ -550,6 +562,9 @@ export async function fetchSharpApiOdds({
   const paramsBase = {
     league: leagueSlug,
     market,
+    startsAfter,
+    startsBefore,
+    maxPages,
     live: live === "true" || live === "false" ? live : null
   };
   const key = cacheKey(paramsBase);
