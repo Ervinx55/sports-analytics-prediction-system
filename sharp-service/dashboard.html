@@ -113,7 +113,7 @@
     .loading{animation:pulse 1.25s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}
     @media(max-width:760px){
       .app{padding:14px 10px 88px}
-      .metrics{grid-template-columns:repeat(2,1fr)}
+      .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
       .grid4{grid-template-columns:repeat(2,1fr)}
       .adjustments{grid-template-columns:repeat(3,1fr)}
       .cal-grid{grid-template-columns:1fr 1fr}
@@ -867,7 +867,7 @@
                 <span class="badge watch">SCHEDULE ONLY</span>
               </div>
               <div class="reason">
-                Market prices and model grading are unavailable while the odds-provider object quota is exhausted.
+                No current validated model markets are available. Raw provider prices alone cannot authorize a PLAY.
                 Source: ${esc(g.source||"schedule feed")}.
               </div>
             </div>`).join("");
