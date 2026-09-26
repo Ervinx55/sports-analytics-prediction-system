@@ -380,3 +380,19 @@ test("provider current-team identity overrides stale historical team after a mov
   assert.ok(result.projections.receiving_yards.mean > 0);
   assert.equal(result.dataQuality, "D");
 });
+
+
+test("schedule lookup preserves first-match dates and refreshes after schedule corrections", () => {
+  const games = [
+    { game_id: "known", season: 2026, week: 1, home_team: "GB", away_team: "CHI", gameday: "2026-09-10" },
+    { game_id: "known", season: 2026, week: 1, home_team: "GB", away_team: "CHI", gameday: "2026-09-01" }
+  ];
+  const byId = { game_id: "known", season: 2026, week: 1, team: "GB" };
+  const byTeam = { season: 2026, week: 1, team: "CHI" };
+  const rows = [byId, byTeam];
+  const options = { schedule: games, cutoff: "2026-09-05T12:00:00Z", source: "player_stats" };
+  assert.deepEqual(pointInTimeRows(rows, options), []);
+  games[0].gameday = "2026-09-01";
+  assert.deepEqual(pointInTimeRows(rows, options), rows);
+  assert.deepEqual(pointInTimeRows([{ game_id: "missing" }], options), []);
+});
