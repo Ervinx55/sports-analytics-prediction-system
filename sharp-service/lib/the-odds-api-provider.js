@@ -603,13 +603,13 @@ export async function fetchTheOddsApiBoardLeague({
   if (startsAfter) {
     url.searchParams.set(
       "commenceTimeFrom",
-      startsAfter
+      new Date(startsAfter).toISOString().replace(/\.\d{3}Z$/, "Z")
     );
   }
   if (startsBefore) {
     url.searchParams.set(
       "commenceTimeTo",
-      startsBefore
+      new Date(startsBefore).toISOString().replace(/\.\d{3}Z$/, "Z")
     );
   }
 
@@ -665,13 +665,13 @@ async function fetchEvents({
   if (startsAfter) {
     url.searchParams.set(
       "commenceTimeFrom",
-      startsAfter
+      new Date(startsAfter).toISOString().replace(/\.\d{3}Z$/, "Z")
     );
   }
   if (startsBefore) {
     url.searchParams.set(
       "commenceTimeTo",
-      startsBefore
+      new Date(startsBefore).toISOString().replace(/\.\d{3}Z$/, "Z")
     );
   }
   return requestJson({
