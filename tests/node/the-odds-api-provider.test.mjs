@@ -69,8 +69,8 @@ test("The Odds API main markets normalize into Edge Lab contract", () => {
   const events = normalizeTheOddsApiBoard([event], {
     league: "MLB",
     books: ["draftkings", "caesars"],
-    startsAfter: "2026-09-24T20:00:00Z",
-    startsBefore: "2026-09-25T12:00:00Z",
+    startsAfter: "2026-09-24T20:00:00.000Z",
+    startsBefore: "2026-09-25T12:00:00.000Z",
     live: "false",
     now: Date.parse("2026-09-24T23:45:00Z")
   });
@@ -120,10 +120,12 @@ test("The Odds API board request uses featured markets and bookmaker aliases", a
       apiKey: "test-key",
       league: "MLB",
       books: ["draftkings", "caesars"],
-      startsAfter: "2026-09-24T20:00:00Z",
-      startsBefore: "2026-09-25T12:00:00Z"
+      startsAfter: "2026-09-24T20:00:00.000Z",
+      startsBefore: "2026-09-25T12:00:00.000Z"
     });
 
+    assert.equal(new URL(requestedUrl).searchParams.get("commenceTimeFrom"), "2026-09-24T20:00:00Z");
+    assert.equal(new URL(requestedUrl).searchParams.get("commenceTimeTo"), "2026-09-25T12:00:00Z");
     assert.equal(result.ok, true);
     assert.equal(result.provider, "The Odds API");
     assert.equal(result.events.length, 1);
@@ -261,13 +263,15 @@ test("The Odds API MLB props use free events discovery then event odds", async (
     const result = await fetchTheOddsApiMlbProps({
       apiKey: "test-key",
       books: ["draftkings"],
-      startsAfter: "2026-09-24T20:00:00Z",
-      startsBefore: "2026-09-25T12:00:00Z"
+      startsAfter: "2026-09-24T20:00:00.000Z",
+      startsBefore: "2026-09-25T12:00:00.000Z"
     });
 
     assert.equal(result.source, "The Odds API");
     assert.equal(result.events.length, 1);
     assert.equal(seen.length, 2);
+    assert.equal(new URL(seen[0]).searchParams.get("commenceTimeFrom"), "2026-09-24T20:00:00Z");
+    assert.equal(new URL(seen[0]).searchParams.get("commenceTimeTo"), "2026-09-25T12:00:00Z");
     assert.match(seen[0], /baseball_mlb\/events\?/);
     assert.match(
       seen[1],
