@@ -1,5 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { createHash } from "node:crypto";
 
 import {
   loadNflData,
@@ -608,12 +610,12 @@ async function backtestSeason(season, minWeek) {
       metrics(rows)
     ])
   );
-  const developmentCalibration = Object.fromEntries(
+  const developmentCalibration = season === 2024 ? Object.fromEntries(
     Object.entries(rowsByMarket).map(([market, rows]) => [
       market,
       residualCalibration(rows, market)
     ])
-  );
+  ) : null;
 
   return {
     season,
@@ -646,15 +648,40 @@ function aggregate(seasonReports) {
 }
 
 async function main() {
-  const seasons = String(argValue("seasons", "2024,2025"))
+  const seasons = String(argValue("seasons", "2024"))
     .split(",")
     .map((value) => Number(value.trim()))
     .filter(Number.isFinite);
+  const holdout = seasons.length === 1 && seasons[0] === 2025;
+  const calibrationPath = argValue("frozen-calibration", null);
+  if (seasons.length !== 1 || ![2024, 2025].includes(seasons[0]) ||
+      (holdout && !calibrationPath)) {
+    throw new Error("Run development with --seasons=2024; holdout requires --seasons=2025 and --frozen-calibration=<frozen 2024 calibration report.json>.");
+  }
+  const outputDir = argValue("output-dir", "artifacts/nfl-player-props-backtest");
+  if (holdout && path.resolve(calibrationPath).toLowerCase() ===
+      path.resolve(outputDir, "report.json").toLowerCase()) {
+    throw new Error("Frozen calibration input must not be overwritten; choose a different --output-dir.");
+  }
+  let frozenCalibration = null;
+  let calibrationSha256 = null;
+  if (holdout) {
+    const bytes = fs.readFileSync(calibrationPath);
+    const development = JSON.parse(bytes.toString("utf8"));
+    if (JSON.stringify(development.seasons) !== "[2024]" || !development.developmentCalibration) {
+      throw new Error("Holdout requires a frozen 2024 calibration report.");
+    }
+    frozenCalibration = development.developmentCalibration;
+    for (const market of Object.keys(V21_INCUMBENT)) {
+      const c = frozenCalibration[market];
+      if (!c || !BASELINE_WINDOWS.includes(c.acceptedBaselineWindow) ||
+          !RESIDUAL_WEIGHT_GRID.includes(c.acceptedWeight)) {
+        throw new Error(`Invalid frozen calibration for ${market}`);
+      }
+    }
+    calibrationSha256 = createHash("sha256").update(bytes).digest("hex");
+  }
   const minWeek = Number(argValue("min-week", "4"));
-  const outputDir = argValue(
-    "output-dir",
-    "artifacts/nfl-player-props-backtest"
-  );
 
   const seasonReports = [];
   for (const season of seasons) {
@@ -677,12 +704,30 @@ async function main() {
     generatedAt: new Date().toISOString(),
     seasons,
     minWeek,
+    phase: holdout ? "UNTOUCHED_HOLDOUT_EVALUATION" : "DEVELOPMENT",
+    holdoutTouched: holdout,
+    frozenCalibrationSha256: calibrationSha256,
+    holdoutEvaluation: holdout ? Object.fromEntries(
+      Object.entries(frozenCalibration).map(([market, calibration]) => {
+        const rows = seasonReports.flatMap((s) => s.rowsByMarket[market] || []);
+        const incumbent = V21_INCUMBENT[market];
+        return [market, {
+          frozenBaselineWindow: calibration.acceptedBaselineWindow,
+          frozenWeight: calibration.acceptedWeight,
+          challenger: metrics(rows, (row) => anchoredPrediction(row, calibration.acceptedWeight, calibration.acceptedBaselineWindow)),
+          incumbent: metrics(rows, (row) => anchoredPrediction(row, incumbent.residualWeight, incumbent.baselineWindow)),
+          productionEligible: false
+        }];
+      })
+    ) : null,
     leakagePolicy:
       "Target-game statistics are unavailable until the following day. Historical nflverse gameday+gametime is converted from Eastern Time to exact UTC kickoff; snap counts, NGS, and depth-chart rows are filtered by live-availability timestamps before that kickoff. Missing gametime falls back conservatively to 00:00Z on game day.",
     historicalWeatherPolicy:
       "Historical finalized weather is intentionally excluded because it is not equivalent to a pregame forecast.",
     developmentPolicy:
-      "Within 2024, weeks 4-10 select a rolling baseline window (3/4/5/6/8 games) plus residual weight. Weeks 11+ must beat the frozen NFL Props v2.1 incumbent by the promotion margin. 2025 remains untouched.",
+      holdout
+        ? "2025 is evaluated once against the frozen, hashed 2024 calibration. No holdout tuning or automatic production promotion."
+        : "Within 2024, weeks 4-10 select a rolling baseline window (3/4/5/6/8 games) plus residual weight. Weeks 11+ must beat the frozen NFL Props v2.1 incumbent by the promotion margin. 2025 remains untouched.",
     marketCalibrationAvailable: false,
     promotion: {
       productionEligible: false,
@@ -730,6 +775,8 @@ async function main() {
     "",
     `Seasons: ${seasons.join(", ")} | Minimum week: ${minWeek}`,
     "",
+    "Raw opportunity model diagnostics (not the frozen challenger):",
+    "",
     "| Market | Rows | MAE | RMSE | Bias | Rolling-Mean MAE | Δ MAE vs Baseline |",
     "|---|---:|---:|---:|---:|---:|---:|"
   ];
@@ -742,6 +789,8 @@ async function main() {
       `| ${market} | ${item.rows} | ${fmt(item.mae)} | ${fmt(item.rmse)} | ${fmt(item.bias)} | ${fmt(item.baselineMae)} | ${fmt(item.maeImprovementVsRollingMean)} |`
     );
   }
+
+  if (holdout) lines.push(...formatHoldoutSummary(report));
 
   lines.push(
     "",
@@ -758,6 +807,9 @@ async function main() {
   console.log(
     "NFL_PLAYER_PROPS_BACKTEST_SUMMARY=" +
       JSON.stringify({
+        phase: report.phase,
+        frozenCalibrationSha256: report.frozenCalibrationSha256,
+        holdoutEvaluation: report.holdoutEvaluation,
         aggregate: aggregateMetrics,
         developmentCalibration: report.developmentCalibration,
         seasons: compactSeasons,
@@ -766,4 +818,15 @@ async function main() {
   );
 }
 
-await main();
+export function formatHoldoutSummary(report) {
+  const lines = ["", "## Frozen holdout comparison", "",
+    `Calibration SHA-256: ${report.frozenCalibrationSha256}`, "",
+    "| Market | Window | Weight | Rows | Frozen MAE | Incumbent MAE |",
+    "|---|---:|---:|---:|---:|---:|"];
+  for (const [market, item] of Object.entries(report.holdoutEvaluation || {})) {
+    lines.push(`| ${market} | ${item.frozenBaselineWindow} | ${item.frozenWeight} | ${item.challenger.rows} | ${item.challenger.mae} | ${item.incumbent.mae} |`);
+  }
+  return lines;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main();

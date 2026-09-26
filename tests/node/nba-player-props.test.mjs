@@ -1,7 +1,7 @@
 import test, { afterEach } from "node:test";
 import assert from "node:assert/strict";
 
-import nbaPropsHandler from "../../sharp-service/api/nbaprops.js";
+import nbaPropsHandler from "../../sharp-service/handlers/nbaprops.js";
 import {
   normalizePlayerName,
   parseMinutes,

@@ -1,7 +1,7 @@
 import test, { afterEach } from "node:test";
 import assert from "node:assert/strict";
 
-import nbaHandler from "../../sharp-service/api/nbamodel.js";
+import nbaHandler from "../../sharp-service/handlers/nbamodel.js";
 import {
   normalizeTeam,
   projectEvent,
