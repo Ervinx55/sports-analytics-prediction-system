@@ -9,10 +9,38 @@ import {
 } from "../../sharp-service/lib/sharpapi-provider.js";
 
 afterEach(() => {
-  globalThis.__edgeLabSharpApi = {
-    cache: new Map(),
-    inFlight: new Map()
-  };
+  globalThis.__edgeLabSharpApi.cache.clear();
+  globalThis.__edgeLabSharpApi.inFlight.clear();
+  globalThis.__edgeLabSharpApi.retryAt = 0;
+});
+
+test("SharpAPI respects Retry-After across leagues without repeated upstream calls", async (t) => {
+  let now = Date.parse("2026-09-25T12:00:00Z");
+  t.mock.method(Date, "now", () => now);
+  let calls = 0;
+  t.mock.method(globalThis, "fetch", async () => {
+    calls++;
+    return new Response(JSON.stringify({ message: "Rate limited" }), {
+      status: 429, headers: { "retry-after": "120" }
+    });
+  });
+  await assert.rejects(fetchSharpApiOdds({ apiKey: "test", league: "MLB" }), { status: 429 });
+  await assert.rejects(fetchSharpApiOdds({ apiKey: "test", league: "NFL" }), { status: 429 });
+  assert.equal(calls, 1);
+  now += 121_000;
+  await assert.rejects(fetchSharpApiOdds({ apiKey: "test", league: "NFL" }), { status: 429 });
+  assert.equal(calls, 2);
+});
+
+test("SharpAPI cache separates requested date windows", async (t) => {
+  let calls = 0;
+  t.mock.method(globalThis, "fetch", async () => {
+    calls++;
+    return new Response(JSON.stringify({ data: [], pagination: { has_more: false } }));
+  });
+  await fetchSharpApiOdds({ apiKey: "test", league: "MLB", startsBefore: "2026-09-25T23:59:59Z" });
+  await fetchSharpApiOdds({ apiKey: "test", league: "MLB", startsBefore: "2026-09-26T23:59:59Z" });
+  assert.equal(calls, 2);
 });
 
 const mainRows = [

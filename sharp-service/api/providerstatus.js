@@ -39,8 +39,8 @@ function sportsGameOddsState(usage, configured, error = null) {
   }
 
   const constrained = usage?.mostConstrainedObjects || null;
-  const remaining = Number(constrained?.remainingObjects);
-  const usagePct = Number(constrained?.usagePct);
+  const remaining = constrained?.remainingObjects == null ? NaN : Number(constrained.remainingObjects);
+  const usagePct = constrained?.usagePct == null ? NaN : Number(constrained.usagePct);
   let status = "READY";
   if (Number.isFinite(remaining) && remaining <= 0) {
     status = "QUOTA_EXHAUSTED";
@@ -72,8 +72,8 @@ function theOddsApiState(usage, configured) {
     };
   }
 
-  const remaining = Number(usage?.remaining);
-  const reserve = Number(usage?.reserve);
+  const remaining = usage?.remaining == null ? NaN : Number(usage.remaining);
+  const reserve = usage?.reserve == null ? NaN : Number(usage.reserve);
   let status = "READY";
   if (Number.isFinite(remaining) && remaining <= 0) {
     status = "CREDITS_EXHAUSTED";
