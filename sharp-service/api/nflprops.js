@@ -10,9 +10,9 @@ import {
   PLAYER_PROP_VERSION,
   findPlayerIdentity,
   gradePropMarket,
-  loadNflPlayerData,
-  projectPlayerOpportunity
+  loadNflPlayerData
 } from "../lib/nfl-player-props.js";
+import { createEventOpportunityProjector } from "../lib/nfl-event-projections.js";
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -575,6 +575,16 @@ export default async function handler(req, res) {
         : null;
 
       const playerResults = [];
+      const projectOpportunity = createEventOpportunityProjector({
+        event,
+        schedule: nflData.schedule,
+        season,
+        playerStats: playerData.playerStats,
+        snapCounts: playerData.snapCounts,
+        ngs: playerData.ngs,
+        depthCharts: nflData.depthCharts,
+        weatherContext
+      });
       for (const prop of event.props) {
         const eventTeams = [
           normalizeTeam(
@@ -620,18 +630,10 @@ export default async function handler(req, res) {
                   )
                 )
               : null;
-        const opportunity = projectPlayerOpportunity({
+        const opportunity = projectOpportunity({
           playerName: prop.playerName,
           preferredTeam: providerTeam,
           preferredPosition: prop.playerPosition,
-          event,
-          schedule: nflData.schedule,
-          season,
-          playerStats: playerData.playerStats,
-          snapCounts: playerData.snapCounts,
-          ngs: playerData.ngs,
-          depthCharts: nflData.depthCharts,
-          weatherContext,
           opponentSnapshot: opponent ? snapshots.get(opponent) : null
         });
 

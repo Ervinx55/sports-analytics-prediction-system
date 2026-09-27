@@ -398,3 +398,25 @@ test("schedule lookup preserves first-match dates and refreshes after schedule c
   assert.deepEqual(pointInTimeRows(rows, options), rows);
   assert.deepEqual(pointInTimeRows([{ game_id: "missing" }], options), []);
 });
+import { createEventOpportunityProjector } from '../../sharp-service/lib/nfl-event-projections.js';
+
+test('event projection reuse preserves real projections and every sportsbook candidate', () => {
+  const context = { event, schedule, season: 2026, playerStats, snapCounts, ngs, depthCharts, weatherContext: { controlledEnvironment: true } };
+  const calculate = createEventOpportunityProjector(context);
+  const player = { playerName: 'Jayden Reed', preferredTeam: 'GB', preferredPosition: 'WR', opponentSnapshot: { defYppAllowed: 5.8 } };
+  const expected = projectPlayerOpportunity({ ...context, ...player });
+  const actual = calculate(player);
+  assert.deepEqual(actual, expected);
+  const original = structuredClone(actual);
+  for (const [statID, line] of [['receiving_yards', 70.5], ['receiving_receptions', 5.5]]) {
+    const prop = { playerName: player.playerName, statID,
+      over: { books: { draftkings: { odds: -110, line, available: true } } },
+      under: { books: { draftkings: { odds: -110, line, available: true } } }
+    };
+    const candidates = gradePropMarket(prop, calculate(player));
+    assert.equal(candidates.length, 2);
+    assert.deepEqual(candidates, gradePropMarket(prop, expected));
+    assert.ok(candidates.every(row => row.productionWeight === 0 && row.status === 'PASS'));
+  }
+  assert.deepEqual(actual, original);
+});
