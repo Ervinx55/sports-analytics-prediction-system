@@ -40,7 +40,7 @@ function startsAt(game) {
 
 function eventFromGame(game) {
   return {
-    eventID: `bdl:${game.id}`,
+    eventID: `${game.source === "ESPN" ? "espn" : "bdl"}:${game.id}`,
     startsAt: startsAt(game),
     matchup: {
       away: {
