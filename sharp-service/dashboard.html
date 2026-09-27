@@ -1959,7 +1959,7 @@
     $("healthDot").classList.toggle("bad",bad);
     $("healthText").textContent=
       data.summary?.dataMode==="SCHEDULE_ONLY"
-      ? "Games connected · market provider quota exhausted"
+      ? "Games connected · awaiting validated model markets"
       : bad
       ? "Some data sources or pipeline components are degraded"
       : providerWatch
