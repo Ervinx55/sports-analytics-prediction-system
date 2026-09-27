@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { gradeMarket } from "../_shared/team-market-grading.mjs";
 
 function n(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
@@ -219,7 +220,10 @@ Deno.serve(async (req) => {
       attributionMap.set(String(a.leg_type) + ":" + String(a.observation_id), a);
     }
 
-    const team = (teamResult.data ?? []).map((x: any) => {
+    // Retain invalid historical records in storage for audit, but never count
+    // an ungradeable market as a win/loss or a missed opportunity.
+    const validTeamRows = (teamResult.data ?? []).filter((x: any) => gradeMarket(x,x.away_score,x.home_score)!==null);
+    const team = validTeamRows.map((x: any) => {
       const decisionStatus = x.decision_status;
       const passEvaluation =
         decisionStatus === "PASS" ? teamPassEvaluation(x) : null;
@@ -280,6 +284,7 @@ Deno.serve(async (req) => {
         summary: {
           team: {
             total: team.length,
+            invalidRowsExcluded: (teamResult.data?.length ?? 0) - team.length,
             plays: teamPlays.length,
             passes: teamPasses.length,
             playRecord: record(teamPlays),

@@ -1,3 +1,4 @@
+import { gradeMarket } from '../_shared/team-market-grading.mjs';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 async function fetchJson(url: string) {
@@ -45,45 +46,6 @@ function resolveDecision(obs: any, sharpRows: any[]) {
     status: sharp?.final_status === "FINAL_PLAY" ? "PLAY" : "PASS",
     sharp,
   };
-}
-
-function gradeMarket(obs: any, awayScore: number, homeScore: number) {
-  let actualValue: number | null = null;
-  let comparison = 0;
-
-  if (obs.market_type === "moneyline") {
-    actualValue = obs.market_side === "away" ? awayScore : homeScore;
-    const opponent = obs.market_side === "away" ? homeScore : awayScore;
-    comparison = actualValue - opponent;
-  } else if (obs.market_type === "spread") {
-    const line = Number(obs.line);
-    if (!Number.isFinite(line)) return null;
-    if (obs.market_side === "away") {
-      actualValue = awayScore + line;
-      comparison = actualValue - homeScore;
-    } else {
-      actualValue = homeScore + line;
-      comparison = actualValue - awayScore;
-    }
-  } else if (obs.market_type === "total") {
-    const line = Number(obs.line);
-    if (!Number.isFinite(line)) return null;
-    actualValue = awayScore + homeScore;
-    comparison =
-      obs.market_side === "over"
-        ? actualValue - line
-        : line - actualValue;
-  } else {
-    return null;
-  }
-
-  if (Math.abs(comparison) <= 1e-9) {
-    return { actualValue, outcome: "PUSH", won: false, pushed: true };
-  }
-  if (comparison > 0) {
-    return { actualValue, outcome: "W", won: true, pushed: false };
-  }
-  return { actualValue, outcome: "L", won: false, pushed: false };
 }
 
 Deno.serve(async (req) => {
@@ -162,8 +124,8 @@ Deno.serve(async (req) => {
 
       if (feed?.gameData?.status?.abstractGameState !== "Final") continue;
 
-      const awayScore = Number(feed?.liveData?.linescore?.teams?.away?.runs);
-      const homeScore = Number(feed?.liveData?.linescore?.teams?.home?.runs);
+      const awayScore = feed?.liveData?.linescore?.teams?.away?.runs;
+      const homeScore = feed?.liveData?.linescore?.teams?.home?.runs;
       if (!Number.isFinite(awayScore) || !Number.isFinite(homeScore)) continue;
 
       const inserts: any[] = [];

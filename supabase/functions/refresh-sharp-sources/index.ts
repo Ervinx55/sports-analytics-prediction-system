@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { fetchSourceText } from "../_shared/source-fetch.mjs";
 
 const BOOKMAKER_CSV =
   "https://lines.bookmaker.eu/en/sports/baseball/mlb.csv";
@@ -173,12 +174,10 @@ function quoteRowsForGame(args: {
 }
 
 async function captureBookmaker(observedAt: string) {
-  const r = await fetch(BOOKMAKER_CSV, {
+  const text = await fetchSourceText(BOOKMAKER_CSV, {
     headers: { accept: "text/csv,*/*" },
     cache: "no-store",
   });
-  if (!r.ok) throw new Error(`BookMaker CSV returned ${r.status}`);
-  const text = await r.text();
   const lines = text.split(/\r?\n/).filter(Boolean).slice(1);
   const rows: Record<string, unknown>[] = [];
 
@@ -283,12 +282,10 @@ function parseVsinRows(html: string, observedAt: string) {
 async function captureVsinCirca(observedAt: string) {
   const pages = await Promise.allSettled(
     VSIN_CIRCA_URLS.map(async (url) => {
-      const r = await fetch(url, {
+      const html = await fetchSourceText(url, {
         headers: { accept: "text/html,*/*" },
         cache: "no-store",
       });
-      if (!r.ok) throw new Error(`VSiN Circa page returned ${r.status}`);
-      const html = await r.text();
       const rows = parseVsinRows(html, observedAt);
       return rows.map((row: any) => ({
         ...row,
@@ -520,7 +517,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({
-        ok: true,
+        ok: sourceErrors.length < 2,
         observedAt,
         capturedRows: captured.length,
         sourceErrors,
@@ -528,7 +525,7 @@ Deno.serve(async (req) => {
         evaluationCount: evaluations.length,
         evaluations,
       }),
-      { headers: { "content-type": "application/json" } },
+      { status: sourceErrors.length >= 2 ? 503 : 200, headers: { "content-type": "application/json" } },
     );
   } catch (error) {
     return new Response(
