@@ -1,0 +1,2 @@
+# Reconstruction manifests hash exact bytes; keep source identical on Windows and CI.
+* text=auto eol=lf

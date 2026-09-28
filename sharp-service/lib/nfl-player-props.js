@@ -145,20 +145,33 @@ function rowPlayerId(row = {}) {
   );
 }
 
+// Build once per projection (or standalone point-in-time filter), not once
+// per historical row. Keep this request-local so mutable datasets cannot reuse
+// an obsolete global index. First-match semantics mirror Array.find.
+function indexSchedule(schedule) {
+  if (!Array.isArray(schedule)) return schedule;
+  const byId = new Map();
+  const byWeekTeam = new Map();
+  for (const game of schedule) {
+    if (!byId.has(game.game_id)) byId.set(game.game_id, game);
+    for (const team of [game.home_team, game.away_team]) {
+      const key = JSON.stringify([num(game.season), num(game.week), team]);
+      if (!byWeekTeam.has(key)) byWeekTeam.set(key, game);
+    }
+  }
+  return { byId, byWeekTeam };
+}
+
 function gameDateForRow(row, schedule) {
   if (row.game_id) {
-    const match = schedule.find((game) => game.game_id === row.game_id);
+    const match = schedule.byId.get(row.game_id);
     if (match?.gameday) return String(match.gameday);
   }
   const season = num(row.season);
   const week = num(row.week);
   const team = rowTeam(row);
   if (season && week && team) {
-    const match = schedule.find((game) => (
-      num(game.season) === season &&
-      num(game.week) === week &&
-      [game.home_team, game.away_team].includes(team)
-    ));
+    const match = schedule.byWeekTeam.get(JSON.stringify([season, week, team]));
     if (match?.gameday) return String(match.gameday);
   }
   return null;
@@ -186,6 +199,7 @@ function pointInTimeRows(rows, {
 } = {}) {
   const cutoffMs = Date.parse(cutoff || "");
   if (!Number.isFinite(cutoffMs)) return [];
+  schedule = indexSchedule(schedule);
   return (rows || []).filter((row) => {
     const availableAt = inferredAvailableAt(row, schedule, source);
     return availableAt !== null && availableAt <= cutoffMs;
@@ -787,6 +801,7 @@ function projectPlayerOpportunity({
   weatherContext = null,
   opponentSnapshot = null
 }) {
+  schedule = indexSchedule(schedule);
   const cutoff = event.startsAt;
   const eventTeams = [
     normalizeTeam(event?.matchup?.home?.name || event?.matchup?.home?.short),

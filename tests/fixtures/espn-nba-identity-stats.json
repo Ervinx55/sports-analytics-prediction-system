@@ -1,0 +1,415 @@
+{
+  "$ref": "http://sports.core.api.espn.com/v2/sports/basketball/leagues/nba/events/401810150/competitions/401810150/competitors/4/roster/5107156/statistics/0?lang=en&region=us",
+  "splits": {
+    "categories": [
+      {
+        "stats": [
+          {
+            "name": "blocks",
+            "value": 0
+          },
+          {
+            "name": "defensiveRebounds",
+            "value": 3
+          },
+          {
+            "name": "steals",
+            "value": 0
+          },
+          {
+            "name": "avgDefensiveRebounds",
+            "value": 3
+          },
+          {
+            "name": "avgBlocks",
+            "value": 0
+          },
+          {
+            "name": "avgSteals",
+            "value": 0
+          },
+          {
+            "name": "avg48DefensiveRebounds",
+            "value": 13.09091
+          },
+          {
+            "name": "avg48Blocks",
+            "value": 0
+          },
+          {
+            "name": "avg48Steals",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "stats": [
+          {
+            "name": "largestLead",
+            "value": 7
+          },
+          {
+            "name": "disqualifications",
+            "value": 0
+          },
+          {
+            "name": "flagrantFouls",
+            "value": 0
+          },
+          {
+            "name": "fouls",
+            "value": 2
+          },
+          {
+            "name": "ejections",
+            "value": 0
+          },
+          {
+            "name": "technicalFouls",
+            "value": 0
+          },
+          {
+            "name": "rebounds",
+            "value": 3
+          },
+          {
+            "name": "minutes",
+            "value": 11
+          },
+          {
+            "name": "avgMinutes",
+            "value": 11
+          },
+          {
+            "name": "NBARating",
+            "value": 3.7
+          },
+          {
+            "name": "plusMinus",
+            "value": 15
+          },
+          {
+            "name": "avgRebounds",
+            "value": 3
+          },
+          {
+            "name": "avgFouls",
+            "value": 2
+          },
+          {
+            "name": "avgFlagrantFouls",
+            "value": 0
+          },
+          {
+            "name": "avgTechnicalFouls",
+            "value": 0
+          },
+          {
+            "name": "avgEjections",
+            "value": 0
+          },
+          {
+            "name": "avgDisqualifications",
+            "value": 0
+          },
+          {
+            "name": "assistTurnoverRatio",
+            "value": 0
+          },
+          {
+            "name": "stealFoulRatio",
+            "value": 0
+          },
+          {
+            "name": "blockFoulRatio",
+            "value": 0
+          },
+          {
+            "name": "avgTeamRebounds",
+            "value": 0
+          },
+          {
+            "name": "totalRebounds",
+            "value": 3
+          },
+          {
+            "name": "totalTechnicalFouls",
+            "value": 0
+          },
+          {
+            "name": "teamAssistTurnoverRatio",
+            "value": 0
+          },
+          {
+            "name": "stealTurnoverRatio",
+            "value": 0
+          },
+          {
+            "name": "avg48Rebounds",
+            "value": 13.09091
+          },
+          {
+            "name": "avg48Fouls",
+            "value": 8.727273
+          },
+          {
+            "name": "avg48FlagrantFouls",
+            "value": 0
+          },
+          {
+            "name": "avg48TechnicalFouls",
+            "value": 0
+          },
+          {
+            "name": "avg48Ejections",
+            "value": 0
+          },
+          {
+            "name": "avg48Disqualifications",
+            "value": 0
+          },
+          {
+            "name": "r40",
+            "value": 10.909090909090908
+          },
+          {
+            "name": "gamesPlayed",
+            "value": 1
+          },
+          {
+            "name": "gamesStarted",
+            "value": 0
+          },
+          {
+            "name": "doubleDouble",
+            "value": 0
+          },
+          {
+            "name": "tripleDouble",
+            "value": 0
+          }
+        ]
+      },
+      {
+        "stats": [
+          {
+            "name": "assists",
+            "value": 0
+          },
+          {
+            "name": "fieldGoals",
+            "value": 0.333333
+          },
+          {
+            "name": "fieldGoalsAttempted",
+            "value": 3
+          },
+          {
+            "name": "fieldGoalsMade",
+            "value": 1
+          },
+          {
+            "name": "fieldGoalPct",
+            "value": 33.33300018310547
+          },
+          {
+            "name": "freeThrows",
+            "value": 0
+          },
+          {
+            "name": "freeThrowPct",
+            "value": 0
+          },
+          {
+            "name": "freeThrowsAttempted",
+            "value": 0
+          },
+          {
+            "name": "freeThrowsMade",
+            "value": 0
+          },
+          {
+            "name": "offensiveRebounds",
+            "value": 0
+          },
+          {
+            "name": "points",
+            "value": 2
+          },
+          {
+            "name": "turnovers",
+            "value": 1
+          },
+          {
+            "name": "threePointPct",
+            "value": 0
+          },
+          {
+            "name": "threePointFieldGoalsAttempted",
+            "value": 1
+          },
+          {
+            "name": "threePointFieldGoalsMade",
+            "value": 0
+          },
+          {
+            "name": "totalTurnovers",
+            "value": 1
+          },
+          {
+            "name": "pointsInPaint",
+            "value": -1
+          },
+          {
+            "name": "brickIndex",
+            "value": 0
+          },
+          {
+            "name": "avgFieldGoalsMade",
+            "value": 1
+          },
+          {
+            "name": "avgFieldGoalsAttempted",
+            "value": 3
+          },
+          {
+            "name": "avgThreePointFieldGoalsMade",
+            "value": 0
+          },
+          {
+            "name": "avgThreePointFieldGoalsAttempted",
+            "value": 1
+          },
+          {
+            "name": "avgFreeThrowsMade",
+            "value": 0
+          },
+          {
+            "name": "avgFreeThrowsAttempted",
+            "value": 0
+          },
+          {
+            "name": "avgPoints",
+            "value": 2
+          },
+          {
+            "name": "avgOffensiveRebounds",
+            "value": 0
+          },
+          {
+            "name": "avgAssists",
+            "value": 0
+          },
+          {
+            "name": "avgTurnovers",
+            "value": 1
+          },
+          {
+            "name": "offensiveReboundPct",
+            "value": 0
+          },
+          {
+            "name": "estimatedPossessions",
+            "value": 4
+          },
+          {
+            "name": "avgEstimatedPossessions",
+            "value": 4
+          },
+          {
+            "name": "pointsPerEstimatedPossessions",
+            "value": 0.5
+          },
+          {
+            "name": "avgTeamTurnovers",
+            "value": 0
+          },
+          {
+            "name": "avgTotalTurnovers",
+            "value": 1
+          },
+          {
+            "name": "threePointFieldGoalPct",
+            "value": 0
+          },
+          {
+            "name": "twoPointFieldGoalsMade",
+            "value": 1
+          },
+          {
+            "name": "twoPointFieldGoalsAttempted",
+            "value": 2
+          },
+          {
+            "name": "avgTwoPointFieldGoalsMade",
+            "value": 1
+          },
+          {
+            "name": "avgTwoPointFieldGoalsAttempted",
+            "value": 2
+          },
+          {
+            "name": "twoPointFieldGoalPct",
+            "value": 50
+          },
+          {
+            "name": "shootingEfficiency",
+            "value": 0.33333334
+          },
+          {
+            "name": "scoringEfficiency",
+            "value": 0.6666667
+          },
+          {
+            "name": "avg48FieldGoalsMade",
+            "value": 4.3636365
+          },
+          {
+            "name": "avg48FieldGoalsAttempted",
+            "value": 13.09091
+          },
+          {
+            "name": "avg48ThreePointFieldGoalsMade",
+            "value": 0
+          },
+          {
+            "name": "avg48ThreePointFieldGoalsAttempted",
+            "value": 4.3636365
+          },
+          {
+            "name": "avg48FreeThrowsMade",
+            "value": 0
+          },
+          {
+            "name": "avg48FreeThrowsAttempted",
+            "value": 0
+          },
+          {
+            "name": "avg48Points",
+            "value": 8.727273
+          },
+          {
+            "name": "avg48OffensiveRebounds",
+            "value": 0
+          },
+          {
+            "name": "avg48Assists",
+            "value": 0
+          },
+          {
+            "name": "avg48Turnovers",
+            "value": 4.3636365
+          },
+          {
+            "name": "p40",
+            "value": 7.272727272727273
+          },
+          {
+            "name": "a40",
+            "value": 0
+          }
+        ]
+      }
+    ]
+  }
+}

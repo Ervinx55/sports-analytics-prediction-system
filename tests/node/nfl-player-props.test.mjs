@@ -382,3 +382,41 @@ test("provider current-team identity overrides stale historical team after a mov
   assert.ok(result.projections.receiving_yards.mean > 0);
   assert.equal(result.dataQuality, "D");
 });
+
+
+test("schedule lookup preserves first-match dates and refreshes after schedule corrections", () => {
+  const games = [
+    { game_id: "known", season: 2026, week: 1, home_team: "GB", away_team: "CHI", gameday: "2026-09-10" },
+    { game_id: "known", season: 2026, week: 1, home_team: "GB", away_team: "CHI", gameday: "2026-09-01" }
+  ];
+  const byId = { game_id: "known", season: 2026, week: 1, team: "GB" };
+  const byTeam = { season: 2026, week: 1, team: "CHI" };
+  const rows = [byId, byTeam];
+  const options = { schedule: games, cutoff: "2026-09-05T12:00:00Z", source: "player_stats" };
+  assert.deepEqual(pointInTimeRows(rows, options), []);
+  games[0].gameday = "2026-09-01";
+  assert.deepEqual(pointInTimeRows(rows, options), rows);
+  assert.deepEqual(pointInTimeRows([{ game_id: "missing" }], options), []);
+});
+import { createEventOpportunityProjector } from '../../sharp-service/lib/nfl-event-projections.js';
+
+test('event projection reuse preserves real projections and every sportsbook candidate', () => {
+  const context = { event, schedule, season: 2026, playerStats, snapCounts, ngs, depthCharts, weatherContext: { controlledEnvironment: true } };
+  const calculate = createEventOpportunityProjector(context);
+  const player = { playerName: 'Jayden Reed', preferredTeam: 'GB', preferredPosition: 'WR', opponentSnapshot: { defYppAllowed: 5.8 } };
+  const expected = projectPlayerOpportunity({ ...context, ...player });
+  const actual = calculate(player);
+  assert.deepEqual(actual, expected);
+  const original = structuredClone(actual);
+  for (const [statID, line] of [['receiving_yards', 70.5], ['receiving_receptions', 5.5]]) {
+    const prop = { playerName: player.playerName, statID,
+      over: { books: { draftkings: { odds: -110, line, available: true } } },
+      under: { books: { draftkings: { odds: -110, line, available: true } } }
+    };
+    const candidates = gradePropMarket(prop, calculate(player));
+    assert.equal(candidates.length, 2);
+    assert.deepEqual(candidates, gradePropMarket(prop, expected));
+    assert.ok(candidates.every(row => row.productionWeight === 0 && row.status === 'PASS'));
+  }
+  assert.deepEqual(actual, original);
+});

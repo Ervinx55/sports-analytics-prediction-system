@@ -11,14 +11,14 @@
     "api/nflmodel.js": {
       "maxDuration": 30
     },
-    "api/nbamodel.js": {
-      "maxDuration": 30
-    },
-    "api/nbaprops.js": {
+    "api/models.js": {
       "maxDuration": 30
     }
   },
   "rewrites": [
+    { "source": "/api/nbamodel", "destination": "/api/models?route=nbamodel" },
+    { "source": "/api/nbaprops", "destination": "/api/models?route=nbaprops" },
+    { "source": "/api/providerstatus", "destination": "/api/models?route=providerstatus" },
     {
       "source": "/dashboard",
       "destination": "/dashboard.html"

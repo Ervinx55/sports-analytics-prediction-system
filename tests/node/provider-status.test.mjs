@@ -1,7 +1,7 @@
 import test, { afterEach, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
-import providerStatusHandler from "../../sharp-service/api/providerstatus.js";
+import providerStatusHandler from "../../sharp-service/handlers/providerstatus.js";
 
 const ENV_KEYS = [
   "SPORTS_ODDS_API_KEY",
@@ -84,6 +84,7 @@ test("provider status reports configured failover chain without exposing secrets
     res.body.providers.theOddsApi.status,
     "NOT_CONFIGURED"
   );
+  assert.equal(res.body.providers.theOddsApi.status, "AWAITING_FIRST_RESPONSE");
   assert.equal(res.body.oddsProviderReady, true);
 
   const serialized = JSON.stringify(res.body);

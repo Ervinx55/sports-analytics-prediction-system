@@ -261,6 +261,9 @@ export function backtestPlayerStats(
       )
     );
 
+  // Context depends on game and team, not stat or player. Reuse only within
+  // this immutable replay; historical availability checks still run per game.
+  const contextByGameTeam = new Map();
   const byPlayer = new Map();
   for (const row of seasonRows) {
     const key =
@@ -301,24 +304,16 @@ export function backtestPlayerStats(
               target,
               historicalGameById
             );
-          const context =
-            historicalEvent
-              ? buildNbaPropGameContext({
-                  propEvent:
-                    historicalEvent,
-                  boardEvent: null,
-                  games:
-                    historicalGames,
-                  season,
-                  playerTeamName:
-                    target?.team?.full_name ||
-                    target?.team?.abbreviation ||
-                    projection?.teamName ||
-                    null
-                })
-              : {
-                  available: false
-                };
+          const playerTeamName = target?.team?.full_name || target?.team?.abbreviation || projection?.teamName || null;
+          const contextKey = JSON.stringify([target?.game?.id, playerTeamName]);
+          let context = contextByGameTeam.get(contextKey);
+          if (!context) {
+            context = historicalEvent ? buildNbaPropGameContext({
+              propEvent: historicalEvent, boardEvent: null, games: historicalGames,
+              season, playerTeamName
+            }) : { available: false };
+            contextByGameTeam.set(contextKey, context);
+          }
           const contextProjection =
             applyNbaPropGameContext(
               projection,

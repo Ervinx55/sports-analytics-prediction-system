@@ -694,7 +694,12 @@ function nearestHourlyWeather(hourly, startsAt) {
   let bestIndex = -1;
   let bestDistance = Infinity;
   for (let i = 0; i < times.length; i += 1) {
-    const timestamp = Date.parse(times[i]);
+    // The request uses timezone=UTC, but Open-Meteo omits the ISO offset.
+    // Parsing that string as local time shifts the forecast on non-UTC hosts.
+    const time = String(times[i]);
+    const timestamp = Date.parse(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(time)
+      ? time
+      : `${time}Z`);
     if (!Number.isFinite(timestamp)) continue;
     const distance = Math.abs(timestamp - target);
     if (distance < bestDistance) {
