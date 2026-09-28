@@ -16,7 +16,7 @@ const pct=value=>value===null?'Unavailable':(value*100).toFixed(1)+'%';
 function render(){
  const kind=$('kind').value,data=state[kind];if(!data)return;
  const all=modelRows(data,kind),query=$('search').value.toLowerCase(),game=$('game').value;
- const rows=all.filter(r=>(!game||r.eventID===game)&&[r.away,r.home,r.playerName,r.label,r.marketType,r.line,r.statID,r.side].join(' ').toLowerCase().includes(query));
+ const rows=all.filter(r=>(!game||r.eventID===game)&&[r.away,r.home,r.playerName,r.label,r.marketType,r.line,r.statID,r.side].join(' ').replaceAll('_',' ').toLowerCase().includes(query));
  $('status').className='';$('status').textContent=rows.length+' of '+all.length+' upcoming model markets · '+(data.generatedAt?'Updated '+new Date(data.generatedAt).toLocaleString():'Update time unavailable');
  $('source').textContent=(data.oddsProvider?'Odds provider: '+data.oddsProvider+'. ':'')+'No NFL recommendations are enabled. Estimates older than 10 minutes are marked stale.';
  if(!all.length){$('cards').innerHTML='<div class="card">No upcoming '+(kind==='teams'?'team markets':'player props')+' were returned. There may be no priced games in the provider window; an empty response does not mean every game was graded PASS.</div>';return;}
