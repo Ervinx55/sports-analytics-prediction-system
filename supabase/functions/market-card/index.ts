@@ -1,3 +1,4 @@
+import { sharpQuoteTimestamp } from "../_shared/sharp-quote-age.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 function keyOf(row: any) {
@@ -376,7 +377,7 @@ Deno.serve(async (req) => {
           ),
           componentFreshness(
             "sharp",
-            sharp?.checked_at,
+            sharpQuoteTimestamp(sharp),
             targets.sharp,
             25,
             sharpRequired,
