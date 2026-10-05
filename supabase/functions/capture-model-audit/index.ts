@@ -149,7 +149,10 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const date = body.date ? String(body.date) : chicagoDate();
     const startsAfter = new Date().toISOString();
-    const startsBefore = new Date(Date.now() + 100 * 60_000).toISOString();
+    // Capture the upcoming slate before final inputs arrive; verification keeps
+    // incomplete candidates PENDING/PASS until they earn a final decision.
+    const horizonMinutes = body.lookaheadMinutes === 120 ? 120 : 24 * 60;
+    const startsBefore = new Date(Date.now() + horizonMinutes * 60_000).toISOString();
     const verifyParams = new URLSearchParams({
       date,
       includeWatch: "true",

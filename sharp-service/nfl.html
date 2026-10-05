@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Edge Lab · NFL Models</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;color:#edf4ff;background:#07101d}*{box-sizing:border-box}body{margin:0}main{max-width:1180px;margin:auto;padding:24px 16px}header,.controls,.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}h1{margin:8px 0}h2{font-size:18px;margin:0}a{color:#55cfff}button,select,input{font:inherit;background:#132238;color:inherit;border:1px solid #36516e;border-radius:10px;padding:11px}button{cursor:pointer}button:disabled{opacity:.5}.notice,.card{background:#0e1a2c;border:1px solid #223654;border-radius:14px;padding:16px;margin:16px 0}.notice{border-left:4px solid #ffbd4a;line-height:1.6}.muted{color:#a9b9cc;font-size:14px;line-height:1.5}.badge{font-size:12px;font-weight:800;color:#ffbd4a}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0}.stats div{background:#14243b;border-radius:9px;padding:12px}.stats small{display:block;color:#a9b9cc;font-size:11px}.stats strong{display:block;margin-top:5px;font-size:21px}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 16px}.card{min-width:0;overflow-wrap:anywhere}#status{min-height:24px;margin:18px 0}input{min-width:0;flex:1}.controls{margin:20px 0}.error{color:#ff9297}@media(max-width:650px){.cards{grid-template-columns:1fr}.stats strong{font-size:18px}.controls>*{max-width:100%}main{padding:18px 12px}}
+</style></head><body><main>
+<header><div><a href="/dashboard">← MLB dashboard</a><h1>Edge Lab · NFL Models</h1><div class="muted">Upcoming team markets and player props</div></div><button id="refresh">Refresh models</button></header>
+<div class="notice"><strong>Shadow analysis · production influence 0%</strong><br>These are model estimates for evaluation, not cleared betting recommendations. NFL team estimates include market calibration. Player props show the independent estimate separately from the market; the deployed prop decision remains market-only. Live injury adjustments are unavailable. NFL settlement tracking is not yet connected to this view.</div>
+<div class="controls"><select id="kind" aria-label="Market type"><option value="teams">Team markets</option><option value="props">Player props</option></select><input id="search" aria-label="Filter teams or players" placeholder="Filter team, player or market"><select id="game" aria-label="Game"><option value="">All games</option></select></div>
+<div id="status" role="status" aria-live="polite">Loading NFL team models…</div><div id="source" class="muted"></div><div id="cards" class="cards"></div>
+</main><script type="module">
+import {modelRows,marketLabel} from './nfl-view.js';
+const $=id=>document.getElementById(id);
+const state={teams:null,props:null};let sequence=0,controller;
+const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct=value=>value===null?'Unavailable':(value*100).toFixed(1)+'%';
+function render(){
+ const kind=$('kind').value,data=state[kind];if(!data)return;
+ const all=modelRows(data,kind),query=$('search').value.toLowerCase(),game=$('game').value;
+ const rows=all.filter(r=>(!game||r.eventID===game)&&[r.away,r.home,r.playerName,r.label,r.marketType,r.line,r.statID,r.side].join(' ').replaceAll('_',' ').toLowerCase().includes(query));
+ $('status').className='';$('status').textContent=rows.length+' of '+all.length+' upcoming model markets · '+(data.generatedAt?'Updated '+new Date(data.generatedAt).toLocaleString():'Update time unavailable');
+ $('source').textContent=(data.oddsProvider?'Odds provider: '+data.oddsProvider+'. ':'')+'No NFL recommendations are enabled. Estimates older than 10 minutes are marked stale.';
+ if(!all.length){$('cards').innerHTML='<div class="card">No upcoming '+(kind==='teams'?'team markets':'player props')+' were returned. There may be no priced games in the provider window; an empty response does not mean every game was graded PASS.</div>';return;}
+ $('cards').innerHTML=rows.length?rows.map(r=>{
+ const modelLabel=kind==='props'?'Independent model':'Calibrated model';
+ const gap=r.model!==null&&r.market!==null?(100*(r.model-r.market)).toFixed(1)+' pp':'Unavailable';
+ const label=marketLabel(r,kind);
+ return '<article class="card"><div class="heading"><h2>'+esc(r.away)+' @ '+esc(r.home)+'</h2><span class="badge">'+(r.stale?'STALE · ':'')+'SHADOW</span></div><p class="muted">'+esc(new Date(r.startsAt).toLocaleString())+'</p><strong>'+esc(label)+'</strong><div class="stats"><div><small>'+modelLabel+'</small><strong>'+pct(r.model)+'</strong></div><div><small>Exact-line market</small><strong>'+pct(r.market)+'</strong></div><div><small>Difference</small><strong>'+gap+'</strong></div></div><p class="muted">'+esc(r.bestBook||r.book||'Book unavailable')+' · Odds '+esc(r.bestOdds??r.odds??'unavailable')+' · Data quality '+esc(typeof r.dataQuality==='number'?(100*r.dataQuality).toFixed(0)+'%':r.dataQuality||'unknown')+'</p><p class="muted">'+esc(r.reason||'Production influence has not been earned.')+'</p>'+(r.stale?'<p class="error">Stale model response. Refresh before reviewing these estimates.</p>':'')+'</article>';
+ }).join(''):'<div class="card">No markets match this filter.</div>';
+}
+async function load(force=false){
+ const kind=$('kind').value,request=++sequence;controller?.abort();
+ if(state[kind]&&!force){populate();render();$('refresh').disabled=false;return;}
+ state[kind]=null;controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),60000);
+ $('refresh').disabled=true;$('status').className='';$('status').textContent='Loading NFL '+(kind==='teams'?'team markets':'player props')+'… Cold requests can take up to a minute.';$('cards').replaceChildren();$('source').textContent='';
+ try{
+  const response=await fetch('/api/'+(kind==='teams'?'nflmodel':'nflprops'),{signal:controller.signal,cache:'no-store'});
+  const data=await response.json();if(!response.ok||data.error)throw new Error(data.error||'API returned '+response.status);
+  if(request!==sequence)return;state[kind]=data;populate();render();
+ }catch(error){if(request!==sequence)return;$('status').className='error';$('status').textContent=error.name==='AbortError'?'The model request timed out. Use Refresh models to retry.':'Model unavailable: '+error.message;$('cards').replaceChildren();}
+ finally{clearTimeout(timeout);if(request===sequence)$('refresh').disabled=false;}
+}
+function populate(){const selected=$('game').value;const games=new Map(modelRows(state[$('kind').value],$('kind').value).map(r=>[r.eventID,r.away+' @ '+r.home]));$('game').innerHTML='<option value="">All games</option>'+[...games].map(([id,label])=>'<option value="'+esc(id)+'">'+esc(label)+'</option>').join('');if(games.has(selected))$('game').value=selected;}
+$('kind').addEventListener('change',()=>load());$('refresh').addEventListener('click',()=>load(true));$('search').addEventListener('input',render);$('game').addEventListener('change',render);setInterval(()=>{if(!$('refresh').disabled)render();},60000);load();
+</script></body></html>
