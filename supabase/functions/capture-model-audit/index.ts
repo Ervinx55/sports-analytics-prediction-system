@@ -151,7 +151,8 @@ Deno.serve(async (req) => {
     const startsAfter = new Date().toISOString();
     // Capture the upcoming slate before final inputs arrive; verification keeps
     // incomplete candidates PENDING/PASS until they earn a final decision.
-    const startsBefore = new Date(Date.now() + 24 * 60 * 60_000).toISOString();
+    const horizonMinutes = body.lookaheadMinutes === 120 ? 120 : 24 * 60;
+    const startsBefore = new Date(Date.now() + horizonMinutes * 60_000).toISOString();
     const verifyParams = new URLSearchParams({
       date,
       includeWatch: "true",

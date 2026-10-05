@@ -308,6 +308,14 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20260930070000",
+      "name": "adaptive_model_capture",
+      "path": "supabase/migrations/20260930070000_adaptive_model_capture.sql",
+      "sha256": "41ecc2e900ccb9b9157810b9a1f511954a26b8f83216fb2b45c9a88256be6ace",
+      "recoveredFromProduction": false,
+      "statementCount": 4
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
