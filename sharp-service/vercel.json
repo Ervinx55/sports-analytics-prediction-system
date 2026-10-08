@@ -15,7 +15,7 @@
   "rewrites": [
     {
       "source": "/api/crypto-candles",
-      "destination": "/api/providerstatus"
+      "destination": "/api/providerstatus?cryptoCandles=1"
     },
     {
       "source": "/dashboard",
