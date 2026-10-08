@@ -1,0 +1,31 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Crypto 15m Paper Lab</title><style>
+:root{font-family:system-ui,sans-serif;color-scheme:dark}body{margin:0;background:#0b1020;color:#f1f5f9;padding:24px;max-width:1150px;margin:auto}h1{margin-bottom:4px}.muted{color:#94a3b8}.panel{background:#151d31;border:1px solid #303b53;border-radius:14px;padding:18px;margin-top:18px}input,select,button{font:inherit;padding:10px;border-radius:8px;border:1px solid #4b5872;background:#111827;color:white}button{cursor:pointer;background:#2356a8}button:disabled{opacity:.5}table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:10px;border-bottom:1px solid #334155}small{color:#94a3b8}.good{color:#5eead4}.bad{color:#fda4af}#status{margin:12px 0}
+</style></head><body><h1>Crypto 15m · Paper Lab</h1><p class="muted">Live read-only quotes. Research only — no orders or validated betting signals.</p>
+<section class="panel"><label>Coinbase asset <select id="asset"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option><option>DOGE</option><option>BNB</option><option>HYPE</option><option>ZEC</option><option>NEAR</option></select></label>
+<label> Exact Kalshi series ticker <input id="series" placeholder="Enter verified series ticker"></label><button id="refresh">Refresh now</button><p id="status" class="muted">Enter a Kalshi series ticker to discover active contracts.</p><p>Coinbase latest: <strong id="price">—</strong> <small id="updated"></small></p></section>
+<section class="panel"><h2>Open Kalshi markets</h2><div style="overflow:auto"><table><thead><tr><th>Contract</th><th>Target</th><th>Close</th><th>YES ask</th><th>NO ask</th><th>Grade</th></tr></thead><tbody id="markets"><tr><td colspan="6">Awaiting series ticker</td></tr></tbody></table></div></section>
+<section class="panel"><h2>Paper observations</h2><p class="muted">Local session only. These are snapshots, not trades. Export before closing this page. Settlement grading and durable storage are not yet enabled.</p><button id="record" disabled>Record paper snapshot</button> <button id="export">Export JSON</button><p id="count">0 observations</p></section>
+<script>
+const $=id=>document.getElementById(id);let snapshot=null;const history=[];
+function cell(tr,s){const td=document.createElement("td");td.textContent=s==null?"—":String(s);tr.appendChild(td)}
+async function refresh(){
+ $("status").textContent="Fetching market data…";$("record").disabled=true;snapshot=null;
+ try{
+  const asset=$("asset").value,series=$("series").value.trim().toUpperCase();
+  const calls=[fetch("/api/crypto-coinbase?asset="+encodeURIComponent(asset),{cache:"no-store"})];
+  if(series)calls.push(fetch("/api/crypto-markets?series="+encodeURIComponent(series),{cache:"no-store"}));
+  const responses=await Promise.all(calls);
+  const results=await Promise.all(responses.map(async r=>{const d=await r.json();if(!r.ok)throw Error(d.detail||d.error||"HTTP "+r.status);return d}));
+  const coin=results[0],latest=coin.candles.at(-1);if(!latest)throw Error("No Coinbase candles");
+  $("price").textContent=asset+" $"+latest.close.toLocaleString();$("updated").textContent=new Date(latest.time*1000).toLocaleTimeString();
+  const markets=results[1]?.markets||[];$("markets").replaceChildren();
+  for(const m of markets){const tr=document.createElement("tr");[m.ticker,m.target,m.closeTime,m.yesAsk,m.noAsk,"PASS · uncalibrated"].forEach(v=>cell(tr,v));$("markets").appendChild(tr)}
+  if(!markets.length)$("markets").innerHTML="<tr><td colspan='6'>No open contracts returned for this series</td></tr>";
+  snapshot={recordedAt:new Date().toISOString(),asset,coinbasePrice:latest.close,coinbaseCandleTime:latest.time,series,markets,grade:"PASS",model:"unvalidated"};
+  $("record").disabled=!markets.length;$("status").textContent="Data loaded. No validated PLAY signals.";
+ }catch(e){$("status").textContent="Data unavailable: "+e.message;$("markets").replaceChildren();}
+}
+$("refresh").onclick=refresh;$("record").onclick=()=>{if(!snapshot)return;history.push(structuredClone(snapshot));$("count").textContent=history.length+" observations"};
+$("export").onclick=()=>{const blob=new Blob([JSON.stringify(history,null,2)],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="crypto-paper-observations.json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};
+refresh();
+</script></body></html>
