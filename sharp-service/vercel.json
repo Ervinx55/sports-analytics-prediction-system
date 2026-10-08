@@ -24,6 +24,14 @@
     {
       "source": "/dashboard/",
       "destination": "/dashboard.html"
+    },
+    {
+      "source": "/crypto",
+      "destination": "/crypto.html"
+    },
+    {
+      "source": "/crypto/",
+      "destination": "/crypto.html"
     }
   ],
   "git": {
