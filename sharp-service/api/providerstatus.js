@@ -1,3 +1,4 @@
+import cryptoCandlesHandler from "../lib/crypto-candles-handler.js";
 import {
   getSportsGameOddsUsageSnapshot
 } from "../lib/provider-protection.js";
@@ -161,6 +162,7 @@ export async function buildProviderStatus() {
 }
 
 export default async function handler(req, res) {
+  if (req.url?.split('?')[0] === '/api/crypto-candles') return cryptoCandlesHandler(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
