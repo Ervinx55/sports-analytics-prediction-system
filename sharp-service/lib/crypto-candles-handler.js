@@ -1,6 +1,6 @@
 // Public Coinbase candles for TradingView-style charting; no trading credentials.
 const ALLOWED = new Set(["BTC","ETH","SOL","XRP","DOGE","BNB","HYPE","ZEC","NEAR"]);
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Cache-Control", "s-maxage=15, stale-while-revalidate=15");
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
   const asset = String(req.query.asset || "ETH").toUpperCase();
