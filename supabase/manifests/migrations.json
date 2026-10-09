@@ -343,6 +343,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261006010000",
+      "name": "priority_sport_contracts",
+      "path": "supabase/migrations/20261006010000_priority_sport_contracts.sql",
+      "sha256": "2bbcb9732f01995828d36fb9b9c68b00f88087186d51f317e60d10b5a66c27df",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -350,7 +359,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 36,
+    "repository_total_migrations": 37,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

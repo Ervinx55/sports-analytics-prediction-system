@@ -18,7 +18,7 @@ test('worker requires service auth, validates input and defaults disabled',async
 });
 test('NBA/CFB coverage is honest without fetch or writes',async()=>{
  const h=load({fetchImpl:()=>{throw Error('unexpected fetch');}});
- for(const sport of ['NBA','CFB']){const r=await h(request({sport,kind:'team',requestId:'r'}));const b=await r.json();assert.equal(r.status,200);assert.equal(b.coverage.modelAvailable,false);assert.equal(b.captured,0);}
+ for(const sport of ['NBA','CFB','NHL','TENNIS','SOCCER']){const r=await h(request({sport,kind:'team',requestId:'r'}));const b=await r.json();assert.equal(r.status,200);assert.equal(b.coverage.modelAvailable,false);assert.equal(b.captured,0);}
 });
 test('NFL fetches configured source only, stores shadow predictions and exposes ingest faults',async()=>{
  const calls=[],urls=[];const at=new Date().toISOString();const db={rpc:async(name,{payload})=>{calls.push({name,payload});return {error:{message:'secret connection string'}};}};

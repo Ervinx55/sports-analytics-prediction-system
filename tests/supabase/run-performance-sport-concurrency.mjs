@@ -9,7 +9,7 @@ const admin=postgres({...config,database:'postgres'}),name=`sport_receipt_fixtur
 try {
  await admin`create database ${admin(name)}`;db=postgres({...config,database:name});
  await db.unsafe("do $$ begin if not exists(select from pg_roles where rolname='anon') then create role anon; end if; if not exists(select from pg_roles where rolname='authenticated') then create role authenticated; end if; if not exists(select from pg_roles where rolname='service_role') then create role service_role bypassrls; end if; end $$;",[],{prepare:false});
- for(const file of ['20261005000000_prediction_performance_ledger.sql','20261005010000_mlb_performance_publication.sql','20261006000000_sport_capture_receipts.sql'])await db.unsafe(readFileSync('supabase/migrations/'+file,'utf8'),[],{prepare:false});
+ for(const file of ['20261005000000_prediction_performance_ledger.sql','20261005010000_mlb_performance_publication.sql','20261006000000_sport_capture_receipts.sql','20261006010000_priority_sport_contracts.sql'])await db.unsafe(readFileSync('supabase/migrations/'+file,'utf8'),[],{prepare:false});
  const a=await db.reserve(),b=await db.reserve();
  try {
   const [{pid:pidA}]=await a`select pg_backend_pid() as pid`,[{pid:pidB}]=await b`select pg_backend_pid() as pid`;assert.notEqual(pidA,pidB);
@@ -37,3 +37,4 @@ try {
   console.log('Native sport receipt concurrency passed: pre/post immutable retry; source-lock wait crossing kickoff excluded; concurrent post-start duplicate; source drift rejected.');
  }finally{try{await a`rollback`;await b`rollback`;}finally{a.release();b.release();}}
 }catch(e){console.error(e.message,e.code??'');process.exitCode=1;}finally{if(db)await db.end();await admin`drop database if exists ${admin(name)} with (force)`;await admin.end();}
+

@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {normalizePrediction,marketKey} from '../../supabase/functions/_shared/performance-contract.mjs';
+import {adaptModelResponse} from '../../supabase/functions/_shared/performance-model-adapters.mjs';
+const base={sourceKey:'x',sport:'TENNIS',eventKey:'e',competitionKey:'open',tour:'ATP',marketScope:{unit:'MATCH'},marketType:'moneyline',side:'home',modelVersion:'v',modelMode:'SHADOW',modelAvailable:true,capturedAt:'2026-01-01T00:00:00Z',startsAt:'2026-01-01T01:00:00Z',quoteAt:'2026-01-01T00:00:00Z',modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',sourceIds:{event:'1'},settlementRule:{version:'v',format:'BEST_OF_3',retirement:'VOID',walkover:'VOID'}};
+const norm=p=>normalizePrediction(p,{now:'2026-01-01T00:00:00Z'});
+test('priority sports accept explicit scope and retain settlement metadata',()=>{for(const sport of ['TENNIS','NHL','SOCCER']){const p=norm({...base,sport,marketScope:sport==='TENNIS'?base.marketScope:{period:'REGULATION'}});assert.equal(p.eligibilityReasons.includes('INVALID_SPORT'),false);assert.deepEqual(p.marketScope,sport==='TENNIS'?base.marketScope:{period:'REGULATION'});}});
+test('new markets separate competition tour unit format and policy',()=>{const a=marketKey(norm(base));for(const change of [{competitionKey:'other'},{tour:'WTA'},{marketScope:{unit:'SET',set:1}},{settlementRule:{...base.settlementRule,format:'BEST_OF_5'}},{settlementRule:{...base.settlementRule,retirement:'ACTION'}}])assert.notEqual(marketKey(norm({...base,...change})),a);});
+test('missing new sport scope and policies exclude; unavailable models never emit rows',()=>{assert.ok(norm({...base,competitionKey:null}).eligibilityReasons.includes('INVALID_COMPETITION_SCOPE'));assert.ok(norm({...base,settlementRule:{version:'v'}}).eligibilityReasons.includes('UNKNOWN_TENNIS_POLICY'));for(const sport of ['NHL','TENNIS','SOCCER']){const r=adaptModelResponse({markets:[base]},{sport});assert.equal(r.predictions.length,0);assert.equal(r.coverage.modelAvailable,false);assert.equal(r.coverage.providerLeagues,null);}});
+
+test('regulation extra time set and game boundaries never collide',()=>{
+ for(const sport of ['SOCCER','NHL']){const a=norm({...base,sport,marketScope:{period:'REGULATION'}}),b=norm({...base,sport,marketScope:{period:sport==='SOCCER'?'INCLUDING_EXTRA_TIME':'INCLUDING_OVERTIME_SHOOTOUT'}});assert.notEqual(marketKey(a),marketKey(b));}
+ for(const marketScope of [{unit:'SET',set:0},{unit:'SET',set:1.5},{unit:'GAME',set:1,game:0}])assert.ok(norm({...base,marketScope}).eligibilityReasons.includes('INVALID_MARKET_SCOPE'));
+ assert.notEqual(marketKey(norm({...base,marketScope:{unit:'GAME',set:1,game:1}})),marketKey(norm({...base,marketScope:{unit:'GAME',set:2,game:1}})));
+ assert.ok(norm({...base,sport:'CRICKET'}).eligibilityReasons.includes('INVALID_SPORT'));
+});

@@ -7,10 +7,10 @@ const time=v=>text(v)&&/(?:Z|[+-]\d{2}:\d{2})$/.test(v)&&Number.isFinite(Date.pa
 export const MODEL_TTL_MS=5*60*1000;
 export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}={}) {
  const diagnostics=[];
- const coverage={sport,kind,modelAvailable:false,dataAvailable:false,complete:false,responseComplete:false,dataSourceComplete:null,state:'UNAVAILABLE',received:0,adapted:0,productionWeight:0};
+ const coverage={sport,kind,modelAvailable:false,dataAvailable:false,complete:false,responseComplete:false,dataSourceComplete:null,providerLeagues:null,requestedTours:sport==='TENNIS'?['ATP','WTA']:null,providerCoverageState:'UNVERIFIED',state:'UNAVAILABLE',received:0,adapted:0,productionWeight:0};
  const result={predictions:[],diagnostics,coverage};
  const reject=(reason,index=null)=>diagnostics.push({reason,index});
- if(sport==='NBA'||sport==='CFB'){reject('MODEL_SOURCE_UNAVAILABLE');return result;}
+ if(['NBA','CFB','NHL','TENNIS','SOCCER'].includes(sport)){reject('MODEL_SOURCE_UNAVAILABLE');return result;}
  if(!body||typeof body!=='object'||Array.isArray(body)){coverage.state='ERROR';reject('MALFORMED_MODEL_RESPONSE');return result;}
  if(sport==='MLB') {
   if(!MLB_TABLES.includes(kind)||!Array.isArray(body.rows)){reject('INVALID_MLB_OBSERVATION_PAGE');return result;}

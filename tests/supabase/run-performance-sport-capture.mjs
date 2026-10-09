@@ -10,7 +10,7 @@ const {PGlite}=await import(pathToFileURL(resolve(process.argv[2])).href);
 const db=new PGlite();
 try {
  await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
- for(const f of ['20261005000000_prediction_performance_ledger.sql','20261005010000_mlb_performance_publication.sql','20261006000000_sport_capture_receipts.sql'])if(existsSync('supabase/migrations/'+f))await db.exec(readFileSync('supabase/migrations/'+f,'utf8'));
+ for(const f of ['20261005000000_prediction_performance_ledger.sql','20261005010000_mlb_performance_publication.sql','20261006000000_sport_capture_receipts.sql','20261006010000_priority_sport_contracts.sql'])if(existsSync('supabase/migrations/'+f))await db.exec(readFileSync('supabase/migrations/'+f,'utf8'));
  const capture=new Date(Date.now()-60000).toISOString(),start=new Date(Date.now()+250).toISOString();
  const p={sourceKey:'sport-receipt:pre',sport:'NFL',eventKey:'nfl:receipt',marketType:'moneyline',side:'home',modelVersion:'receipt-test',modelMode:'SHADOW',modelAvailable:true,capturedAt:capture,startsAt:start,eligibilityStartsAt:start,quoteAt:capture,book:'fixture',odds:-110,modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',sourceIds:{provider:'fixture',event:'receipt'},settlementRule:{version:'fixture'},provenance:{productionWeight:0},eligibilityReasons:[]};
  const query=async(sql,params)=> (await db.query(sql,params)).rows[0];
