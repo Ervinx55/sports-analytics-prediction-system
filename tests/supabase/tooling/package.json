@@ -1,0 +1,8 @@
+{
+  "name": "performance-sql-development-tools",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {"node": "24.x"},
+  "devDependencies": {"@electric-sql/pglite": "0.5.8", "postgres": "3.4.9"}
+}
