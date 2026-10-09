@@ -316,6 +316,15 @@
       "sha256": "41ecc2e900ccb9b9157810b9a1f511954a26b8f83216fb2b45c9a88256be6ace",
       "recoveredFromProduction": false,
       "statementCount": 4
+    },
+    {
+      "version": "20261005000000",
+      "name": "prediction_performance_ledger",
+      "path": "supabase/migrations/20261005000000_prediction_performance_ledger.sql",
+      "sha256": "74f2450890c6a302b3de5264943d22ba7f316f3546ddabd210d7521a7bb27c10",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
