@@ -62,5 +62,5 @@ export function normalizePrediction(input, { now = new Date().toISOString() } = 
     if ((capture - quote) / 60000 > maxAge) reasons.add('STALE_QUOTE');
   }
   p.eligibilityReasons = [...reasons].sort();
-  return p;
+  return {...p,sourceKey:text(input.sourceKey),startsAt:time(input.startsAt)};
 }

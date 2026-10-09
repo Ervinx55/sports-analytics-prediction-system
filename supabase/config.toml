@@ -164,3 +164,6 @@ verify_jwt = true
 
 [functions.capture-sport-predictions]
 verify_jwt = true
+
+[functions.settle-sport-predictions]
+verify_jwt = true

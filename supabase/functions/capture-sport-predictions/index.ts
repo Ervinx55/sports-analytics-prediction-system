@@ -37,7 +37,9 @@ Deno.serve(async req=>{
   }
   const adapted=adaptModelResponse(source,{sport,kind,capturedAt:new Date().toISOString(),sourceRequestId:requestId});
   const faults:any[]=[],reasons:Record<string,number>={};let captured=0,excluded=0;
-  for(const prediction of adapted.predictions) {
+  const scheduledAt=Date.now();
+  const predictions=body.scheduled===true?adapted.predictions.filter(p=>{const start=Date.parse(p.startsAt??'');return start>scheduledAt&&start<=scheduledAt+6*3600000;}):adapted.predictions;
+  for(const prediction of predictions) {
    let savedReasons=prediction.eligibilityReasons;
    try{
     const {data,error}=await client.rpc(sport==='NFL'?'ingest_sport_prediction_v1':'ingest_prediction_v1',{payload:prediction});if(error)throw error;
@@ -52,6 +54,6 @@ Deno.serve(async req=>{
    if(savedReasons.length)excluded++;
   }
   if(sport==='MLB'&&(faults.length||adapted.diagnostics.length))nextCursor=body.cursor??0;
-  return respond({ok:faults.length===0&&adapted.coverage.complete,captured,rejected:adapted.coverage.received-adapted.predictions.length,excluded,reasons,diagnostics:adapted.diagnostics,faults,nextCursor,coverage:{...adapted.coverage,complete:adapted.coverage.complete&&faults.length===0}});
+  return respond({ok:faults.length===0&&adapted.coverage.complete,captured,rejected:adapted.coverage.received-adapted.predictions.length,excluded,skippedOutsideWindow:adapted.predictions.length-predictions.length,reasons,diagnostics:adapted.diagnostics,faults,nextCursor,coverage:{...adapted.coverage,complete:adapted.coverage.complete&&faults.length===0}});
  }catch{return respond({ok:false,error:'CAPTURE_FAILED',coverage:{sport,complete:false,state:'ERROR'}},500);}
 });

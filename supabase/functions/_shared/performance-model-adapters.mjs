@@ -8,7 +8,9 @@ export const MODEL_TTL_MS=5*60*1000;
 export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}={}) {
  const diagnostics=[];
  const coverage={sport,kind,modelAvailable:false,dataAvailable:false,complete:false,responseComplete:false,dataSourceComplete:null,providerLeagues:null,requestedTours:sport==='TENNIS'?['ATP','WTA']:null,providerCoverageState:'UNVERIFIED',state:'UNAVAILABLE',received:0,adapted:0,productionWeight:0};
- const result={predictions:[],diagnostics,coverage};
+ /** @type {ReturnType<typeof normalizePrediction>[]} */
+ const predictions=[];
+ const result={predictions,diagnostics,coverage};
  const reject=(reason,index=null)=>diagnostics.push({reason,index});
  if(['NBA','CFB','NHL','TENNIS','SOCCER'].includes(sport)){reject('MODEL_SOURCE_UNAVAILABLE');return result;}
  if(!body||typeof body!=='object'||Array.isArray(body)){coverage.state='ERROR';reject('MALFORMED_MODEL_RESPONSE');return result;}
@@ -62,7 +64,9 @@ export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}=
  return result;
 }
 
-/** Two attempts maximum; never expose provider bodies, URLs or credentials in errors. */
+/** Two attempts maximum; never expose provider bodies, URLs or credentials in errors.
+ * @returns {Promise<{ok:true,body:object,attempts:number}|{ok:false,complete:false,error:string,attempts:number}>}
+ */
 export async function fetchModelResponse(url,{fetchImpl=fetch,timeoutMs=10000}={}) {
  for(let attempts=1;attempts<=2;attempts++) {
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),timeoutMs);
@@ -80,4 +84,5 @@ export async function fetchModelResponse(url,{fetchImpl=fetch,timeoutMs=10000}={
   }catch{if(attempts===2)return {ok:false,complete:false,error:controller.signal.aborted?'PROVIDER_TIMEOUT':'PROVIDER_UNAVAILABLE',attempts};}
   finally{clearTimeout(timer);}
  }
+ return {ok:false,complete:false,error:'PROVIDER_UNAVAILABLE',attempts:2};
 }

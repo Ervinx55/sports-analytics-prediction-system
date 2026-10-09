@@ -49,3 +49,9 @@ test('HTTP uses persisted receipt reasons for prestart retry and late firstseen'
  const retry=await(await h(request({sport:'NFL',kind:'team',requestId:'r'}))).json();assert.equal(retry.captured,1);assert.equal(retry.excluded,0);assert.deepEqual(payloads[0],payloads[1]);
  late=true;source.markets[0].eventID='late-event';const post=await(await h(request({sport:'NFL',kind:'team',requestId:'late'}))).json();assert.equal(post.excluded,1);assert.equal(post.reasons.POST_START_RECEIPT,1);
 });
+test('scheduled NFL capture only writes bounded upcoming windows',async()=>{
+ let calls=0;const now=Date.now(),at=new Date(now).toISOString();const body={sport:'FOOTBALL',league:'NFL',version:'v',forecastAt:at,dataSourceComplete:true,markets:[{eventID:'far',marketType:'moneyline',side:'home',modelProbability:.6,marketFairProbability:.5,startsAt:new Date(now+24*3600000).toISOString()}]};
+ const db={rpc:async()=>{calls++;return {data:{id:'p',eligibilityReasons:[]}};}};
+ const response=await load({db,fetchImpl:async()=>Response.json(body)})(request({sport:'NFL',kind:'team',requestId:'scheduled',scheduled:true}));
+ assert.equal((await response.json()).captured,0);assert.equal(calls,0);
+});

@@ -352,6 +352,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261006020000",
+      "name": "register_prediction_performance_jobs",
+      "path": "supabase/migrations/20261006020000_register_prediction_performance_jobs.sql",
+      "sha256": "b78375d1fe7904e542552843baae1df0c1a9e4c7d8faae7824b00c31f1bb9647",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
