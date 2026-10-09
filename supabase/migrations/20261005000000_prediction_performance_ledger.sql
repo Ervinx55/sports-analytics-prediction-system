@@ -96,6 +96,12 @@ begin
   if existing.payload <> p then raise exception 'sourceKey payload conflict' using errcode='23505'; end if;
   return existing.id;
  end if;
+ -- Lock order: observation source, external mapping identity, canonical event.
+ -- Different eventKeys claiming one provider event must see the winning mapping
+ -- before any ambiguity check or canonical state mutation.
+ if nullif(p#>>'{sourceIds,provider}','') is not null and nullif(p#>>'{sourceIds,event}','') is not null then
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('mapping:' || jsonb_build_array(sport,p#>>'{sourceIds,provider}',p#>>'{sourceIds,event}')::text,0));
+ end if;
  -- Lock/read existing canonical state, but diagnostics must not create it.
  if sport in ('MLB','NFL','NBA','CFB') and event is not null and start_time is not null then
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('event:' || sport || ':' || event,0));

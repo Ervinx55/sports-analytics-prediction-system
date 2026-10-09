@@ -321,7 +321,7 @@
       "version": "20261005000000",
       "name": "prediction_performance_ledger",
       "path": "supabase/migrations/20261005000000_prediction_performance_ledger.sql",
-      "sha256": "fa5c3b9f0b58e52574c1082cd474108557a76a6565bc80afbb2b90a7ac51572f",
+      "sha256": "93189316ab5e806aa31ebe39192d69ea01a9b3ff72824572319459cdaf6d19c8",
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null

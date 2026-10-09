@@ -51,7 +51,25 @@ try {
   assert.equal(rows.length,1); assert.equal(rows[0].id,issued.id); assert.equal(Number(rows[0].odds),-110);
   const [count]=await db`select count(*)::int as n from public.performance_decisions where market_key=(select market_key from public.performance_predictions where id=${first.id})`;
   assert.equal(count.n,2,'later concurrent issuance audit missing');
-  console.log('Native PostgreSQL fixtures and independent-session duplicate/first-PLAY races passed.');
+  // Different canonical events must serialize on their shared external identity.
+  const mapped={...p,sourceKey:'mapping-race:a',eventKey:'mapping-race:event-a',sourceIds:{provider:'fixture',event:'shared-external-id'}};
+  transactionsOpen=true; await a`begin`; await b`begin`;
+  await a`set local role service_role`; await b`set local role service_role`;
+  const [mapA]=await a`select public.ingest_prediction_v1(${db.json(mapped)}::jsonb) as id`;
+  const mapRetry=b`select public.ingest_prediction_v1(${db.json({...mapped,sourceKey:'mapping-race:b',eventKey:'mapping-race:event-b'})}::jsonb) as id`.then(x=>x);
+  await waitForLock(); await a`commit`; const [mapB]=await mapRetry; await b`commit`; transactionsOpen=false;
+  const [winner]=await db`select valid from public.performance_predictions where id=${mapA.id}`;
+  const [loser]=await db`select valid,event_key,eligibility_reasons,payload from public.performance_predictions where id=${mapB.id}`;
+  assert.equal(winner.valid,true);
+  assert.equal(loser.valid,false,'conflicting external identity became a valid prediction');
+  assert.equal(loser.event_key,null,'conflicting diagnostic acquired canonical event identity');
+  assert.ok(loser.eligibility_reasons.includes('AMBIGUOUS_SOURCE_MAPPING'));
+  assert.equal(loser.payload.eventKey,'mapping-race:event-b','diagnostic source provenance lost');
+  const [canonical]=await db`select count(*)::int as n from public.performance_events where event_key like 'mapping-race:%'`;
+  assert.equal(canonical.n,1,'conflicting diagnostic created canonical event state');
+  const [mapping]=await db`select event_key from public.performance_event_mappings where sport='NFL' and provider='fixture' and source_event_id='shared-external-id'`;
+  assert.equal(mapping.event_key,'mapping-race:event-a');
+  console.log('Native PostgreSQL fixtures and independent-session duplicate/first-PLAY/provider-mapping races passed.');
  } finally {
   if(transactionsOpen) { await a`rollback`.catch(()=>{}); await b`rollback`.catch(()=>{}); }
   a.release(); b.release();
