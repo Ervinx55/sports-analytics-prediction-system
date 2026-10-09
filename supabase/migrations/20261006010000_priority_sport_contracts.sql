@@ -27,11 +27,14 @@ begin
   if nullif(btrim(p->>'competitionKey'),'') is null then reasons := reasons || '"INVALID_COMPETITION_SCOPE"'::jsonb; end if;
   if sport='TENNIS' then
    if coalesce(p->>'tour','') not in ('ATP','WTA') then reasons := reasons || '"INVALID_TOUR"'::jsonb; end if;
-   if coalesce(p#>>'{marketScope,unit}','') not in ('MATCH','SET','GAME')
+   if coalesce(p#>'{marketScope,period}','null'::jsonb)<>'null'::jsonb
+    or (p#>>'{marketScope,unit}'='MATCH' and (coalesce(p#>'{marketScope,set}','null'::jsonb)<>'null'::jsonb or coalesce(p#>'{marketScope,game}','null'::jsonb)<>'null'::jsonb))
+    or (p#>>'{marketScope,unit}'='SET' and coalesce(p#>'{marketScope,game}','null'::jsonb)<>'null'::jsonb)
+    or coalesce(p#>>'{marketScope,unit}','') not in ('MATCH','SET','GAME')
     or (p#>>'{marketScope,unit}' in ('SET','GAME') and (jsonb_typeof(p#>'{marketScope,set}') is distinct from 'number' or coalesce(public.performance_number_v1(p#>'{marketScope,set}'),0)<=0 or public.performance_number_v1(p#>'{marketScope,set}')>9007199254740991 or public.performance_number_v1(p#>'{marketScope,set}')<>trunc(public.performance_number_v1(p#>'{marketScope,set}'))))
     or (p#>>'{marketScope,unit}'='GAME' and (jsonb_typeof(p#>'{marketScope,game}') is distinct from 'number' or coalesce(public.performance_number_v1(p#>'{marketScope,game}'),0)<=0 or public.performance_number_v1(p#>'{marketScope,game}')>9007199254740991 or public.performance_number_v1(p#>'{marketScope,game}')<>trunc(public.performance_number_v1(p#>'{marketScope,game}')))) then reasons := reasons || '"INVALID_MARKET_SCOPE"'::jsonb; end if;
    if coalesce(p#>>'{settlementRule,format}','') not in ('BEST_OF_3','BEST_OF_5') or coalesce(p#>>'{settlementRule,retirement}','') not in ('VOID','ACTION') or coalesce(p#>>'{settlementRule,walkover}','') not in ('VOID','ACTION') then reasons := reasons || '"UNKNOWN_TENNIS_POLICY"'::jsonb; end if;
-  elsif (sport='SOCCER' and coalesce(p#>>'{marketScope,period}','') not in ('REGULATION','INCLUDING_EXTRA_TIME')) or (sport='NHL' and coalesce(p#>>'{marketScope,period}','') not in ('REGULATION','INCLUDING_OVERTIME_SHOOTOUT')) then reasons := reasons || '"INVALID_MARKET_SCOPE"'::jsonb; end if;
+  elsif coalesce(p#>'{marketScope,unit}','null'::jsonb)<>'null'::jsonb or coalesce(p#>'{marketScope,set}','null'::jsonb)<>'null'::jsonb or coalesce(p#>'{marketScope,game}','null'::jsonb)<>'null'::jsonb or (sport='SOCCER' and coalesce(p#>>'{marketScope,period}','') not in ('REGULATION','INCLUDING_EXTRA_TIME')) or (sport='NHL' and coalesce(p#>>'{marketScope,period}','') not in ('REGULATION','INCLUDING_OVERTIME_SHOOTOUT')) then reasons := reasons || '"INVALID_MARKET_SCOPE"'::jsonb; end if;
   scope_key := jsonb_build_array(p#>>'{marketScope,period}',p#>>'{marketScope,unit}',to_jsonb(trim_scale(public.performance_number_v1(p#>'{marketScope,set}'))),to_jsonb(trim_scale(public.performance_number_v1(p#>'{marketScope,game}'))),p#>>'{settlementRule,version}',p#>>'{settlementRule,format}',p#>>'{settlementRule,retirement}',p#>>'{settlementRule,walkover}');
  end if;
  -- Lock order: observation source, external mapping identity, canonical event.
