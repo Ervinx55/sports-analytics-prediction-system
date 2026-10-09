@@ -10,6 +10,16 @@ test("dashboard inline script parses", () => {
   assert.doesNotThrow(() => new Function(match[1]));
 });
 
+test('failed legacy results hide diagnostic counts instead of displaying empty success',()=>{
+  const source=html.slice(html.indexOf('  function renderDecisionResults('),html.indexOf('  function renderCalibration('));
+  const nodes=Object.fromEntries(['legacyResultsContent','legacyResultsStatus','rOverallPlay'].map(id=>[id,{hidden:false,textContent:'previous success'}]));
+  const render=new Function('$','renderTeamResultRows','renderPropResultRows','renderCombinedPlayRows',source+';return renderDecisionResults;')(id=>nodes[id]??(nodes[id]={}),()=>'',()=>'',()=>'');
+  for(const input of [{},{error:'unavailable'},{summary:{},error:'provider failed'}]){render(input);assert.equal(nodes.legacyResultsContent.hidden,true);assert.match(nodes.legacyResultsStatus.textContent,/unavailable; coverage unknown/);assert.equal(nodes.rOverallPlay.textContent,'previous success');}
+  nodes.legacyResultsContent.hidden=false;
+  render({summary:{team:{},props:{}}},{ok:false,error:'upstream'});
+  assert.equal(nodes.legacyResultsContent.hidden,true,'API fabricated empty fallback must stay hidden when source health failed');
+});
+
 test("provider health observability is wired into the dashboard", () => {
   for (const id of [
     "providerHealthBadge",

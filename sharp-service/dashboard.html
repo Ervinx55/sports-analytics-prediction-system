@@ -126,7 +126,9 @@
       .market-list-row .prob-box .prob-value{font-size:18px}
       h1{font-size:19px}
     }
-  </style>
+
+.performance-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}.performance-filters label{display:flex;flex-direction:column;gap:6px;min-width:0}.performance-filters input,.performance-filters select{font:inherit;padding:10px;background:var(--card,#101e30);color:var(--text,#edf4ff);border:1px solid #36516e;border-radius:8px;width:100%;min-width:0}.performance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.performance-metric,.performance-coverage,.performance-row{background:var(--card,#101e30);border:1px solid #36516e;border-radius:10px;padding:14px;min-width:0;overflow-wrap:anywhere}.performance-metric small,.performance-metric strong{display:block}.performance-metric strong{font-size:22px;margin-top:8px}.performance-row{margin:12px 0}.performance-row>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.performance-table{overflow-x:auto;max-width:100%}.performance-table table{border-collapse:collapse;min-width:600px;width:100%}.performance-table th,.performance-table td{text-align:left;padding:10px;border-bottom:1px solid #36516e}.performance-notice{border-left:3px solid #ffbd4a;padding:10px;overflow-wrap:anywhere}#performanceView{overflow-wrap:anywhere;min-width:0}#legacyResults summary{cursor:pointer;font-weight:700;margin:24px 0}#legacyResults .metrics{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))!important}
+</style>
 </head>
 <body>
 <div class="app">
@@ -293,7 +295,21 @@
   </section>
 
   <section class="section" id="results">
-    <div class="section-title"><h2>Results & Decision Tracking</h2><p>MLB final-state check every 5 minutes</p></div>
+    <div class="section-title"><h2>Cross-sport Performance</h2><p>saved pregame predictions · separate decision cohorts</p></div>
+    <form id="performanceFilters" class="performance-filters">
+      <label>Sport<select name="sport"><option value="">All sports</option><option>NBA</option><option>NFL</option><option>NHL</option><option value="TENNIS">Tennis · ATP + WTA</option><option value="SOCCER">Soccer · provider leagues</option><option value="MLB">MLB · maintenance</option><option>CFB</option></select></label>
+      <label>Decision cohort<select name="cohort"><option value="ALL">All model predictions</option><option value="PLAY">Qualified PLAYs · first issued</option><option value="SHADOW">Shadow · influence 0%</option><option value="PASS">PASS counterfactuals</option><option value="LEGACY">Legacy reconstructed</option><option value="DIAGNOSTIC">Raw excluded candidates</option></select></label>
+      <label>Market kind<select name="kind"><option value="ALL">Team + props</option><option value="TEAM">Team</option><option value="PROP">Player props</option></select></label>
+      <label>Exact market<input name="market" placeholder="All markets" maxlength="200"></label>
+      <label>Model version<input name="modelVersion" placeholder="All versions" maxlength="200"></label>
+      <label>From · UTC<input name="from" type="date" required></label>
+      <label>To · UTC exclusive<input name="to" type="date" required></label>
+      <button type="submit">Refresh performance</button>
+    </form>
+    <div id="performanceView" aria-live="polite"><p role="status">Loading performance… Coverage and results are pending.</p></div>
+    <details id="legacyResults"><summary>Legacy MLB diagnostics · separate audit view</summary>
+    <p id="legacyResultsStatus">Legacy diagnostic coverage pending.</p><div id="legacyResultsContent" hidden>
+    <div class="section-title"><h2>Legacy MLB Results & Decision Tracking</h2><p>diagnostic reconstruction · not prospective evidence</p></div>
 
     <div class="metrics" style="grid-template-columns:repeat(5,1fr)">
       <div class="metric"><div class="label">Overall Plays</div><div class="value" id="rOverallPlay">—</div><div class="hint">team + props W-L-P</div></div>
@@ -378,6 +394,7 @@
       <div style="font-weight:850;margin-bottom:8px">Hard Pass Outcomes</div>
       <div id="propHardPasses"><div class="empty">No hard-pass prop outcomes graded yet.</div></div>
     </div>
+    </div></details>
   </section>
 
   <section class="section" id="calibration">
@@ -1452,7 +1469,11 @@
       }).join("");
   }
 
-  function renderDecisionResults(data){
+  function renderDecisionResults(data, sourceHealth){
+    const available=!!data?.summary && !data?.error && sourceHealth?.ok!==false;
+    $("legacyResultsContent").hidden=!available;
+    $("legacyResultsStatus").textContent=available?"Legacy MLB diagnostics — reconstructed audit; separate from prospective performance.":"Legacy MLB diagnostic results unavailable; coverage unknown.";
+    if(!available) return;
     const summary=data?.summary||{};
     const team=summary.team||{};
     const props=summary.props||{};
@@ -1941,7 +1962,7 @@
     renderSharpGate(data.sharpGate||{});
     renderAlerts(data.alerts||[]);
     renderMovements(data.movements||[]);
-    renderDecisionResults(data.decisionResults||{});
+    renderDecisionResults(data.decisionResults||{},data.system?.sourceHealth?.decisionResults);
     renderCalibration(data.calibration,data.marketCalibration,data.sharpDisagreementCalibration,data.decisionFusionCalibration,data.playerPropFusionCalibration,data.playerPropClvCalibration,data.parlayCorrelationCalibration,data.decisionTimingCalibration,data.modelGovernance,data.outcomeAttribution);
     renderProviderHealth(
       data.providerHealth||{},
@@ -2057,6 +2078,21 @@
   }
   $("refreshBtn").addEventListener("click",()=>load(true));
   load(false);
+</script>
+<script type="module">
+import {createPerformanceController} from './performance-view.js';
+const form=document.getElementById('performanceFilters');
+const root=document.getElementById('performanceView');
+const controller=createPerformanceController({root});
+const now=new Date();form.elements.to.value=now.toISOString().slice(0,10);form.elements.from.value=new Date(now.getTime()-30*86400000).toISOString().slice(0,10);
+const params=new URLSearchParams(location.search);if(['NBA','NFL','NHL','TENNIS','SOCCER','MLB','CFB'].includes(params.get('sport')))form.elements.sport.value=params.get('sport');
+const filters=()=>Object.fromEntries(new FormData(form));
+const refresh=()=>{if(form.reportValidity())controller.load(filters());};
+form.addEventListener('submit',event=>{event.preventDefault();refresh();});
+form.addEventListener('change',refresh);
+root.addEventListener('click',event=>{const button=event.target.closest('[data-performance-next]');if(button)controller.load(filters(),button.dataset.performanceNext);});
+if(location.hash==='#results')document.querySelector('[data-tab="results"]').click();
+refresh();
 </script>
 </body>
 </html>
