@@ -18,3 +18,10 @@ test('limit errors are actionable and public projection never exposes nested int
  const r=await readPerformance({rpc:async()=>({data:{predictions:[row],decisions:[],settlements:[]},error:null})},{sport:'NFL',cohort:'DIAGNOSTIC',from:'2026-10-01',to:'2026-10-03'});
  assert.ok(!JSON.stringify(r).includes('never public'));assert.equal(r.summary.count,0);assert.equal(r.coverage.exclusionCategories.model.MODEL_UNAVAILABLE,1);
 });
+test('20MiB limit counts actual UTF8 bytes, accepts exact boundary and rejects multibyte overflow',async()=>{
+ const bytes=20*1024*1024,data={predictions:[],decisions:[],settlements:[],padding:''},encoder=new TextEncoder(),overhead=encoder.encode(JSON.stringify(data)).byteLength;
+ const remaining=bytes-overhead;data.padding='é'.repeat(Math.floor(remaining/2))+'a'.repeat(remaining%2);
+ const client={rpc:async()=>({data,error:null})};assert.equal(encoder.encode(JSON.stringify(data)).byteLength,bytes);assert.equal((await readPerformance(client)).summary.count,0);
+ data.padding+='é';assert.equal(encoder.encode(JSON.stringify(data)).byteLength,bytes+2);await assert.rejects(readPerformance(client),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
+ data.padding='';data.predictions=[{sourceKey:'界'.repeat(8*1024*1024)}];await assert.rejects(readPerformance(client),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
+});

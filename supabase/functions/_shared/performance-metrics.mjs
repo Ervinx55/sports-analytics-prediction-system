@@ -39,17 +39,19 @@ export function selectCohort(predictions,decisions=[],settlements=[],filters={})
  for(const p of predictions){
   if(!matches(p,filters))continue;
   const ds=byPrediction.get(p.id)??[];
-  if(cohort==='DIAGNOSTIC'){if(!eligible(p))selected.set(p.id,{...p});continue;}
-  if(!eligible(p))continue;
+  const legacyReconstructed=p.legacyReconstructed===true||p.provenance?.legacyReconstructed===true||ds.some(d=>d.legacyReconstructed===true);
+  if(cohort==='DIAGNOSTIC'){if(!eligible(p))selected.set(p.id,{...p,legacyReconstructed});continue;}
+  if(cohort!=='LEGACY'&&!eligible(p))continue;
   let decision=null;
   if(cohort==='SHADOW'){if(p.modelMode!=='SHADOW')continue;}
-  else if(cohort==='LEGACY'){decision=ds.filter(d=>d.legacyReconstructed).sort((a,b)=>timestamp(a.issuedAt)-timestamp(b.issuedAt)||lexical(a.id,b.id))[0];if(!decision)continue;}
+  else if(cohort==='LEGACY'){if(!legacyReconstructed)continue;decision=ds.filter(d=>d.legacyReconstructed).sort((a,b)=>timestamp(a.issuedAt)-timestamp(b.issuedAt)||lexical(a.id,b.id))[0]??null;}
   else {if(p.modelMode!=='LIVE')continue;
+   if(['PLAY','PASS'].includes(cohort)&&legacyReconstructed)continue;
    if(cohort==='PLAY'){decision=ds.filter(d=>d.status==='PLAY'&&d.qualified&&d.firstIssued===true&&!d.legacyReconstructed&&timestamp(d.issuedAt)>=timestamp(p.capturedAt)&&timestamp(d.issuedAt)<timestamp(p.eligibilityStartsAt??p.startsAt)).sort((a,b)=>timestamp(a.issuedAt)-timestamp(b.issuedAt)||lexical(a.id,b.id))[0];if(!decision)continue;}
    if(cohort==='PASS'){decision=ds.filter(d=>d.status==='PASS'&&!d.legacyReconstructed&&timestamp(d.issuedAt)<timestamp(p.eligibilityStartsAt??p.startsAt)).sort((a,b)=>timestamp(b.issuedAt)-timestamp(a.issuedAt)||lexical(a.id,b.id))[0];if(!decision)continue;}
   }
-  const row={...p,decisionId:decision?.id??null,issuedAt:decision?.issuedAt??null,legacyReconstructed:decision?.legacyReconstructed??false},key=cohort==='PLAY'?portfolioKey(p):exactKey(p),previous=selected.get(key);
-  const earlier=cohort==='PLAY'||cohort==='LEGACY',a=timestamp(earlier?row.issuedAt:row.capturedAt),b=previous?timestamp(earlier?previous.issuedAt:previous.capturedAt):NaN;
+  const row={...p,decisionId:decision?.id??null,issuedAt:decision?.issuedAt??null,legacyReconstructed},key=cohort==='PLAY'?portfolioKey(p):exactKey(p),previous=selected.get(key);
+  const earlier=cohort==='PLAY'||cohort==='LEGACY',a=timestamp(earlier?(row.issuedAt??row.capturedAt):row.capturedAt),b=previous?timestamp(earlier?(previous.issuedAt??previous.capturedAt):previous.capturedAt):NaN;
   if(!previous||(earlier?a<b:a>b)||(a===b&&lexical(exactKey(row)+'|'+row.sourceKey,exactKey(previous)+'|'+previous.sourceKey)<0))selected.set(key,row);
  }
  return [...selected.values()].map(p=>{const s=latest.get(p.id);return {...p,outcome:s?.outcome??'UNRESOLVED',settlementRevision:s?.revision??null,settlementReason:s?.reason??null};}).sort((a,b)=>lexical(exactKey(a),exactKey(b))||lexical(a.id,b.id));
@@ -91,6 +93,7 @@ export function publicRow(r){
  const result=Object.fromEntries(['id','sport','eventKey','playerKey','marketType','side','line','modelVersion','modelMode','modelAvailable','capturedAt','startsAt','issuedAt','odds','book','modelProbability','marketProbability','pushProbability','probabilityBasis','outcome','settlementRevision','legacyReconstructed','competitionKey','tour'].map(k=>[k,r[k]??null]));
  const token=v=>typeof v==='string'&&/^[A-Z][A-Z0-9_]{0,99}$/.test(v);
  result.eligibilityReasons=(r.eligibilityReasons??[]).filter(token);result.settlementReason=token(r.settlementReason)?r.settlementReason:null;
- result.marketScope=r.marketScope?Object.fromEntries(['period','unit','set','game'].map(k=>[k,r.marketScope[k]??null])):null;
+ const scope=r.marketScope,index=v=>Number.isSafeInteger(v)&&v>0?v:null;
+ result.marketScope=scope?{period:['REGULATION','INCLUDING_EXTRA_TIME','INCLUDING_OVERTIME_SHOOTOUT'].includes(scope.period)?scope.period:null,unit:['MATCH','SET','GAME'].includes(scope.unit)?scope.unit:null,set:index(scope.set),game:index(scope.game)}:null;
  return result;
 }

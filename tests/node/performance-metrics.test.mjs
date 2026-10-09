@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {selectCohort,summarizePerformance,parsePerformanceFilters} from '../../supabase/functions/_shared/performance-metrics.mjs';
+import {selectCohort,summarizePerformance,parsePerformanceFilters,publicRow} from '../../supabase/functions/_shared/performance-metrics.mjs';
 const p=(id,change={})=>({id,sourceKey:id,sport:'MLB',eventKey:'g',playerKey:'p',marketType:'player_hits',side:'OVER',line:.5,marketKey:'m',modelVersion:'v',modelMode:'LIVE',modelAvailable:true,valid:true,capturedAt:'2026-10-01T12:00:00Z',startsAt:'2026-10-01T14:00:00Z',eligibilityStartsAt:'2026-10-01T14:00:00Z',quoteAt:'2026-10-01T12:00:00Z',odds:100,modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',eligibilityReasons:[],...change});
 const d=(id,predictionId,change={})=>({id,predictionId,issuedAt:'2026-10-01T12:01:00Z',status:'PLAY',qualified:true,firstIssued:true,legacyReconstructed:false,...change});
 const s=(predictionId,outcome,revision=1)=>({predictionId,outcome,revision});
@@ -49,4 +49,18 @@ test('PASS uses saved decision and mirrored rows count one game; invalid diagnos
 test('equivalent policy portfolios cross books without outcomes or quote improvement selecting entry',()=>{
  const predictions=[p('a',{marketKey:'a',settlementRule:{version:'v',book:'one',period:'FULL_GAME'}}),p('b',{marketKey:'b',marketType:'player_total_bases',odds:300,settlementRule:{period:'FULL_GAME',book:'two',version:'v'}})];
  assert.deepEqual(selectCohort(predictions,[d('a','a'),d('b','b',{issuedAt:'2026-10-01T12:02:00Z'})],[],{...filters,cohort:'PLAY'}).map(r=>r.id),['a']);
+});
+test('legacy provenance survives ALL, no-decision LEGACY imports and diagnostic history',()=>{
+ const predictions=[p('marked',{marketKey:'marked',legacyReconstructed:true}),p('decision',{marketKey:'decision'}),p('bad',{marketKey:'bad',valid:false,legacyReconstructed:true,eligibilityReasons:['MODEL_UNAVAILABLE']})];
+ const decisions=[d('legacy','decision',{legacyReconstructed:true}),d('apparently-live','marked')];
+ const all=selectCohort(predictions,decisions,[],{...filters,cohort:'ALL'});assert.ok(all.every(r=>r.legacyReconstructed===true));
+ assert.deepEqual(selectCohort(predictions,decisions,[],{...filters,cohort:'LEGACY'}).map(r=>r.id).sort(),['bad','decision','marked']);
+ assert.equal(selectCohort(predictions,decisions,[],{...filters,cohort:'DIAGNOSTIC'})[0].legacyReconstructed,true);
+ assert.equal(selectCohort(predictions,decisions,[],{...filters,cohort:'PLAY'}).length,0);
+});
+test('scope projection validates values under allowed keys and cannot return nested data',()=>{
+ for(const value of [{raw:{secret:'exposed'}},['exposed'],true,'exposed',-1,0,1.5,'1',9007199254740992]){
+  const row=publicRow(p('bad',{marketScope:{period:value,unit:value,set:value,game:value}}));assert.deepEqual(row.marketScope,{period:null,unit:null,set:null,game:null});
+ }
+ assert.deepEqual(publicRow(p('valid',{marketScope:{period:'REGULATION',unit:'GAME',set:2,game:9007199254740991}})).marketScope,{period:'REGULATION',unit:'GAME',set:2,game:9007199254740991});
 });

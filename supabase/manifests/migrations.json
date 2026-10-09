@@ -366,7 +366,7 @@
       "version": "20261006030000",
       "name": "performance_read",
       "path": "supabase/migrations/20261006030000_performance_read.sql",
-      "sha256": "93ad2452c5761f9746c2fca1fddce9c6e20d47af4c14bba87d79987db38ff16d",
+      "sha256": "b0ba6ba9d8d2c629f42482cd52f7aa4dd83151960fe5c8228995fd2cd2093e43",
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null

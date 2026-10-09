@@ -13,6 +13,7 @@ with predictions as materialized (
  'id',p.id,'sourceKey',p.source_key,'sport',coalesce(p.sport,p.payload->>'sport'),'eventKey',p.event_key,
  'playerKey',p.player_key,'marketType',p.market_type,'side',p.side,'line',p.line,'marketKey',p.market_key,
  'modelVersion',p.model_version,'modelMode',p.model_mode,'modelAvailable',p.model_available,'valid',p.valid,
+ 'legacyReconstructed',coalesce(p.provenance->'legacyReconstructed'='true'::jsonb,false),
  'capturedAt',p.captured_at,'startsAt',p.starts_at,'eligibilityStartsAt',p.eligibility_starts_at,'quoteAt',p.quote_at,
  'odds',p.odds,'book',p.book,'modelProbability',p.model_probability,'marketProbability',p.market_probability,
  'pushProbability',p.push_probability,'probabilityBasis',p.probability_basis,'settlementRule',p.settlement_rule,
