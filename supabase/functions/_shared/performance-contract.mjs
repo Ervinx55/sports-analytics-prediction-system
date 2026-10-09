@@ -32,7 +32,7 @@ export function normalizePrediction(input, { now = new Date().toISOString() } = 
     if(p.sport==='TENNIS') {
       if(!['ATP','WTA'].includes(p.tour)) reasons.add('INVALID_TOUR');
       const scope=p.marketScope;
-      if(!['MATCH','SET','GAME'].includes(scope?.unit) || (scope.unit!=='MATCH' && !(Number.isInteger(scope.set)&&scope.set>0)) || (scope.unit==='GAME' && !(Number.isInteger(scope.game)&&scope.game>0))) reasons.add('INVALID_MARKET_SCOPE');
+      if(!['MATCH','SET','GAME'].includes(scope?.unit) || (scope.unit!=='MATCH' && !(Number.isSafeInteger(scope.set)&&scope.set>0)) || (scope.unit==='GAME' && !(Number.isSafeInteger(scope.game)&&scope.game>0))) reasons.add('INVALID_MARKET_SCOPE');
       if(!['BEST_OF_3','BEST_OF_5'].includes(p.settlementRule?.format)||!['VOID','ACTION'].includes(p.settlementRule?.retirement)||!['VOID','ACTION'].includes(p.settlementRule?.walkover)) reasons.add('UNKNOWN_TENNIS_POLICY');
     } else if(!(p.sport==='SOCCER'?['REGULATION','INCLUDING_EXTRA_TIME']:['REGULATION','INCLUDING_OVERTIME_SHOOTOUT']).includes(p.marketScope?.period)) reasons.add('INVALID_MARKET_SCOPE');
   }

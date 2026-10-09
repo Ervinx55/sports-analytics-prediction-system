@@ -348,7 +348,7 @@
       "version": "20261006010000",
       "name": "priority_sport_contracts",
       "path": "supabase/migrations/20261006010000_priority_sport_contracts.sql",
-      "sha256": "2bbcb9732f01995828d36fb9b9c68b00f88087186d51f317e60d10b5a66c27df",
+      "sha256": "c22a34f4b455b236eb086fcf3ebee38104e3bf97546e861cef13098726a6f0a5",
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null

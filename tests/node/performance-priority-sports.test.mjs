@@ -14,3 +14,5 @@ test('regulation extra time set and game boundaries never collide',()=>{
  assert.notEqual(marketKey(norm({...base,marketScope:{unit:'GAME',set:1,game:1}})),marketKey(norm({...base,marketScope:{unit:'GAME',set:2,game:1}})));
  assert.ok(norm({...base,sport:'CRICKET'}).eligibilityReasons.includes('INVALID_SPORT'));
 });
+
+test('tennis indices require numeric positive safe integers',()=>{assert.equal(norm({...base,marketScope:{unit:'GAME',set:Number.MAX_SAFE_INTEGER,game:Number.MAX_SAFE_INTEGER}}).eligibilityReasons.includes('INVALID_MARKET_SCOPE'),false);for(const value of ['1',true,null,0,-1,1.5,9007199254740992])for(const marketScope of [{unit:'SET',set:value},{unit:'GAME',set:1,game:value}])assert.ok(norm({...base,marketScope}).eligibilityReasons.includes('INVALID_MARKET_SCOPE'),JSON.stringify(marketScope));});
