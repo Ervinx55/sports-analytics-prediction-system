@@ -83,7 +83,15 @@ def test_edge_function_recovery_is_complete_and_configured():
         (ROOT / "supabase" / "manifests" / "edge-functions.json").read_text()
     )
     items = manifest["items"]
-    assert len(items) == EXPECTED_EDGE_FUNCTION_COUNT
+    recovered = [item for item in items if item.get("status") == "ACTIVE"]
+    planned = [item for item in items if item.get("status") == "PLANNED"]
+    assert len(recovered) == EXPECTED_EDGE_FUNCTION_COUNT
+    assert len(recovered) + len(planned) == len(items)
+    for item in planned:
+        assert item.get("appliedToProduction") is False
+        assert item.get("entrypoint") == "index.ts"
+        assert item.get("verify_jwt") is True
+        assert any(file["path"] == f"supabase/functions/{item['slug']}/index.ts" for file in item["files"])
 
     slugs = [item["slug"] for item in items]
     assert len(slugs) == len(set(slugs))
@@ -100,7 +108,7 @@ def test_edge_function_recovery_is_complete_and_configured():
     configured = config.get("functions", {})
 
     for item in items:
-        assert item["status"] == "ACTIVE"
+        assert item["status"] in ("ACTIVE", "PLANNED")
         assert item["bundle_sha256"]
         assert item["files"]
         assert item["slug"] in configured

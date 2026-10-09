@@ -1,3 +1,4 @@
+import {capturePersistedRows, serviceAuthorized} from '../_shared/performance-mlb-adapter.mjs';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const VERIFY_URL =
@@ -146,6 +147,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!serviceAuthorized(req.headers.get('authorization'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))) return new Response(JSON.stringify({error:'Service authentication required'}),{status:401});
+    const tracking = {enabled:Deno.env.get('PERFORMANCE_MLB_CAPTURE_ENABLED') === 'true', tracked:0, faults:[] as any[]};
     const body = await req.json().catch(() => ({}));
     const date = body.date ? String(body.date) : chicagoDate();
     const startsAfter = new Date().toISOString();
@@ -237,7 +240,7 @@ Deno.serve(async (req) => {
           c?.runEnvironmentAdjustment?.probabilityAdjustmentPctPoints ?? 0,
         blockers: c.blockingReasons ?? [],
         warnings: c.warnings ?? [],
-        raw: compactRaw(c),
+        raw: {...compactRaw(c), performanceCapture:true, quoteAt:c.currentModelPrice?.quoteAt ?? null, probabilityBasis:"CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"}},
       });
 
       const marketFair =
@@ -275,6 +278,7 @@ Deno.serve(async (req) => {
           : "Waiting for required moneyline verification inputs.",
         raw: {
           source: "verify-v7.1",
+          performanceCapture:true, quoteAt:c.currentModelPrice?.quoteAt ?? null, probabilityBasis:"CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"},
           warnings: c.warnings ?? [],
           explanationStats: explanationStats(c),
         },
@@ -354,6 +358,7 @@ Deno.serve(async (req) => {
             requires_sharp: requiresSharp,
             reason,
             raw: {
+              performanceCapture:true, quoteAt:data?.quoteAt ?? null, quoteLine:data?.quoteLine ?? null, pushProbability:data?.pushProbability ?? null, probabilityBasis:data?.pushProbability != null ? "UNCONDITIONAL" : "CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"},
               projectedTotal: tp.projectedTotal ?? null,
               differenceRuns: tp.differenceRuns ?? null,
               marketSplit: tp.marketSplit ?? null,
@@ -426,6 +431,7 @@ Deno.serve(async (req) => {
             requires_sharp: requiresSharp,
             reason,
             raw: {
+              performanceCapture:true, quoteAt:data?.quoteAt ?? null, quoteLine:data?.quoteLine ?? null, pushProbability:data?.pushProbability ?? null, probabilityBasis:data?.pushProbability != null ? "UNCONDITIONAL" : "CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"},
               projectedAwayRuns: sp.projectedAwayRuns ?? null,
               projectedHomeRuns: sp.projectedHomeRuns ?? null,
               rawPoissonProbability: data?.rawPoissonProbability ?? null,
@@ -440,22 +446,25 @@ Deno.serve(async (req) => {
     }
 
     if (auditRows.length) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("model_audit_observations")
-        .insert(auditRows);
+        .insert(auditRows).select("*");
       if (error) throw error;
+      if (tracking.enabled) {const result=await capturePersistedRows(supabase,data ?? [],'model_audit_observations',auditRows.length);tracking.tracked+=result.tracked;tracking.faults.push(...result.faults);}
     }
 
     if (marketRows.length) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("market_grade_observations")
-        .insert(marketRows);
+        .insert(marketRows).select("*");
       if (error) throw error;
+      if (tracking.enabled) {const result=await capturePersistedRows(supabase,data ?? [],'market_grade_observations',marketRows.length);tracking.tracked+=result.tracked;tracking.faults.push(...result.faults);}
     }
 
     return new Response(
       JSON.stringify({
-        ok: true,
+        ok: tracking.faults.length === 0,
+        tracking,
         date,
         verificationVersion: verify.version ?? null,
         capturedAt,

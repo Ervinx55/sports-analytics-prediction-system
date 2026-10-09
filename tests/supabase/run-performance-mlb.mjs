@@ -1,0 +1,37 @@
+import {readFileSync} from 'node:fs';
+import {resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import assert from 'node:assert/strict';
+import {adaptLegacyObservation,importHistoryPage} from '../../supabase/functions/_shared/performance-mlb-adapter.mjs';
+const {PGlite}=await import(pathToFileURL(resolve(process.argv[2])).href);
+const db=new PGlite();
+try {
+ await db.exec('create role anon; create role authenticated; create role service_role bypassrls;');
+ for(const file of ['20261005000000_prediction_performance_ledger.sql','20261005010000_mlb_performance_publication.sql']) await db.exec(readFileSync('supabase/migrations/'+file,'utf8'));
+ const capture=new Date(Date.now()-60000).toISOString(),start=new Date(Date.now()+15*60000).toISOString();
+ const row={id:1,game_pk:900,starts_at:start,captured_at:capture,model_version:'fixture',market_type:'moneyline',market_side:'home',best_odds:110,best_book:'book',model_probability:.6,market_fair_probability:.5,raw:{quoteAt:capture,probabilityBasis:'CONDITIONAL_NO_PUSH',settlementRule:{version:'fixture'}}};
+ const prediction=adaptLegacyObservation(row,'market_grade_observations');
+ const query=async(sql,p)=> (await db.query(sql,p)).rows[0];
+ const payload={prediction,evidence:{status:'PLAY',finalQualification:true},issuedAt:new Date().toISOString()};
+ const a=await query('select publish_mlb_performance_v1($1::jsonb) as id',[JSON.stringify(payload)]);
+ const b=await query('select publish_mlb_performance_v1($1::jsonb) as id',[JSON.stringify({...payload,issuedAt:new Date().toISOString()})]);
+ assert.deepEqual(a.id,b.id);
+ assert.equal((await query('select count(*)::int as n from performance_decisions')).n,1);
+ await assert.rejects(query('select publish_mlb_performance_v1($1::jsonb)',[JSON.stringify({...payload,prediction:{...prediction,odds:120}})]),/conflict/);
+ const imported=Array.from({length:501},(_,i)=>({...row,id:i+10,raw:{}}));
+ const dry=await importHistoryPage({table:'market_grade_observations',fetchPage:async(t,c,n)=>imported.filter(r=>r.id>c).slice(0,n),write:()=>{},dryRun:true});
+ assert.equal(dry.count,500);assert.equal(dry.exclusions.UNKNOWN_QUOTE_AGE,500);
+ const page=imported.slice(0,500).map(r=>adaptLegacyObservation(r,'market_grade_observations'));
+ const checkpoint={table:'market_grade_observations',cursor:0,nextCursor:509,complete:false,predictions:page};
+ await query('select import_mlb_performance_page_v1($1::jsonb)',[JSON.stringify(checkpoint)]);
+ assert.equal((await query('select imported_count::int as n from performance_import_cursors')).n,500);
+ await assert.rejects(query('select import_mlb_performance_page_v1($1::jsonb)',[JSON.stringify(checkpoint)]),/cursor conflict/);
+ const bad={table:'market_grade_observations',cursor:509,nextCursor:510,complete:true,predictions:[{...page[0],odds:120}]};
+ await assert.rejects(query('select import_mlb_performance_page_v1($1::jsonb)',[JSON.stringify(bad)]),/invalid ordered/);
+ assert.equal((await query('select last_id::int as n from performance_import_cursors')).n,509);
+ await query('select import_mlb_performance_page_v1($1::jsonb)',[JSON.stringify({...bad,predictions:[adaptLegacyObservation(imported[500],'market_grade_observations')]})]);
+ assert.equal((await query('select imported_count::int as n from performance_import_cursors')).n,501);
+ assert.equal((await query('select complete from performance_import_cursors')).complete,true);
+ await db.exec('set role anon'); await assert.rejects(db.query('select publish_mlb_performance_v1($1::jsonb)',[JSON.stringify(payload)]),/permission denied/); await db.exec('reset role');
+ console.log('MLB publication/import SQL passed: dry-run 500 exclusions; durable import 501; failed page rollback/recovery; publication retry/conflict; anon denied.');
+}catch(error){console.error(error.message,error.code,error.where??'');process.exitCode=1;}finally {await db.close();}

@@ -158,3 +158,6 @@ verify_jwt = true
 
 [functions.github-ml-training-export]
 verify_jwt = false
+
+[functions.import-performance-history]
+verify_jwt = true

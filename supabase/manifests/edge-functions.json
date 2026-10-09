@@ -835,6 +835,22 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "import-performance-history",
+      "status": "PLANNED",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "98f23bedd3a16a18928bf39018194fac07b76a1a3373fc34ac1c84052acc33fc",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/import-performance-history/index.ts",
+          "name": "index.ts",
+          "sha256": "98f23bedd3a16a18928bf39018194fac07b76a1a3373fc34ac1c84052acc33fc"
+        }
+      ]
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

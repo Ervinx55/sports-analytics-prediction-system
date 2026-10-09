@@ -17,6 +17,7 @@ try {
  db = postgres({...config,database:name});
  await db.unsafe("do $$ begin if not exists(select from pg_roles where rolname='anon') then create role anon; end if; if not exists(select from pg_roles where rolname='authenticated') then create role authenticated; end if; if not exists(select from pg_roles where rolname='service_role') then create role service_role bypassrls; end if; end $$;",[],{prepare:false});
  await db.unsafe(readFileSync(new URL('../../supabase/migrations/20261005000000_prediction_performance_ledger.sql',import.meta.url),'utf8'),[],{prepare:false});
+ await db.unsafe(readFileSync(new URL('../../supabase/migrations/20261005010000_mlb_performance_publication.sql',import.meta.url),'utf8'),[],{prepare:false});
  const fixtures = await db.reserve();
  try { await fixtures.unsafe(readFileSync(new URL('./performance-ledger.sql',import.meta.url),'utf8'),[],{prepare:false}); } finally { fixtures.release(); }
  const p={sourceKey:'concurrent:1',sport:'NFL',eventKey:'concurrent:event',marketType:'spread',side:'HOME',line:0,modelVersion:'v1',modelMode:'LIVE',modelAvailable:true,capturedAt:'2020-10-05T12:00:00Z',startsAt:'2020-10-05T12:15:00Z',quoteAt:'2020-10-05T11:59:00Z',book:'fixture',odds:-110,modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',sourceIds:{event:'concurrent:event'},settlementRule:{version:'v1'},provenance:{},eligibilityReasons:[]};
@@ -69,7 +70,21 @@ try {
   assert.equal(canonical.n,1,'conflicting diagnostic created canonical event state');
   const [mapping]=await db`select event_key from public.performance_event_mappings where sport='NFL' and provider='fixture' and source_event_id='shared-external-id'`;
   assert.equal(mapping.event_key,'mapping-race:event-a');
-  console.log('Native PostgreSQL fixtures and independent-session duplicate/first-PLAY/provider-mapping races passed.');
+  // Actual MLB publisher retries return the immutable first timestamp and snapshot.
+  const stamp=new Date(Date.now()-60000).toISOString(),start=new Date(Date.now()+15*60000).toISOString();
+  const mlb={...p,sourceKey:'market_grade_observations:901',sport:'MLB',eventKey:'mlb:901',capturedAt:stamp,startsAt:start,quoteAt:stamp,sourceIds:{event:'901'}};
+  const publication={prediction:mlb,issuedAt:new Date().toISOString(),evidence:{status:'PLAY',finalQualification:true}};
+  transactionsOpen=true;await a`begin`;await b`begin`;await a`set local role service_role`;await b`set local role service_role`;
+  const [pubA]=await a`select public.publish_mlb_performance_v1(${db.json(publication)}::jsonb) as result`;
+  const pubRetry=b`select public.publish_mlb_performance_v1(${db.json({...publication,issuedAt:new Date().toISOString()})}::jsonb) as result`.then(x=>x);
+  await waitForLock();await a`commit`;const [pubB]=await pubRetry;await b`commit`;transactionsOpen=false;
+  assert.deepEqual(pubA.result,pubB.result,'publisher retry changed immutable issuance');
+  const nextPublication={...publication,prediction:{...mlb,sourceKey:'market_grade_observations:902',odds:120}};
+  const [audit]=await db`select public.publish_mlb_performance_v1(${db.json(nextPublication)}::jsonb) as result`;
+  assert.notEqual(audit.result.id,pubA.result.id);
+  const [entry]=await db`select p.odds,d.prediction_id from public.performance_decisions d join public.performance_predictions p on p.id=d.prediction_id where d.first_issued and p.sport='MLB'`;
+  assert.equal(Number(entry.odds),-110);assert.equal(entry.prediction_id,pubA.result.prediction_id);
+  console.log('Native PostgreSQL fixtures, duplicate/first-PLAY/provider-mapping races and MLB transactional publication retry/entry-price preservation passed.');
  } finally {
   if(transactionsOpen) { await a`rollback`.catch(()=>{}); await b`rollback`.catch(()=>{}); }
   a.release(); b.release();
@@ -80,4 +95,3 @@ finally {
  await admin`drop database if exists ${admin(name)}`;
  await admin.end();
 }
-
