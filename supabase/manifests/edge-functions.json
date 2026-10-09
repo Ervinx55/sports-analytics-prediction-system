@@ -857,14 +857,14 @@
       "status": "PLANNED",
       "verify_jwt": true,
       "appliedToProduction": false,
-      "bundle_sha256": "dfdf3a09a178e8f7b55633bfddacefbc48215c2f0e050b5d50c7106559116b6d",
+      "bundle_sha256": "90fbbe93e8b41d82d3c6db5072ed60d93faac1090bc8dfaf63db9dd6c1982723",
       "bundle_hash_basis": "Local source only; not a deployed bundle",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/capture-sport-predictions/index.ts",
           "name": "index.ts",
-          "sha256": "dfdf3a09a178e8f7b55633bfddacefbc48215c2f0e050b5d50c7106559116b6d"
+          "sha256": "90fbbe93e8b41d82d3c6db5072ed60d93faac1090bc8dfaf63db9dd6c1982723"
         }
       ]
     }

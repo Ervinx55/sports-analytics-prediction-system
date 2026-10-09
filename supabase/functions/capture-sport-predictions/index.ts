@@ -36,13 +36,22 @@ Deno.serve(async req=>{
    source=fetched.body;
   }
   const adapted=adaptModelResponse(source,{sport,kind,capturedAt:new Date().toISOString(),sourceRequestId:requestId});
-  const faults:any[]=[],reasons:Record<string,number>={};let captured=0;
+  const faults:any[]=[],reasons:Record<string,number>={};let captured=0,excluded=0;
   for(const prediction of adapted.predictions) {
-   for(const reason of prediction.eligibilityReasons)reasons[reason]=(reasons[reason]??0)+1;
-   try{const {error}=await client.rpc('ingest_prediction_v1',{payload:prediction});if(error)throw error;captured++;}
+   let savedReasons=prediction.eligibilityReasons;
+   try{
+    const {data,error}=await client.rpc(sport==='NFL'?'ingest_sport_prediction_v1':'ingest_prediction_v1',{payload:prediction});if(error)throw error;
+    if(sport==='NFL'){
+     if(typeof data?.id!=='string'||!Array.isArray(data.eligibilityReasons))throw Error('Invalid receipt response');
+     savedReasons=[...new Set([...savedReasons,...data.eligibilityReasons])];
+    }
+    captured++;
+   }
    catch{faults.push({sourceKey:prediction.sourceKey,reason:'LEDGER_WRITE_FAILED'});}
+   for(const reason of savedReasons)reasons[reason]=(reasons[reason]??0)+1;
+   if(savedReasons.length)excluded++;
   }
   if(sport==='MLB'&&(faults.length||adapted.diagnostics.length))nextCursor=body.cursor??0;
-  return respond({ok:faults.length===0&&adapted.coverage.complete,captured,rejected:adapted.coverage.received-adapted.predictions.length,excluded:adapted.predictions.filter(p=>p.eligibilityReasons.length).length,reasons,diagnostics:adapted.diagnostics,faults,nextCursor,coverage:{...adapted.coverage,complete:adapted.coverage.complete&&faults.length===0}});
+  return respond({ok:faults.length===0&&adapted.coverage.complete,captured,rejected:adapted.coverage.received-adapted.predictions.length,excluded,reasons,diagnostics:adapted.diagnostics,faults,nextCursor,coverage:{...adapted.coverage,complete:adapted.coverage.complete&&faults.length===0}});
  }catch{return respond({ok:false,error:'CAPTURE_FAILED',coverage:{sport,complete:false,state:'ERROR'}},500);}
 });

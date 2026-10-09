@@ -53,8 +53,19 @@ test('team output preserves raw independent probability and chosen book quote wi
  const projection=projectEvent({event,schedule:[],stats:[],snapshots,baseline:leagueBaselines([...snapshots.values()]),season:2026,simulationIterations:10});
  const p=projection.markets[0];assert.equal(p.quoteAt,at);assert.equal(typeof p.rawIndependentProbability,'number');assert.equal(p.effectiveIndependentWeight,0);assert.equal(p.modelProbability,p.marketFairProbability);assert.equal(p.productionEligible,false);
 });
-test('fresh-enough forecast first received after kickoff remains excluded',()=>{
- const p=adaptModelResponse({...body,forecastAt:'2026-10-06T11:59:00Z',markets:[{...body.markets[0],startsAt:'2026-10-06T11:59:30Z'}]},options).predictions[0];assert.ok(p.eligibilityReasons.includes('POST_START_RECEIPT'));
+test('kickoff-crossing receipt keeps source payload immutable; ledger owns first receipt eligibility',()=>{
+ const source={...body,forecastAt:'2026-10-06T11:59:00Z',markets:[{...body.markets[0],startsAt:'2026-10-06T11:59:30Z'}]};
+ const first=adaptModelResponse(source,{...options,capturedAt:'2026-10-06T11:59:20Z'}).predictions[0];
+ const retry=adaptModelResponse(source,{...options,capturedAt:'2026-10-06T11:59:40Z'}).predictions[0];assert.deepEqual(retry,first);assert.equal(retry.eligibilityReasons.includes('POST_START_RECEIPT'),false);
+});
+test('provider cap counts streaming bytes and cancels before allocating full oversized response',async()=>{
+ let cancelled=false,pulls=0;
+ const response=new Response(new ReadableStream({pull(controller){pulls++;if(pulls>8){controller.close();return;}controller.enqueue(new Uint8Array(1024*1024));},cancel(){cancelled=true;}}));
+ const r=await fetchModelResponse('https://fixture',{fetchImpl:async()=>response});assert.equal(r.error,'PROVIDER_RESPONSE_TOO_LARGE');assert.equal(cancelled,true);assert.ok(pulls<=6);
+ const unicode='"'+'é'.repeat(3*1024*1024)+'"';let cancelledHeader=false;
+ const oversized=new Response(new ReadableStream({start(c){c.enqueue(new TextEncoder().encode(unicode));},cancel(){cancelledHeader=true;}}),{headers:{'content-length':String(6*1024*1024)}});
+ const header=await fetchModelResponse('https://fixture',{fetchImpl:async()=>oversized});assert.equal(header.error,'PROVIDER_RESPONSE_TOO_LARGE');assert.equal(cancelledHeader,true);
+ const bytes=await fetchModelResponse('https://fixture',{fetchImpl:async()=>new Response(unicode)});assert.equal(bytes.error,'PROVIDER_RESPONSE_TOO_LARGE');
 });
 test('props chosen side retains its own quote timestamp',()=>{
  const underAt='2026-10-06T11:59:00Z';

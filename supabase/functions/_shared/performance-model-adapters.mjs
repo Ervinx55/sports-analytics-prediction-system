@@ -33,7 +33,8 @@ export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}=
   const probability=number(props?row?.shadowModelProbability:row?.modelProbability);
   if(!event||!market||!side||!version||probability===null){reject('INVALID_MODEL_ROW',index);continue;}
   const reasons=[],canonicalEvent=text(row.canonicalEventID),canonicalPlayer=text(row.canonicalPlayerID);
-  if(Date.parse(receivedAt)>=Date.parse(row.originalStartsAt??row.startsAt))reasons.push('POST_START_RECEIPT');
+  // Receipt eligibility is owned atomically by ingest_sport_prediction_v1.
+  // Recomputing it here would change the same source payload across kickoff retries.
   if(!canonicalEvent)reasons.push('MISSING_CANONICAL_EVENT_MAPPING');
   if(props&&!canonicalPlayer)reasons.push('MISSING_CANONICAL_PLAYER_MAPPING');
   const independentWeight=number(row.effectiveIndependentWeight);
@@ -68,8 +69,13 @@ export async function fetchModelResponse(url,{fetchImpl=fetch,timeoutMs=10000}={
   try {
    const response=await fetchImpl(url,{signal:controller.signal,headers:{accept:'application/json'},cache:'no-store'});
    if(!response.ok){if([429,500,502,503,504].includes(response.status)&&attempts===1)continue;return {ok:false,complete:false,error:`PROVIDER_HTTP_${response.status}`,attempts};}
-   const raw=await response.text();
-   if(raw.length>4*1024*1024)return {ok:false,complete:false,error:'PROVIDER_RESPONSE_TOO_LARGE',attempts};
+   const limit=4*1024*1024;
+   if(Number(response.headers.get('content-length'))>limit){await response.body?.cancel();return {ok:false,complete:false,error:'PROVIDER_RESPONSE_TOO_LARGE',attempts};}
+   const reader=response.body?.getReader(),decoder=new TextDecoder();let raw='',bytes=0;
+   if(reader)try {
+    while(true){const {value,done}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>limit){await reader.cancel();return {ok:false,complete:false,error:'PROVIDER_RESPONSE_TOO_LARGE',attempts};}raw+=decoder.decode(value,{stream:true});}
+    raw+=decoder.decode();
+   }finally{reader.releaseLock();}
    try{return {ok:true,body:JSON.parse(raw),attempts};}catch{return {ok:false,complete:false,error:'MALFORMED_JSON',attempts};}
   }catch{if(attempts===2)return {ok:false,complete:false,error:controller.signal.aborted?'PROVIDER_TIMEOUT':'PROVIDER_UNAVAILABLE',attempts};}
   finally{clearTimeout(timer);}

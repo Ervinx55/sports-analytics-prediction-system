@@ -334,6 +334,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261006000000",
+      "name": "sport_capture_receipts",
+      "path": "supabase/migrations/20261006000000_sport_capture_receipts.sql",
+      "sha256": "efd704b575f5530a852661a3b46bbe00cb87cb7986025135ece5bafcd817aefe",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
