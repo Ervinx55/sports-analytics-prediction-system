@@ -1,3 +1,4 @@
+import { evaluateTeamCard, evaluatePropCard } from './performance-mlb-qualification.mjs';
 import { normalizePrediction } from './performance-contract.mjs';
 export const MLB_TABLES = ['model_audit_observations','market_grade_observations','player_prop_observations'];
 const numeric = v => (typeof v === 'number' || typeof v === 'string' && v.trim()) && Number.isFinite(Number(v)) ? Number(v) : null;
@@ -60,30 +61,111 @@ export function publicationState(card, publication, {enabled=false,kind='market_
   const finalWindow=Date.parse(card.starts_at)-Date.parse(now)<=20*60000;
   return {...card,status:finalWindow?'PASS':'PENDING',reason:`${card.reason ?? ''} Final qualification publication is not recorded for this snapshot and price.`,tracking:{tracked:false,fault:'PUBLICATION_NOT_READY'}};
 }
-/** Authenticated callers supply freshly evaluated cards; never accepts qualification from HTTP bodies. */
-export async function reconcilePublications(client,cards,kind,{publish=false,now=new Date().toISOString()}={}) {
-  const qualified=cards.filter(card=>card.status==='PLAY');
-  const publications=new Map(),faults=[];
-  for(let offset=0;offset<qualified.length;offset+=500) {
-    const keys=qualified.slice(offset,offset+500).map(card=>`${kind}:${card.id}`);
-    const {data,error}=await client.from('performance_decisions').select('*,prediction:performance_predictions!inner(*)').in('prediction.source_key',keys).eq('qualified',true).eq('legacy_reconstructed',false);
-    if(error) {faults.push({error:error.message??String(error)});continue;}
-    for(const decision of data??[]) publications.set(decision.prediction.source_key,decision);
+function reevaluateCard(card, kind, at) {
+  if (kind === 'player_prop_observations') {
+    return evaluatePropCard({ ...card, status:card.freshness?.originalStatus ?? card.status }, card, at);
   }
-  for(const card of qualified) {
-    const sourceKey=`${kind}:${card.id}`;
-    if(publish && !publications.has(sourceKey)) {
-      try {
-        const prediction=adaptLegacyObservation(card,kind);
-        const evidence={status:card.status,finalQualification:true,freshness:card.freshness,sharpGate:card.sharpGate??null,verificationGate:card.verificationGate??null,weatherParkImpact:card.weatherParkImpact??null,qualificationVersion:'mlb-existing-final-gates-v1',quoteAgeMinutes:prediction.quoteAt ? (Date.parse(now)-Date.parse(prediction.quoteAt))/60000 : null};
-        if(!qualifiedDecision({...prediction,id:'pending'},evidence,now)) throw Error('Snapshot lacks eligible contemporary prediction, price or quote provenance');
-        const {data,error}=await client.rpc('publish_mlb_performance_v1',{payload:{prediction,evidence,issuedAt:now}});
-        if(error) throw error;
-        // Transaction returned only after prediction and qualification are both durable.
-        publications.set(sourceKey,{...data,prediction:{source_key:sourceKey,odds:prediction.odds,book:prediction.book}});
-      } catch(error) {faults.push({sourceKey,error:error.message??String(error)});}
+  return evaluateTeamCard(card, {
+    sharp:card.sharpGate,
+    verification:card.verificationGate,
+    weather:card.weatherParkImpact,
+    fusion:card.decisionFusion,
+    timing:card.decisionTiming,
+    sharpDisagreement:card.sharpDisagreement,
+    uncertainty:card.uncertainty,
+    priceSensitivity:card.priceSensitivity,
+  }, at);
+}
+
+// The existing freshness score only deteriorates as saved inputs age and windows tighten.
+// Find its expiry using the same evaluator so the database can guard lock waits without
+// introducing a second scoring implementation or stricter qualification thresholds.
+function qualificationExpiry(card, kind, at, startsAt) {
+  let validAt = at;
+  let expiresAt = Date.parse(startsAt);
+  while (expiresAt - validAt > 1) {
+    const midpoint = Math.floor((expiresAt + validAt) / 2);
+    if (reevaluateCard(card, kind, midpoint).status === 'PLAY') validAt = midpoint;
+    else expiresAt = midpoint;
+  }
+  return new Date(expiresAt).toISOString();
+}
+
+/** Authenticated callers supply saved check inputs; request bodies cannot qualify a PLAY. */
+export async function reconcilePublications(client, cards, kind, {
+  publish = false,
+  clock = () => new Date().toISOString(),
+} = {}) {
+  const qualified = cards.filter(card => card.status === 'PLAY');
+  const publications = new Map();
+  const refreshedCards = new Map();
+  const faults = [];
+
+  for (let offset = 0; offset < qualified.length; offset += 500) {
+    const keys = qualified.slice(offset, offset + 500).map(card => `${kind}:${card.id}`);
+    const { data, error } = await client
+      .from('performance_decisions')
+      .select('*,prediction:performance_predictions!inner(*)')
+      .in('prediction.source_key', keys)
+      .eq('qualified', true)
+      .eq('legacy_reconstructed', false);
+    if (error) {
+      faults.push({ error:error.message ?? String(error) });
+      continue;
+    }
+    for (const decision of data ?? []) publications.set(decision.prediction.source_key, decision);
+  }
+
+  for (const card of qualified) {
+    const sourceKey = `${kind}:${card.id}`;
+    // Previously issued decisions are immutable retry results, including after start.
+    if (!publish || publications.has(sourceKey)) continue;
+    try {
+      const issuedAt = clock();
+      const at = Date.parse(issuedAt);
+      const refreshed = reevaluateCard(card, kind, at);
+      refreshedCards.set(sourceKey, refreshed);
+      const prediction = adaptLegacyObservation(card, kind);
+      const evidence = {
+        status:refreshed.status,
+        finalQualification:refreshed.status === 'PLAY',
+        evaluatedAt:issuedAt,
+        freshness:refreshed.freshness,
+        sharpGate:refreshed.sharpGate ?? null,
+        verificationGate:refreshed.verificationGate ?? null,
+        weatherParkImpact:refreshed.weatherParkImpact ?? null,
+        qualificationVersion:'mlb-existing-final-gates-v1',
+        quoteAgeMinutes:prediction.quoteAt ? (at - Date.parse(prediction.quoteAt)) / 60000 : null,
+      };
+      if (!qualifiedDecision({ ...prediction, id:'pending' }, evidence, issuedAt)) {
+        throw Error('Snapshot lacks eligible contemporary prediction, price or quote provenance');
+      }
+      evidence.qualificationExpiresAt = qualificationExpiry(card, kind, at, prediction.eligibilityStartsAt);
+      const { data, error } = await client.rpc('publish_mlb_performance_v1', {
+        payload:{ prediction, evidence, issuedAt },
+      });
+      if (error) throw error;
+      // The RPC returns its actual database-clock issuance after all locks and guards.
+      publications.set(sourceKey, {
+        ...data,
+        prediction:{ source_key:sourceKey, odds:prediction.odds, book:prediction.book },
+      });
+    } catch (error) {
+      faults.push({ sourceKey, error:error.message ?? String(error) });
+      const refreshed = refreshedCards.get(sourceKey) ?? card;
+      refreshedCards.set(sourceKey, {
+        ...refreshed,
+        tracking:{ tracked:false, fault:'PUBLICATION_NOT_READY' },
+      });
     }
   }
-  const rows=cards.map(card=>publicationState(card,publications.get(`${kind}:${card.id}`),{enabled:true,kind,now}));
-  return {rows,faults};
+
+  const responseAt = clock();
+  const rows = cards.map(card => {
+    const sourceKey = `${kind}:${card.id}`;
+    return publicationState(refreshedCards.get(sourceKey) ?? card, publications.get(sourceKey), {
+      enabled:true, kind, now:responseAt,
+    });
+  });
+  return { rows, faults };
 }

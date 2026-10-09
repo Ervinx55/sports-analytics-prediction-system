@@ -53,3 +53,16 @@ test('history endpoint defaults to read-only dry run and rejects missing page da
  const response=await handler(new Request('https://fixture/import',{method:'POST',headers:{authorization:'Bearer service-secret','content-type':'application/json'},body:JSON.stringify({table:'market_grade_observations'})}));
  const body=await response.json();assert.equal(response.status,500);assert.equal(body.complete,false);assert.match(body.error,/missing page/);assert.equal(calls.length,0);
 });
+
+test('team capture stores missing source spread push as null while retaining a true zero',async()=>{
+ const persisted=[],predictions=[];
+ const db={from:table=>({insert:rows=>({select:async()=>{persisted.push(...rows.map(r=>({table,...r})));return {data:rows.map((r,i)=>({...r,id:i+1})),error:null};}})}),rpc:async(name,{payload})=>{predictions.push(payload);return {data:'id',error:null};}};
+ const verify={candidates:[{eventID:'event',mlbGamePk:900,startsAt:start,sideKey:'home',side:'Home',matchup:{away:'Away',home:'Home'},currentModelPrice:{modelProbability:.6,edgePctPoints:10,bestOdds:110,bestBook:'book',quoteAt:capture},runEnvironmentAdjustment:{spreadProjection:{decision:'PASS',away:{line:-1.5,probability:.6,marketFairProbability:.5,bestOdds:110,bestBook:'book',quoteAt:capture,quoteLine:-1.5},home:{line:1.5,probability:.4,pushProbability:0,marketFairProbability:.5,bestOdds:110,bestBook:'book',quoteAt:capture,quoteLine:1.5}}}}]};
+ const handler=loadHandler('capture-model-audit',db,true,async()=>new Response(JSON.stringify(verify),{headers:{'content-type':'application/json'}}));
+ const response=await handler(new Request('https://fixture/capture',{method:'POST',headers:{authorization:'Bearer service-secret','content-type':'application/json'},body:'{}'}));
+ assert.equal(response.status,200);
+ const spread=persisted.filter(r=>r.market_type==='spread');assert.equal(spread.length,2);
+ assert.equal(spread.find(r=>r.market_side==='away').raw.pushProbability,null);
+ assert.equal(spread.find(r=>r.market_side==='home').raw.pushProbability,0);
+ assert.equal(predictions.find(p=>p.marketType==='spread'&&p.side==='away').pushProbability,null);
+});

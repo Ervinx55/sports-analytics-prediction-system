@@ -16,8 +16,12 @@ try {
  const a=await query('select publish_mlb_performance_v1($1::jsonb) as id',[JSON.stringify(payload)]);
  const b=await query('select publish_mlb_performance_v1($1::jsonb) as id',[JSON.stringify({...payload,issuedAt:new Date().toISOString()})]);
  assert.deepEqual(a.id,b.id);
+ assert.ok(Date.parse(a.id.issued_at)>=Date.parse(payload.issuedAt),'database did not store actual wall-clock issuance');
  assert.equal((await query('select count(*)::int as n from performance_decisions')).n,1);
  await assert.rejects(query('select publish_mlb_performance_v1($1::jsonb)',[JSON.stringify({...payload,prediction:{...prediction,odds:120}})]),/conflict/);
+ const expired={...payload,prediction:{...prediction,sourceKey:'market_grade_observations:2'},evidence:{status:'PLAY',finalQualification:true,freshness:{score:100},qualificationExpiresAt:new Date(Date.now()-1000).toISOString()}};
+ await assert.rejects(query('select publish_mlb_performance_v1($1::jsonb)',[JSON.stringify(expired)]),/final-check freshness expired/);
+ assert.equal((await query('select count(*)::int as n from performance_predictions')).n,1,'failed publication left a partial new prediction');
  const imported=Array.from({length:501},(_,i)=>({...row,id:i+10,raw:{}}));
  const dry=await importHistoryPage({table:'market_grade_observations',fetchPage:async(t,c,n)=>imported.filter(r=>r.id>c).slice(0,n),write:()=>{},dryRun:true});
  assert.equal(dry.count,500);assert.equal(dry.exclusions.UNKNOWN_QUOTE_AGE,500);

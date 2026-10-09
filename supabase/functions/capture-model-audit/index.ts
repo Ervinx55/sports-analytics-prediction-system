@@ -404,7 +404,7 @@ Deno.serve(async (req) => {
           }
 
           const p = num(data?.probability);
-          const push = num(data?.pushProbability) ?? 0;
+          const sourcePushProbability = num(data?.pushProbability);
           const labelTeam =
             side === "away" ? c.matchup?.away : c.matchup?.home;
           marketRows.push({
@@ -422,7 +422,7 @@ Deno.serve(async (req) => {
             line: data?.line ?? null,
             best_book: data?.bestBook ?? null,
             best_odds: data?.bestOdds ?? null,
-            playable_threshold: minOddsForTargetEv(p, 0.02, push),
+            playable_threshold: minOddsForTargetEv(p, 0.02, sourcePushProbability ?? 0),
             model_probability: p,
             market_fair_probability: data?.marketFairProbability ?? null,
             edge_pct_points: data?.edgePctPoints ?? null,
@@ -431,11 +431,10 @@ Deno.serve(async (req) => {
             requires_sharp: requiresSharp,
             reason,
             raw: {
-              performanceCapture:true, quoteAt:data?.quoteAt ?? null, quoteLine:data?.quoteLine ?? null, pushProbability:data?.pushProbability ?? null, probabilityBasis:data?.pushProbability != null ? "UNCONDITIONAL" : "CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"},
+              performanceCapture:true, quoteAt:data?.quoteAt ?? null, quoteLine:data?.quoteLine ?? null, pushProbability:sourcePushProbability, probabilityBasis:sourcePushProbability !== null ? "UNCONDITIONAL" : "CONDITIONAL_NO_PUSH", settlementRule:{version:"mlb-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED"},
               projectedAwayRuns: sp.projectedAwayRuns ?? null,
               projectedHomeRuns: sp.projectedHomeRuns ?? null,
               rawPoissonProbability: data?.rawPoissonProbability ?? null,
-              pushProbability: push,
               marketSplit: sp.marketSplit ?? null,
               decision: sp.decision ?? null,
               explanationStats: explanationStats(c),

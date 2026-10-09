@@ -84,7 +84,38 @@ try {
   assert.notEqual(audit.result.id,pubA.result.id);
   const [entry]=await db`select p.odds,d.prediction_id from public.performance_decisions d join public.performance_predictions p on p.id=d.prediction_id where d.first_issued and p.sport='MLB'`;
   assert.equal(Number(entry.odds),-110);assert.equal(entry.prediction_id,pubA.result.prediction_id);
-  console.log('Native PostgreSQL fixtures, duplicate/first-PLAY/provider-mapping races and MLB transactional publication retry/entry-price preservation passed.');
+  // Wall-clock publication must survive waits on every lock, including portfolio.
+  async function blockedPublication({key,startOffsetMs,quoteAgeMs,lockKind,existing=false,qualificationOffsetMs=null}) {
+   const beginAt=Date.now(),eventKey=`mlb:${key}`;
+   const prediction={...mlb,sourceKey:`market_grade_observations:${key}`,eventKey,
+    capturedAt:new Date(beginAt-500).toISOString(),startsAt:new Date(beginAt+startOffsetMs).toISOString(),
+    quoteAt:new Date(beginAt-quoteAgeMs).toISOString(),sourceIds:{event:String(key)}};
+   const candidate={prediction,issuedAt:new Date(beginAt).toISOString(),evidence:{status:'PLAY',finalQualification:true,...(qualificationOffsetMs===null?{}:{freshness:{score:100},qualificationExpiresAt:new Date(beginAt+qualificationOffsetMs).toISOString()})}};
+   const [savedPrediction]=await db`select public.ingest_prediction_v1(${db.json(prediction)}::jsonb) as id`;
+   const [stored]=await db`select market_key from public.performance_predictions where id=${savedPrediction.id}`;
+   const alreadyIssued=existing?(await db`select public.publish_mlb_performance_v1(${db.json(candidate)}::jsonb) as result`)[0].result:null;
+   transactionsOpen=true;await a`begin`;await b`begin`;await a`set local role service_role`;await b`set local role service_role`;
+   const lockKey=lockKind==='portfolio'?`portfolio:${stored.market_key}`:`decision:${prediction.sourceKey}:final`;
+   await a`select pg_advisory_xact_lock(hashtextextended(${lockKey},0))`;
+   const waiting=b`select public.publish_mlb_performance_v1(${db.json(candidate)}::jsonb) as result`.then(rows=>({rows}),error=>({error}));
+   await waitForLock();
+   const expiration=qualificationOffsetMs!==null?beginAt+qualificationOffsetMs:lockKind==='portfolio'&&startOffsetMs>5000?beginAt+(120000-quoteAgeMs):beginAt+startOffsetMs;
+   await new Promise(resolve=>setTimeout(resolve,Math.max(0,expiration-Date.now()+100)));
+   await a`commit`;const result=await waiting;await b`rollback`;transactionsOpen=false;
+   if(existing) assert.deepEqual(result.rows?.[0]?.result,alreadyIssued,'post-start retry changed the existing issuance');
+   else {
+    assert.ok(result.error,'new publication was accepted after lock wait crossed its deadline');
+    assert.match(result.error.message,/publication.*(?:start|quote|freshness)/i);
+    const [count]=await db`select count(*)::int as n from public.performance_decisions where prediction_id=${savedPrediction.id}`;
+    assert.equal(count.n,0);
+   }
+  }
+  await blockedPublication({key:903,startOffsetMs:1000,quoteAgeMs:500,lockKind:'decision'});
+  await blockedPublication({key:904,startOffsetMs:1000,quoteAgeMs:500,lockKind:'portfolio'});
+  await blockedPublication({key:905,startOffsetMs:15*60000,quoteAgeMs:119500,lockKind:'portfolio'});
+  await blockedPublication({key:907,startOffsetMs:15*60000,quoteAgeMs:500,lockKind:'portfolio',qualificationOffsetMs:500});
+  await blockedPublication({key:906,startOffsetMs:1000,quoteAgeMs:500,lockKind:'decision',existing:true});
+  console.log('Native PostgreSQL races passed, including actual decision/portfolio waits crossing start, quote/final-check expiry, and post-start immutable retry.');
  } finally {
   if(transactionsOpen) { await a`rollback`.catch(()=>{}); await b`rollback`.catch(()=>{}); }
   a.release(); b.release();

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { adaptLegacyObservation, qualifiedDecision, importHistoryPage, capturePersistedRows, publicationState, serviceAuthorized } from '../../supabase/functions/_shared/performance-mlb-adapter.mjs';
+import { adaptLegacyObservation, qualifiedDecision, importHistoryPage, capturePersistedRows, publicationState, serviceAuthorized, reconcilePublications } from '../../supabase/functions/_shared/performance-mlb-adapter.mjs';
 const row = { id: 12, game_pk: 123, event_id: 'odds-1', captured_at: '2026-10-05T12:00:00Z', starts_at: '2026-10-05T12:15:00Z', model_version: 'v1', market_type: 'moneyline', market_side: 'home', best_book: 'book', best_odds: -110, model_probability: .6, market_fair_probability: .5, raw: { quoteAt: '2026-10-05T11:59:00Z', probabilityBasis: 'CONDITIONAL_NO_PUSH', settlementRule: { version: 'mlb-full-game-v1', extraInnings: true, shortenedFinal: 'UNRESOLVED' } } };
 const adapt = (changes = {}, kind = 'market_grade_observations') => adaptLegacyObservation({...row,...changes}, kind);
 test('source identity is deterministic and equivalent observations preserve original links', () => {
@@ -122,4 +122,26 @@ test('publication enrichment never changes the immutable captured prediction pay
 test('missing persistence IDs are an explicit capture coverage fault',async()=>{
  const result=await capturePersistedRows({rpc:async()=>({data:'id',error:null})},[],'player_prop_observations',3);
  assert.equal(result.tracked,0);assert.match(result.faults[0].error,/IDs.*0.*3/);
+});
+
+test('publication lookup delay crossing start blocks a new issuance with current qualification',async()=>{
+ const stamp=new Date().toISOString();
+ const liveRow={...row,captured_at:stamp,starts_at:new Date(Date.parse(stamp)+15*60000).toISOString(),raw:{...row.raw,quoteAt:stamp}};
+ let clock=Date.parse(stamp);const calls=[];
+ const card=evaluateTeamCard({...liveRow,non_sharp_status:'READY_FOR_SHARP_CHECK'},{sharp:{checked_at:liveRow.captured_at,final_status:'FINAL_PLAY',raw:{sources:{x:{valid:true,updatedAt:liveRow.captured_at}}}},verification:{evaluated_at:liveRow.captured_at},weather:{evaluated_at:liveRow.captured_at}},clock);
+ const query={select(){return this;},in(){return this;},eq(){return this;},then(resolve){clock=Date.parse(liveRow.starts_at)+1;return Promise.resolve({data:[],error:null}).then(resolve);}};
+ const result=await reconcilePublications({from:()=>query,rpc:async(...args)=>{calls.push(args);return {data:{},error:null};}},[card],'market_grade_observations',{publish:true,clock:()=>new Date(clock).toISOString()});
+ assert.equal(calls.length,0);assert.equal(result.rows[0].status,'PASS');assert.equal(result.rows[0].tracking.tracked,false);assert.equal(result.faults.length,1);
+});
+test('sequential publishers recompute quote and final-check freshness for each card',async()=>{
+ const stamp=new Date().toISOString();
+ const liveRow={...row,captured_at:stamp,starts_at:new Date(Date.parse(stamp)+15*60000).toISOString(),raw:{...row.raw,quoteAt:stamp}};
+ let clock=Date.parse(stamp);const calls=[];
+ const card=evaluateTeamCard({...liveRow,non_sharp_status:'READY_FOR_SHARP_CHECK'},{sharp:{checked_at:liveRow.captured_at,final_status:'FINAL_PLAY',raw:{sources:{x:{valid:true,updatedAt:liveRow.captured_at}}}},verification:{evaluated_at:liveRow.captured_at},weather:{evaluated_at:liveRow.captured_at}},clock);
+ const query={select(){return this;},in(){return this;},eq(){return this;},then(resolve){return Promise.resolve({data:[],error:null}).then(resolve);}};
+ const result=await reconcilePublications({from:()=>query,rpc:async(name,{payload})=>{calls.push(payload);clock+=3*60000;return {data:{id:'d',prediction_id:'p',issued_at:payload.issuedAt,status:'PLAY',qualified:true,legacy_reconstructed:false},error:null};}},[card,{...card,id:13}],'market_grade_observations',{publish:true,clock:()=>new Date(clock).toISOString()});
+ assert.equal(calls.length,1);assert.equal(result.rows[1].status,'PASS');assert.equal(result.faults.length,1);
+ assert.equal(calls[0].evidence.evaluatedAt,stamp);
+ assert.ok(Date.parse(calls[0].evidence.qualificationExpiresAt)>Date.parse(stamp));
+ assert.ok(Date.parse(calls[0].evidence.qualificationExpiresAt)<Date.parse(liveRow.starts_at));
 });

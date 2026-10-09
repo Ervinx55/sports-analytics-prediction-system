@@ -330,7 +330,7 @@
       "version": "20261005010000",
       "name": "mlb_performance_publication",
       "path": "supabase/migrations/20261005010000_mlb_performance_publication.sql",
-      "sha256": "077177ea80029cf1c3305d3f5a77bdf566f0e1fcc5d289ce36ba7c2d0b07f84d",
+      "sha256": "fccb2fb360521174fe095b28fa3b0abf5928374896c29b0d35d60e790fa917c9",
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
