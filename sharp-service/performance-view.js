@@ -15,7 +15,10 @@ export function renderPerformance(data, root) {
 }
 export function createPerformanceController({root,fetchImpl=fetch,timeoutMs=15000}) {
  let sequence=0,active;
- return {async load(filters={},cursor='0') {
+ return {invalidate() {
+  ++sequence;active?.abort();
+  root.innerHTML='<p role="alert">Invalid filters. Enter both UTC dates with the end after the start. Results are pending valid filters.</p>';
+ },async load(filters={},cursor='0') {
   const request=++sequence;active?.abort();active=new AbortController();const abort=active;
   root.innerHTML='<p role="status">Loading performance… Coverage and results are pending.</p>';
   const timer=setTimeout(()=>abort.abort(),timeoutMs);

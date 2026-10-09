@@ -2087,7 +2087,13 @@ const controller=createPerformanceController({root});
 const now=new Date();form.elements.to.value=now.toISOString().slice(0,10);form.elements.from.value=new Date(now.getTime()-30*86400000).toISOString().slice(0,10);
 const params=new URLSearchParams(location.search);if(['NBA','NFL','NHL','TENNIS','SOCCER','MLB','CFB'].includes(params.get('sport')))form.elements.sport.value=params.get('sport');
 const filters=()=>Object.fromEntries(new FormData(form));
-const refresh=()=>{if(form.reportValidity())controller.load(filters());};
+const refresh=()=>{
+ controller.invalidate();
+ if(!form.reportValidity())return;
+ const selected=filters();
+ if(!selected.from||!selected.to||selected.from>=selected.to)return;
+ controller.load(selected);
+};
 form.addEventListener('submit',event=>{event.preventDefault();refresh();});
 form.addEventListener('change',refresh);
 root.addEventListener('click',event=>{const button=event.target.closest('[data-performance-next]');if(button)controller.load(filters(),button.dataset.performanceNext);});
