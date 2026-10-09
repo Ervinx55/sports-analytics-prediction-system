@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {mkdtempSync, readFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -25,3 +26,15 @@ test('repeated snapshots cannot cross canonical game partitions',()=>fixture(pat
 test('chronology and snapshot identity cannot leak across partitions',()=>{fixture(path=>{const c=config();c.eventGroups[0].startsAt='2099-01-03T00:00:00Z';assert.throws(()=>freezeExperiment(c,path),/chronology/);});fixture(path=>{const c=config();c.eventGroups[1].snapshots=['s1'];assert.throws(()=>freezeExperiment(c,path),/snapshot/);});});
 test('evaluation start must be future and timestamps explicit UTC',()=>{for(const date of ['2020-01-01T00:00:00Z','2099-01-01','garbage'])fixture(path=>{const c=config();c.evaluationStart=date;assert.throws(()=>freezeExperiment(c,path),/evaluationStart/);});});
 test('invalid calendar dates and string power assumptions cannot silently normalize',()=>{fixture(path=>{const c=config();c.evaluationStart='2099-02-30T00:00:00Z';c.eventGroups[1].startsAt='2099-03-05T00:00:00Z';assert.throws(()=>freezeExperiment(c,path),/evaluationStart/);});fixture(path=>{const c=config();c.power.alpha='0.05';assert.throws(()=>freezeExperiment(c,path),/power/);});});
+test('saved protocol digest remains independently verifiable with a caller-supplied hash',()=>{
+ for(const suppliedHash of [undefined,'copied-from-an-earlier-protocol'])fixture(path=>{
+  const c=config();if(suppliedHash!==undefined)c.protocolHash=suppliedHash;
+  const returned=freezeExperiment(c,path),before=readFileSync(path,'utf8');
+  const {protocolHash,...payload}=JSON.parse(before);
+  assert.equal(protocolHash,createHash('sha256').update(JSON.stringify(payload)).digest('hex'));
+  assert.equal(returned.protocolHash,protocolHash);
+  assert.equal(c.protocolHash,suppliedHash,'caller config remains unchanged');
+  assert.throws(()=>freezeExperiment(c,path),/EEXIST/);
+  assert.equal(readFileSync(path,'utf8'),before,'retry preserves verified artifact');
+ });
+});

@@ -10,6 +10,8 @@ function utc(value,name){if(typeof value!=='string'||!/^\d{4}-\d\d-\d\dT\d\d:\d\
 // This is an append-only workflow guarantee, not filesystem administrator protection.
 export function freezeExperiment(config,outputPath){
  const c=JSON.parse(JSON.stringify(config)),frozenAt=new Date().toISOString(),freeze=Date.parse(frozenAt);
+ // This derived field must never enter its own digest, even in copied inputs.
+ delete c.protocolHash;
  for(const name of ['experimentId','modelSource','formulaSource'])requireText(c[name],name);
  for(const name of ['sport','modelMode','selection','probabilityBasis'])requireText(c.cohort?.[name],`cohort.${name}`);
  if(!['LIVE','SHADOW'].includes(c.cohort.modelMode))throw Error('cohort.modelMode invalid');
