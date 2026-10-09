@@ -163,7 +163,7 @@ begin
    good:=good and body->'ok'='true'::jsonb and coalesce(body->'faults',body#>'{tracking,faults}')='[]'::jsonb
     and (body#>'{tracking,enabled}'='true'::jsonb or body#>'{coverage,complete}'='true'::jsonb);
   end if;
-  update public.pipeline_http_request_log set response_ok=coalesce(good,false),reconciled_at=clock_timestamp(),responded_at=entry.created,error_msg=case when coalesce(good,false) then null else 'PERFORMANCE_RECORDING_OR_COVERAGE_FAILED' end where request_id=entry.request_id;
+  update public.pipeline_http_request_log set status_code=entry.status_code,timed_out=coalesce(entry.timed_out,false),response_preview=left(coalesce(entry.content,''),500),response_ok=coalesce(good,false),reconciled_at=clock_timestamp(),responded_at=entry.created,error_msg=case when coalesce(good,false) then null else 'PERFORMANCE_RECORDING_OR_COVERAGE_FAILED' end where request_id=entry.request_id;
   counted:=counted+1;
  end loop;
  return counted;
@@ -177,3 +177,55 @@ do $$ declare job_id bigint;begin
   execute 'select cron.alter_job($1,active := false)' using job_id;
  end if;
 end $$;
+
+-- Forward replacement: generic minute reconciliation cannot publish semantic jobs as healthy.
+-- Other components retain the recovered transport-only behavior, including timeout marking.
+CREATE OR REPLACE FUNCTION public.reconcile_pipeline_http_requests_v1()
+ RETURNS integer
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pg_catalog', 'public', 'net'
+AS $function$
+declare
+  v_count integer := 0;
+  v_marked integer := 0;
+begin
+  update public.pipeline_http_request_log l
+  set reconciled_at=now(),
+      responded_at=r.created,
+      status_code=r.status_code,
+      timed_out=coalesce(r.timed_out,false),
+      error_msg=r.error_msg,
+      response_ok=(
+        r.status_code between 200 and 299
+        and coalesce(r.timed_out,false)=false
+        and r.error_msg is null
+      ),
+      response_preview=left(coalesce(r.content,''),500)
+  from net._http_response r
+  where l.request_id=r.id
+    and l.reconciled_at is null
+    and l.component_key not like 'performance_%';
+
+  get diagnostics v_count = row_count;
+
+  update public.pipeline_http_request_log l
+  set reconciled_at=now(),
+      responded_at=now(),
+      response_ok=false,
+      error_msg=coalesce(l.error_msg,'NO_HTTP_RESPONSE_WITHIN_3_MINUTES')
+  where l.reconciled_at is null
+    and l.enqueued_at < now()-interval '3 minutes'
+    and not exists (
+      select 1 from net.http_request_queue q where q.id=l.request_id
+    )
+    and not exists (
+      select 1 from net._http_response r where r.id=l.request_id
+    );
+
+  get diagnostics v_marked = row_count;
+  return v_count+v_marked;
+end;
+$function$;
+revoke execute on function public.reconcile_pipeline_http_requests_v1() from public, anon, authenticated;
+grant execute on function public.reconcile_pipeline_http_requests_v1() to service_role;
