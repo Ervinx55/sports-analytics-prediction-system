@@ -161,3 +161,6 @@ verify_jwt = false
 
 [functions.import-performance-history]
 verify_jwt = true
+
+[functions.capture-sport-predictions]
+verify_jwt = true

@@ -122,6 +122,7 @@ export default async function handler(req, res) {
     );
     const weatherByEvent = new Map(weatherEntries);
 
+    const forecastAt = new Date().toISOString();
     const projections = events.map((event) =>
       projectEvent({
         event,
@@ -165,6 +166,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       version: "NFL Team Markets v3-shadow",
       generatedAt: new Date().toISOString(),
+      forecastAt,
       sport: "FOOTBALL",
       league: "NFL",
       season,
@@ -202,6 +204,7 @@ export default async function handler(req, res) {
       sourceHealth: nflData.sourceHealth,
       marketBooks: BOOKS,
       boardProviderCache: board.providerCache ?? null,
+      oddsProvider: board.source ?? null,
       eventCount: projections.length,
       availableEventCount: projections.filter(
         (projection) => projection.available
