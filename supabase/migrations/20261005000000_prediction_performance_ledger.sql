@@ -63,10 +63,12 @@ do $$ declare t text; begin
 end $$;
 -- Safe casts keep malformed source rows diagnosable instead of coercing nulls to zero.
 create function public.performance_number_v1(value jsonb) returns numeric language plpgsql immutable set search_path = '' as $$
+declare parsed numeric;
 begin
  if jsonb_typeof(value) not in ('number','string') or value is null then return null; end if;
- if btrim(value #>> '{}') in ('NaN','Infinity','-Infinity') then return null; end if;
- return nullif(btrim(value #>> '{}'),'')::numeric;
+ parsed := nullif(btrim(value #>> '{}'),'')::numeric;
+ if parsed::text in ('NaN','Infinity','-Infinity') then return null; end if;
+ return parsed;
 exception when others then return null;
 end $$;
 create function public.performance_time_v1(value text) returns timestamptz language plpgsql immutable set search_path = '' as $$
@@ -81,7 +83,8 @@ declare p jsonb := payload; existing public.performance_predictions; result uuid
  sport text := p->>'sport'; event text := nullif(p->>'eventKey','');
  capture timestamptz := public.performance_time_v1(p->>'capturedAt');
  start_time timestamptz := public.performance_time_v1(p->>'startsAt');
- original timestamptz := public.performance_time_v1(coalesce(p->>'eligibilityStartsAt',p->>'startsAt'));
+ original timestamptz := least(public.performance_time_v1(p->>'eligibilityStartsAt'),start_time);
+ canonical_start timestamptz;
  quote timestamptz := public.performance_time_v1(p->>'quoteAt');
  model numeric := public.performance_number_v1(p->'modelProbability'); market numeric := public.performance_number_v1(p->'marketProbability');
  push numeric := public.performance_number_v1(p->'pushProbability'); reasons jsonb := '[]'; key text; minutes numeric; max_age integer;
@@ -93,17 +96,12 @@ begin
   if existing.payload <> p then raise exception 'sourceKey payload conflict' using errcode='23505'; end if;
   return existing.id;
  end if;
- if sport in ('MLB','NFL','NBA','CFB') and event is not null and original is not null then
+ -- Lock/read existing canonical state, but diagnostics must not create it.
+ if sport in ('MLB','NFL','NBA','CFB') and event is not null and start_time is not null then
   perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended('event:' || sport || ':' || event,0));
-  insert into public.performance_events values(sport,event,original) on conflict do nothing;
-  select e.eligibility_starts_at into original from public.performance_events e where e.sport = sport and e.event_key = event;
-  if nullif(p#>>'{sourceIds,provider}','') is not null and nullif(p#>>'{sourceIds,event}','') is not null then
-   insert into public.performance_event_mappings(sport,event_key,provider,source_event_id,provenance) values(sport,event,p#>>'{sourceIds,provider}',p#>>'{sourceIds,event}',coalesce(p->'provenance','{}')) on conflict do nothing;
-   if not exists(select 1 from public.performance_event_mappings m where m.sport = sport and m.event_key = event and m.provider = p#>>'{sourceIds,provider}' and m.source_event_id = p#>>'{sourceIds,event}') then reasons := reasons || '"AMBIGUOUS_SOURCE_MAPPING"'::jsonb; end if;
-  end if;
-  if start_time is not null and capture is not null then
-   insert into public.performance_start_revisions(sport,event_key,starts_at,observed_at) values(sport,event,start_time,capture) on conflict do nothing;
-  end if;
+  select e.eligibility_starts_at into canonical_start from public.performance_events e where e.sport = sport and e.event_key = event;
+  original := least(original,canonical_start);
+  if exists(select 1 from public.performance_event_mappings m where m.sport = sport and m.provider = p#>>'{sourceIds,provider}' and m.source_event_id = p#>>'{sourceIds,event}' and m.event_key <> event) then reasons := reasons || '"AMBIGUOUS_SOURCE_MAPPING"'::jsonb; end if;
  else
   sport := null; event := null; original := null; reasons := reasons || '"INVALID_EVENT_IDENTITY"'::jsonb;
  end if;
@@ -122,6 +120,18 @@ begin
  minutes := extract(epoch from (original-capture))/60;
  max_age := case when minutes <=20 then 2 when minutes <=90 then 5 when minutes <=360 then 15 else 30 end;
  if quote is null or quote > capture or capture - quote > make_interval(mins => max_age) then reasons := reasons || '"INVALID_QUOTE_AGE"'::jsonb; end if;
+ -- Only a fully validated saved prediction may establish canonical event/mapping state.
+ -- Keep invalid source observations and all reported times in their immutable payload.
+ if reasons = '[]'::jsonb then
+  insert into public.performance_events values(sport,event,original) on conflict do nothing;
+  if nullif(p#>>'{sourceIds,provider}','') is not null then
+   insert into public.performance_event_mappings(sport,event_key,provider,source_event_id,provenance) values(sport,event,p#>>'{sourceIds,provider}',p#>>'{sourceIds,event}',coalesce(p->'provenance','{}')) on conflict do nothing;
+  end if;
+  insert into public.performance_start_revisions(sport,event_key,starts_at,observed_at) values(sport,event,start_time,capture) on conflict do nothing;
+ elsif canonical_start is null then
+  -- No canonical FK target exists; diagnostic source identity remains in payload.
+  sport := null; event := null;
+ end if;
  key := jsonb_build_array(sport,event,p->>'playerKey',p->>'marketType',p->>'side',trim_scale(public.performance_number_v1(p->'line')),p->>'modelVersion',p->>'modelMode')::text;
  insert into public.performance_predictions(source_key,sport,event_key,player_key,market_type,side,line,model_version,model_mode,model_available,captured_at,starts_at,eligibility_starts_at,quote_at,model_probability,market_probability,push_probability,odds,book,probability_basis,settlement_rule,source_ids,provenance,market_key,eligibility_reasons,valid,payload)
  values(p->>'sourceKey',sport,event,p->>'playerKey',p->>'marketType',p->>'side',trim_scale(public.performance_number_v1(p->'line')),p->>'modelVersion',p->>'modelMode',coalesce(p->>'modelAvailable' = 'true',false),capture,start_time,original,quote,model,market,push,public.performance_number_v1(p->'odds'),p->>'book',p->>'probabilityBasis',p->'settlementRule',coalesce(p->'sourceIds','{}'),coalesce(p->'provenance','{}'),key,reasons,reasons = '[]',p) returning id into result;

@@ -106,3 +106,40 @@ begin
 end $$;
 reset role;
 rollback;
+begin;
+set local role service_role;
+do $$
+declare p jsonb; diagnostic uuid; later uuid;
+begin
+ p := '{"sourceKey":"fixture:poison:1","sport":"NFL","eventKey":"fixture:poison","marketType":"spread","side":"HOME","line":0,"modelVersion":"v1","modelMode":"LIVE","modelAvailable":true,"capturedAt":"2020-10-05T12:00:00Z","startsAt":"2020-10-06T12:15:00Z","quoteAt":"2020-10-05T11:59:00Z","book":"book","odds":-110,"modelProbability":null,"marketProbability":0.5,"probabilityBasis":"CONDITIONAL_NO_PUSH","sourceIds":{"event":"poison","provider":"fixture"},"settlementRule":{"version":"v1"},"provenance":{},"eligibilityReasons":[]}';
+ diagnostic := public.ingest_prediction_v1(p);
+ assert not exists(select 1 from public.performance_events where event_key='fixture:poison'), 'diagnostic seeded canonical event cutoff';
+ assert not exists(select 1 from public.performance_event_mappings where source_event_id='poison'), 'diagnostic seeded source mapping';
+ later := public.ingest_prediction_v1(p || '{"sourceKey":"fixture:poison:2","modelProbability":0.6,"capturedAt":"2020-10-05T13:00:00Z","startsAt":"2020-10-05T12:15:00Z","quoteAt":"2020-10-05T12:59:00Z"}'::jsonb);
+ assert (select not valid from public.performance_predictions where id=later), 'diagnostic cutoff admitted post-start capture';
+ later := public.ingest_prediction_v1(p || '{"sourceKey":"fixture:delayed-original","eventKey":"fixture:delayed","modelProbability":0.6,"capturedAt":"2020-10-05T13:00:00Z","startsAt":"2020-10-05T12:15:00Z","eligibilityStartsAt":"2020-10-06T12:15:00Z","quoteAt":"2020-10-05T12:59:00Z"}'::jsonb);
+ assert (select not valid from public.performance_predictions where id=later), 'caller delayed original start';
+ assert (select count(*)=3 from public.performance_predictions where source_key in ('fixture:poison:1','fixture:poison:2','fixture:delayed-original')), 'diagnostic provenance lost';
+end $$;
+reset role;
+rollback;
+begin;
+set local role service_role;
+do $$
+declare p jsonb; value text; pred uuid;
+begin
+ p := '{"sourceKey":"fixture:numeric:1","sport":"NFL","eventKey":"fixture:numeric","marketType":"spread","side":"HOME","line":0,"modelVersion":"v1","modelMode":"LIVE","modelAvailable":true,"capturedAt":"2020-10-05T12:00:00Z","startsAt":"2020-10-05T12:15:00Z","quoteAt":"2020-10-05T11:59:00Z","book":"book","odds":-110,"modelProbability":0.6,"marketProbability":0.5,"probabilityBasis":"CONDITIONAL_NO_PUSH","sourceIds":{"event":"numeric"},"settlementRule":{"version":"v1"},"provenance":{},"eligibilityReasons":[]}';
+ foreach value in array array['nan','NAN','infinity','+Infinity','-infinity','+nan','-nan'] loop
+  assert public.performance_number_v1(to_jsonb(value)) is null, 'nonfinite cast survived: ' || value;
+  pred := public.ingest_prediction_v1(p || jsonb_build_object('sourceKey','fixture:nonfinite-line:'||value,'line',value));
+  assert (select not valid and line is null from public.performance_predictions where id=pred), 'nonfinite line valid: ' || value;
+  pred := public.ingest_prediction_v1(p || jsonb_build_object('sourceKey','fixture:nonfinite-odds:'||value,'odds',value));
+  assert (select odds is null from public.performance_predictions where id=pred), 'nonfinite odds stored: ' || value;
+  begin
+   perform public.record_decision_v1(jsonb_build_object('sourceKey','fixture:nonfinite-play:'||value,'predictionId',pred,'issuedAt','2020-10-05T12:00:00Z','status','PLAY','qualified',true,'evidence',jsonb_build_object('finalQualification',true)));
+   raise exception 'nonfinite price qualified';
+  exception when check_violation then null; end;
+ end loop;
+end $$;
+reset role;
+rollback;

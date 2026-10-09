@@ -12,6 +12,7 @@ export function normalizePrediction(input, { now = new Date().toISOString() } = 
   for (const key of ['line','odds','modelProbability','marketProbability','pushProbability']) p[key] = number(input[key]);
   for (const key of ['capturedAt','startsAt','quoteAt']) p[key] = time(input[key]);
   p.eligibilityStartsAt = time(input.eligibilityStartsAt ?? input.startsAt);
+  if (p.startsAt && p.eligibilityStartsAt && Date.parse(p.startsAt) < Date.parse(p.eligibilityStartsAt)) p.eligibilityStartsAt = p.startsAt;
   p.modelAvailable = input.modelAvailable === true;
   p.settlementRule = structuredClone(input.settlementRule ?? null);
   p.sourceIds = structuredClone(input.sourceIds ?? {});

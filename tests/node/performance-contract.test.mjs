@@ -52,3 +52,6 @@ test('exact lines are mandatory for spreads totals and props, optional for money
 test('null source metadata becomes diagnostic data rather than crashing', () => {
   assert.ok(norm({sourceIds:null,provenance:null}).eligibilityReasons.includes('MISSING_SOURCE_EVENT_ID'));
 });
+test('a caller-provided delayed eligibility start cannot override the recorded kickoff', () => {
+  assert.ok(norm({startsAt:'2026-10-05T11:00:00Z',eligibilityStartsAt:'2026-10-06T12:00:00Z'}).eligibilityReasons.includes('POST_START_CAPTURE'));
+});
