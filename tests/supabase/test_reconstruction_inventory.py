@@ -90,7 +90,18 @@ def test_edge_function_recovery_is_complete_and_configured():
     for item in planned:
         assert item.get("appliedToProduction") is False
         assert item.get("entrypoint") == "index.ts"
-        assert item.get("verify_jwt") is True
+        # The public GET projection is the sole planned reader; all planned
+        # ingestion, publication and settlement handlers retain JWT protection.
+        public_reader = item["slug"] == "prediction-performance"
+        assert item.get("verify_jwt") is (not public_reader)
+        if public_reader:
+            source = (ROOT / "supabase/functions/prediction-performance/index.ts").read_text()
+            assert "req.method!=='GET'" in source
+            assert "readPerformance" in source
+            read_sql = (ROOT / "supabase/migrations/20261006030000_performance_read.sql").read_text()
+            assert "security invoker" in read_sql
+            assert "from public,anon,authenticated" in read_sql
+            assert "to service_role" in read_sql
         assert any(file["path"] == f"supabase/functions/{item['slug']}/index.ts" for file in item["files"])
 
     slugs = [item["slug"] for item in items]

@@ -883,6 +883,22 @@
           "sha256": "a6416caf033425cafabde1cb2fb96f94bd5c6f84867b824d6c0b53baada4a7df"
         }
       ]
+    },
+    {
+      "slug": "prediction-performance",
+      "status": "PLANNED",
+      "verify_jwt": false,
+      "appliedToProduction": false,
+      "bundle_sha256": "60d3c33c4772d95c206de7cce596492e688124d46fa852b731ebaab2ebf17e0b",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/prediction-performance/index.ts",
+          "name": "index.ts",
+          "sha256": "60d3c33c4772d95c206de7cce596492e688124d46fa852b731ebaab2ebf17e0b"
+        }
+      ]
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

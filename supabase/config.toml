@@ -167,3 +167,6 @@ verify_jwt = true
 
 [functions.settle-sport-predictions]
 verify_jwt = true
+
+[functions.prediction-performance]
+verify_jwt = false
