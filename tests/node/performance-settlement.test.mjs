@@ -100,3 +100,15 @@ test('provider league identity prevents cross-sport relabeling and MLB side swap
  const f=fixture('NFL');assert.equal(normalizeFinalResult(f.payload,{sport:'NBA',source:'espn'}).status,'UNKNOWN');delete f.payload.header.league;assert.equal(normalizeFinalResult(f.payload,{sport:'NFL',source:'espn'}).status,'UNKNOWN');
  const m=fixture('MLB');m.payload.gameData.teams.home.sport.id=11;assert.equal(normalizeFinalResult(m.payload,{sport:'MLB',source:'mlb-statsapi'}).status,'UNKNOWN');const swapped=fixture('MLB');swapped.payload.liveData.boxscore.teams.home.team.id=111;assert.equal(normalizeFinalResult(swapped.payload,{sport:'MLB',source:'mlb-statsapi'}).identityAmbiguous,true);
 });
+const mlbDurationResult = change => {const f=fixture('MLB');Object.assign(f.payload.liveData.linescore,change);return normalizeFinalResult(f.payload,{sport:'MLB',source:'mlb-statsapi'});};
+const mlbDurationGrade = (r,policy='VOID') => grade({sport:'MLB',eventKey:r.eventKey,sourceIds:{provider:'mlb-statsapi',event:r.sourceEventId},marketType:'total',side:'OVER',line:10,settlementRule:{...rule,period:'FULL_GAME',shortened:policy,minimumPeriods:9}},r);
+test('interrupted scheduled final inning obeys shortened VOID and ACTION policies',()=>{
+ for(const [inningState,outs] of [['Top',1],['Top',3],['Middle',3],['Bottom',1]]){const r=mlbDurationResult({currentInning:9,scheduledInnings:9,inningState,outs});assert.equal(r.shortened,true);assert.equal(mlbDurationGrade(r).outcome,'VOID');assert.equal(mlbDurationGrade(r,'ACTION').outcome,'UNRESOLVED');}
+});
+test('missing or invalid MLB duration evidence stays unresolved instead of proving full duration',()=>{
+ for(const change of [{outs:null},{outs:undefined},{outs:4},{outs:-1},{outs:1.5},{outs:true},{inningState:null},{inningState:undefined},{inningState:'unknown'},{inningState:'Middle',outs:0},{inningState:'End',outs:1},{currentInning:null},{scheduledInnings:null},{inningState:'Top',outs:3,teams:{home:{runs:null},away:{runs:6}}},{inningState:'Bottom',outs:1,teams:{home:{runs:11},away:{runs:null}}}]){const r=mlbDurationResult(change);assert.equal(r.shortened,null,JSON.stringify(change));assert.equal(mlbDurationGrade(r).outcome,'UNRESOLVED');}
+});
+test('completed away wins, skipped home bottom halves and home walkoffs preserve full-game grading',()=>{
+ for(const [inningState,outs,home,away] of [['Bottom',3,6,11],['End',3,6,11],['Top',3,11,6],['Middle',3,11,6],['Bottom',0,11,6],['Bottom',1,11,6],['Bottom',2,11,6]]){const r=mlbDurationResult({currentInning:9,scheduledInnings:9,inningState,outs,teams:{home:{runs:home},away:{runs:away}}});assert.equal(r.shortened,false,JSON.stringify([inningState,outs]));assert.equal(mlbDurationGrade(r).outcome,'WIN');}
+ const interruptedTop=mlbDurationResult({currentInning:9,scheduledInnings:9,inningState:'Top',outs:1,teams:{home:{runs:11},away:{runs:6}}});assert.equal(interruptedTop.shortened,true);assert.equal(mlbDurationGrade(interruptedTop).outcome,'VOID');
+});

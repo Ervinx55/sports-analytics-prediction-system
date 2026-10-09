@@ -77,10 +77,23 @@ function normalizeMlb(p,r) {
  r.providerRevision=typeof timestamp==='string'?timestamp:null;
  const lines=p.liveData?.linescore;r.homeScore=score(lines?.teams?.home?.runs);r.awayScore=score(lines?.teams?.away?.runs);
  const inning=score(lines?.currentInning),outs=score(lines?.outs);
- // Top of inning N finishes only N-1 whole innings. Do not round a 4.5-inning final to five.
- if(inning>0&&outs!==null&&outs<=3&&['Top','Bottom','Middle','End'].includes(lines?.inningState))r.completedPeriods=inning-1+(outs===3&&['Bottom','End'].includes(lines.inningState)?1:0);
  const scheduled=score(lines?.scheduledInnings);
- if(scheduled>0&&inning>0){r.shortened=inning<scheduled;r.overtime=inning>scheduled;}
+ const state=lines?.inningState;
+ const validDuration=inning>0&&scheduled>0&&outs!==null&&outs<=3&&['Top','Bottom','Middle','End'].includes(state)&&(!['Middle','End'].includes(state)||outs===3);
+ if(validDuration) {
+   // Top of inning N finishes only N-1 whole innings. Do not round a 4.5-inning final to five.
+   r.completedPeriods=inning-1+(outs===3&&['Bottom','End'].includes(state)?1:0);
+   r.overtime=inning>scheduled;
+   if(inning<scheduled)r.shortened=true;
+   else if(inning>scheduled || outs===3&&['Bottom','End'].includes(state))r.shortened=false;
+   else if(state==='Top'&&outs<3)r.shortened=true;
+   else if(r.homeScore!==null&&r.awayScore!==null) {
+     // A home lead after the final top half needs no bottom half; a final home lead
+     // during the bottom half proves an allowable walkoff ending. An away lead or
+     // tie still needs the bottom's third out. Unknown scores cannot prove either.
+     r.shortened=!(r.homeScore>r.awayScore && (state==='Bottom'||outs===3&&['Top','Middle'].includes(state)));
+   }
+ }
  for(const side of ['home','away']) {
    const team=p.liveData?.boxscore?.teams?.[side],teamId=id(team?.team?.id);r[`${side}TeamId`]=teamId;
    if(teamId!==id(p.gameData?.teams?.[side]?.id))r.identityAmbiguous=true;
