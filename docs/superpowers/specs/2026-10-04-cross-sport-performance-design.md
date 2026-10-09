@@ -1,6 +1,6 @@
 # Cross-sport prediction performance and model improvement
 
-Status: proposed implementation design following approval of the tracking scope. No production model promotion is authorized by this document.
+Status: written design approved by the user on October 4, 2026. No production model promotion is authorized by this document.
 
 ## Intended outcome
 
