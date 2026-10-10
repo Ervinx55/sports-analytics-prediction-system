@@ -1,3 +1,4 @@
+import {capturePersistedRows, serviceAuthorized} from '../_shared/performance-mlb-adapter.mjs';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const MODEL_URL =
@@ -23,6 +24,8 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!serviceAuthorized(req.headers.get('authorization'), Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))) return new Response(JSON.stringify({error:'Service authentication required'}),{status:401});
+    const tracking = {enabled:Deno.env.get('PERFORMANCE_MLB_CAPTURE_ENABLED') === 'true', tracked:0, faults:[] as any[]};
     const body = await req.json().catch(() => ({}));
     const date = body.date ? String(body.date) : chicagoDate();
     const startsAfter = new Date().toISOString();
@@ -96,21 +99,24 @@ Deno.serve(async (req) => {
       tf_shadow_affects_decision:
         Boolean(p.tensorflowShadow?.affectsDecision),
       raw: {
+        performanceCapture:true, quoteAt:p.quoteAt ?? null, probabilityBasis:"UNCONDITIONAL", settlementRule:{version:"mlb-player-full-game-v1",extraInnings:true,shortenedFinal:"UNRESOLVED",participation:"REQUIRES_APPEARANCE"},
         projection: p.projection ?? null,
         tensorflowShadow: p.tensorflowShadow ?? null,
       },
     }));
 
     if (rows.length) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("player_prop_observations")
-        .insert(rows);
+        .insert(rows).select("*");
       if (error) throw error;
+      if (tracking.enabled) {const result=await capturePersistedRows(supabase,data ?? [],'player_prop_observations',rows.length);tracking.tracked+=result.tracked;tracking.faults.push(...result.faults);}
     }
 
     return new Response(
       JSON.stringify({
-        ok: true,
+        ok: tracking.faults.length === 0,
+        tracking,
         capturedAt,
         date,
         version: model.version ?? null,

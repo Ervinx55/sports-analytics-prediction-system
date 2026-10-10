@@ -1,0 +1,61 @@
+name: Performance SQL fixtures
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sql:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable-fixture-only
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '5432'
+      PGUSER: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.19.0'
+          cache: npm
+          cache-dependency-path: tests/supabase/tooling/package-lock.json
+      - name: Install isolated pinned development tools
+        run: npm ci --prefix tests/supabase/tooling --include=dev --ignore-scripts --no-audit --no-fund
+      - name: Provision disposable fixture password
+        shell: bash
+        run: |
+          umask 077
+          printf '%s' 'disposable-fixture-only' > "$RUNNER_TEMP/performance-pg-password"
+          printf 'PGPASSWORD_FILE=%s\n' "$RUNNER_TEMP/performance-pg-password" >> "$GITHUB_ENV"
+      - name: PGlite actual schema and fixture assertions
+        run: |
+          node tests/supabase/run-pipeline-health.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
+          node tests/supabase/run-performance-ledger.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
+          node tests/supabase/run-performance-mlb.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
+          node tests/supabase/run-performance-sport-capture.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
+      - name: Mandatory native PostgreSQL RLS, concurrency, queue and read assertions
+        run: |
+          node tests/supabase/run-performance-concurrency.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+          node tests/supabase/run-performance-sport-concurrency.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+          node tests/supabase/run-performance-priority-sports.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+          node tests/supabase/run-performance-worker.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+          node tests/supabase/run-performance-read.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+      - name: Remove fixture password
+        if: always()
+        shell: bash
+        run: rm -f -- "$RUNNER_TEMP/performance-pg-password"

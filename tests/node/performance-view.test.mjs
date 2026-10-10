@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {renderPerformance, createPerformanceController} from '../../sharp-service/performance-view.js';
+const fixture = (sport='NBA') => ({filters:{sport,cohort:'ALL'},summary:{count:0,wins:0,losses:0,pushes:0,voids:0,unresolved:0,winRate:null,distinctGames:0,pricedCount:0,hypotheticalRoi:null,hypotheticalUnitProfit:null,pairedCount:0,modelBrier:null,marketBrier:null,modelLogLoss:null,marketLogLoss:null},coverage:{selected:0,settledCount:0,missingOdds:0,missingPaired:0,sports:[{sport,samples:0,state:'MODEL_UNAVAILABLE',modelAvailability:'UNAVAILABLE',providerCoverage:'UNVERIFIED'}],providerCoverageState:'UNVERIFIED',providerLeagues:null},rows:[],groups:[],reliabilityBins:[],warnings:[],uncertainty:{status:'INSUFFICIENT_GAMES',games:0},nextCursor:null});
+test('empty unavailable sports and missing metrics never become zero accuracy or returns',()=>{
+ for(const sport of ['NBA','CFB']){const root={innerHTML:''};renderPerformance(fixture(sport),root);assert.match(root.innerHTML,/Model unavailable/);assert.match(root.innerHTML,/No captured predictions/);assert.match(root.innerHTML,/Hypothetical ROI/);assert.match(root.innerHTML,/Unavailable/);assert.doesNotMatch(root.innerHTML,/0\.0%/);}
+});
+test('provider and row strings are escaped, exact entry and revision remain visible',()=>{
+ const data=fixture('NFL');data.rows=[{eventKey:'<img src=x onerror=alert(1)>',book:'"<script>alert(1)</script>',odds:-115,outcome:'UNRESOLVED',settlementRevision:2,settlementReason:'MISSING_STATS',line:0,modelProbability:null}];data.warnings=['<svg onload=alert(1)>'];const root={innerHTML:''};renderPerformance(data,root);assert.doesNotMatch(root.innerHTML,/<img|<script|<svg/);assert.match(root.innerHTML,/&lt;img/);assert.match(root.innerHTML,/-115/);assert.match(root.innerHTML,/Revision 2/);assert.match(root.innerHTML,/Line 0/);
+});
+test('rapid filters reject stale success and stale errors, loading and outage remove old results',async()=>{
+ const pending=[];const root={innerHTML:'old success'};const controller=createPerformanceController({root,fetchImpl:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))});
+ const first=controller.load({sport:'NBA'});assert.match(root.innerHTML,/Loading/);assert.doesNotMatch(root.innerHTML,/old success/);
+ const second=controller.load({sport:'NFL'});pending[1].resolve({ok:true,json:async()=>fixture('NFL')});await second;assert.match(root.innerHTML,/NFL/);
+ pending[0].resolve({ok:true,json:async()=>fixture('NBA')});await first;assert.doesNotMatch(root.innerHTML,/NBA/);
+ const third=controller.load({sport:'NHL'});pending[2].reject(Error('<script>bad</script>'));await third;assert.match(root.innerHTML,/Performance unavailable/);assert.doesNotMatch(root.innerHTML,/NFL|<script>/);
+});
+test('controller sends filters and pagination and treats malformed/HTTP errors as outage',async()=>{
+ const root={innerHTML:''};let url;const controller=createPerformanceController({root,fetchImpl:async input=>{url=input;return {ok:true,json:async()=>fixture('TENNIS')};}});await controller.load({sport:'TENNIS',cohort:'PLAY',kind:'PROP',market:'player_aces',modelVersion:'v2',from:'2026-10-01',to:'2026-10-07'},'100');const query=new URL(url,'http://local').searchParams;assert.equal(query.get('view'),'performance');assert.equal(query.get('cursor'),'100');assert.equal(query.get('cohort'),'PLAY');assert.equal(query.get('market'),'player_aces');
+ for(const response of [{ok:false,status:503},{ok:true,json:async()=>({})},{ok:true,json:async()=>{throw Error('HTML');}}]){await createPerformanceController({root,fetchImpl:async()=>response}).load({});assert.match(root.innerHTML,/Performance unavailable/);}
+});
+test('qualified and raw cohorts have distinct totals and exclusions, paired sample uncertainty and pagination',()=>{
+ const data=fixture('NFL');data.filters.cohort='PLAY';data.summary={...data.summary,count:3,wins:1,losses:1,pushes:1,distinctGames:2,pairedCount:2,pricedCount:3,hypotheticalUnitProfit:-.13,hypotheticalRoi:-.0433};data.coverage={...data.coverage,selected:3,settledCount:3,exclusions:{MODEL_UNAVAILABLE:4},settlementExclusions:{MISSING_STATS:1},legacyReconstructedCount:2,prospectiveCount:1};data.groups=[{sport:'NFL',market:'player_passing_yards',modelVersion:'v1',count:3,wins:1,losses:1,pushes:1,voids:0,unresolved:0}];data.nextCursor='100';data.uncertainty={status:'AVAILABLE',games:2,brierDifference:[-.02,.04],logLossDifference:[-.01,.05]};const root={innerHTML:''};renderPerformance(data,root);assert.match(root.innerHTML,/Qualified PLAYs · exact first-issued entry/);assert.match(root.innerHTML,/MODEL_UNAVAILABLE: 4/);assert.match(root.innerHTML,/Legacy reconstructed samples/);assert.match(root.innerHTML,/player_passing_yards/);assert.match(root.innerHTML,/data-performance-next="100"/);assert.match(root.innerHTML,/-0\.020 to 0\.040/);data.filters.cohort='DIAGNOSTIC';renderPerformance(data,root);assert.match(root.innerHTML,/Raw excluded candidates · never qualified PLAY totals/);
+});
+test('a stale failed request cannot overwrite newer success',async()=>{
+ const pending=[];const root={innerHTML:''};const controller=createPerformanceController({root,fetchImpl:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))});const old=controller.load({sport:'NBA'});const current=controller.load({sport:'NFL'});pending[1].resolve({ok:true,json:async()=>fixture('NFL')});await current;pending[0].reject(Error('outage'));await old;assert.match(root.innerHTML,/NFL/);assert.doesNotMatch(root.innerHTML,/Performance unavailable/);
+});
+test('deadline replaces pending loading with an explicit timeout and unknown coverage',async()=>{
+ const root={innerHTML:''};const controller=createPerformanceController({root,timeoutMs:5,fetchImpl:(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Object.assign(Error('timeout'),{name:'AbortError'}))))});await controller.load({sport:'NBA'});assert.match(root.innerHTML,/Request timed out/);assert.match(root.innerHTML,/Coverage is unknown/);assert.doesNotMatch(root.innerHTML,/Loading performance/);
+});

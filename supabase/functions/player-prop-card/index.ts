@@ -1,172 +1,6 @@
+import {serviceAuthorized,reconcilePublications} from '../_shared/performance-mlb-adapter.mjs';
+import {evaluatePropCard} from '../_shared/performance-mlb-qualification.mjs';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-function inFinalWindow(startsAt: string | null, minutes = 20) {
-  const t = Date.parse(startsAt || "");
-  if (!Number.isFinite(t)) return false;
-  return t - Date.now() <= minutes * 60_000;
-}
-
-
-function freshnessTargets(startsAt: string | null) {
-  const t = Date.parse(startsAt || "");
-  const minutesToStart = Number.isFinite(t)
-    ? (t - Date.now()) / 60000
-    : null;
-
-  if (minutesToStart !== null && minutesToStart <= 20) {
-    return { minutesToStart, market: 2, sharp: 3, verification: 5, weather: 10, fusion: 5 };
-  }
-  if (minutesToStart !== null && minutesToStart <= 90) {
-    return { minutesToStart, market: 5, sharp: 5, verification: 10, weather: 15, fusion: 10 };
-  }
-  if (minutesToStart !== null && minutesToStart <= 360) {
-    return { minutesToStart, market: 15, sharp: 15, verification: 30, weather: 45, fusion: 30 };
-  }
-  return { minutesToStart, market: 30, sharp: 30, verification: 60, weather: 90, fusion: 60 };
-}
-
-function timestampAgeMinutes(value: unknown) {
-  const t = Date.parse(String(value || ""));
-  if (!Number.isFinite(t)) return null;
-  return Math.max(0, (Date.now() - t) / 60000);
-}
-
-function componentFreshness(
-  name: string,
-  timestamp: unknown,
-  targetMinutes: number,
-  weight: number,
-  required: boolean,
-  hardRequired: boolean,
-) {
-  const ageMinutes = timestampAgeMinutes(timestamp);
-  let score = 100;
-
-  if (ageMinutes === null) {
-    score = required ? 0 : 100;
-  } else if (ageMinutes <= targetMinutes * 0.5) {
-    score = 100;
-  } else if (ageMinutes <= targetMinutes) {
-    score = 100 - ((ageMinutes / targetMinutes - 0.5) * 60);
-  } else if (ageMinutes <= targetMinutes * 2) {
-    score = 70 - ((ageMinutes / targetMinutes - 1) * 40);
-  } else {
-    score = 0;
-  }
-
-  return {
-    name,
-    timestamp: timestamp || null,
-    ageMinutes:
-      ageMinutes === null ? null : Number(ageMinutes.toFixed(1)),
-    targetMinutes,
-    score: Number(Math.max(0, Math.min(100, score)).toFixed(1)),
-    weight,
-    required,
-    hardStale:
-      hardRequired &&
-      (ageMinutes === null || ageMinutes > targetMinutes * 2),
-  };
-}
-
-function gradeForScore(score: number) {
-  if (score >= 90) return "A";
-  if (score >= 80) return "B";
-  if (score >= 65) return "C";
-  if (score >= 50) return "D";
-  return "F";
-}
-
-function buildFreshness(
-  startsAt: string | null,
-  components: any[],
-) {
-  const included = components.filter(
-    (x) => x.required || x.timestamp,
-  );
-  const weight = included.reduce(
-    (sum, x) => sum + Number(x.weight || 0),
-    0,
-  );
-  const score = weight > 0
-    ? included.reduce(
-        (sum, x) => sum + Number(x.score || 0) * Number(x.weight || 0),
-        0,
-      ) / weight
-    : 0;
-  const hardStale = included.filter((x) => x.hardStale);
-  const staleComponents = included
-    .filter(
-      (x) =>
-        x.ageMinutes === null ||
-        Number(x.ageMinutes) > Number(x.targetMinutes),
-    )
-    .map((x) => x.name);
-
-  return {
-    score: Number(score.toFixed(1)),
-    grade: gradeForScore(score),
-    hardStale: hardStale.length > 0,
-    hardStaleComponents: hardStale.map((x) => x.name),
-    staleComponents,
-    components,
-    startsAt,
-  };
-}
-
-function applyFreshnessGate(
-  status: string,
-  reason: string,
-  freshness: any,
-  startsAt: string | null,
-) {
-  const originalStatus = status;
-  const finalWindow = inFinalWindow(startsAt);
-  let next = status;
-  let action = "KEEP";
-
-  if (status === "PLAY") {
-    if (freshness.hardStale || freshness.score < 65) {
-      next = "PASS";
-      action = "PASS_STALE";
-    } else if (freshness.score < 80) {
-      next = finalWindow ? "PASS" : "PENDING";
-      action = finalWindow ? "PASS_STALE" : "DOWNGRADE_PENDING";
-    }
-  } else if (
-    status === "PENDING" &&
-    finalWindow &&
-    (freshness.hardStale || freshness.score < 80)
-  ) {
-    next = "PASS";
-    action = "PASS_STALE";
-  }
-
-  const staleText = freshness.staleComponents.length
-    ? " Stale/aging: " + freshness.staleComponents.join(", ") + "."
-    : "";
-  const gateText =
-    action === "KEEP"
-      ? ""
-      : " Freshness gate changed " +
-        originalStatus +
-        " to " +
-        next +
-        " (grade " +
-        freshness.grade +
-        ", " +
-        freshness.score +
-        "/100)." +
-        staleText;
-
-  return {
-    status: next,
-    reason: (String(reason || "") + gateText).trim(),
-    action,
-    originalStatus,
-  };
-}
-
 
 function displayKey(row: any) {
   const equivalentHitMarket =
@@ -211,13 +45,17 @@ function better(a: any, b: any) {
 
 Deno.serve(async (req) => {
   try {
-    if (req.method !== "GET") {
-      return new Response(JSON.stringify({ error: "GET only" }), {
+    if (!["GET","POST"].includes(req.method)) {
+      return new Response(JSON.stringify({ error: "GET or authenticated POST only" }), {
         status: 405,
         headers: { "content-type": "application/json" },
       });
     }
 
+    const publishing=req.method === 'POST';
+    const publicationEnabled=Deno.env.get('PERFORMANCE_MLB_PUBLICATION_ENABLED') === 'true';
+    if(publishing && !serviceAuthorized(req.headers.get('authorization'),Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))) return new Response(JSON.stringify({error:'Service authentication required'}),{status:401,headers:{'content-type':'application/json'}});
+    if(publishing && !publicationEnabled) return new Response(JSON.stringify({error:'MLB publication disabled'}),{status:503,headers:{'content-type':'application/json'}});
     const u = new URL(req.url);
     const hours = Math.max(
       4,
@@ -326,88 +164,23 @@ Deno.serve(async (req) => {
         clvMap.get(Number(row.id)) ?? null;
       const decisionTiming =
         timingMap.get(Number(row.id)) ?? null;
-      const targets = freshnessTargets(row.starts_at);
-      const nearGame =
-        targets.minutesToStart !== null &&
-        targets.minutesToStart <= 90;
-      const freshness = buildFreshness(
-        row.starts_at,
-        [
-          componentFreshness(
-            "prop_market",
-            row.captured_at,
-            targets.market,
-            40,
-            true,
-            true,
-          ),
-          componentFreshness(
-            "lineup_role",
-            verificationGate?.evaluated_at,
-            targets.verification,
-            25,
-            true,
-            nearGame,
-          ),
-          componentFreshness(
-            "weather",
-            weatherParkImpact?.evaluated_at,
-            targets.weather,
-            15,
-            true,
-            nearGame,
-          ),
-          componentFreshness(
-            "fusion",
-            decisionFusion?.evaluated_at ||
-              decisionFusion?.source_captured_at,
-            targets.fusion,
-            10,
-            false,
-            false,
-          ),
-          componentFreshness(
-            "decision_timing",
-            decisionTiming?.captured_at,
-            targets.fusion,
-            10,
-            false,
-            false,
-          ),
-        ],
-      );
-      const freshnessDecision = applyFreshnessGate(
-        row.status,
-        row.reason,
-        freshness,
-        row.starts_at,
-      );
-      const enriched = {
-        ...row,
-        status: freshnessDecision.status,
-        reason: freshnessDecision.reason,
-        freshness: {
-          ...freshness,
-          action: freshnessDecision.action,
-          originalStatus: freshnessDecision.originalStatus,
-        },
-        verificationGate,
-        weatherParkImpact,
-        decisionFusion,
-        marketClv,
-        decisionTiming,
-      };
+      const enriched = evaluatePropCard(row, {verificationGate,weatherParkImpact,decisionFusion,marketClv,decisionTiming});
       const key = displayKey(enriched);
       const current = dedup.get(key);
       dedup.set(key, current ? better(current, enriched) : enriched);
     }
 
-    const rows = [...dedup.values()].sort((a, b) => {
+    let rows = [...dedup.values()].sort((a, b) => {
       const statusDiff = rankStatus(a.status) - rankStatus(b.status);
       if (statusDiff !== 0) return statusDiff;
       return Number(b.ev_pct ?? -999) - Number(a.ev_pct ?? -999);
     });
 
+    let publicationFaults:any[]=[];
+    if(publicationEnabled) {
+      const result=await reconcilePublications(supabase,rows,'player_prop_observations',{publish:publishing});
+      rows=result.rows;publicationFaults=result.faults;
+    }
     const playRows = rows.filter((x) => x.status === "PLAY");
     const pendingRows = rows.filter((x) => x.status === "PENDING");
     const passRows = rows.filter((x) => x.status === "PASS");
@@ -432,6 +205,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({
+        publication:{enabled:publicationEnabled,faults:publicationFaults},
         fetchedAt: new Date().toISOString(),
         version: "MLB Player Props Card v2",
         summary: {
@@ -498,7 +272,7 @@ Deno.serve(async (req) => {
       {
         headers: {
           "content-type": "application/json",
-          "cache-control": "public, max-age=20",
+          "cache-control": publishing || publicationEnabled ? "no-store" : "public, max-age=20",
         },
       },
     );

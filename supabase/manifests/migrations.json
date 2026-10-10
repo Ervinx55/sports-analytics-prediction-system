@@ -316,6 +316,69 @@
       "sha256": "41ecc2e900ccb9b9157810b9a1f511954a26b8f83216fb2b45c9a88256be6ace",
       "recoveredFromProduction": false,
       "statementCount": 4
+    },
+    {
+      "version": "20261005000000",
+      "name": "prediction_performance_ledger",
+      "path": "supabase/migrations/20261005000000_prediction_performance_ledger.sql",
+      "sha256": "93189316ab5e806aa31ebe39192d69ea01a9b3ff72824572319459cdaf6d19c8",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261005010000",
+      "name": "mlb_performance_publication",
+      "path": "supabase/migrations/20261005010000_mlb_performance_publication.sql",
+      "sha256": "fccb2fb360521174fe095b28fa3b0abf5928374896c29b0d35d60e790fa917c9",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261006000000",
+      "name": "sport_capture_receipts",
+      "path": "supabase/migrations/20261006000000_sport_capture_receipts.sql",
+      "sha256": "efd704b575f5530a852661a3b46bbe00cb87cb7986025135ece5bafcd817aefe",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261006010000",
+      "name": "priority_sport_contracts",
+      "path": "supabase/migrations/20261006010000_priority_sport_contracts.sql",
+      "sha256": "c84b958d1775ca52ac77e2a18b5f25d50463367880ba552c99cf3eed9d1a54d7",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261006020000",
+      "name": "register_prediction_performance_jobs",
+      "path": "supabase/migrations/20261006020000_register_prediction_performance_jobs.sql",
+      "sha256": "7da37ae1726475ba61069aca1f2df924266bfa04fcd39a04d7db2de87c479717",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261006030000",
+      "name": "performance_read",
+      "path": "supabase/migrations/20261006030000_performance_read.sql",
+      "sha256": "b0ba6ba9d8d2c629f42482cd52f7aa4dd83151960fe5c8228995fd2cd2093e43",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261009000000",
+      "name": "pipeline_health_set_based",
+      "path": "supabase/migrations/20261009000000_pipeline_health_set_based.sql",
+      "sha256": "c1ca83f9eb79d4a44bd457f8be56ffcd1ae81ef36d3406708b18183a05c0e903",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -323,7 +386,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 36,
+    "repository_total_migrations": 44,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

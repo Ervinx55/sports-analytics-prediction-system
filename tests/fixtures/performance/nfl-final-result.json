@@ -1,0 +1,507 @@
+{
+  "evidence": {
+    "source": "espn",
+    "url": "https://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=401671789",
+    "retrievedAt": "2026-10-06T22:13:17.564Z",
+    "kind": "minimal live primary result fields; unmodified values; unrelated fields omitted"
+  },
+  "payload": {
+    "header": {
+      "id": "401671789",
+      "competitions": [
+        {
+          "id": "401671789",
+          "status": {
+            "type": {
+              "id": "3",
+              "name": "STATUS_FINAL",
+              "state": "post",
+              "completed": true,
+              "description": "Final",
+              "detail": "Final",
+              "shortDetail": "Final"
+            },
+            "isTBDFlex": false
+          },
+          "competitors": [
+            {
+              "id": "12",
+              "homeAway": "home",
+              "score": "27",
+              "linescores": [
+                {
+                  "displayValue": "7"
+                },
+                {
+                  "displayValue": "6"
+                },
+                {
+                  "displayValue": "7"
+                },
+                {
+                  "displayValue": "7"
+                }
+              ]
+            },
+            {
+              "id": "33",
+              "homeAway": "away",
+              "score": "20",
+              "linescores": [
+                {
+                  "displayValue": "7"
+                },
+                {
+                  "displayValue": "3"
+                },
+                {
+                  "displayValue": "0"
+                },
+                {
+                  "displayValue": "10"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "uid": "s:20~l:28~e:401671789",
+      "league": {
+        "id": "28",
+        "uid": "s:20~l:28"
+      }
+    },
+    "boxscore": {
+      "players": [
+        {
+          "team": {
+            "id": "33"
+          },
+          "statistics": [
+            {
+              "name": "passing",
+              "keys": [
+                "completions/passingAttempts",
+                "passingYards",
+                "yardsPerPassAttempt",
+                "passingTouchdowns",
+                "interceptions",
+                "sacks-sackYardsLost",
+                "adjQBR",
+                "QBRating"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "3916387"
+                  },
+                  "stats": [
+                    "26/41",
+                    "273",
+                    "6.7",
+                    "1",
+                    "0",
+                    "1-6",
+                    "59.3",
+                    "90.8"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rushing",
+              "keys": [
+                "rushingAttempts",
+                "rushingYards",
+                "yardsPerRushAttempt",
+                "rushingTouchdowns",
+                "longRushing"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "3916387"
+                  },
+                  "stats": [
+                    "16",
+                    "122",
+                    "7.6",
+                    "0",
+                    "16"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3043078"
+                  },
+                  "stats": [
+                    "13",
+                    "46",
+                    "3.5",
+                    "1",
+                    "9"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4429615"
+                  },
+                  "stats": [
+                    "2",
+                    "14",
+                    "7.0",
+                    "0",
+                    "8"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4038441"
+                  },
+                  "stats": [
+                    "1",
+                    "3",
+                    "3.0",
+                    "0",
+                    "3"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "receiving",
+              "keys": [
+                "receptions",
+                "receivingYards",
+                "yardsPerReception",
+                "receivingTouchdowns",
+                "longReception",
+                "receivingTargets"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "4361050"
+                  },
+                  "stats": [
+                    "9",
+                    "111",
+                    "12.3",
+                    "1",
+                    "49",
+                    "12"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4360939"
+                  },
+                  "stats": [
+                    "2",
+                    "53",
+                    "26.5",
+                    "0",
+                    "38",
+                    "5"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4038441"
+                  },
+                  "stats": [
+                    "6",
+                    "52",
+                    "8.7",
+                    "0",
+                    "18",
+                    "8"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4429615"
+                  },
+                  "stats": [
+                    "6",
+                    "37",
+                    "6.2",
+                    "0",
+                    "19",
+                    "10"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3116365"
+                  },
+                  "stats": [
+                    "2",
+                    "14",
+                    "7.0",
+                    "0",
+                    "11",
+                    "2"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "2971618"
+                  },
+                  "stats": [
+                    "1",
+                    "6",
+                    "6.0",
+                    "0",
+                    "6",
+                    "1"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3043078"
+                  },
+                  "stats": [
+                    "0",
+                    "0",
+                    "0.0",
+                    "0",
+                    "0",
+                    "2"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "team": {
+            "id": "12"
+          },
+          "statistics": [
+            {
+              "name": "passing",
+              "keys": [
+                "completions/passingAttempts",
+                "passingYards",
+                "yardsPerPassAttempt",
+                "passingTouchdowns",
+                "interceptions",
+                "sacks-sackYardsLost",
+                "adjQBR",
+                "QBRating"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "3139477"
+                  },
+                  "stats": [
+                    "20/28",
+                    "291",
+                    "10.4",
+                    "1",
+                    "1",
+                    "2-10",
+                    "65.9",
+                    "101.9"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "rushing",
+              "keys": [
+                "rushingAttempts",
+                "rushingYards",
+                "yardsPerRushAttempt",
+                "rushingTouchdowns",
+                "longRushing"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "4361529"
+                  },
+                  "stats": [
+                    "15",
+                    "45",
+                    "3.0",
+                    "1",
+                    "5"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4683062"
+                  },
+                  "stats": [
+                    "1",
+                    "21",
+                    "21.0",
+                    "1",
+                    "21"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3139477"
+                  },
+                  "stats": [
+                    "2",
+                    "3",
+                    "1.5",
+                    "0",
+                    "4"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4714365"
+                  },
+                  "stats": [
+                    "2",
+                    "3",
+                    "1.5",
+                    "0",
+                    "5"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "receiving",
+              "keys": [
+                "receptions",
+                "receivingYards",
+                "yardsPerReception",
+                "receivingTouchdowns",
+                "longReception",
+                "receivingTargets"
+              ],
+              "athletes": [
+                {
+                  "athlete": {
+                    "id": "4428331"
+                  },
+                  "stats": [
+                    "7",
+                    "103",
+                    "14.7",
+                    "0",
+                    "33",
+                    "9"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4683062"
+                  },
+                  "stats": [
+                    "2",
+                    "47",
+                    "23.5",
+                    "1",
+                    "35",
+                    "3"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4240472"
+                  },
+                  "stats": [
+                    "3",
+                    "37",
+                    "12.3",
+                    "0",
+                    "13",
+                    "3"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "15847"
+                  },
+                  "stats": [
+                    "3",
+                    "34",
+                    "11.3",
+                    "0",
+                    "23",
+                    "4"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "4361529"
+                  },
+                  "stats": [
+                    "2",
+                    "33",
+                    "16.5",
+                    "0",
+                    "23",
+                    "3"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3118892"
+                  },
+                  "stats": [
+                    "1",
+                    "25",
+                    "25.0",
+                    "0",
+                    "25",
+                    "1"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3116389"
+                  },
+                  "stats": [
+                    "1",
+                    "10",
+                    "10.0",
+                    "0",
+                    "10",
+                    "2"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3139477"
+                  },
+                  "stats": [
+                    "1",
+                    "2",
+                    "2.0",
+                    "0",
+                    "2",
+                    "1"
+                  ]
+                },
+                {
+                  "athlete": {
+                    "id": "3120348"
+                  },
+                  "stats": [
+                    "0",
+                    "0",
+                    "0.0",
+                    "0",
+                    "0",
+                    "1"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

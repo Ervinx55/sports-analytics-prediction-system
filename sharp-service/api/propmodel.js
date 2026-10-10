@@ -208,6 +208,7 @@ function missingStatus(startsAt) {
 function bestPriceAtLine(sideMarket, line) {
   let bestOdds = null;
   let bestBook = null;
+  let quoteAt = null;
   let count = 0;
   for (const [book, p] of Object.entries(sideMarket?.books || {})) {
     if (!p || p.available === false) continue;
@@ -218,9 +219,10 @@ function bestPriceAtLine(sideMarket, line) {
     if (bestOdds === null || odds > bestOdds) {
       bestOdds = odds;
       bestBook = book;
+      quoteAt = p.updatedAt ?? null;
     }
   }
-  return { bestOdds, bestBook, count };
+  return { bestOdds, bestBook, count, quoteAt };
 }
 
 function exactLineMarket(prop, line) {
@@ -787,6 +789,7 @@ export default async function handler(req, res) {
                   ? null
                   : Number((edge * 100).toFixed(2)),
               bestBook: best.bestBook,
+              quoteAt: best.quoteAt,
               bestOdds: best.bestOdds,
               exactLineBookCount: best.count,
               pairedBooks: exact.pairedBooks,

@@ -1,3 +1,5 @@
+import {serviceAuthorized,reconcilePublications} from '../_shared/performance-mlb-adapter.mjs';
+import {evaluateTeamCard} from '../_shared/performance-mlb-qualification.mjs';
 import { sharpQuoteTimestamp } from "../_shared/sharp-quote-age.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -14,182 +16,19 @@ function keyOf(row: any) {
   ].join("|");
 }
 
-function inFinalWindow(startsAt: string | null, minutes = 20) {
-  const t = Date.parse(startsAt || "");
-  if (!Number.isFinite(t)) return false;
-  return t - Date.now() <= minutes * 60_000;
-}
-
-function freshnessTargets(startsAt: string | null) {
-  const t = Date.parse(startsAt || "");
-  const minutesToStart = Number.isFinite(t)
-    ? (t - Date.now()) / 60000
-    : null;
-
-  if (minutesToStart !== null && minutesToStart <= 20) {
-    return { minutesToStart, market: 2, sharp: 3, verification: 5, weather: 10, fusion: 5 };
-  }
-  if (minutesToStart !== null && minutesToStart <= 90) {
-    return { minutesToStart, market: 5, sharp: 5, verification: 10, weather: 15, fusion: 10 };
-  }
-  if (minutesToStart !== null && minutesToStart <= 360) {
-    return { minutesToStart, market: 15, sharp: 15, verification: 30, weather: 45, fusion: 30 };
-  }
-  return { minutesToStart, market: 30, sharp: 30, verification: 60, weather: 90, fusion: 60 };
-}
-
-function timestampAgeMinutes(value: unknown) {
-  const t = Date.parse(String(value || ""));
-  if (!Number.isFinite(t)) return null;
-  return Math.max(0, (Date.now() - t) / 60000);
-}
-
-function componentFreshness(
-  name: string,
-  timestamp: unknown,
-  targetMinutes: number,
-  weight: number,
-  required: boolean,
-  hardRequired: boolean,
-) {
-  const ageMinutes = timestampAgeMinutes(timestamp);
-  let score = 100;
-
-  if (ageMinutes === null) {
-    score = required ? 0 : 100;
-  } else if (ageMinutes <= targetMinutes * 0.5) {
-    score = 100;
-  } else if (ageMinutes <= targetMinutes) {
-    score = 100 - ((ageMinutes / targetMinutes - 0.5) * 60);
-  } else if (ageMinutes <= targetMinutes * 2) {
-    score = 70 - ((ageMinutes / targetMinutes - 1) * 40);
-  } else {
-    score = 0;
-  }
-
-  return {
-    name,
-    timestamp: timestamp || null,
-    ageMinutes:
-      ageMinutes === null ? null : Number(ageMinutes.toFixed(1)),
-    targetMinutes,
-    score: Number(Math.max(0, Math.min(100, score)).toFixed(1)),
-    weight,
-    required,
-    hardStale:
-      hardRequired &&
-      (ageMinutes === null || ageMinutes > targetMinutes * 2),
-  };
-}
-
-function gradeForScore(score: number) {
-  if (score >= 90) return "A";
-  if (score >= 80) return "B";
-  if (score >= 65) return "C";
-  if (score >= 50) return "D";
-  return "F";
-}
-
-function buildFreshness(
-  startsAt: string | null,
-  components: any[],
-) {
-  const included = components.filter(
-    (x) => x.required || x.timestamp,
-  );
-  const weight = included.reduce(
-    (sum, x) => sum + Number(x.weight || 0),
-    0,
-  );
-  const score = weight > 0
-    ? included.reduce(
-        (sum, x) => sum + Number(x.score || 0) * Number(x.weight || 0),
-        0,
-      ) / weight
-    : 0;
-  const hardStale = included.filter((x) => x.hardStale);
-  const staleComponents = included
-    .filter(
-      (x) =>
-        x.ageMinutes === null ||
-        Number(x.ageMinutes) > Number(x.targetMinutes),
-    )
-    .map((x) => x.name);
-
-  return {
-    score: Number(score.toFixed(1)),
-    grade: gradeForScore(score),
-    hardStale: hardStale.length > 0,
-    hardStaleComponents: hardStale.map((x) => x.name),
-    staleComponents,
-    components,
-    startsAt,
-  };
-}
-
-function applyFreshnessGate(
-  status: string,
-  reason: string,
-  freshness: any,
-  startsAt: string | null,
-) {
-  const originalStatus = status;
-  const finalWindow = inFinalWindow(startsAt);
-  let next = status;
-  let action = "KEEP";
-
-  if (status === "PLAY") {
-    if (freshness.hardStale || freshness.score < 65) {
-      next = "PASS";
-      action = "PASS_STALE";
-    } else if (freshness.score < 80) {
-      next = finalWindow ? "PASS" : "PENDING";
-      action = finalWindow ? "PASS_STALE" : "DOWNGRADE_PENDING";
-    }
-  } else if (
-    status === "PENDING" &&
-    finalWindow &&
-    (freshness.hardStale || freshness.score < 80)
-  ) {
-    next = "PASS";
-    action = "PASS_STALE";
-  }
-
-  const staleText = freshness.staleComponents.length
-    ? " Stale/aging: " + freshness.staleComponents.join(", ") + "."
-    : "";
-  const gateText =
-    action === "KEEP"
-      ? ""
-      : " Freshness gate changed " +
-        originalStatus +
-        " to " +
-        next +
-        " (grade " +
-        freshness.grade +
-        ", " +
-        freshness.score +
-        "/100)." +
-        staleText;
-
-  return {
-    status: next,
-    reason: (String(reason || "") + gateText).trim(),
-    action,
-    originalStatus,
-  };
-}
-
-
 Deno.serve(async (req) => {
   try {
-    if (req.method !== "GET") {
-      return new Response(JSON.stringify({ error: "GET only" }), {
+    if (!["GET","POST"].includes(req.method)) {
+      return new Response(JSON.stringify({ error: "GET or authenticated POST only" }), {
         status: 405,
         headers: { "content-type": "application/json" },
       });
     }
 
+    const publishing=req.method === 'POST';
+    const publicationEnabled=Deno.env.get('PERFORMANCE_MLB_PUBLICATION_ENABLED') === 'true';
+    if(publishing && !serviceAuthorized(req.headers.get('authorization'),Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'))) return new Response(JSON.stringify({error:'Service authentication required'}),{status:401,headers:{'content-type':'application/json'}});
+    if(publishing && !publicationEnabled) return new Response(JSON.stringify({error:'MLB publication disabled'}),{status:503,headers:{'content-type':'application/json'}});
     const u = new URL(req.url);
     const sport = (u.searchParams.get("sport") || "MLB").toUpperCase();
     const hours = Math.max(
@@ -310,147 +149,33 @@ Deno.serve(async (req) => {
     }
 
     const markets = (gradesResult.data ?? []).map((g: any) => {
-      const sharp = sharpMap.get(keyOf(g)) ?? null;
-      let status = "PASS";
-      let reason = g.reason || "";
-      let resolutionSource = "non_sharp";
-
-      if (g.non_sharp_status === "PASS") {
-        status = "PASS";
-      } else if (g.non_sharp_status === "PENDING") {
-        status = inFinalWindow(g.starts_at) ? "PASS" : "PENDING";
-        if (status === "PASS") {
-          reason =
-            reason ||
-            "Required information was still unavailable in the final pregame window.";
-        }
-      } else if (g.non_sharp_status === "READY_FOR_SHARP_CHECK") {
-        const sharpFresh =
-          sharp &&
-          Date.parse(sharp.checked_at || "") >=
-            Date.parse(g.captured_at || "") - 2 * 60_000;
-
-        if (sharpFresh && sharp.final_status === "FINAL_PLAY") {
-          status = "PLAY";
-          reason = sharp.reason || "Cleared the complete sharp gate.";
-          resolutionSource = "sharp_gate";
-        } else if (sharpFresh && sharp.final_status === "PASS") {
-          status = "PASS";
-          reason = sharp.reason || "Failed the final sharp gate.";
-          resolutionSource = "sharp_gate";
-        } else if (inFinalWindow(g.starts_at)) {
-          status = "PASS";
-          reason =
-            sharp?.reason ||
-            "Sharp confirmation was not completed before the final pregame deadline.";
-          resolutionSource = "deadline";
-        } else {
-          status = "PENDING";
-          reason =
-            sharp?.reason ||
-            "All model/context checks passed; waiting for final sharp confirmation.";
-          resolutionSource = sharp ? "sharp_gate_pending" : "awaiting_sharp";
-        }
-      }
-
-      const verification = verificationMap.get(Number(g.id)) ?? null;
-      const weather = weatherMap.get(Number(g.id)) ?? null;
-      const fusion = fusionMap.get(Number(g.id)) ?? null;
-      const timing = timingMap.get(Number(g.id)) ?? null;
-      const targets = freshnessTargets(g.starts_at);
-      const nearGame =
-        targets.minutesToStart !== null &&
-        targets.minutesToStart <= 90;
-      const sharpRequired =
-        status === "PLAY" ||
-        g.non_sharp_status === "READY_FOR_SHARP_CHECK";
-      const freshness = buildFreshness(
-        g.starts_at,
-        [
-          componentFreshness(
-            "market",
-            g.captured_at,
-            targets.market,
-            35,
-            true,
-            true,
-          ),
-          componentFreshness(
-            "sharp",
-            sharpQuoteTimestamp(sharp),
-            targets.sharp,
-            25,
-            sharpRequired,
-            sharpRequired,
-          ),
-          componentFreshness(
-            "lineup",
-            verification?.evaluated_at,
-            targets.verification,
-            20,
-            true,
-            nearGame,
-          ),
-          componentFreshness(
-            "weather",
-            weather?.evaluated_at,
-            targets.weather,
-            15,
-            true,
-            nearGame,
-          ),
-          componentFreshness(
-            "fusion",
-            fusion?.evaluated_at || fusion?.source_captured_at,
-            targets.fusion,
-            5,
-            false,
-            false,
-          ),
-        ],
-      );
-      const freshnessDecision = applyFreshnessGate(
-        status,
-        reason,
-        freshness,
-        g.starts_at,
-      );
-      status = freshnessDecision.status;
-      reason = freshnessDecision.reason;
-      if (freshnessDecision.action !== "KEEP") {
-        resolutionSource = "freshness_gate";
-      }
-
-      return {
-        ...g,
-        status,
-        reason,
-        resolutionSource,
-        freshness: {
-          ...freshness,
-          action: freshnessDecision.action,
-          originalStatus: freshnessDecision.originalStatus,
-        },
-        sharpGate: sharp,
-        sharpDisagreement: sharp ? disagreementMap.get(Number(sharp.id)) ?? null : null,
+      return evaluateTeamCard(g, {
+        sharp: sharpMap.get(keyOf(g)) ?? null,
+        verification: verificationMap.get(Number(g.id)) ?? null,
+        weather: weatherMap.get(Number(g.id)) ?? null,
+        fusion: fusionMap.get(Number(g.id)) ?? null,
+        timing: timingMap.get(Number(g.id)) ?? null,
+        sharpDisagreement: disagreementMap.get(Number(sharpMap.get(keyOf(g))?.id)) ?? null,
         uncertainty: uncertaintyMap.get(Number(g.id)) ?? null,
         priceSensitivity: priceMap.get(Number(g.id)) ?? null,
-        verificationGate: verification,
-        weatherParkImpact: weather,
-        decisionFusion: fusion,
-        decisionTiming: timing,
-      };
+      });
     });
 
-    const active = markets.filter((m: any) => {
+    let active = markets.filter((m: any) => {
       const t = Date.parse(m.starts_at || "");
       return !Number.isFinite(t) || t > Date.now() - 4 * 3600_000;
     });
 
+    let publicationFaults:any[]=[];
+    if(publicationEnabled && sport === 'MLB') {
+      const result=await reconcilePublications(supabase,active,'market_grade_observations',{publish:publishing});
+      active=result.rows;publicationFaults=result.faults;
+    }
     return new Response(
       JSON.stringify({
         fetchedAt: new Date().toISOString(),
         sport,
+        publication:{enabled:publicationEnabled,faults:publicationFaults},
         finalWindowMinutes: 20,
         summary: {
           markets: active.length,
@@ -531,7 +256,7 @@ Deno.serve(async (req) => {
       {
         headers: {
           "content-type": "application/json",
-          "cache-control": "public, max-age=20",
+          "cache-control": publishing || publicationEnabled ? "no-store" : "public, max-age=20",
         },
       },
     );

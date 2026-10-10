@@ -863,6 +863,7 @@ function currentScheduleGame(schedule, event, season, away, home) {
 function exactLineBest(market, line = null) {
   let bestOdds = null;
   let bestBook = null;
+  let quoteAt = null;
   let bookCount = 0;
   for (const [book, price] of Object.entries(market?.books || {})) {
     if (!price || price.available === false) continue;
@@ -878,9 +879,10 @@ function exactLineBest(market, line = null) {
     if (bestOdds === null || odds > bestOdds) {
       bestOdds = odds;
       bestBook = book;
+      quoteAt = price.updatedAt ?? null;
     }
   }
-  return { odds: bestOdds, book: bestBook, bookCount };
+  return { odds: bestOdds, book: bestBook, bookCount, quoteAt };
 }
 
 function erf(x) {
@@ -1043,6 +1045,8 @@ function candidate({
   market,
   opponentMarket,
   modelProbability,
+  rawIndependentProbability = null,
+  effectiveIndependentWeight = null,
   line = null,
   dataQuality
 }) {
@@ -1069,10 +1073,13 @@ function candidate({
     label,
     line,
     modelProbability,
+    rawIndependentProbability,
+    effectiveIndependentWeight,
     marketFairProbability: fairProbability,
     edgePctPoints: edge === null ? null : edge * 100,
     bestBook: best.book,
     bestOdds: best.odds,
+    quoteAt: best.quoteAt,
     exactLineBookCount: best.bookCount,
     evPct: ev === null ? null : ev * 100,
     dataQuality,
@@ -1296,6 +1303,8 @@ function projectEvent({
       market: homeMl,
       opponentMarket: awayMl,
       modelProbability: calibratedHomeMl,
+      rawIndependentProbability: independentHomeMl,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.moneyline,
       dataQuality: quality
     }));
     markets.push(candidate({
@@ -1306,6 +1315,8 @@ function projectEvent({
       market: awayMl,
       opponentMarket: homeMl,
       modelProbability: calibratedAwayMl,
+      rawIndependentProbability: independentAwayMl,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.moneyline,
       dataQuality: quality
     }));
   }
@@ -1351,6 +1362,8 @@ function projectEvent({
       market: homeSpread,
       opponentMarket: awaySpread,
       modelProbability: calibratedHomeCover,
+      rawIndependentProbability: independentHomeCover,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.spread,
       line: marketHomeSpread,
       dataQuality: quality
     }));
@@ -1362,6 +1375,8 @@ function projectEvent({
       market: awaySpread,
       opponentMarket: homeSpread,
       modelProbability: calibratedAwayCover,
+      rawIndependentProbability: independentAwayCover,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.spread,
       line: -marketHomeSpread,
       dataQuality: quality
     }));
@@ -1398,6 +1413,8 @@ function projectEvent({
       market: overMarket,
       opponentMarket: underMarket,
       modelProbability: calibratedOver,
+      rawIndependentProbability: independentOver,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.total,
       line: marketTotal,
       dataQuality: quality
     }));
@@ -1409,6 +1426,8 @@ function projectEvent({
       market: underMarket,
       opponentMarket: overMarket,
       modelProbability: calibratedUnder,
+      rawIndependentProbability: independentUnder,
+      effectiveIndependentWeight: independentWeight * NFL_MARKET_SHRINKAGE.total,
       line: marketTotal,
       dataQuality: quality
     }));

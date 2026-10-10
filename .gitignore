@@ -10,3 +10,4 @@ supabase/.env
 supabase/.env.*
 supabase/.temp/
 supabase/.branches/
+tests/supabase/tooling/node_modules/
