@@ -370,6 +370,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261009000000",
+      "name": "pipeline_health_set_based",
+      "path": "supabase/migrations/20261009000000_pipeline_health_set_based.sql",
+      "sha256": "c1ca83f9eb79d4a44bd457f8be56ffcd1ae81ef36d3406708b18183a05c0e903",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -377,7 +386,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 37,
+    "repository_total_migrations": 44,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

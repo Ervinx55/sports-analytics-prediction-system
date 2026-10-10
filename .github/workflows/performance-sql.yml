@@ -44,6 +44,7 @@ jobs:
           printf 'PGPASSWORD_FILE=%s\n' "$RUNNER_TEMP/performance-pg-password" >> "$GITHUB_ENV"
       - name: PGlite actual schema and fixture assertions
         run: |
+          node tests/supabase/run-pipeline-health.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-performance-ledger.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-performance-mlb.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-performance-sport-capture.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
