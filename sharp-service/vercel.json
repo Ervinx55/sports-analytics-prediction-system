@@ -14,12 +14,24 @@
   },
   "rewrites": [
     {
+      "source": "/api/crypto-candles",
+      "destination": "/api/providerstatus?cryptoCandles=1"
+    },
+    {
       "source": "/dashboard",
       "destination": "/dashboard.html"
     },
     {
       "source": "/dashboard/",
       "destination": "/dashboard.html"
+    },
+    {
+      "source": "/crypto",
+      "destination": "/crypto.html"
+    },
+    {
+      "source": "/crypto/",
+      "destination": "/crypto.html"
     }
   ],
   "git": {
