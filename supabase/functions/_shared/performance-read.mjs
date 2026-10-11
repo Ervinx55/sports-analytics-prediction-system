@@ -13,7 +13,7 @@ export async function readPerformance(client,input={},now=new Date()){
  const settlementExclusions={};for(const r of rows)if(r.outcome==='UNRESOLVED'&&r.settlementReason&&/^[A-Z][A-Z0-9_]{0,99}$/.test(r.settlementReason))settlementExclusions[r.settlementReason]=(settlementExclusions[r.settlementReason]??0)+1;
  const exclusionCategories={model:{},source:{},mapping:{},rule:{},other:{}};
  for(const [reason,count] of Object.entries({...exclusions,...settlementExclusions})){const category=reason.includes('MODEL')?'model':/MAPPING|IDENTITY|PLAYER_KEY/.test(reason)?'mapping':/RULE|POLICY|SCOPE/.test(reason)?'rule':/SOURCE|PROVIDER|RESULT_ADAPTER/.test(reason)?'source':'other';exclusionCategories[category][reason]=count;}
- const matchingIds=new Set(data.predictions.filter(p=>(!filters.market||p.marketType===filters.market)&&(!filters.modelVersion||p.modelVersion===filters.modelVersion)&&(filters.kind==='ALL'||(filters.kind==='PROP')===p.marketType?.startsWith('player_'))).map(p=>p.id));
+ const matchingIds=new Set(data.predictions.filter(p=>Date.parse(p.capturedAt)>=Date.parse(filters.from)&&Date.parse(p.capturedAt)<Date.parse(filters.to)&&(!filters.market||p.marketType===filters.market)&&(!filters.modelVersion||p.modelVersion===filters.modelVersion)&&(filters.kind==='ALL'||(filters.kind==='PROP')===p.marketType?.startsWith('player_'))).map(p=>p.id));
  const retries=(data.queue??[]).filter(q=>matchingIds.has(q.predictionId)&&q.lastError&&q.attempts>0);
  const retryReasons={};for(const q of retries){const reason=/^[A-Z][A-Z0-9_]{0,99}$/.test(q.lastError)?q.lastError:'PROVIDER_RETRY_PENDING';retryReasons[reason]=(retryReasons[reason]??0)+1;}
  const sports=filters.sport?[filters.sport]:PERFORMANCE_SPORTS;

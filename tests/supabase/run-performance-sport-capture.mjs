@@ -36,6 +36,7 @@ try {
  // Actual HTTP handler -> pure adapter -> real SQL receipt wrapper, across kickoff.
  const sourceAt=new Date(Date.now()-60000).toISOString(),httpStart=new Date(Date.now()+500).toISOString();
  const source={sport:'FOOTBALL',league:'NFL',version:'http-sql',forecastAt:sourceAt,dataSourceComplete:true,markets:[{eventID:'http-pre',canonicalEventID:'http-pre',marketType:'moneyline',side:'home',startsAt:httpStart,quoteAt:sourceAt,modelProbability:.6,marketFairProbability:.5,effectiveIndependentWeight:1,probabilityBasis:'CONDITIONAL_NO_PUSH',settlementRule:{version:'fixture'}}]};
+ source.markets[0].resultIdentity={provider:'espn',event:'123',oddsProvider:'nfl-model-provider',oddsEvent:'http-pre',validation:{status:'VALIDATED',reference:'synthetic-http-sql-crosswalk',validatedAt:sourceAt}};
  let handler;
  const handlerSource=stripTypeScriptTypes(readFileSync('supabase/functions/capture-sport-predictions/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
  vm.runInNewContext(handlerSource,{...model,...mlb,fetchModelResponse:async()=>({ok:true,body:source}),createClient:()=>({rpc:async(name,{payload})=>{assert.equal(name,'ingest_sport_prediction_v1');return {data:await write(payload),error:null};}}),Response,URL,Date,Deno:{serve:fn=>{handler=fn;},env:{get:name=>name==='SUPABASE_SERVICE_ROLE_KEY'?'fixture-secret':name==='PERFORMANCE_SPORT_CAPTURE_ENABLED'?'true':'https://fixture'}}});
@@ -44,7 +45,7 @@ try {
  const beforeHttp=await(await handler(request())).json();assert.equal(beforeHttp.captured,1);assert.equal(beforeHttp.excluded,0);
  await new Promise(r=>setTimeout(r,Math.max(0,Date.parse(httpStart)-Date.now()+50)));
  const afterHttp=await(await handler(request())).json();assert.equal(afterHttp.captured,1);assert.equal(afterHttp.excluded,0);assert.equal(afterHttp.faults.length,0);
- source.markets[0].eventID='http-late';source.markets[0].canonicalEventID='http-late';
+ source.markets[0].eventID='http-late';source.markets[0].canonicalEventID='http-late';source.markets[0].resultIdentity={...source.markets[0].resultIdentity,event:'124',oddsEvent:'http-late'};
  const lateHttp=await(await handler(request())).json();assert.equal(lateHttp.captured,1);assert.equal(lateHttp.excluded,1);assert.equal(lateHttp.reasons.POST_START_RECEIPT,1);
  await db.exec('reset role');
  console.log('Sport receipt SQL passed: immutable kickoff retry, post-start firstseen, source drift/reserved metadata rejection, canonical cutoff, rollback, roles.');

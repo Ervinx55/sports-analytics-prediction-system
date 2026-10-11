@@ -4,10 +4,12 @@ const time = value => typeof value === 'string' && /(?:Z|[+-]\d{2}:\d{2})$/.test
 export const PERFORMANCE_SPORTS = ['MLB','NFL','NBA','CFB','NHL','TENNIS','SOCCER'];
 export const scopedSport = sport => ['NHL','TENNIS','SOCCER'].includes(sport);
 export const eventIdentity = p => scopedSport(p.sport) ? '['+[p.sport,p.competitionKey,p.tour ?? null,p.eventKey].map(v=>JSON.stringify(v)).join(', ')+']' : p.eventKey;
-export const scopeIdentity = p => [p.marketScope?.period ?? null,p.marketScope?.unit ?? null,p.marketScope?.set ?? null,p.marketScope?.game ?? null,p.settlementRule?.version ?? null,p.settlementRule?.format ?? null,p.settlementRule?.retirement ?? null,p.settlementRule?.walkover ?? null];
+const ordered=value=>Array.isArray(value)?value.map(ordered):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,ordered(value[k])])):value;
+// Book is quote binding, not policy semantics. Every other saved policy field is identity.
+export const scopeIdentity = p => [ordered(p.marketScope ?? null),ordered(p.settlementRule ? Object.fromEntries(Object.entries(p.settlementRule).filter(([k])=>k!=='book')) : null)];
 export function marketKey(p) {
   const key=[p.sport,eventIdentity(p),p.playerKey ?? null,p.marketType,p.side,p.line ?? null,p.modelVersion,p.modelMode];
-  if(scopedSport(p.sport)) key.push(scopeIdentity(p));
+  key.push(scopeIdentity(p));
   return JSON.stringify(key);
 }
 

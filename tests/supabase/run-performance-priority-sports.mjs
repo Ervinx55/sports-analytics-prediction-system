@@ -15,7 +15,7 @@ else {
 }
 
 try{await db.exec("do $$ begin if not exists(select from pg_roles where rolname='anon') then create role anon; end if; if not exists(select from pg_roles where rolname='authenticated') then create role authenticated; end if; if not exists(select from pg_roles where rolname='service_role') then create role service_role bypassrls; end if; end $$;");
-for(const f of ['20261005000000_prediction_performance_ledger.sql','20261006000000_sport_capture_receipts.sql','20261006010000_priority_sport_contracts.sql'])await db.exec(readFileSync('supabase/migrations/'+f,'utf8'));
+for(const f of ['20261005000000_prediction_performance_ledger.sql','20261006000000_sport_capture_receipts.sql','20261006010000_priority_sport_contracts.sql','20261010010000_exact_market_semantics.sql'])await db.exec(readFileSync('supabase/migrations/'+f,'utf8'));
 const now=new Date(Date.now()-60000).toISOString(),start=new Date(Date.now()+3600000).toISOString();
 const base={sourceKey:'new:1',sport:'TENNIS',competitionKey:'open',tour:'ATP',eventKey:'event',marketScope:{unit:'MATCH'},marketType:'moneyline',side:'home',modelVersion:'v',modelMode:'SHADOW',modelAvailable:true,capturedAt:now,startsAt:start,quoteAt:now,modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',sourceIds:{provider:'fixture',event:'1'},settlementRule:{version:'v',format:'BEST_OF_3',retirement:'VOID',walkover:'VOID'}};
 const write=async p=>(await db.query('select ingest_prediction_v1($1::jsonb) id',[JSON.stringify(p)])).rows[0].id;

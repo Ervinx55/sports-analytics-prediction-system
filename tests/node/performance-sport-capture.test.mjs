@@ -43,11 +43,12 @@ test('MLB replay keeps failed page cursor and uses original saved observation ke
 test('HTTP uses persisted receipt reasons for prestart retry and late firstseen',async()=>{
  let clock=Date.parse('2026-10-06T11:59:20Z'),late=false;const payloads=[];
  const source={sport:'FOOTBALL',league:'NFL',version:'v',forecastAt:'2026-10-06T11:59:00Z',dataSourceComplete:true,markets:[{eventID:'event',canonicalEventID:'canonical',marketType:'moneyline',side:'home',modelProbability:.6,marketFairProbability:.5,effectiveIndependentWeight:1,quoteAt:'2026-10-06T11:59:00Z',startsAt:'2026-10-06T11:59:30Z',probabilityBasis:'CONDITIONAL_NO_PUSH',settlementRule:{version:'fixture'}}]};
+ source.markets[0].resultIdentity={provider:'espn',event:'123',oddsProvider:'nfl-model-provider',oddsEvent:'event',validation:{status:'VALIDATED',reference:'synthetic-receipt-test',validatedAt:source.forecastAt}};
  const db={rpc:async(name,{payload})=>{assert.equal(name,'ingest_sport_prediction_v1');payloads.push(payload);return {data:{id:late?'late':'saved',eligibilityReasons:late?['POST_START_RECEIPT']:[],captureReceipt:{postStart:late,receivedAt:late?'2026-10-06T11:59:40Z':'2026-10-06T11:59:20Z'}},error:null};}};
  const h=load({db,clock:()=>clock,fetchImpl:async()=>new Response(JSON.stringify(source))});
  const first=await(await h(request({sport:'NFL',kind:'team',requestId:'r'}))).json();assert.equal(first.excluded,0);clock=Date.parse('2026-10-06T11:59:40Z');
  const retry=await(await h(request({sport:'NFL',kind:'team',requestId:'r'}))).json();assert.equal(retry.captured,1);assert.equal(retry.excluded,0);assert.deepEqual(payloads[0],payloads[1]);
- late=true;source.markets[0].eventID='late-event';const post=await(await h(request({sport:'NFL',kind:'team',requestId:'late'}))).json();assert.equal(post.excluded,1);assert.equal(post.reasons.POST_START_RECEIPT,1);
+ late=true;source.markets[0].eventID='late-event';source.markets[0].resultIdentity.oddsEvent='late-event';const post=await(await h(request({sport:'NFL',kind:'team',requestId:'late'}))).json();assert.equal(post.excluded,1);assert.equal(post.reasons.POST_START_RECEIPT,1);
 });
 test('scheduled NFL capture only writes bounded upcoming windows',async()=>{
  let calls=0;const now=Date.now(),at=new Date(now).toISOString();const body={sport:'FOOTBALL',league:'NFL',version:'v',forecastAt:at,dataSourceComplete:true,markets:[{eventID:'far',marketType:'moneyline',side:'home',modelProbability:.6,marketFairProbability:.5,startsAt:new Date(now+24*3600000).toISOString()}]};

@@ -1,3 +1,4 @@
+import {validatedResultIdentity} from './performance-result-identity.mjs';
 import {normalizePrediction} from './performance-contract.mjs';
 import {adaptLegacyObservation,MLB_TABLES} from './performance-mlb-adapter.mjs';
 
@@ -35,19 +36,22 @@ export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}=
   const probability=number(props?row?.shadowModelProbability:row?.modelProbability);
   if(!event||!market||!side||!version||probability===null){reject('INVALID_MODEL_ROW',index);continue;}
   const reasons=[],canonicalEvent=text(row.canonicalEventID),canonicalPlayer=text(row.canonicalPlayerID);
+  const oddsProvider=body.oddsProvider??'nfl-model-provider',oddsPlayer=props?text(row.playerID):null;
+  const resultIdentity=validatedResultIdentity(row.resultIdentity,{oddsProvider,oddsEvent:event,oddsPlayer,forecastAt});
+  if(!resultIdentity)reasons.push('EXACT_RESULT_MAPPING_UNAVAILABLE');
   // Receipt eligibility is owned atomically by ingest_sport_prediction_v1.
   // Recomputing it here would change the same source payload across kickoff retries.
-  if(!canonicalEvent)reasons.push('MISSING_CANONICAL_EVENT_MAPPING');
-  if(props&&!canonicalPlayer)reasons.push('MISSING_CANONICAL_PLAYER_MAPPING');
+  if(!canonicalEvent&&!resultIdentity)reasons.push('MISSING_CANONICAL_EVENT_MAPPING');
+  if(props&&!canonicalPlayer&&!resultIdentity)reasons.push('MISSING_CANONICAL_PLAYER_MAPPING');
   const independentWeight=number(row.effectiveIndependentWeight);
   const forecastClass=independentWeight===0?'MARKET_ONLY':independentWeight!==null&&independentWeight===1?'INDEPENDENT':independentWeight!==null?'MARKET_ANCHORED':props?'UNKNOWN':market==='total'?'MARKET_ANCHORED':'MARKET_ONLY';
   if(forecastClass!=='INDEPENDENT')reasons.push('NON_INDEPENDENT_MODEL');
   const identity=[event,props?text(row.playerID):null,market,side,number(row.line),props?text(row.book):text(row.bestBook),version,forecastAt];
-  const p=normalizePrediction({sourceKey:`nfl:${kind}:${JSON.stringify(identity)}`,sport:'NFL',eventKey:canonicalEvent?`nfl:${canonicalEvent}`:`nfl-provider:${event}`,playerKey:props?(canonicalPlayer?`nfl:${canonicalPlayer}`:null):null,
+  const p=normalizePrediction({sourceKey:`nfl:${kind}:${JSON.stringify(identity)}`,sport:'NFL',eventKey:resultIdentity?`espn:nfl:${resultIdentity.event}`:canonicalEvent?`nfl:${canonicalEvent}`:`nfl-provider:${event}`,playerKey:props?(resultIdentity?`espn:nfl:${resultIdentity.player}`:canonicalPlayer?`nfl:${canonicalPlayer}`:null):null,
    marketType:props?`player_${market}`:market,side,line:row.line,modelVersion:version,modelMode:'SHADOW',modelAvailable:true,capturedAt:forecastAt,startsAt:row.startsAt,eligibilityStartsAt:row.originalStartsAt??row.startsAt,
    quoteAt:props?row.updatedAt:row.quoteAt,odds:props?row.odds:row.bestOdds,book:props?row.book:row.bestBook,modelProbability:probability,marketProbability:row.marketFairProbability,pushProbability:row.pushProbability,
-   probabilityBasis:row.probabilityBasis??null,settlementRule:row.settlementRule??null,eligibilityReasons:reasons,
-   sourceIds:{provider:body.oddsProvider??'nfl-model-provider',event,player:props?text(row.playerID):null,canonicalEvent,canonicalPlayer},
+   marketScope:row.marketScope??null,probabilityBasis:row.probabilityBasis??null,settlementRule:row.settlementRule??null,eligibilityReasons:reasons,
+   sourceIds:{provider:resultIdentity?.provider??oddsProvider,event:resultIdentity?.event??event,player:resultIdentity?.player??oddsPlayer,odds:{provider:oddsProvider,event,player:oddsPlayer},resultIdentity,canonicalEvent,canonicalPlayer},
    provenance:{forecastAt,forecastClass,independentModel:forecastClass==='INDEPENDENT',rawIndependentProbability:number(row.rawIndependentProbability),effectiveIndependentWeight:number(row.effectiveIndependentWeight),marketShrinkage:number(row.marketShrinkage),productionWeight:0,productionEligible:false,qualified:false,originalShadowStatus:row.shadowStatus??null,sourceHealth:structuredClone(body.sourceHealth??null),providerCache:structuredClone(body.boardProviderCache??null),raw:structuredClone(row)}
   },{now:receivedAt});
   result.predictions.push(p);

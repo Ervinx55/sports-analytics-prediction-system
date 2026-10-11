@@ -54,7 +54,9 @@ export async function importHistoryPage({table,cursor=0,fetchPage,write,dryRun=f
   return {table,cursor,nextCursor:last,count:rows.length,complete:rows.length<500,dryRun,exclusions};
 }
 export function publicationState(card, publication, {enabled=false,kind='market_grade_observations',now=new Date().toISOString()}={}) {
-  if(!enabled || card.status !== 'PLAY') return card;
+  if(!enabled) return card;
+  if(publication?.status==='PASS'&&publication.legacy_reconstructed===false&&publication.prediction?.source_key===`${kind}:${card.id}`) return {...card,status:'PASS',reason:publication.evidence?.reason??card.reason,tracking:{tracked:true,decisionId:publication.id,predictionId:publication.prediction_id,issuedAt:publication.issued_at}};
+  if(card.status !== 'PLAY') return card;
   const p=publication?.prediction;
   const matches=publication?.qualified === true && publication.status==='PLAY' && publication.legacy_reconstructed===false && p?.source_key===`${kind}:${card.id}` && numeric(p.odds)===numeric(card.best_odds) && p.book===card.best_book;
   if(matches) return {...card,tracking:{tracked:true,decisionId:publication.id,predictionId:publication.prediction_id,issuedAt:publication.issued_at}};
@@ -96,7 +98,7 @@ export async function reconcilePublications(client, cards, kind, {
   publish = false,
   clock = () => new Date().toISOString(),
 } = {}) {
-  const qualified = cards.filter(card => card.status === 'PLAY');
+  const qualified = cards.filter(card => ['PLAY','PASS'].includes(card.status));
   const publications = new Map();
   const refreshedCards = new Map();
   const faults = [];
@@ -107,8 +109,8 @@ export async function reconcilePublications(client, cards, kind, {
       .from('performance_decisions')
       .select('*,prediction:performance_predictions!inner(*)')
       .in('prediction.source_key', keys)
-      .eq('qualified', true)
-      .eq('legacy_reconstructed', false);
+      .eq('legacy_reconstructed', false)
+      .in('status', ['PLAY','PASS']);
     if (error) {
       faults.push({ error:error.message ?? String(error) });
       continue;
@@ -137,6 +139,17 @@ export async function reconcilePublications(client, cards, kind, {
         qualificationVersion:'mlb-existing-final-gates-v1',
         quoteAgeMinutes:prediction.quoteAt ? (at - Date.parse(prediction.quoteAt)) / 60000 : null,
       };
+      if(refreshed.status==='PASS') {
+        const start=Date.parse(prediction.eligibilityStartsAt);
+        // PASS means the final evaluator ran now on this saved prospective snapshot.
+        // Early/raw statuses and imports are not issuance; only the final 20-minute window qualifies.
+        if(at<start-20*60000)continue;
+        if(prediction.provenance.legacyReconstructed||prediction.eligibilityReasons.length||at<Date.parse(prediction.capturedAt)||at>=start)throw Error('PASS lacks contemporary prospective snapshot');
+        const {data,error}=await client.rpc('publish_mlb_pass_v1',{payload:{prediction,evidence:{...evidence,finalDecision:true,reason:refreshed.reason??null,decisionExpiresAt:new Date(Math.min(start,at+30000)).toISOString()},issuedAt}});
+        if(error)throw error;
+        publications.set(sourceKey,{...data,prediction:{source_key:sourceKey,odds:prediction.odds,book:prediction.book}});
+        continue;
+      }
       if (!qualifiedDecision({ ...prediction, id:'pending' }, evidence, issuedAt)) {
         throw Error('Snapshot lacks eligible contemporary prediction, price or quote provenance');
       }

@@ -1,9 +1,10 @@
+import {marketKey} from './performance-contract.mjs';
 export const PERFORMANCE_SPORTS=['MLB','NFL','NBA','CFB','NHL','TENNIS','SOCCER'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const mean=values=>values.length?values.reduce((a,b)=>a+b,0)/values.length:null;
 const timestamp=value=>typeof value==='string'?Date.parse(value):NaN;
 const lexical=(a,b)=>String(a)<String(b)?-1:String(a)>String(b)?1:0;
-const ordered=value=>value&&typeof value==='object'&&!Array.isArray(value)?Object.fromEntries(Object.keys(value).sort().map(k=>[k,ordered(value[k])])):value;
+const ordered=value=>Array.isArray(value)?value.map(ordered):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,ordered(value[k])])):value;
 function date(value){
  if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2}))?$/.test(value)||!Number.isFinite(timestamp(value)))throw Error('Invalid date');
  const day=value.slice(0,10);if(new Date(day+'T00:00:00Z').toISOString().slice(0,10)!==day)throw Error('Invalid date');
@@ -21,7 +22,7 @@ export function parsePerformanceFilters(input={},now=new Date()){
  return {sport,cohort,kind,from,to,market:input.market??null,modelVersion:input.modelVersion??null,cursor:Number(cursor),limit};
 }
 function matches(p,f){return (!f.sport||p.sport===f.sport)&&(!f.market||p.marketType===f.market)&&(!f.modelVersion||p.modelVersion===f.modelVersion)&&(!f.kind||f.kind==='ALL'||(f.kind==='PROP')===p.marketType?.startsWith('player_'))&&(!f.from||timestamp(p.capturedAt)>=timestamp(f.from))&&(!f.to||timestamp(p.capturedAt)<timestamp(f.to));}
-const exactKey=p=>p.marketKey??JSON.stringify([p.sport,p.eventKey,p.playerKey,p.marketType,p.side,p.line,p.modelVersion,p.modelMode,p.marketScope]);
+const exactKey=p=>p.marketKey??marketKey(p);
 function eligible(p){return p.valid!==false&&p.modelAvailable===true&&!(p.eligibilityReasons?.length)&&timestamp(p.capturedAt)<timestamp(p.eligibilityStartsAt??p.startsAt)&&timestamp(p.quoteAt)<=timestamp(p.capturedAt);}
 function portfolioKey(p){
  // Half hits and half total bases are equivalent only for the same saved scope and side.
@@ -37,7 +38,7 @@ export function selectCohort(predictions,decisions=[],settlements=[],filters={})
  for(const d of decisions){const list=byPrediction.get(d.predictionId)??[];list.push(d);byPrediction.set(d.predictionId,list);}
  const selected=new Map();
  for(const p of predictions){
-  if(!matches(p,filters))continue;
+  if(cohort!=='PLAY'&&!matches(p,filters))continue;
   const ds=byPrediction.get(p.id)??[];
   const legacyReconstructed=p.legacyReconstructed===true||p.provenance?.legacyReconstructed===true||ds.some(d=>d.legacyReconstructed===true);
   if(cohort==='DIAGNOSTIC'){if(!eligible(p))selected.set(p.id,{...p,legacyReconstructed});continue;}
@@ -54,7 +55,7 @@ export function selectCohort(predictions,decisions=[],settlements=[],filters={})
   const earlier=cohort==='PLAY'||cohort==='LEGACY',a=timestamp(earlier?(row.issuedAt??row.capturedAt):row.capturedAt),b=previous?timestamp(earlier?(previous.issuedAt??previous.capturedAt):previous.capturedAt):NaN;
   if(!previous||(earlier?a<b:a>b)||(a===b&&lexical(exactKey(row)+'|'+row.sourceKey,exactKey(previous)+'|'+previous.sourceKey)<0))selected.set(key,row);
  }
- return [...selected.values()].map(p=>{const s=latest.get(p.id);return {...p,outcome:s?.outcome??'UNRESOLVED',settlementRevision:s?.revision??null,settlementReason:s?.reason??null};}).sort((a,b)=>lexical(exactKey(a),exactKey(b))||lexical(a.id,b.id));
+ return [...selected.values()].filter(p=>matches(p,filters)).map(p=>{const s=latest.get(p.id);return {...p,outcome:s?.outcome??'UNRESOLVED',settlementRevision:s?.revision??null,settlementReason:s?.reason??null};}).sort((a,b)=>lexical(exactKey(a),exactKey(b))||lexical(a.id,b.id));
 }
 function pair(row){
  if(row.valid===false||!['WIN','LOSS'].includes(row.outcome)||!finite(row.modelProbability)||!finite(row.marketProbability))return null;
@@ -94,6 +95,6 @@ export function publicRow(r){
  const token=v=>typeof v==='string'&&/^[A-Z][A-Z0-9_]{0,99}$/.test(v);
  result.eligibilityReasons=(r.eligibilityReasons??[]).filter(token);result.settlementReason=token(r.settlementReason)?r.settlementReason:null;
  const scope=r.marketScope,index=v=>Number.isSafeInteger(v)&&v>0?v:null;
- result.marketScope=scope?{period:['REGULATION','INCLUDING_EXTRA_TIME','INCLUDING_OVERTIME_SHOOTOUT'].includes(scope.period)?scope.period:null,unit:['MATCH','SET','GAME'].includes(scope.unit)?scope.unit:null,set:index(scope.set),game:index(scope.game)}:null;
+ result.marketScope=scope?{period:['FULL_GAME','REGULATION','INCLUDING_OVERTIME','INCLUDING_EXTRA_TIME','INCLUDING_OVERTIME_SHOOTOUT'].includes(scope.period)?scope.period:null,unit:['MATCH','SET','GAME'].includes(scope.unit)?scope.unit:null,set:index(scope.set),game:index(scope.game)}:null;
  return result;
 }

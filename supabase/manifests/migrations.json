@@ -379,6 +379,42 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261010000000",
+      "name": "existing_capture_service_dispatch",
+      "path": "supabase/migrations/20261010000000_existing_capture_service_dispatch.sql",
+      "sha256": "5e9a82eaf961afb5ada6aac3645a6696049d334f0f4c7ffa46e083b9f303bded",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261010010000",
+      "name": "exact_market_semantics",
+      "path": "supabase/migrations/20261010010000_exact_market_semantics.sql",
+      "sha256": "9667c57537fa3502489c091c358d1d20d748a49ccdf6fac8cfc6de43d41ed89a",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261010020000",
+      "name": "final_pass_publication",
+      "path": "supabase/migrations/20261010020000_final_pass_publication.sql",
+      "sha256": "64b3bd82cd384cf852c5d2f8dbf9bd90c45bd84d9f43ea20201737800cebf1f5",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261010030000",
+      "name": "global_portfolio_read",
+      "path": "supabase/migrations/20261010030000_global_portfolio_read.sql",
+      "sha256": "7e3b21e958c3e99d0f4d000d7bc851745ea8fcc94e6e767a6b79fab8c38dd8bc",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -386,7 +422,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 44,
+    "repository_total_migrations": 48,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

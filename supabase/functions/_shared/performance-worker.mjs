@@ -1,7 +1,12 @@
+import {validatedResultIdentity} from './performance-result-identity.mjs';
 import {normalizeFinalResult} from './performance-result-sources.mjs';
 import {settlePrediction} from './performance-settlement.mjs';
 export const SETTLEMENT_SPORTS=['MLB','NFL','NBA','CFB','NHL','TENNIS','SOCCER'];
 export function resultRequest(p) {
+ if(p?.sourceIds&&Object.hasOwn(p.sourceIds,'resultIdentity')){
+  const ids=p.sourceIds,odds=ids.odds??{},m=validatedResultIdentity(ids.resultIdentity,{oddsProvider:odds.provider,oddsEvent:odds.event,oddsPlayer:odds.player,forecastAt:p.provenance?.forecastAt??p.capturedAt});
+  if(!m||ids.provider!==m.provider||ids.event!==m.event||(ids.player??null)!==(m.player??null))return null;
+ }
  const id=p?.sourceIds?.event;
  if(typeof id!=='string'||! /^[1-9][0-9]*$/.test(id))return null;
  if(p.sport==='MLB'&&p.sourceIds.provider==='mlb-statsapi'&&p.eventKey===`mlb:${id}`)return {source:'mlb-statsapi',url:`https://statsapi.mlb.com/api/v1.1/game/${id}/feed/live`};
