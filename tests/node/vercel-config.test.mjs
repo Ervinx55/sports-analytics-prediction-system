@@ -12,8 +12,8 @@ const edgeLab = JSON.parse(
   )
 );
 
-test("legacy root Vercel project has automatic deployments disabled", () => {
-  assert.equal(root?.git?.deploymentEnabled, false);
+test("root Vercel project preserves current-master automatic Git deployments", () => {
+  assert.equal(root?.git?.deploymentEnabled, undefined);
 });
 
 test("Edge Lab Vercel project only auto-deploys master", () => {
