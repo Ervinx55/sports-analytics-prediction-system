@@ -17,3 +17,27 @@ test("decision endpoint rejects non-GET requests without fetching providers", as
   assert.equal(headers.Allow, "GET");
   assert.deepEqual(body, { error: "GET only" });
 });
+
+test("decision endpoint identifies failed dependencies without authorizing plays", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("/api/board")) throw new Error("provider offline");
+    return { ok: true, text: async () => JSON.stringify({ records: [], dates: [], alerts: [] }) };
+  };
+  try {
+    let status = 200;
+    let body;
+    const res = {
+      setHeader() {},
+      status(code) { status = code; return this; },
+      json(value) { body = value; return this; },
+    };
+    await handler({ method: "GET", query: { date: "2026-10-13" } }, res);
+    assert.equal(status, 503);
+    assert.equal(body.code, "DATA_BLOCKED");
+    assert.equal(body.finalPlayAuthorized, false);
+    assert.deepEqual(body.failedDependencies, [{ dependency: "board", reason: "UPSTREAM_UNAVAILABLE" }]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
