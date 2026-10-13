@@ -22,7 +22,7 @@ test("decision endpoint identifies failed dependencies without authorizing plays
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (url) => {
     if (String(url).includes("/api/board")) throw new Error("provider offline");
-    return { ok: true, text: async () => JSON.stringify({ records: [], dates: [], alerts: [] }) };
+    return { ok: true, json: async () => ({ records: [], dates: [], alerts: [] }) };
   };
   try {
     let status = 200;
