@@ -175,12 +175,19 @@ function playoffLeverage(team) {
 }
 
 async function fetchJson(url) {
-  const r = await fetch(url, { headers: { accept: "application/json" }, cache: "no-store" });
-  const text = await r.text();
-  let body;
-  try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 400) }; }
-  if (!r.ok) throw new Error(`${r.status} ${url}: ${JSON.stringify(body).slice(0, 400)}`);
-  return body;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(url, {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!r.ok) throw new Error("UPSTREAM_HTTP_" + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function selectPitcherSplit(payload) {
