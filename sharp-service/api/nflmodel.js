@@ -122,7 +122,7 @@ export default async function handler(req, res) {
     );
     const weatherByEvent = new Map(weatherEntries);
 
-    const forecastAt = new Date().toISOString();
+    const forecastAt = new Date(Date.now()).toISOString();
     const projections = events.map((event) =>
       projectEvent({
         event,
@@ -133,6 +133,7 @@ export default async function handler(req, res) {
         baseline,
         season,
         weatherContext: weatherByEvent.get(event.eventID) || null,
+        forecastAt,
         sourceHealth: nflData.sourceHealth
       })
     );
@@ -199,7 +200,7 @@ export default async function handler(req, res) {
         injuryPolicy:
           "No current nflverse injury adjustment is applied because the feed ended after 2024.",
         calibration:
-          "2024 selected market-specific shrinkage; 2025 was untouched. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
+          "2024 selected market-specific shrinkage; 2025 is already-examined historical validation; future untouched evaluation is still required. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
       },
       sourceHealth: nflData.sourceHealth,
       marketBooks: BOOKS,

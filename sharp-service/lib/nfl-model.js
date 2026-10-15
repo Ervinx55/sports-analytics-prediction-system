@@ -571,86 +571,60 @@ function latestPriorQb(schedule, season, team, currentGame) {
     : game.away_qb_name || null;
 }
 
-function latestDepthChartQb(depthCharts, team) {
-  const rows = (depthCharts || [])
-    .filter((row) => {
-      const rowTeam = normalizeTeam(row.team);
-      const position = String(
-        row.pos_abb || row.pos_name || row.position || ""
-      ).toUpperCase();
-      return rowTeam === team && position === "QB";
-    })
-    .sort((a, b) => {
-      const dateDiff = String(b.dt || "").localeCompare(String(a.dt || ""));
-      if (dateDiff) return dateDiff;
-      return (number(a.pos_rank) ?? 999) - (number(b.pos_rank) ?? 999);
-    });
-
-  if (!rows.length) return null;
-  const latestDate = rows[0].dt || null;
-  const latestRows = latestDate
-    ? rows.filter((row) => row.dt === latestDate)
-    : rows;
-  const qb1 = latestRows
-    .sort(
-      (a, b) =>
-        (number(a.pos_rank) ?? 999) - (number(b.pos_rank) ?? 999)
-    )[0];
-  return qb1?.player_name || qb1?.full_name || null;
+// Date-only snapshots have unknown publication time: use end-of-day UTC.
+// Missing/invalid forecast time fails closed, including historical callers.
+function evidenceTime(value) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2}))?$/.test(value)) return null;
+  const day = value.slice(0, 10);
+  const dayTime = Date.parse(`${day}T00:00:00Z`);
+  if (!Number.isFinite(dayTime) || new Date(dayTime).toISOString().slice(0, 10) !== day) return null;
+  const time = Date.parse(value.length === 10 ? `${day}T23:59:59.999Z` : value);
+  return Number.isFinite(time) ? time : null;
 }
 
-function qbAvailabilityContext({
-  schedule,
-  depthCharts,
-  season,
-  team,
-  game,
-  side
-}) {
-  const listed = side === "home"
-    ? game?.home_qb_name || null
-    : game?.away_qb_name || null;
-  const depthChart = latestDepthChartQb(depthCharts, team);
+function latestDepthChartQb(depthCharts, team, forecastAt) {
+  const cutoff = evidenceTime(forecastAt);
+  const rows = (depthCharts || []).filter((row) =>
+    normalizeTeam(row.team) === team &&
+    String(row.pos_abb || row.pos_name || row.position || "").toUpperCase() === "QB"
+  );
+  const usable = rows.filter(row => cutoff !== null && evidenceTime(row.dt) !== null && evidenceTime(row.dt) <= cutoff)
+    .sort((a, b) => evidenceTime(b.dt) - evidenceTime(a.dt));
+  if (!usable.length) return {name: null, timestamp: null, rejectedRows: rows.length, ambiguous: false};
+  const timestamp = usable[0].dt;
+  const latest = usable.filter(row => evidenceTime(row.dt) === evidenceTime(timestamp));
+  // A partial snapshot containing backups is not evidence of a starter.
+  // Require an explicit decimal rank one in this newest eligible snapshot.
+  const names = [...new Set(latest.filter(row =>
+    (typeof row.pos_rank === "number" && row.pos_rank === 1) ||
+    (typeof row.pos_rank === "string" && /^1(?:\.0+)?$/.test(row.pos_rank.trim())))
+    .map(row => row.player_name || row.full_name).filter(Boolean))];
+  return {name: names.length === 1 ? names[0] : null, timestamp,
+    rejectedRows: rows.length - usable.length, ambiguous: names.length > 1};
+}
+
+function qbAvailabilityContext({schedule, depthCharts, season, team, game, side, forecastAt = null}) {
+  const listed = side === "home" ? game?.home_qb_name || null : game?.away_qb_name || null;
+  const chart = latestDepthChartQb(depthCharts, team, forecastAt);
+  const depthChart = chart.name;
   const prior = latestPriorQb(schedule, season, team, game);
-  const expected = listed || depthChart || null;
-
-  const changedFromPrior = Boolean(
-    expected &&
-    prior &&
-    normalizePlayerName(expected) !== normalizePlayerName(prior)
-  );
-  const depthChartDisagreement = Boolean(
-    listed &&
-    depthChart &&
-    normalizePlayerName(listed) !== normalizePlayerName(depthChart)
-  );
-
-  let adjustmentPoints = 0;
-  if (changedFromPrior) adjustmentPoints -= 0.4;
-  if (depthChartDisagreement) adjustmentPoints -= 0.45;
-  adjustmentPoints = clamp(adjustmentPoints, -0.85, 0);
-
-  let confidence = 0.45;
-  if (expected) confidence += 0.2;
-  if (prior) confidence += 0.1;
-  if (depthChart) confidence += 0.1;
-  if (depthChartDisagreement) confidence -= 0.2;
-  confidence = clamp(confidence, 0, 1);
-
+  const depthChartDisagreement = Boolean(listed && depthChart &&
+    normalizePlayerName(listed) !== normalizePlayerName(depthChart));
+  const status = depthChartDisagreement || chart.ambiguous ? "CONFLICTING" :
+    listed && depthChart ? "AGREEING" : "UNRESOLVED";
+  // Agreement is corroboration, not verification of the external starter truth.
+  const expected = status === "AGREEING" ? listed : null;
+  const changedFromPrior = Boolean(expected && prior &&
+    normalizePlayerName(expected) !== normalizePlayerName(prior));
   return {
-    expected,
-    scheduleListed: listed,
-    depthChartQb1: depthChart,
-    previousStarter: prior,
-    changedFromPrior,
-    depthChartDisagreement,
-    adjustmentPoints,
-    confidence,
-    source: {
-      schedule: Boolean(listed),
-      depthChart: Boolean(depthChart),
-      injuryReport: false
-    }
+    expected, scheduleListed: listed, depthChartQb1: depthChart, previousStarter: prior,
+    changedFromPrior, depthChartDisagreement, status, forecastAt,
+    depthChartTimestamp: chart.timestamp, rejectedDepthChartRows: chart.rejectedRows,
+    adjustmentPoints: status === "AGREEING" && changedFromPrior ? -0.4 : 0,
+    confidence: status === "AGREEING" ? 0.75 : 0.45,
+    reason: status === "AGREEING" ? "Schedule and as-of depth chart agree; starter remains unverified." :
+      "QB evidence is unresolved or conflicting; no directional availability adjustment or shadow PLAY is allowed.",
+    source: {schedule: Boolean(listed), depthChart: Boolean(depthChart), injuryReport: false}
   };
 }
 
@@ -1138,7 +1112,8 @@ function projectEvent({
   weatherContext = null,
   sourceHealth = null,
   disableAvailabilityAdjustments = false,
-  simulationIterations = 20000
+  simulationIterations = 20000,
+  forecastAt = null
 }) {
   const away = normalizeTeam(
     event?.matchup?.away?.name || event?.matchup?.away?.short
@@ -1175,6 +1150,10 @@ function projectEvent({
     4
   );
   const restAdjustment = restDiff * 0.16;
+  // A live capture after kickoff cannot reconstruct pregame source evidence.
+  const pregameForecastAt = evidenceTime(forecastAt) !== null &&
+    Number.isFinite(Date.parse(event.startsAt)) && evidenceTime(forecastAt) < Date.parse(event.startsAt)
+    ? forecastAt : null;
   const availability = {
     away: qbAvailabilityContext({
       schedule,
@@ -1182,7 +1161,8 @@ function projectEvent({
       season,
       team: away,
       game,
-      side: "away"
+      side: "away",
+      forecastAt: pregameForecastAt
     }),
     home: qbAvailabilityContext({
       schedule,
@@ -1190,7 +1170,8 @@ function projectEvent({
       season,
       team: home,
       game,
-      side: "home"
+      side: "home",
+      forecastAt: pregameForecastAt
     })
   };
   const qbAdjustment = disableAvailabilityAdjustments
@@ -1433,6 +1414,13 @@ function projectEvent({
     }));
   }
 
+  if (availability.home.status !== "AGREEING" || availability.away.status !== "AGREEING") {
+    for (const market of markets) {
+      market.shadowStatus = "PASS";
+      market.reason = "Unresolved or conflicting QB evidence prevents shadow PLAY; production remains disabled.";
+    }
+  }
+
   return {
     eventID: event.eventID,
     available: true,
@@ -1464,7 +1452,9 @@ function projectEvent({
       calibration: {
         version: NFL_CALIBRATION_VERSION,
         validationSeason: 2024,
-        untouchedTestSeason: 2025,
+        historicalTestSeason: 2025,
+        historicalTestStatus: "ALREADY_EXAMINED",
+        futureUntouchedEvaluationRequired: true,
         shrinkage: NFL_MARKET_SHRINKAGE,
         productionEligible: false
       },
@@ -1475,7 +1465,9 @@ function projectEvent({
       baseIndependentTotal: Number(baseIndependentTotal.toFixed(3)),
       qbAdjustmentPoints: Number(qbAdjustment.toFixed(3)),
       weatherAdjustmentPoints: Number(weatherAdjustment.toFixed(3)),
-      availabilityAdjustmentApplied: !disableAvailabilityAdjustments,
+      availabilityAdjustmentApplied: !disableAvailabilityAdjustments && qbAdjustment !== 0,
+      availabilityAdjustmentsDisabled: disableAvailabilityAdjustments,
+      dataQualityMeaning: "Input coverage score; not confidence or win probability",
       simulationIterations,
       dataQuality: Number(quality.toFixed(3))
     },
