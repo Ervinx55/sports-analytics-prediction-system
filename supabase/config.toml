@@ -158,3 +158,15 @@ verify_jwt = true
 
 [functions.github-ml-training-export]
 verify_jwt = false
+
+[functions.import-performance-history]
+verify_jwt = true
+
+[functions.capture-sport-predictions]
+verify_jwt = true
+
+[functions.settle-sport-predictions]
+verify_jwt = true
+
+[functions.prediction-performance]
+verify_jwt = false

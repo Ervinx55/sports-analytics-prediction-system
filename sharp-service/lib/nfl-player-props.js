@@ -1254,6 +1254,8 @@ function pairedBookLines(prop) {
       underOdds: num(under.odds),
       marketOverProbability: noVig.over,
       marketUnderProbability: noVig.under,
+      overUpdatedAt: over.updatedAt ?? null,
+      underUpdatedAt: under.updatedAt ?? null,
       updatedAt: over.updatedAt || under.updatedAt || null
     });
   }
@@ -1354,7 +1356,7 @@ function gradePropMarket(prop, opportunity, {
         effectiveIndependentWeight: weight,
         calibrationVersion: NFL_PROP_CALIBRATION_VERSION,
         reason,
-        updatedAt: row.updatedAt
+        updatedAt: side === "over" ? row.overUpdatedAt : row.underUpdatedAt
       });
     }
   }

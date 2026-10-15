@@ -560,6 +560,7 @@ export default async function handler(req, res) {
 
     const eventResults = [];
     const candidates = [];
+    const forecastAt = new Date().toISOString();
 
     for (const event of events) {
       const homeTeam = normalizeTeam(
@@ -691,6 +692,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       version: PLAYER_PROP_VERSION,
       generatedAt: new Date().toISOString(),
+      forecastAt,
       sport: "FOOTBALL",
       league: "NFL",
       season,

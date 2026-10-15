@@ -65,6 +65,7 @@ function minAcceptableOdds(p, targetEv = 0.02) {
 function bestOdds(books = {}) {
   let best = null;
   let bestBook = null;
+  let quoteAt = null;
   for (const [book, v] of Object.entries(books || {})) {
     if (!v || v.available === false) continue;
     const o = num(v.odds);
@@ -72,9 +73,10 @@ function bestOdds(books = {}) {
     if (best === null || o > best) {
       best = o;
       bestBook = book;
+      quoteAt = v.updatedAt ?? null;
     }
   }
-  return { odds: best, book: bestBook };
+  return { odds: best, book: bestBook, quoteAt };
 }
 
 function teamKey(name = "") {
@@ -471,6 +473,7 @@ export default async function handler(req, res) {
               }
             ),
             bestBook: awayBest.book,
+            quoteAt: awayBest.quoteAt,
             bestOdds: awayBest.odds,
             modelProbability: Number(modelAway.toFixed(4)),
             edgePctPoints: Number((awayEdge * 100).toFixed(2)),
@@ -506,6 +509,7 @@ export default async function handler(req, res) {
               }
             ),
             bestBook: homeBest.book,
+            quoteAt: homeBest.quoteAt,
             bestOdds: homeBest.odds,
             modelProbability: Number(modelHome.toFixed(4)),
             edgePctPoints: Number((homeEdge * 100).toFixed(2)),

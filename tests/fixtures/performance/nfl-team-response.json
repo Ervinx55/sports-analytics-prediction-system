@@ -1,0 +1,14 @@
+{
+  "fixtureNote": "Synthetic adapter-owned fixture matching production nflmodel response fields; no live predictions or secrets",
+  "sport": "FOOTBALL",
+  "league": "NFL",
+  "version": "NFL Team Markets v3-shadow",
+  "forecastAt": "2026-10-06T12:00:00Z",
+  "generatedAt": "2026-10-06T12:00:01Z",
+  "productionWeight": 0,
+  "productionEligible": false,
+  "methodology": {"currentMarketAnchor": true},
+  "sourceHealth": {"schedule": {"status": "HEALTHY", "source": "nflverse"}},
+  "markets": [{"id": "event|moneyline|home|na", "eventID": "event", "startsAt": "2026-10-06T14:00:00Z", "marketType": "moneyline", "side": "home", "line": null, "modelProbability": 0.55, "rawIndependentProbability": 0.6, "effectiveIndependentWeight": 0, "marketFairProbability": 0.55, "bestBook": "book", "bestOdds": -110, "quoteAt": "2026-10-06T12:00:00Z", "status": "PASS", "shadowStatus": "PLAY", "productionEligible": false}],
+  "events": []
+}

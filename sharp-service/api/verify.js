@@ -1381,6 +1381,7 @@ export default async function handler(req, res) {
         modelDecision: c.market.modelDecision,
         currentModelPrice: {
           bestBook: c.market.bestBook,
+          quoteAt: c.market.quoteAt ?? null,
           bestOdds: c.market.bestOdds,
           modelProbability: c.market.modelProbability,
           edgePctPoints: c.market.edgePctPoints,

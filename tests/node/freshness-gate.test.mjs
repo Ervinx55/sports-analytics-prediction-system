@@ -11,29 +11,30 @@ const props = readFileSync(
   "utf8"
 );
 
+const shared=readFileSync("supabase/functions/_shared/performance-mlb-qualification.mjs","utf8");
 for (const [name, source] of [
   ["team market", market],
   ["player prop", props],
 ]) {
   test(name + " freshness gate can change production decisions", () => {
-    assert.match(source, /function applyFreshnessGate/);
-    assert.match(source, /DOWNGRADE_PENDING/);
-    assert.match(source, /PASS_STALE/);
-    assert.match(source, /freshness\.score < 65/);
-    assert.match(source, /freshness\.score < 80/);
-    assert.match(source, /freshness\.hardStale/);
+    assert.match(shared, /function applyFreshnessGate/);
+    assert.match(shared, /DOWNGRADE_PENDING/);
+    assert.match(shared, /PASS_STALE/);
+    assert.match(shared, /freshness\.score < 65/);
+    assert.match(shared, /freshness\.score < 80/);
+    assert.match(shared, /freshness\.hardStale/);
     assert.match(source, /affectsDecision: true/);
   });
 }
 
 test("team freshness includes market, sharp, lineup, and weather ages", () => {
   for (const component of ["market", "sharp", "lineup", "weather"]) {
-    assert.match(market, new RegExp(`"${component}"`));
+    assert.match(shared, new RegExp(`"${component}"`));
   }
 });
 
 test("prop freshness includes prop market, lineup role, and weather ages", () => {
   for (const component of ["prop_market", "lineup_role", "weather"]) {
-    assert.match(props, new RegExp(`"${component}"`));
+    assert.match(shared, new RegExp(`"${component}"`));
   }
 });

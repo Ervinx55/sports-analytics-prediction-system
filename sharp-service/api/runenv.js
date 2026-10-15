@@ -93,6 +93,8 @@ function expectedValue(p, odds) {
 function bestOdds(books = {}) {
   let best = null;
   let bestBook = null;
+  let quoteAt = null;
+  let quoteLine = null;
   for (const [book, v] of Object.entries(books || {})) {
     if (!v || v.available === false) continue;
     const o = num(v.odds);
@@ -100,9 +102,11 @@ function bestOdds(books = {}) {
     if (best === null || o > best) {
       best = o;
       bestBook = book;
+      quoteAt = v.updatedAt ?? null;
+      quoteLine = num(v.line);
     }
   }
-  return { odds: best, book: bestBook };
+  return { odds: best, book: bestBook, quoteAt, quoteLine };
 }
 
 function impliedProbability(odds) {
@@ -121,6 +125,8 @@ function noVigProbability(sideOdds, opponentOdds) {
 function bestOddsAtLine(books = {}, line) {
   let best = null;
   let bestBook = null;
+  let quoteAt = null;
+  let quoteLine = null;
   for (const [book, v] of Object.entries(books || {})) {
     if (!v || v.available === false) continue;
     const l = num(v.line);
@@ -129,9 +135,11 @@ function bestOddsAtLine(books = {}, line) {
     if (best === null || o > best) {
       best = o;
       bestBook = book;
+      quoteAt = v.updatedAt ?? null;
+      quoteLine = num(v.line);
     }
   }
-  return { odds: best, book: bestBook };
+  return { odds: best, book: bestBook, quoteAt, quoteLine };
 }
 
 function poissonArray(lambda, maxRuns = 25) {
@@ -723,6 +731,8 @@ export default async function handler(req, res) {
           edgePctPoints:
             overEdge === null ? null : Number((overEdge * 100).toFixed(2)),
           bestBook: overBest.book,
+          quoteAt: overBest.quoteAt,
+          quoteLine: overBest.quoteLine,
           bestOdds: overBest.odds,
           evPct:
             overEv === null ? null : Number((overEv * 100).toFixed(2)),
@@ -735,6 +745,8 @@ export default async function handler(req, res) {
           edgePctPoints:
             underEdge === null ? null : Number((underEdge * 100).toFixed(2)),
           bestBook: underBest.book,
+          quoteAt: underBest.quoteAt,
+          quoteLine: underBest.quoteLine,
           bestOdds: underBest.odds,
           evPct:
             underEv === null ? null : Number((underEv * 100).toFixed(2)),
@@ -767,6 +779,8 @@ export default async function handler(req, res) {
               ? null
               : Number((awaySpreadEdge * 100).toFixed(2)),
           bestBook: awaySpreadBest.book,
+          quoteAt: awaySpreadBest.quoteAt,
+          quoteLine: awaySpreadBest.quoteLine,
           bestOdds: awaySpreadBest.odds,
           evPct:
             awaySpreadEv === null
@@ -794,6 +808,8 @@ export default async function handler(req, res) {
               ? null
               : Number((homeSpreadEdge * 100).toFixed(2)),
           bestBook: homeSpreadBest.book,
+          quoteAt: homeSpreadBest.quoteAt,
+          quoteLine: homeSpreadBest.quoteLine,
           bestOdds: homeSpreadBest.odds,
           evPct:
             homeSpreadEv === null
