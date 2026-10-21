@@ -1,0 +1,14 @@
+{
+  "leagues": [{"id": "46", "uid": "s:40~l:46"}],
+  "events": [{
+    "id": "401705278", "uid": "s:40~l:46~e:401705278", "date": "2024-11-03T00:00:00Z",
+    "competitions": [{
+      "id": "401705278", "date": "2024-11-03T00:00:00Z",
+      "status": {"type": {"name": "STATUS_FINAL", "state": "post", "completed": true}},
+      "competitors": [
+        {"id": "20", "homeAway": "home", "team": {"id": "20"}, "score": "118"},
+        {"id": "6", "homeAway": "away", "team": {"id": "6"}, "score": "116"}
+      ]
+    }]
+  }]
+}
