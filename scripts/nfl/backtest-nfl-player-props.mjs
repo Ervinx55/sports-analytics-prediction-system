@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { metrics } from "./player-props-metrics.mjs";
 
 import {
   loadNflData,
@@ -197,59 +198,6 @@ const RESIDUAL_WEIGHT_GRID = Array.from(
 function anchoredPrediction(row, weight) {
   if (!Number.isFinite(row.baseline)) return row.prediction;
   return row.baseline + weight * (row.prediction - row.baseline);
-}
-
-function metrics(rows, predictionFn = (row) => row.prediction) {
-  if (!rows.length) {
-    return {
-      rows: 0,
-      mae: null,
-      rmse: null,
-      bias: null,
-      baselineMae: null,
-      maeImprovementVsRollingMean: null
-    };
-  }
-
-  let absolute = 0;
-  let squared = 0;
-  let signed = 0;
-  let modelRows = 0;
-  let baselineAbsolute = 0;
-  let baselineRows = 0;
-
-  for (const row of rows) {
-    const prediction = predictionFn(row);
-    if (Number.isFinite(prediction)) {
-      const error = prediction - row.actual;
-      absolute += Math.abs(error);
-      squared += error ** 2;
-      signed += error;
-      modelRows += 1;
-    }
-
-    if (Number.isFinite(row.baseline)) {
-      baselineAbsolute += Math.abs(row.baseline - row.actual);
-      baselineRows += 1;
-    }
-  }
-
-  const mae = modelRows > 0 ? absolute / modelRows : null;
-  const baselineMae =
-    baselineRows > 0 ? baselineAbsolute / baselineRows : null;
-
-  return {
-    rows: modelRows,
-    mae,
-    rmse: modelRows > 0 ? Math.sqrt(squared / modelRows) : null,
-    bias: modelRows > 0 ? signed / modelRows : null,
-    baselineRows,
-    baselineMae,
-    maeImprovementVsRollingMean:
-      baselineMae === null || mae === null
-        ? null
-        : baselineMae - mae
-  };
 }
 
 function residualCalibration(rows, {
@@ -620,8 +568,8 @@ async function main() {
     "",
     `Seasons: ${seasons.join(", ")} | Minimum week: ${minWeek}`,
     "",
-    "| Market | Rows | MAE | RMSE | Bias | Rolling-Mean MAE | Δ MAE vs Baseline |",
-    "|---|---:|---:|---:|---:|---:|---:|"
+    "| Market | Model rows | Model MAE | RMSE | Bias | Baseline rows | Baseline MAE | Paired rows | Paired model MAE | Paired baseline MAE | Paired Δ MAE vs baseline |",
+    "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|"
   ];
 
   for (const market of Object.keys(aggregateMetrics)) {
@@ -629,11 +577,13 @@ async function main() {
     const fmt = (value) =>
       Number.isFinite(value) ? value.toFixed(3) : "n/a";
     lines.push(
-      `| ${market} | ${item.rows} | ${fmt(item.mae)} | ${fmt(item.rmse)} | ${fmt(item.bias)} | ${fmt(item.baselineMae)} | ${fmt(item.maeImprovementVsRollingMean)} |`
+      `| ${market} | ${item.rows} | ${fmt(item.mae)} | ${fmt(item.rmse)} | ${fmt(item.bias)} | ${item.baselineRows} | ${fmt(item.baselineMae)} | ${item.pairedRows} | ${fmt(item.pairedModelMae)} | ${fmt(item.pairedBaselineMae)} | ${fmt(item.maeImprovementVsRollingMean)} |`
     );
   }
 
   lines.push(
+    "",
+    "The improvement column compares model and rolling baseline absolute errors on the same rows with finite actual, prediction, and baseline values. Model and baseline MAE columns describe their respective available rows.",
     "",
     "**Production eligible: no.**",
     "",
