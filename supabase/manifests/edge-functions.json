@@ -835,6 +835,70 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "import-performance-history",
+      "status": "PLANNED",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "98f23bedd3a16a18928bf39018194fac07b76a1a3373fc34ac1c84052acc33fc",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/import-performance-history/index.ts",
+          "name": "index.ts",
+          "sha256": "98f23bedd3a16a18928bf39018194fac07b76a1a3373fc34ac1c84052acc33fc"
+        }
+      ]
+    },
+    {
+      "slug": "capture-sport-predictions",
+      "status": "PLANNED",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "0f6cd30ff9cbab0bbaf054b6c85a36923ee8d0f4f531836b71c9ec9738f4c0ae",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-sport-predictions/index.ts",
+          "name": "index.ts",
+          "sha256": "0f6cd30ff9cbab0bbaf054b6c85a36923ee8d0f4f531836b71c9ec9738f4c0ae"
+        }
+      ]
+    },
+    {
+      "slug": "settle-sport-predictions",
+      "status": "PLANNED",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "a6416caf033425cafabde1cb2fb96f94bd5c6f84867b824d6c0b53baada4a7df",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/settle-sport-predictions/index.ts",
+          "name": "index.ts",
+          "sha256": "a6416caf033425cafabde1cb2fb96f94bd5c6f84867b824d6c0b53baada4a7df"
+        }
+      ]
+    },
+    {
+      "slug": "prediction-performance",
+      "status": "PLANNED",
+      "verify_jwt": false,
+      "appliedToProduction": false,
+      "bundle_sha256": "60d3c33c4772d95c206de7cce596492e688124d46fa852b731ebaab2ebf17e0b",
+      "bundle_hash_basis": "Local source only; not a deployed bundle",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/prediction-performance/index.ts",
+          "name": "index.ts",
+          "sha256": "60d3c33c4772d95c206de7cce596492e688124d46fa852b731ebaab2ebf17e0b"
+        }
+      ]
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

@@ -1,0 +1,5 @@
+tests/
+.github/
+.superpowers/
+scripts/performance/
+task7-preview.mjs

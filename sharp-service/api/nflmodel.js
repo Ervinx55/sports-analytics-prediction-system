@@ -7,6 +7,7 @@ import {
   seasonForDate,
   teamSnapshot
 } from "../lib/nfl-model.js";
+import nbaModelHandler from "../handlers/nbamodel.js";
 
 const DEFAULT_BOARD_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/board";
@@ -48,6 +49,7 @@ function dateWindow(query) {
 }
 
 export default async function handler(req, res) {
+  if (req.query?.nba === "1") return nbaModelHandler(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
@@ -122,6 +124,7 @@ export default async function handler(req, res) {
     );
     const weatherByEvent = new Map(weatherEntries);
 
+    const forecastAt = new Date(Date.now()).toISOString();
     const projections = events.map((event) =>
       projectEvent({
         event,
@@ -132,6 +135,7 @@ export default async function handler(req, res) {
         baseline,
         season,
         weatherContext: weatherByEvent.get(event.eventID) || null,
+        forecastAt,
         sourceHealth: nflData.sourceHealth
       })
     );
@@ -165,6 +169,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       version: "NFL Team Markets v3-shadow",
       generatedAt: new Date().toISOString(),
+      forecastAt,
       sport: "FOOTBALL",
       league: "NFL",
       season,
@@ -197,11 +202,12 @@ export default async function handler(req, res) {
         injuryPolicy:
           "No current nflverse injury adjustment is applied because the feed ended after 2024.",
         calibration:
-          "2024 selected market-specific shrinkage; 2025 was untouched. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
+          "2024 selected market-specific shrinkage; 2025 is already-examined historical validation; future untouched evaluation is still required. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
       },
       sourceHealth: nflData.sourceHealth,
       marketBooks: BOOKS,
       boardProviderCache: board.providerCache ?? null,
+      oddsProvider: board.source ?? null,
       eventCount: projections.length,
       availableEventCount: projections.filter(
         (projection) => projection.available

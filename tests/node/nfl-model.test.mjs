@@ -225,6 +225,7 @@ test("NFL model produces shadow-only team market grades", async (t) => {
 
   assert.equal(response.statusCode, 200);
   assert.equal(response.body.league, "NFL");
+  assert.equal(response.body.events[0].gameContext.availability.home.forecastAt, response.body.forecastAt);
   assert.equal(response.body.productionEligible, false);
   assert.equal(response.body.eventCount, 1);
   assert.equal(response.body.availableEventCount, 1);

@@ -26,6 +26,7 @@ import {
   fetchTheOddsApiBoardLeague,
   fetchTheOddsApiNflProps
 } from "../lib/the-odds-api-provider.js";
+import nbaPropsHandler from "../handlers/nbaprops.js";
 
 const DEFAULT_BOOKS = [
   "draftkings",
@@ -446,6 +447,9 @@ function dateWindow(query) {
 }
 
 export default async function handler(req, res) {
+  if (String(req.query?.nba || "") === "1") {
+    return nbaPropsHandler(req, res);
+  }
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
@@ -560,6 +564,7 @@ export default async function handler(req, res) {
 
     const eventResults = [];
     const candidates = [];
+    const forecastAt = new Date().toISOString();
 
     for (const event of events) {
       const homeTeam = normalizeTeam(
@@ -691,6 +696,7 @@ export default async function handler(req, res) {
     return res.status(200).json({
       version: PLAYER_PROP_VERSION,
       generatedAt: new Date().toISOString(),
+      forecastAt,
       sport: "FOOTBALL",
       league: "NFL",
       season,

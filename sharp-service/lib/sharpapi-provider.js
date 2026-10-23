@@ -299,6 +299,24 @@ function propStatID(row, league = "MLB") {
   const category = String(row?.stat_category || "").toLowerCase();
   const combined = `${type}|${category}`;
 
+  if (String(league).toUpperCase() === "NBA") {
+    // Only full-game IDs explicitly identified in SharpAPI's odds reference.
+    const supported = {
+      player_points: "points",
+      player_rebounds: "rebounds",
+      player_assists: "assists"
+    };
+    const marketID = String(row?.market_type || "").toLowerCase();
+    if (String(row?.sport || "").toLowerCase() !== "basketball" ||
+        String(row?.league || "").toLowerCase() !== "nba" ||
+        row?.is_player_prop !== true || row?.is_live !== false ||
+        row?.is_active === false || row?.is_stale_pregame_price === true ||
+        (row?.market_ref?.id && String(row.market_ref.id).toLowerCase() !== marketID)) {
+      return null;
+    }
+    return Object.hasOwn(supported, marketID) ? supported[marketID] : null;
+  }
+
   if (String(league).toUpperCase() === "NFL") {
     if (/pass(ing)?[_ ]?(yards|yds)/.test(combined)) {
       return "passing_yards";
@@ -352,6 +370,9 @@ export function normalizeSharpApiPropRows(rows, {
   for (const row of rows || []) {
     const statID = propStatID(row, league);
     if (!statID) continue;
+    if (String(league).toUpperCase() === "NBA" &&
+        (num(row?.line) === null || num(row?.line) < 0 ||
+         num(row?.odds_american) === null || num(row?.odds_american) === 0)) continue;
 
     const side = String(row?.selection_type || "").toLowerCase();
     if (!["over", "under"].includes(side)) continue;
@@ -380,7 +401,9 @@ export function normalizeSharpApiPropRows(rows, {
         sport:
           String(league).toUpperCase() === "NFL"
             ? "FOOTBALL"
-            : "BASEBALL",
+            : String(league).toUpperCase() === "NBA"
+              ? "BASKETBALL"
+              : "BASEBALL",
         league: String(league).toUpperCase(),
         startsAt,
         status: {
@@ -682,6 +705,10 @@ export function normalizeSharpApiNflPropRows(rows, options = {}) {
   });
 }
 
+export function normalizeSharpApiNbaPropRows(rows, options = {}) {
+  return normalizeSharpApiPropRows(rows, { ...options, league: "NBA" });
+}
+
 async function fetchSharpApiProps(options, league) {
   const result = await fetchSharpApiOdds({
     ...options,
@@ -713,4 +740,8 @@ export async function fetchSharpApiMlbProps(options) {
 
 export async function fetchSharpApiNflProps(options) {
   return fetchSharpApiProps(options, "NFL");
+}
+
+export async function fetchSharpApiNbaProps(options) {
+  return fetchSharpApiProps(options, "NBA");
 }

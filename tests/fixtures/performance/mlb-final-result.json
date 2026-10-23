@@ -1,0 +1,770 @@
+{
+  "evidence": {
+    "source": "mlb-statsapi",
+    "url": "https://statsapi.mlb.com/api/v1.1/game/744986/feed/live",
+    "retrievedAt": "2026-10-06T22:13:17.574Z",
+    "kind": "minimal live primary result fields; unmodified values; unrelated fields omitted"
+  },
+  "payload": {
+    "gamePk": 744986,
+    "metaData": {
+      "timeStamp": "20240803_025306"
+    },
+    "gameData": {
+      "game": {
+        "pk": 744986,
+        "type": "R",
+        "doubleHeader": "N",
+        "id": "2024/08/02/bosmlb-texmlb-1",
+        "gamedayType": "P",
+        "tiebreaker": "N",
+        "gameNumber": 1,
+        "calendarEventID": "14-744986-2024-08-02",
+        "season": "2024",
+        "seasonDisplay": "2024"
+      },
+      "status": {
+        "abstractGameState": "Final",
+        "codedGameState": "F",
+        "detailedState": "Final",
+        "statusCode": "F",
+        "startTimeTBD": false,
+        "abstractGameCode": "F"
+      },
+      "teams": {
+        "home": {
+          "id": 140,
+          "sport": {
+            "id": 1
+          }
+        },
+        "away": {
+          "id": 111,
+          "sport": {
+            "id": 1
+          }
+        }
+      }
+    },
+    "liveData": {
+      "linescore": {
+        "currentInning": 9,
+        "scheduledInnings": 9,
+        "teams": {
+          "home": {
+            "runs": 6,
+            "hits": 8,
+            "errors": 0,
+            "leftOnBase": 3
+          },
+          "away": {
+            "runs": 11,
+            "hits": 16,
+            "errors": 0,
+            "leftOnBase": 6
+          }
+        },
+        "inningState": "Bottom",
+        "outs": 3
+      },
+      "boxscore": {
+        "teams": {
+          "home": {
+            "team": {
+              "id": 140
+            },
+            "players": {
+              "ID641680": {
+                "person": {
+                  "id": 641680
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID694671": {
+                "person": {
+                  "id": 694671
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 0,
+                    "totalBases": 0,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID665750": {
+                "person": {
+                  "id": 665750
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 1,
+                    "hits": 1,
+                    "totalBases": 4,
+                    "rbi": 1
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID641540": {
+                "person": {
+                  "id": 641540
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 1
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID570632": {
+                "person": {
+                  "id": 570632
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 2
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID663993": {
+                "person": {
+                  "id": 663993
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 1,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID656641": {
+                "person": {
+                  "id": 656641
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 0
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID605177": {
+                "person": {
+                  "id": 605177
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 3
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID608369": {
+                "person": {
+                  "id": 608369
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 3,
+                    "homeRuns": 2,
+                    "hits": 3,
+                    "totalBases": 9,
+                    "rbi": 3
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID608348": {
+                "person": {
+                  "id": 608348
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 2,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID543760": {
+                "person": {
+                  "id": 543760
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 1,
+                    "hits": 1,
+                    "totalBases": 4,
+                    "rbi": 2
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID673962": {
+                "person": {
+                  "id": 673962
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 0,
+                    "totalBases": 0,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID677649": {
+                "person": {
+                  "id": 677649
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 0,
+                    "totalBases": 0,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID622250": {
+                "person": {
+                  "id": 622250
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID608671": {
+                "person": {
+                  "id": 608671
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID669701": {
+                "person": {
+                  "id": 669701
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 0,
+                    "totalBases": 0,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID642520": {
+                "person": {
+                  "id": 642520
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID571760": {
+                "person": {
+                  "id": 571760
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID679156": {
+                "person": {
+                  "id": 679156
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID666969": {
+                "person": {
+                  "id": 666969
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID489446": {
+                "person": {
+                  "id": 489446
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID543257": {
+                "person": {
+                  "id": 543257
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 1,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID674003": {
+                "person": {
+                  "id": 674003
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID543135": {
+                "person": {
+                  "id": 543135
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID600917": {
+                "person": {
+                  "id": 600917
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID502085": {
+                "person": {
+                  "id": 502085
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              }
+            }
+          },
+          "away": {
+            "team": {
+              "id": 111
+            },
+            "players": {
+              "ID663853": {
+                "person": {
+                  "id": 663853
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID657136": {
+                "person": {
+                  "id": 657136
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 3,
+                    "homeRuns": 0,
+                    "hits": 4,
+                    "totalBases": 4,
+                    "rbi": 1
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID608701": {
+                "person": {
+                  "id": 608701
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID677161": {
+                "person": {
+                  "id": 677161
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID572020": {
+                "person": {
+                  "id": 572020
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID678394": {
+                "person": {
+                  "id": 678394
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID641933": {
+                "person": {
+                  "id": 641933
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 1,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID592155": {
+                "person": {
+                  "id": 592155
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 1
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID445276": {
+                "person": {
+                  "id": 445276
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID677800": {
+                "person": {
+                  "id": 677800
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 2,
+                    "homeRuns": 1,
+                    "hits": 3,
+                    "totalBases": 6,
+                    "rbi": 3
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID670174": {
+                "person": {
+                  "id": 670174
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 1
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID657514": {
+                "person": {
+                  "id": 657514
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID676710": {
+                "person": {
+                  "id": 676710
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 5
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID642086": {
+                "person": {
+                  "id": 642086
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 2,
+                    "rbi": 1
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID601713": {
+                "person": {
+                  "id": 601713
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID666152": {
+                "person": {
+                  "id": 666152
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID646240": {
+                "person": {
+                  "id": 646240
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 2,
+                    "homeRuns": 1,
+                    "hits": 2,
+                    "totalBases": 6,
+                    "rbi": 1
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID681867": {
+                "person": {
+                  "id": 681867
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID608371": {
+                "person": {
+                  "id": 608371
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 1
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID680776": {
+                "person": {
+                  "id": 680776
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 0,
+                    "hits": 2,
+                    "totalBases": 4,
+                    "rbi": 0
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID686765": {
+                "person": {
+                  "id": 686765
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 0,
+                    "hits": 1,
+                    "totalBases": 1,
+                    "rbi": 2
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID643376": {
+                "person": {
+                  "id": 643376
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID678882": {
+                "person": {
+                  "id": 678882
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 1,
+                    "homeRuns": 1,
+                    "hits": 2,
+                    "totalBases": 5,
+                    "rbi": 2
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID807799": {
+                "person": {
+                  "id": 807799
+                },
+                "stats": {
+                  "batting": {
+                    "gamesPlayed": 1,
+                    "runs": 0,
+                    "homeRuns": 0,
+                    "hits": 0,
+                    "totalBases": 0,
+                    "rbi": 1
+                  },
+                  "pitching": {},
+                  "fielding": {}
+                }
+              },
+              "ID472610": {
+                "person": {
+                  "id": 472610
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {
+                    "gamesPlayed": 1,
+                    "strikeOuts": 0
+                  },
+                  "fielding": {}
+                }
+              },
+              "ID656557": {
+                "person": {
+                  "id": 656557
+                },
+                "stats": {
+                  "batting": {},
+                  "pitching": {},
+                  "fielding": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

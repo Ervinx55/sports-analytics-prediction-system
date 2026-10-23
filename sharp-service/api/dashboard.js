@@ -59,6 +59,30 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "GET only" });
   }
 
+  if (req.query.view === "performance") {
+    const query = new URLSearchParams();
+    for (const key of ["sport", "kind", "market", "modelVersion", "cohort", "from", "to", "cursor", "limit"]) {
+      if (req.query[key] != null) query.set(key, String(req.query[key]));
+    }
+    res.setHeader("Cache-Control", "no-store");
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(`${BASE}/prediction-performance?${query}`, { headers: { accept: "application/json" }, cache: "no-store", signal: controller.signal });
+      if (!response.ok) {
+        if (response.status === 422) return res.status(422).json({ error: "PERFORMANCE_READ_LIMIT_EXCEEDED", message: "Narrow the date interval or sport filter; the read limit applies before cohort selection." });
+        return res.status(response.status === 400 ? 400 : 503).json({ error: response.status === 400 ? "INVALID_PERFORMANCE_FILTERS" : "PERFORMANCE_READ_UNAVAILABLE" });
+      }
+      const data = await response.json();
+      if (!data?.summary || !Array.isArray(data.rows) || !data.coverage) throw new Error("Invalid performance response");
+      return res.status(200).json(data);
+    } catch {
+      return res.status(503).json({ error: "PERFORMANCE_READ_UNAVAILABLE" });
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   const sport = String(req.query.sport || "MLB").toUpperCase();
   const hours = Math.max(
     6,
