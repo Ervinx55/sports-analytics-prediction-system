@@ -7,6 +7,7 @@ import {
   seasonForDate,
   teamSnapshot
 } from "../lib/nfl-model.js";
+import nbaModelHandler from "../handlers/nbamodel.js";
 
 const DEFAULT_BOARD_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/board";
@@ -48,6 +49,7 @@ function dateWindow(query) {
 }
 
 export default async function handler(req, res) {
+  if (req.query?.nba === "1") return nbaModelHandler(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
