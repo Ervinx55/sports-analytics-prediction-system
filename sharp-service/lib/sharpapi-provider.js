@@ -318,22 +318,22 @@ function propStatID(row, league = "MLB") {
   }
 
   if (String(league).toUpperCase() === "NFL") {
-    if (/pass(ing)?[_ ]?(yards|yds)/.test(combined)) {
-      return "passing_yards";
+    // Match full-game market IDs, never broad categories or substring matches.
+    const supported = {
+      player_passing_yards: "passing_yards",
+      player_passing_touchdowns: "passing_touchdowns",
+      player_rushing_yards: "rushing_yards",
+      player_receptions: "receiving_receptions",
+      player_receiving_yards: "receiving_yards"
+    };
+    if (String(row?.sport || "").toLowerCase() !== "football" ||
+        String(row?.league || "").toLowerCase() !== "nfl" ||
+        row?.is_live !== false || row?.is_active === false ||
+        row?.is_stale_pregame_price === true ||
+        (row?.market_ref?.id && String(row.market_ref.id).toLowerCase() !== type)) {
+      return null;
     }
-    if (/pass(ing)?[_ ]?(touchdowns|tds)/.test(combined)) {
-      return "passing_touchdowns";
-    }
-    if (/rush(ing)?[_ ]?(yards|yds)/.test(combined)) {
-      return "rushing_yards";
-    }
-    if (/receptions?/.test(combined)) {
-      return "receiving_receptions";
-    }
-    if (/receiv(ing|e)?[_ ]?(yards|yds)/.test(combined)) {
-      return "receiving_yards";
-    }
-    return null;
+    return Object.hasOwn(supported, type) ? supported[type] : null;
   }
 
   if (/strikeout/.test(combined) && !/batter.*strikeout/.test(combined)) {
