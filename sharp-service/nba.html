@@ -12,10 +12,11 @@
 </head>
 <body class="el-theme el-nba"><main>
 <header><div><a href="/dashboard">← Edge Lab dashboard</a> · <a href="/nfl.html">NFL models</a><h1>NBA inspection</h1><div class="muted">Upcoming team estimates and provider-observed player markets</div></div><button id="refresh" type="button">Refresh NBA data</button><a href="/accounts.html">Accounts &amp; Profit</a><a href="/research.html">Prop research board</a></header>
-<div class="notice"><strong>Shadow only · no cleared NBA plays · production influence 0%</strong><br>Team probabilities are uncalibrated estimates for evaluation. Shadow PLAY is a provisional research label; every priced NBA market remains production PASS. Player props are provider quotes only: player prediction is unavailable. This page does not show persisted results or validated betting skill.</div>
+<div class="notice"><strong>Shadow only · no cleared NBA plays · production influence 0%</strong><br>Team probabilities are uncalibrated estimates for evaluation. Every priced NBA market currently says PASS: do not play. Experimental signals are inside research details. Player props are provider quotes only: player prediction is unavailable. This page does not show persisted results or validated betting skill.</div>
 <section aria-labelledby="team-title"><div class="section-head"><div><h2 id="team-title">Team markets</h2><p class="muted">Model versus exact-book, same-line market probability. Difference is in percentage points (pp).</p></div></div><div id="team-status" class="status" role="status" aria-live="polite">Loading team estimates…</div><div id="team-metrics" class="metrics" hidden></div><div id="team-cards" class="cards"></div><button id="more-team" type="button" hidden></button><h3 class="subhead">Modeled, without a current paired quote</h3><div id="unpriced-cards" class="cards"></div><h3 class="subhead">Unavailable event estimates</h3><div id="unavailable-cards" class="cards"></div></section>
 <section aria-labelledby="props-title"><div class="section-head"><div><h2 id="props-title">Player prop observations</h2><p class="muted">Bookmaker lines and odds only. No player prediction or candidate is available.</p></div></div><div id="props-status" class="status" role="status" aria-live="polite">Loading player markets…</div><div id="props-metrics" class="metrics" hidden></div><div id="props-cards" class="cards"></div><button id="more-props" type="button" hidden></button></section>
-</main><script>
+</main><script type="module">
+import {appendDecision} from "./decision-display.js";
 const $ = id => document.getElementById(id);
 const el = (tag, className, value) => { const node=document.createElement(tag); if(className) node.className=className; if(value!==undefined) node.textContent=String(value); return node; };
 const add = (parent, tag, className, value) => { const node=el(tag,className,value); parent.append(node); return node; };
@@ -43,11 +44,13 @@ function renderTeam(data){
  if(!batches(target,$('more-team'),rows,row=>{
   const article=card(target,`${row.away||'Away team unavailable'} @ ${row.home||'Home team unavailable'}`,'PRODUCTION PASS','pass');
   add(article,'p','meta',`${date(row.startsAt)} · ${label(row.marketType)} · ${label(row.side)} · ${row.label||'Selection unavailable'}`);
+  appendDecision(article,row,data);
   const model=number(row.modelProbability),market=number(row.marketFairProbability);
   compare(article,probability(model),probability(market),pp(model===null||market===null?null:(model-market)*100));
   add(article,'div','quote',`Exact quote: ${row.book||'book unavailable'} · line ${line(row.line)} · odds ${odds(row.odds)} · opposite odds ${odds(row.opponentOdds)} · observed ${date(row.updatedAt)}`);
-  add(article,'p','meta',`Shadow status: ${row.shadowStatus==='PLAY'?'PLAY (research only)':'PASS'} · Exact-line books: ${number(row.exactLineBookCount)??'unavailable'} · Quote quality: ${number(row.dataQuality)===null?'unavailable':`${(number(row.dataQuality)*100).toFixed(0)}%`}`);
-  if(row.reason)add(article,'p','meta',row.reason);
+  const research=add(article,'details','');add(research,'summary','','Experimental signal details');
+  add(research,'p','meta',`Research threshold: ${row.shadowStatus==='PLAY'?'met (not cleared for betting)':'not met'} · Exact-line books: ${number(row.exactLineBookCount)??'unavailable'} · Quote quality: ${number(row.dataQuality)===null?'unavailable':`${(number(row.dataQuality)*100).toFixed(0)}%`}`);
+  if(row.reason)add(research,'p','meta',row.reason);
  }))empty(target,events.length?'No current paired NBA market quotes were returned. An empty priced list is not a production PASS decision for every game.':'No NBA events were returned in the current window.');
  const unpricedTarget=$('unpriced-cards');unpricedTarget.replaceChildren();if(!unpriced.length)empty(unpricedTarget,'No modeled events without a current paired quote.');
  for(const event of unpriced){const article=card(unpricedTarget,`${event.matchup?.away?.name||'Away team unavailable'} @ ${event.matchup?.home?.name||'Home team unavailable'}`,'UNPRICED','');add(article,'p','meta',date(event.startsAt));const home=event.simulation?.moneyline?.home,away=event.simulation?.moneyline?.away;add(article,'p','',`Model estimate: home ${probability(home)} · away ${probability(away)}. Market probability and difference unavailable.`);add(article,'p','meta',event.reason||'No current same-book NBA quote pair is available.');}

@@ -1,3 +1,4 @@
+import {decisionPresentation,decisionTime} from '../../sharp-service/decision-display.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { modelRows } from '../../sharp-service/nfl-view.js';
@@ -25,10 +26,10 @@ import fs from 'node:fs';
 test('failed refresh cannot restore old cards through a filter or timer render',async()=>{
  const elements=new Map(); const get=id=>{if(!elements.has(id))elements.set(id,{value:id==='kind'?'teams':'',innerHTML:'',textContent:'',disabled:false,addEventListener(){},replaceChildren(){this.innerHTML='';}});return elements.get(id);};
  const html=fs.readFileSync(new URL('../../sharp-service/nfl.html',import.meta.url),'utf8');
- const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;$/m,'');
+ const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;$/gm,'');
  const payload={generatedAt:new Date().toISOString(),markets:[{eventID:'one',away:'Away',home:'Home',startsAt:new Date(Date.now()+3600000).toISOString(),marketType:'total',label:'Over',line:44.5,modelProbability:.55,marketFairProbability:.5}]};
- const context=vm.createContext({document:{getElementById:get},modelRows,marketLabel,AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
- await vm.runInContext(script,context);assert.match(get('cards').innerHTML,/44.5/);
+ const context=vm.createContext({document:{getElementById:get},modelRows,marketLabel,decisionPresentation,decisionTime,AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
+ await vm.runInContext(script,context);assert.match(get('cards').innerHTML,/44.5/);assert.match(get('cards').innerHTML,/NOT CLEARED/);assert.match(get('cards').innerHTML,/Decision recorded: Not recorded/);
  context.fetch=async()=>{throw new Error('Upstream unavailable')};await vm.runInContext('load(true)',context);vm.runInContext('render()',context);
  assert.equal(get('cards').innerHTML,'');assert.match(get('status').textContent,/Upstream unavailable/);
 });
