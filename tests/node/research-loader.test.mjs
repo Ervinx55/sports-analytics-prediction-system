@@ -11,3 +11,7 @@ test('failure clears previous quote data and permits retry',async()=>{
  await loader.load('NBA');fail=true;await loader.load('NBA');assert.equal(loader.state.status,'error');assert.deepEqual(loader.state.rows,[]);assert.doesNotMatch(loader.state.message,/private/);
  fail=false;await loader.load('NBA');assert.equal(loader.state.status,'ready');
 });
+
+test('quota exhaustion explains the data blocker without exposing upstream error text',async()=>{
+ const loader=createResearchLoader({fetchImpl:async()=>({ok:false,status:429,json:async()=>({error:'secret upstream detail',providerFailures:[{objectBudgetBlocked:true}]})})});await loader.load('NBA');assert.match(loader.state.message,/quota.*exhausted/i);assert.doesNotMatch(loader.state.message,/secret|Refresh to retry/);assert.deepEqual(loader.state.rows,[]);
+});
