@@ -25,6 +25,7 @@ function render(){
   const card=add(target,'article',undefined,'card');const head=add(card,'div',undefined,'card-head');add(head,'h3',row.player);add(head,'span',row.status,'badge');add(card,'p',`${row.away||'Away unavailable'} @ ${row.home||'Home unavailable'} · ${date(row.startsAt)}`,'match');add(card,'small',label(row.marketType).toUpperCase());add(card,'p',`${row.side} ${row.line??'Line unavailable'}`,'selection');add(card,'p',`${row.book} · ${odds(row.odds)}`,'quote');
   const compare=add(card,'div',undefined,'comparison');for(const [name,value] of [['Model estimate',pct(row.model)],['Market no-vig',pct(row.market)],['Difference',difference(row)]]){const cell=add(compare,'div');add(cell,'small',name);add(cell,'strong',value);}
   add(card,'p',`${row.freshness} timestamp · ${date(row.updatedAt)}`,'freshness '+(row.freshness==='CURRENT'?'current':''));
+  add(card,'p',row.status==='SHADOW'?'Not cleared: this experimental estimate has not passed the production validation gate.':'Not cleared: this is a provider quote without a validated player prediction.','match');
   const actions=add(card,'div',undefined,'actions');button(actions,'View research',()=>openDetail(row));button(actions,saved.has(row.id)?'Remove saved':'Shortlist +',()=>{if(saved.has(row.id))saved.delete(row.id);else saved.set(row.id,structuredClone(row));render();});
  }
  $('more').textContent=`Show more · ${Math.min(shown,rows.length)} of ${rows.length}`;
