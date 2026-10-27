@@ -15,3 +15,8 @@ test('failure clears previous quote data and permits retry',async()=>{
 test('quota exhaustion explains the data blocker without exposing upstream error text',async()=>{
  const loader=createResearchLoader({fetchImpl:async()=>({ok:false,status:429,json:async()=>({error:'secret upstream detail',providerFailures:[{objectBudgetBlocked:true}]})})});await loader.load('NBA');assert.match(loader.state.message,/quota.*exhausted/i);assert.doesNotMatch(loader.state.message,/secret|Refresh to retry/);assert.deepEqual(loader.state.rows,[]);
 });
+
+test('withheld roster mismatches are disclosed without exposing source error details',async()=>{
+ const loader=createResearchLoader({fetchImpl:async()=>({ok:true,json:async()=>({events:[],sourceHealth:{playerIdentity:{matched:12,excluded:3,unverified:0,error:'secret'}}})})});
+ await loader.load('NBA');assert.match(loader.state.message,/3.*withheld/);assert.doesNotMatch(loader.state.message,/secret/);
+});

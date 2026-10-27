@@ -17,3 +17,17 @@ test('NFL retains unmodeled quotes and joins estimates only to exact quote ident
 });
 
 test('explicitly unavailable NFL prices cannot be shortlisted as available quotes',()=>{const data=structuredClone(nba);data.candidates=[];data.events[0].players[0].prop.over.books.A.available=false;assert.equal(normalizeResearch(data,'NFL',now).length,2);});
+
+test('research derives market probability only from a fresh same-book exact-line pair',()=>{
+ const rows=normalizeResearch(nba,'NBA',now);
+ assert.equal(rows.find(r=>r.book==='A'&&r.side==='OVER').market,.5);
+ assert.equal(rows.find(r=>r.book==='A'&&r.side==='UNDER').market,.5);
+ assert.equal(rows.find(r=>r.book==='B').market,null);
+ assert.ok(rows.every(r=>r.model===null));
+});
+test('stale unavailable mismatched and invalid opposite quotes do not establish market probability',()=>{
+ for(const patch of [{line:21.5},{available:false},{odds:0},{odds:null},{updatedAt:'2026-10-25T17:00:00Z'}]){
+  const data=structuredClone(nba);Object.assign(data.events[0].players[0].prop.under.books.A,patch);
+  assert.equal(normalizeResearch(data,'NBA',now).find(r=>r.book==='A'&&r.side==='OVER').market,null);
+ }
+});

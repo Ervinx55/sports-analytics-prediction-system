@@ -33,6 +33,7 @@ function render(){
 function openDetail(row){selected=row;drawDetail();$('detail').showModal();}
 function drawDetail(){if(!selected)return;const row=current(selected);$('detail-title').textContent=row.player;const body=$('detail-body');body.replaceChildren();add(body,'p',`${label(row.marketType)} · ${row.side} ${row.line??'Unavailable'} · ${row.book} ${odds(row.odds)}`,'selection');
  const section=(heading,copy)=>{const block=add(body,'section',undefined,'detail-section');add(block,'h3',heading);add(block,'p',copy);};
+ section('Player identity',row.identityStatus==='ROSTER_MATCHED'?'Matched to ESPN current roster: '+row.verifiedTeam+'. This does not verify injuries, participation or projected minutes.':'Player roster identity is not independently verified.');
  section('Research status',`${row.status}. ${row.reason}`);
  section('Probability comparison',`Model estimate: ${pct(row.model)}. Market no-vig: ${pct(row.market)}. Difference: ${difference(row)}. These estimates do not authorize a play.`);
  section('Source and freshness',`${row.provider||'Provider unavailable'} · ${row.freshness}. Quote observed ${date(row.updatedAt)}; response generated ${date(row.generatedAt)}. Quote quality: ${label(row.quoteState)||'Unavailable'}. Current timestamps do not establish a validated model or player identity.`);

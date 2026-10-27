@@ -12,7 +12,10 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
     state={sport,status:'error',rows:[],message:'Provider quota is exhausted. Live prop quotes are unavailable until quota resets or another configured provider supplies data. Repeated refreshes will not restore the exhausted quota.'};return;
    }
    if(!response.ok||request.signal.aborted)throw Error('Unavailable');
-   state={sport,status:'ready',rows:normalizeResearch(data,sport,now()),generatedAt:data.generatedAt,provider:data.oddsProvider,message:''};
+   const identity=data.sourceHealth?.playerIdentity;
+   const count=v=>Number.isSafeInteger(v)&&v>=0?v:0;
+   const identityMessage=identity?count(identity.matched)+' roster-matched market records; '+count(identity.excluded)+' withheld for roster mismatch or ambiguity; '+count(identity.unverified)+' unverified. ':'';
+   state={sport,status:'ready',rows:normalizeResearch(data,sport,now()),generatedAt:data.generatedAt,provider:data.oddsProvider,message:identityMessage};
   }catch{if(current!==sequence)return;state={sport,status:'error',rows:[],message:'Research unavailable. The provider request failed or timed out. Refresh to retry.'};}
   finally{clearTimeout(timer);if(current===sequence)onChange(state);}
  }};
