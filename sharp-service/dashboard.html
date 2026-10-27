@@ -480,9 +480,13 @@
 
   function statusBadge(c){
     const s = c.status || c.verification_status || c.model_decision || "UNKNOWN";
-    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">PLAY</span>';
-    if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING</span>';
-    if(s==="PASS") return '<span class="badge pass">PASS</span>';
+    const issued = c.tracking?.tracked === true && typeof c.tracking?.issuedAt === "string" ? Date.parse(c.tracking.issuedAt) : NaN;
+    const recorded = Number.isFinite(issued) && issued <= Date.now();
+    const time = recorded ? new Intl.DateTimeFormat(undefined,{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",second:"2-digit",timeZoneName:"short"}).format(new Date(issued)) : "Not recorded";
+    const stamp = '<div class="decision-stamp">Decision issued: '+esc(time)+'</div>';
+    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge '+(recorded?'play':'watch')+'">'+(recorded?'PLAY — cleared':'NOT CLEARED — do not play')+'</span>'+stamp;
+    if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING — do not play</span>'+stamp;
+    if(s==="PASS") return '<span class="badge pass">PASS — do not play</span>'+stamp;
     return '<span class="badge neutral">'+esc(s)+'</span>';
   }
 
@@ -1038,7 +1042,7 @@
               <div class="match">#${i+1} · ${esc(g.market_label)}</div>
               <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
             </div>
-            <span class="badge play">PLAY</span>
+            ${statusBadge(g)}
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
@@ -1206,7 +1210,7 @@
               <div class="match">#${i+1} · ${esc(p.label)}</div>
               <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
             </div>
-            <span class="badge play">PLAY</span>
+            ${statusBadge(p)}
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>

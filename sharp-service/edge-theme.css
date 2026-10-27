@@ -129,3 +129,7 @@ body.el-theme {
 .el-theme .decision-play>strong { color:#6ee7b7; }
 .el-theme .decision-unavailable { background:#24202d; border-color:#635275; border-left-color:#c4b5fd; }
 .el-theme .decision-unavailable>strong { color:#e0d4ff; }
+
+.el-theme .decision-stamp { font-size:12px; line-height:1.5; color:var(--muted); margin-top:8px; font-weight:500; overflow-wrap:anywhere; }
+.el-dashboard .market-decision-box .badge, .el-dashboard .candidate-head .badge { white-space:normal; text-align:center; font-size:12px; }
+.el-dashboard .market-decision-box { padding:14px 10px; }
