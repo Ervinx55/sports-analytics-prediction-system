@@ -1,0 +1,123 @@
+/* Edge Lab: shared charcoal and violet visual language. */
+:root {
+  color-scheme: dark;
+  --bg: #111115; --panel: #1b1b22; --panel2: #23232d; --card: #1b1b22;
+  --text: #f4f3f8; --muted: #b2afc2; --line: #393642;
+  --blue: #c4b5fd; --cyan: #c4b5fd; --purple: #c4b5fd; --mint: #c4b5fd;
+  --accent: #a78bfa; --accent-strong: #7c3aed;
+  --green: #6ee7b7; --red: #fda4af; --amber: #fcd38d;
+  --shadow: 0 8px 24px #00000020;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--bg); color: var(--text);
+}
+body.el-theme {
+  background: radial-gradient(ellipse 900px 340px at 65% 0, #8b5cf612, transparent 75%), var(--bg);
+  color: var(--text); min-height: 100vh; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.el-theme a { color: var(--purple); text-underline-offset: 4px; }
+.el-theme a:hover { color: #e2d8ff; }
+.el-theme :focus-visible { outline: 3px solid #c4b5fd; outline-offset: 4px; }
+.el-theme h1 { font-size: clamp(26px, 3vw, 36px); font-weight: 780; letter-spacing: -.8px; line-height: 1.2; }
+.el-theme h2 { font-size: 22px; letter-spacing: -.35px; line-height: 1.35; }
+.el-theme h3 { letter-spacing: -.2px; }
+.el-theme .muted, .el-theme .meta, .el-theme small, .el-theme .sub,
+.el-theme .reason, .el-theme .pick, .el-theme .status { color: var(--muted); }
+.el-theme button, .el-theme input, .el-theme select, .el-theme textarea {
+  border-color: var(--line); background: var(--panel2); color: var(--text);
+  border-radius: 10px; min-height: 44px; font-family: inherit;
+}
+.el-theme button { font-weight: 650; }
+.el-theme button:hover:not(:disabled) { background: #30283e; border-color: var(--accent); }
+.el-theme button:disabled { opacity: .55; }
+.el-theme input::placeholder, .el-theme textarea::placeholder { color: #a19bad; opacity: 1; }
+.el-theme .refresh, .el-theme #refresh, .el-accounts form button {
+  background: #7c3aed; color: #fff; border-color: #9b70f5; padding: 11px 18px;
+}
+.el-theme .refresh:hover:not(:disabled), .el-theme #refresh:hover:not(:disabled),
+.el-accounts form button:hover:not(:disabled) { background: #6d28d9; }
+.el-theme .logo { background: linear-gradient(145deg, #c4b5fd, #9874ec); color: #21143d; box-shadow: 0 6px 20px #8b5cf622; border-radius: 12px; }
+.el-theme .card, .el-theme .metric, .el-theme .metrics article,
+.el-theme .performance-metric, .el-theme .performance-coverage, .el-theme .performance-row {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+}
+.el-theme .card { padding: 22px; }
+.el-theme .metric, .el-theme .metrics article { padding: 20px; }
+.el-theme .metric .value, .el-theme .metrics strong, .el-theme .performance-metric strong {
+  font-size: 30px; letter-spacing: -.8px; font-variant-numeric: tabular-nums; line-height: 1.3;
+}
+.el-theme .metric .label, .el-theme .metrics small { color: #c0baca; letter-spacing: 1px; font-size: 11px; }
+.el-theme .metric .hint { margin-top: 8px; font-size: 12px; }
+.el-theme .stat, .el-theme .adj, .el-theme .total-box, .el-theme .stats div,
+.el-theme .compare div, .el-theme .quote, .el-theme .source, .el-theme .market-decision-box {
+  background: #15151c; border-color: var(--line);
+}
+.el-theme .notice { background: #211e29; border: 1px solid #51425e; border-left: 4px solid var(--accent); padding: 20px 24px; color: #ded9e9; border-radius: 14px; }
+.el-theme .notice strong { color: var(--amber); }
+.el-theme .notice h2 { color: var(--text); margin: 0 0 12px; }
+.el-theme .notice p { margin: 8px 0; }
+.el-theme .empty { background: #17171e; border-color: #514961; color: var(--muted); }
+.el-theme .tab { background: transparent; color: #c0bbce; border: 1px solid transparent; border-radius: 9px; padding: 12px 16px; }
+.el-theme .tab.active, .el-theme .sportbar button[aria-pressed=true] { background: #33264c; color: #e6dcff; border: 1px solid #735697; box-shadow: inset 0 -2px #b899ff; }
+.el-theme .tabs { background: #19191f; border: 1px solid #302e39; border-radius: 13px; padding: 6px; margin: 24px 0; gap: 4px; }
+.el-theme .model-pick, .el-theme .model-prob { background: #262034; border-color: #5e477e; }
+.el-theme .market-prob { background: #202027; border-color: #45404e; }
+.el-theme .market-prob .prob-label { color: #d1cadc; }
+.el-theme .compare .model, .el-theme .compare .market { color: var(--purple); }
+.el-theme .comparison { border-color: var(--line); }
+.el-theme .progress { background: #2c2735; }
+.el-theme .progress>span { background: linear-gradient(90deg, #7c3aed, #c4b5fd); }
+.el-theme .why { background: #22202b; border-color: #4a405b; font-weight: 550; }
+.el-theme .why.play, .el-theme .why.outcome-win { background: #152b23; border-left-color: var(--green); }
+.el-theme .why.pass, .el-theme .why.outcome-loss { background: #301e24; border-left-color: var(--red); }
+.el-theme .why.pending, .el-theme .why.outcome-push { background: #302719; border-left-color: var(--amber); }
+.el-theme .badge.neutral { background: #30283e; color: #e0d4f4; }
+.el-theme .badge.play, .el-theme .badge.ready, .el-theme .result-win { background: #6ee7b7; color: #08271c; }
+.el-theme .badge.pass, .el-theme .result-loss { background: #fda4af; color: #360e18; }
+.el-theme .positive, .el-theme .ok, .el-theme .badge.good { color: var(--green); }
+.el-theme .negative, .el-theme .badtext, .el-theme .error { color: var(--red); }
+.el-theme details, .el-theme td, .el-theme th, .el-theme .list-row, .el-theme .market-list-row { border-color: var(--line); }
+.el-dashboard .app { max-width: 1280px; padding: 32px 28px 90px; }
+.el-dashboard .top { margin-bottom: 26px; }
+.el-dashboard .section-title { margin: 28px 0 16px; }
+.el-dashboard .healthline { margin-bottom: 22px; }
+.el-dashboard .metrics { gap: 14px; }
+.el-dashboard .match { font-size: 17px; }
+.el-dashboard .performance-filters label { font-size: 13px; color: var(--muted); }
+.el-dashboard .performance-grid { gap: 14px; }
+.el-research .sidebar { background: #15151b; border-color: var(--line); }
+.el-research .sidebar nav a { color: #c0bbce; }
+.el-research .sidebar nav a.selected, .el-research .sidebar nav a:hover { background: #30253f; color: #e6dcff; }
+.el-research .brand { color: var(--text); }
+.el-research .eyebrow, .el-research .quote { color: var(--purple); }
+.el-research .quote { background: transparent; }
+.el-research .badge { background: #30283e; color: #e0d4f4; }
+.el-research .freshness.current { color: #bbb4cb; }
+.el-research .actions button:first-child { border-color: #735697; color: #e0d4ff; background: #30253f; }
+.el-research dialog { background: var(--panel); border-color: #655475; box-shadow: 0 28px 90px #0009; }
+.el-research .detail-section { border-color: var(--line); }
+.el-research .detail-section p { color: #c9c3d5; }
+.el-accounts section, .el-accounts details { background: var(--panel); border-color: var(--line); }
+.el-accounts #notice { border-left-color: var(--accent); }
+.el-accounts header { border-bottom: 1px solid var(--line); }
+.el-nba main, .el-nfl main { max-width: 1280px; padding: 32px 28px; }
+.el-nba header, .el-nfl header { border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+@media(max-width:760px) {
+  .el-dashboard .app, .el-nba main, .el-nfl main { padding: 20px 14px 72px; }
+  .el-theme .card, .el-theme .metric, .el-theme .metrics article { padding: 16px; }
+  .el-theme .notice { padding: 16px; }
+  .el-theme .metrics { gap: 10px; }
+  .el-theme h2 { font-size: 20px; }
+  .el-theme .metric .value, .el-theme .metrics strong { font-size: 26px; }
+  .el-theme .tabs { border-radius: 10px; }
+  .el-theme .tab { padding: 10px 13px; }
+  .el-theme .candidate-head, .el-theme .section-title { flex-wrap: wrap; }
+}
+@media(max-width:480px) {
+  .el-dashboard .market-list-row { grid-template-columns: minmax(0,1fr); }
+  .el-dashboard .top { align-items: flex-start; flex-wrap: wrap; }
+  .el-theme .prob-box .prob-label { white-space: normal; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .el-theme *, .el-theme *::before, .el-theme *::after { animation: none!important; transition: none!important; scroll-behavior: auto!important; }
+}
