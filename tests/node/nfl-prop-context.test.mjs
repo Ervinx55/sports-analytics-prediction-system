@@ -40,3 +40,19 @@ test('weekly source joins require unambiguous team-season-week and regular seaso
  assert.equal(build({ playerStats: [row('1', { season_type: 'POST' })] }).opponentAllowanceByPosition.WR.receiving_yards.value, null);
  assert.equal(build({ schedule: [game('1', '2026-09-10', { status: 'postponed' })] }).teamForm.value, null);
 });
+
+test('live-source blank EPA on verified nonparticipants does not erase team efficiency', () => {
+ const liveRows = [
+  row('1', { player_id: 'te', position: 'TE', attempts: '0', carries: '0', passing_epa: '', rushing_epa: '' }),
+  row('1', { player_id: 'rb', position: 'RB', attempts: '0', carries: '11', passing_epa: '', rushing_epa: '-1.6957' }),
+  row('1', { player_id: 'qb', position: 'QB', attempts: '45', carries: '0', passing_epa: '6.9249', rushing_epa: '' })
+ ];
+ const r = build({ playerStats: liveRows });
+ assert.equal(r.offense.value, (6.9249 - 1.6957) / 56);
+ assert.equal(r.opponentDefense.value, r.offense.value);
+ assert.equal(r.offense.sampleCount, 1);
+ for (const [index, extra] of [[2, { passing_epa: '' }], [1, { rushing_epa: '' }], [0, { attempts: '' }], [0, { carries: '' }]]) {
+  const brokenRows = liveRows.map((r, i) => i === index ? { ...r, ...extra } : r);
+  assert.equal(build({ playerStats: brokenRows }).offense.value, null);
+ }
+});

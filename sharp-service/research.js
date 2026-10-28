@@ -1,4 +1,4 @@
-import {filterResearch,quoteFreshness} from './research-data.js';
+import {filterResearch,refreshResearchRow} from './research-data.js';
 import {createResearchLoader} from './research-loader.js';
 const $=id=>document.getElementById(id);
 const add=(parent,tag,text,className)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=String(text);if(className)node.className=className;parent.append(node);return node;};
@@ -10,7 +10,7 @@ const difference=row=>row.model===null||row.market===null?'Unavailable':`${((row
 const saved=new Map();let shortlist=false,shown=40,selected=null;
 const loader=createResearchLoader({onChange:state=>{if(state.status==='loading'){$('detail').close();selected=null;}populate();render();}});
 function button(parent,text,handler){const node=add(parent,'button',text);node.type='button';node.onclick=handler;return node;}
-function current(row){return {...row,freshness:quoteFreshness(row.updatedAt,row.generatedAt)};}
+function current(row){return refreshResearchRow(row);}
 function sourceRows(){return (shortlist?[...saved.values()].filter(r=>r.sport===loader.state.sport):loader.state.rows).map(current).filter(r=>Date.parse(r.startsAt)>Date.now());}
 function populate(){for(const [id,key,title] of [['book','book','All books'],['market','marketType','All markets']]){const select=$(id),previous=select.value;select.replaceChildren();const first=add(select,'option',title);first.value='';for(const value of [...new Set(sourceRows().map(r=>r[key]))].sort()){const opt=add(select,'option',label(value));opt.value=value;}if([...select.options].some(o=>o.value===previous))select.value=previous;}}
 function render(){

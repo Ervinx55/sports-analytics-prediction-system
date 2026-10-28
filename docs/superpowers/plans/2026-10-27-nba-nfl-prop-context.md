@@ -39,9 +39,16 @@ Files: scripts/props/evaluate-context.mjs, tests/node/prop-context-evaluation.te
 - [x] Integrate available NBA and NFL context into research endpoints/detail views; unavailable fields stay explicit.
 - [x] Audit real source samples; run existing full Node/Python checks.
 - [x] Independent review, fix findings and commit logical changes.
-- [ ] Publish validated preview and report source/training/holdout blockers honestly. Production remains unchanged.
+- [x] Publish validated preview and report source/training/holdout blockers honestly. Production remains unchanged.
 
 ## Validation checkpoint (2026-10-28)
 363 Node tests and 49 Python tests pass. Live ESPN summary 401909877 parsed with 22 complete player rows; team possessions use totalTurnovers. Independent review caught and repaired conflicting NBA duplicate games, repeated NFL context computation, unmatched ablation cohorts, inconsistent outcome/game identities and incomplete probability evidence.
 
 Scope delivered is source/context infrastructure and descriptive evaluation, not a trained challenger. No weights have been fitted, no historical betting-edge claim is supported, and no holdout has been consumed. Historical source publication timestamps, archived exact pregame prices, projected NBA minutes/injury knowledge and complete league comparison coverage remain prerequisites. Game-level uncertainty intervals, calibrated distributions, fitted/shrunk context adjustments and durable prospective capture are outstanding. The evaluator always blocks promotion and reports its limitations.
+
+## Hosted validation and feasibility audit
+The first context preview was READY and verified via API/browser on October28: NBA12/12 summary loads,351 context records,279 records with baselines; NFL436 context records. Both use SharpAPI fallback and retain zero influence. GitHub Tests, Performance SQL fixtures and NFL Player Props Shadow Backtest all passed for bc018063.
+
+Live checks then identified and repaired two issues: empty nflverse EPA is legitimate for verified zero attempts/carries, while positive-opportunity missing EPA must remain unavailable; and aging research quotes must lose their displayed market comparison. The existing NFL workflow explicitly runs2024 development only. docs/performance-rollout.md records that previously examined NBA/NFL holdouts are development evidence, so2025 must not be relabeled untouched based only on the workflow matrix. No new holdout outcomes were read in this audit.
+
+Next modeling work requires an archived feature/price cohort with real publication evidence or a newly frozen prospective experiment. Current source retrieval timestamps cannot certify past availability. This checkpoint does not claim learned context weights, calibration improvement or profit.

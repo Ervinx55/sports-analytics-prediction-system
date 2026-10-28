@@ -36,7 +36,7 @@ export function normalizeResearch(data, sport, now = Date.now()) {
    for(const side of ['over','under']){
     const books=prop[side]?.books;if(!books||typeof books!=='object'||Array.isArray(books))continue;
     for(const [book,quote] of Object.entries(books)){if(!quote||typeof quote!=='object'||quote.available===false)continue;
-     add({context:player.context||player.opportunity?.context||null,position:text(player.opportunity?.player?.position),eventID:text(event.eventID),startsAt:event.startsAt,playerID:text(prop.playerID),player:text(prop.playerName)||'Player unavailable',marketType:text(prop.statID)||text(prop.marketName)||'Unknown market',side:side.toUpperCase(),line:numeric(quote.line),book,odds:quote.odds,updatedAt:quote.updatedAt,away:text(event.matchup?.away?.name),home:text(event.matchup?.home?.name),provider:text(event.provider)||text(data.oddsProvider),identityStatus:text(prop.identityStatus),verifiedTeam:text(prop.verifiedTeam),espnPlayerID:text(prop.espnPlayerID),model:null,market:pairedMarket(quote,prop[side==='over'?'under':'over']?.books?.[book],data.generatedAt,now),status:'QUOTE ONLY',reason:prop.identityStatus==='ROSTER_MATCHED'?'Player matches a current ESPN roster for this matchup. Injury availability and player prediction remain unverified. No play is cleared.':'Player prediction, identity and availability are not validated. No PLAY/PASS decision is available from this quote.',quoteState:text(quote.quoteState)});
+     add({context:player.context||player.opportunity?.context||null,position:text(player.opportunity?.player?.position),eventID:text(event.eventID),startsAt:event.startsAt,playerID:text(prop.playerID),player:text(prop.playerName)||'Player unavailable',marketType:text(prop.statID)||text(prop.marketName)||'Unknown market',side:side.toUpperCase(),line:numeric(quote.line),book,odds:quote.odds,updatedAt:quote.updatedAt,away:text(event.matchup?.away?.name),home:text(event.matchup?.home?.name),provider:text(event.provider)||text(data.oddsProvider),identityStatus:text(prop.identityStatus),verifiedTeam:text(prop.verifiedTeam),espnPlayerID:text(prop.espnPlayerID),model:null,oppositeUpdatedAt:prop[side==='over'?'under':'over']?.books?.[book]?.updatedAt??null,market:pairedMarket(quote,prop[side==='over'?'under':'over']?.books?.[book],data.generatedAt,now),status:'QUOTE ONLY',reason:prop.identityStatus==='ROSTER_MATCHED'?'Player matches a current ESPN roster for this matchup. Injury availability and player prediction remain unverified. No play is cleared.':'Player prediction, identity and availability are not validated. No PLAY/PASS decision is available from this quote.',quoteState:text(quote.quoteState)});
     }
    }
   }
@@ -48,4 +48,9 @@ export function normalizeResearch(data, sport, now = Date.now()) {
 export function filterResearch(rows,{query='',book='',market='',freshness=''}={}) {
  const needle=query.trim().toLowerCase();
  return rows.filter(r=>(!book||r.book===book)&&(!market||r.marketType===market)&&(!freshness||r.freshness===freshness)&&(!needle||[r.player,r.away,r.home,r.marketType,r.side,r.line,r.book].join(' ').replaceAll('_',' ').toLowerCase().includes(needle)));
+}
+
+export function refreshResearchRow(row, now=Date.now()) {
+ const freshness=quoteFreshness(row.updatedAt,row.generatedAt,now);
+ return {...row,freshness,market:freshness==='CURRENT'&&quoteFreshness(row.oppositeUpdatedAt,row.generatedAt,now)==='CURRENT'?row.market:null};
 }

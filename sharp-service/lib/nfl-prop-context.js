@@ -12,6 +12,23 @@ const numeric = value => value === null || value === undefined || String(value).
 const time = value => Number.isFinite(Date.parse(value)) ? Date.parse(value) : null;
 const teamOf = row => normalizeTeam(row.team || row.recent_team);
 const sum = (rows, key) => rows.length && rows.every(row => numeric(row[key]) !== null) ? rows.reduce((n, row) => n + numeric(row[key]), 0) : null;
+// nflverse leaves EPA blank for players with no matching opportunity. Only a
+// verified zero denominator permits that absence; unknown participation or an
+// active player's missing EPA invalidates the game rather than becoming zero.
+function opportunityEpa(rows, opportunity, field) {
+  if (!rows.length) return null;
+  let total = 0;
+  for (const row of rows) {
+    const count = numeric(row[opportunity]);
+    if (count === null || count < 0) return null;
+    if (count === 0) continue;
+    const epa = numeric(row[field]);
+    if (epa === null) return null;
+    total += epa;
+  }
+  return total;
+}
+
 
 // Explanatory evidence only. Unknown publication times cannot certify a retrospective
 // forecast. No weights, probability mapping or adjustment to the v2.1 control.
@@ -94,7 +111,9 @@ export function buildNflPropContext({ schedule = [], playerStats = [], season, c
     const selected = [], evidence = []; let epa = 0, plays = 0;
     for (const game of forTeam(club)) {
       const gameRows = (rowsByGame.get(game.game_id) || []).filter(r => defense ? r.historicalTeam !== club : r.historicalTeam === club);
-      const totals = ['attempts', 'carries', 'passing_epa', 'rushing_epa'].map(key => sum(gameRows, key));
+      const totals = [sum(gameRows, 'attempts'), sum(gameRows, 'carries'),
+        opportunityEpa(gameRows, 'attempts', 'passing_epa'),
+        opportunityEpa(gameRows, 'carries', 'rushing_epa')];
       if (totals.some(v => v === null) || totals[0] + totals[1] <= 0) continue;
       selected.push(game); evidence.push(...gameRows); plays += totals[0] + totals[1]; epa += totals[2] + totals[3];
     }

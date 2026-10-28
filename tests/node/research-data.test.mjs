@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeResearch,filterResearch} from '../../sharp-service/research-data.js';
+import {normalizeResearch,filterResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
 const now=Date.parse('2026-10-25T18:00:00Z');
 const nba={generatedAt:'2026-10-25T17:59:00Z',events:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',matchup:{home:{name:'Home'},away:{name:'Away'}},players:[{prop:{playerName:'Player',statID:'points',over:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'},B:{line:21.5,odds:100,updatedAt:'2026-10-25T17:59:00Z'}}},under:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'}}}}}]}]};
 test('NBA keeps exact book line and side identity without inventing predictions',()=>{const rows=normalizeResearch(nba,'NBA',now);assert.equal(rows.length,3);assert.equal(new Set(rows.map(r=>r.id)).size,3);assert.ok(rows.every(r=>r.model===null&&r.status==='QUOTE ONLY'));assert.equal(rows[0].player,'Player');});
@@ -42,4 +42,21 @@ test('context evidence travels with NBA and NFL quotes without becoming a probab
  data.candidates=[];
  rows=normalizeResearch(data,'NFL',now);
  assert.equal(rows[0].context.version,'nfl-prop-context-v1');assert.equal(rows[0].position,'WR');assert.equal(rows[0].model,null);
+});
+
+test('aging quotes lose market comparison without mutating the saved observation',()=>{
+ const original=normalizeResearch(nba,'NBA',now)[0];
+ assert.equal(original.market,.5);
+ const aged=refreshResearchRow(original,now+11*60_000);
+ assert.equal(aged.freshness,'STALE');assert.equal(aged.market,null);assert.equal(original.market,.5);
+ assert.equal(refreshResearchRow(original,now).market,.5);
+});
+
+test('market comparison expires when its older opposite side expires',()=>{
+ const data=structuredClone(nba);
+ data.events[0].players[0].prop.under.books.A.updatedAt='2026-10-25T17:51:00Z';
+ const row=normalizeResearch(data,'NBA',now).find(r=>r.side==='OVER'&&r.book==='A');
+ assert.equal(row.market,.5);
+ const aged=refreshResearchRow(row,now+2*60_000);
+ assert.equal(aged.freshness,'CURRENT');assert.equal(aged.market,null);
 });
