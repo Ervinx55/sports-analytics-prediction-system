@@ -5,6 +5,7 @@ import {
 import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 import { fetchSharpApiNbaProps } from "../lib/sharpapi-provider.js";
 
+import { enrichNbaPropResearchContext } from "../lib/nba-prop-research-context.js";
 import { verifyNbaPropRosters } from "../lib/nba-prop-identity.js";
 
 const VERSION = "nba-observed-player-markets-v1";
@@ -253,7 +254,8 @@ export default async function handler(req, res) {
     });
     const result = await resolveProvider({ keys, books: selectedBooks, window, requestedLimit, refreshPolicy, now });
     const identity = await verifyNbaPropRosters(result.events);
-    result.events = identity.events;
+    const context = await enrichNbaPropResearchContext(identity.events);
+    result.events = context.events;
     const quoteStates = result.events.flatMap((event) => event.players.map((player) => player.prop.quoteState));
     const degradedQuotes = quoteStates.filter((state) => state !== "OBSERVED").length;
     res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=120");
@@ -273,6 +275,7 @@ export default async function handler(req, res) {
           usage: result.usage, objectPolicy: result.objectPolicy, failures: result.failures
         },
         playerIdentity: identity.health,
+        propContext: context.health,
         playerAvailability: { status: "UNVERIFIED", source: "No verified pregame NBA injury status" }
       },
       eventCount: result.events.length,

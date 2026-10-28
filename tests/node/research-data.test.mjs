@@ -31,3 +31,15 @@ test('stale unavailable mismatched and invalid opposite quotes do not establish 
   assert.equal(normalizeResearch(data,'NBA',now).find(r=>r.book==='A'&&r.side==='OVER').market,null);
  }
 });
+
+test('context evidence travels with NBA and NFL quotes without becoming a probability',()=>{
+ const data=structuredClone(nba);
+ data.events[0].players[0].context={version:'nba-prop-context-v1',baselineProjection:21,productionWeight:0};
+ let rows=normalizeResearch(data,'NBA',now);
+ assert.equal(rows[0].context.baselineProjection,21);assert.equal(rows[0].model,null);
+ delete data.events[0].players[0].context;
+ data.events[0].players[0].opportunity={player:{position:'WR'},context:{version:'nfl-prop-context-v1',productionWeight:0}};
+ data.candidates=[];
+ rows=normalizeResearch(data,'NFL',now);
+ assert.equal(rows[0].context.version,'nfl-prop-context-v1');assert.equal(rows[0].position,'WR');assert.equal(rows[0].model,null);
+});

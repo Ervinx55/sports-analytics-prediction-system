@@ -37,7 +37,26 @@ function drawDetail(){if(!selected)return;const row=current(selected);$('detail-
  section('Research status',`${row.status}. ${row.reason}`);
  section('Probability comparison',`Model estimate: ${pct(row.model)}. Market no-vig: ${pct(row.market)}. Difference: ${difference(row)}. These estimates do not authorize a play.`);
  section('Source and freshness',`${row.provider||'Provider unavailable'} · ${row.freshness}. Quote observed ${date(row.updatedAt)}; response generated ${date(row.generatedAt)}. Quote quality: ${label(row.quoteState)||'Unavailable'}. Current timestamps do not establish a validated model or player identity.`);
- section('Player history and matchup context','Game-log hit rates, injury verification, projected minutes and opponent splits are not connected to this view yet. No historical chart or context score is inferred from a price.');
+ const context=row.context;
+ if(!context){section('Player history and matchup context','Context unavailable for this quote. Missing history never becomes a neutral matchup score.');}
+ else {
+  section('Context research - NOT CLEARED','Exploratory evidence only; context influence is zero. League ranks, injuries and learned adjustments remain unavailable. Historical source publication times are not verified.');
+  const value=v=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(2):'Unavailable';
+  const evidence=(title,f)=>{if(!f)return;section(title,value(f.value)+' | sample '+(f.sampleCount??0)+' | '+(typeof f.window==='string'?f.window:('last '+(f.window?.lastGames??'?')+' regular-season games'))+'. '+(f.missingReason||f.method||f.coverageReason||'Exploratory sample')+'. Source: '+(f.source||'Unavailable')+'. Observed: '+date(f.observedAt)+'. Cutoff: '+date(f.cutoff)+'.');};
+  if(context.features){
+   section('Historical baseline',value(context.baselineProjection)+' '+label(row.marketType)+'. Mean observed minutes times pooled per-minute rate; this is not confirmed projected playing time. Context-adjusted projection unavailable.');
+   for(const [key,title] of Object.entries({expectedMinutes:'Observed minutes',recentPlayerAverage:'Recent player form',winRate:'Team win rate (0 to 1)',offensiveRating:'Team points per 100 estimated possessions',defensiveRating:'Team points allowed per 100 estimated possessions',defenseVsPosition:'Opponent allowance at historical position'}))evidence(title,context.features[key]);
+  }else{
+   evidence('Team win rate (ties count half)',context.teamForm);
+   evidence('Team offensive EPA per attempt or carry',context.offense);
+   evidence('Team defensive EPA per attempt or carry',context.defense);
+   evidence('Opponent defensive EPA per attempt or carry',context.opponentDefense);
+   const allowance=context.opponentAllowanceByPosition?.[row.position]?.[row.marketType];
+   evidence('Opponent '+row.position+' allowance per observed position game',allowance);
+   evidence('Opponent '+row.position+' allowance per opportunity',allowance?.perOpportunity);
+   if(!allowance)section('Defense versus position','Unavailable for this player position and market.');
+  }
+ }
  section('Tracking','Use the session shortlist to compare quotes. It is not a persisted model prediction or a placed wager. Model results and your actual account profit are tracked separately.');
 }
 for(const tab of document.querySelectorAll('[data-sport]'))tab.onclick=()=>{shown=40;$('query').value='';$('book').value='';$('market').value='';loader.load(tab.dataset.sport);};
