@@ -16,6 +16,7 @@ async function denied(fn) {
 try {
     await db.exec(`do $$ begin if not exists(select from pg_roles where rolname='anon') then create role anon;end if;if not exists(select from pg_roles where rolname='authenticated') then create role authenticated;end if;end $$;create schema auth;create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to anon,authenticated;grant execute on function auth.uid() to anon,authenticated;`);
     await db.exec(readFileSync(new URL('../../supabase/migrations/20261025122136_private_accounts.sql', import.meta.url), 'utf8'));
+    await db.exec(readFileSync(new URL('../../supabase/migrations/20261028130836_account_strategy_metadata.sql', import.meta.url), 'utf8'));
     await db.query('insert into private_accounts.owner_config(owner_id) values ($1)', [owner]);
     await db.exec('set role anon');
     await denied(() => db.query('select public.accounts_snapshot()'));

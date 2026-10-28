@@ -28,3 +28,13 @@ Capacity is currently 100 accounts, 10,000 immutable entries, 10,000 movements, 
 ## Kalshi
 
 Connection remains disabled pending the read-only connector and secure credential provisioning. Do not enter a Kalshi private key or sportsbook password into these forms. Manual Kalshi history is labeled incomplete until provider reconciliation is available. No trade, bet, cancellation, deposit or withdrawal action is supported.
+
+## Optional strategy classifications
+
+Apply the additive migration `20261028130836_account_strategy_metadata.sql` before saving strategy tags. It updates only the existing payload validator; existing entries remain valid and default to unclassified in reports. No live database was changed by this feature.
+
+Entries may include `strategyMetadata` with `version: 1`, `strategy` (unclassified, value, matched, arbitrage, specialization), and optional nonempty `league`, `market`, and `calculationRef` strings (maximum 200 characters each). `assignment: "entry"` explicitly assigns the whole multi-leg result to the entry's categories. Otherwise multi-leg results remain unallocated except when grouped by account provider. Corrections display and preserve these fields for review.
+
+Old CSV headers remain supported. An extended canonical CSV appends one `strategyMetadata` column containing quoted JSON; blank means no metadata. Export selects that extended header when any row has metadata.
+
+My specialties uses only current, settled actual entries since each account's checkpoint. Cash and promo rows remain separate; promo ROI and closing-price comparisons are unavailable. Pending results, deposits and superseded records do not enter settled performance. Sample counts are observations, not evidence of a validated profitable niche.

@@ -3,8 +3,15 @@ const enumValue=(value,allowed,label)=>{if(!allowed.includes(value))throw new Er
 export function cents(value,signed=false){if(!Number.isSafeInteger(value)||(!signed&&value<0))throw new Error('Invalid cents');return value;}
 export function iso(value){if(typeof value!=='string'||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)||!Number.isFinite(Date.parse(value)))throw new Error('Invalid ISO date');const day=value.slice(0,10);if(new Date(`${day}T00:00:00Z`).toISOString().slice(0,10)!==day)throw new Error('Invalid calendar date');return new Date(value).toISOString();}
 function identifier(value,label){if(typeof value!=='string'||!value.trim()||value.length>200)throw new Error(`Invalid ${label}`);return value.trim();}
+export function validateStrategyMetadata(value){
+ if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).some(k=>!['version','strategy','league','market','calculationRef','assignment'].includes(k))||value.version!==1)throw Error('Invalid strategy metadata');
+ enumValue(value.strategy,['unclassified','value','matched','arbitrage','specialization'],'strategy');
+ for(const k of ['league','market','calculationRef'])if(k in value){if(typeof value[k]!=='string'||value[k]!==value[k].trim())throw Error('Invalid strategy metadata');identifier(value[k],k);}
+ if('assignment' in value)enumValue(value.assignment,['entry'],'strategy assignment');
+ return {...value};
+}
 export function validateEntry(input){
- const e={...input};e.id=identifier(e.id,'id');e.accountId=identifier(e.accountId,'accountId');e.source=enumValue(e.source,['manual','import'],'source (Kalshi requires reconciliation)');e.kind=enumValue(e.kind,['cash','promo'],'kind');e.status=enumValue(e.status,['pending','won','lost','push','void','partial'],'status');
+ const e={...input};if('strategyMetadata' in e)e.strategyMetadata=validateStrategyMetadata(e.strategyMetadata);e.id=identifier(e.id,'id');e.accountId=identifier(e.accountId,'accountId');e.source=enumValue(e.source,['manual','import'],'source (Kalshi requires reconciliation)');e.kind=enumValue(e.kind,['cash','promo'],'kind');e.status=enumValue(e.status,['pending','won','lost','push','void','partial'],'status');
  for(const key of ['sport','description']){if(typeof e[key]!=='string'||e[key].length>4000)throw new Error(`Invalid ${key}`);}
  e.placedAt=iso(e.placedAt);e.settledAt=e.settledAt==null?null:iso(e.settledAt);e.stakeCents=cents(e.stakeCents);e.feeCents=cents(e.feeCents);e.returnCents=e.returnCents==null?null:cents(e.returnCents);
  if(typeof e.feeIncluded!=='boolean')throw new Error('Invalid feeIncluded');if(!Array.isArray(e.legs)||e.legs.length>100)throw new Error('Invalid legs');e.legs=JSON.parse(JSON.stringify(e.legs));

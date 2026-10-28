@@ -45,6 +45,7 @@ jobs:
       - name: PGlite actual schema and fixture assertions
         run: |
           node tests/supabase/run-accounts.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
+          node tests/supabase/run-strategies.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-pipeline-health.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-performance-final-fixes.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
           node tests/supabase/run-performance-ledger.mjs tests/supabase/tooling/node_modules/@electric-sql/pglite/dist/index.js
@@ -54,6 +55,7 @@ jobs:
         run: |
           node tests/supabase/run-performance-final-fixes.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
           node tests/supabase/run-accounts.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
+          node tests/supabase/run-strategies.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
           node tests/supabase/run-performance-concurrency.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
           node tests/supabase/run-performance-sport-concurrency.mjs tests/supabase/tooling/node_modules/postgres/src/index.js
           node tests/supabase/run-performance-priority-sports.mjs tests/supabase/tooling/node_modules/postgres/src/index.js

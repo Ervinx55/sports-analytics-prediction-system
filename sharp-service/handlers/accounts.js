@@ -11,7 +11,7 @@ function shape(v, keys) {
     if (!v || typeof v !== 'object' || Array.isArray(v) || Object.keys(v).some(k => !keys.includes(k)))
         throw Error('Invalid');
 }
-const entryKeys = ['id', 'accountId', 'source', 'sourceId', 'kind', 'status', 'sport', 'description', 'placedAt', 'settledAt', 'stakeCents', 'returnCents', 'feeCents', 'feeIncluded', 'predictionId', 'legs', 'supersedes'];
+const entryKeys = ['id', 'accountId', 'source', 'sourceId', 'kind', 'status', 'sport', 'description', 'placedAt', 'settledAt', 'stakeCents', 'returnCents', 'feeCents', 'feeIncluded', 'predictionId', 'legs', 'supersedes', 'strategyMetadata'];
 function entry(v) {
     shape(v, entryKeys);
     const e = validateEntry(v);
