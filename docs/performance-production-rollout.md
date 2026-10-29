@@ -32,3 +32,15 @@ market-alerts v4 now reads bounded snapshot data through a read-only direct data
 Current board evidence: SportsGameOdds quota exhausted (2,500/2,500 monthly objects, 429); fallback The Odds API has 453 requests remaining but returned zero MLB events in the queried window. No new production predictions or settlements were demonstrated. Capture insert authentication remains untested while rows are empty.
 
 Final local validation: 391 Node tests, 49 Python tests and the PostgreSQL grading repository integration test passed. Vercel preview creation for commit 24fa9bfed26a3ecc8e59c3fbbb9d53fd7ece40b7 was rejected with HTTP 403. The historical UI is pushed but not released; no master merge.
+
+## NBA diagnostic capture — October 29
+
+Live NBA team model returned 130 priced forecasts; NFL team model returned 78 markets. NBA props returned observed lines/context, which are not equivalent to independent model probabilities. The NBA capture adapter previously rejected the sport unconditionally.
+
+Added an NBA team adapter that validates the response and forecast age, preserves source probability/quote timestamps, and forces SHADOW with zero production weight. Missing exact result identity, probability basis and settlement policy remain exclusions. One stale response was rejected; a subsequent fresh response was accepted without relaxing freshness checks.
+
+A one-time authorized capture saved 130 excluded NBA forecasts across 11 provider events through ingest_prediction_v1. Verified in SQL and the existing Vercel performance API: diagnosticCount=130, 100 rows on the first page, SHADOW mode, eligible count zero. No decisions or settlements were fabricated. Original raw fields retained in this capture were limited to team names and shadow status; normalized probabilities and market details are saved separately.
+
+prediction-performance v6 now reports SAVED_FORECASTS when saved model evidence exists, instead of labeling NBA universally unavailable. Users can inspect these records with NBA and Raw excluded candidates, October 29–30 UTC. The worker source now routes NBA team models to the adapter, but the worker and automatic jobs have NOT been activated/deployed in this step. Automatic capture, exact result mapping and settlement remain unfinished.
+
+395 Node tests pass. All three remote workflows for preceding commit f6c36b92 passed (Tests, Performance SQL fixtures, NFL Player Props Shadow Backtest). No production influence or master merge.

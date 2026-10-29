@@ -1,3 +1,4 @@
+import {adaptNbaTeamResponse} from './performance-nba-adapter.mjs';
 import {validatedResultIdentity} from './performance-result-identity.mjs';
 import {normalizePrediction} from './performance-contract.mjs';
 import {adaptLegacyObservation,MLB_TABLES} from './performance-mlb-adapter.mjs';
@@ -7,6 +8,7 @@ const text=v=>typeof v==='string'&&v.trim()?v.trim():null;
 const time=v=>text(v)&&/(?:Z|[+-]\d{2}:\d{2})$/.test(v)&&Number.isFinite(Date.parse(v))?new Date(v).toISOString():null;
 export const MODEL_TTL_MS=5*60*1000;
 export function adaptModelResponse(body,{sport,kind,capturedAt,sourceRequestId}={}) {
+ if(sport==='NBA'&&kind==='team')return adaptNbaTeamResponse(body,{capturedAt});
  const diagnostics=[];
  const coverage={sport,kind,modelAvailable:false,dataAvailable:false,complete:false,responseComplete:false,dataSourceComplete:null,providerLeagues:null,requestedTours:sport==='TENNIS'?['ATP','WTA']:null,providerCoverageState:'UNVERIFIED',state:'UNAVAILABLE',received:0,adapted:0,productionWeight:0};
  /** @type {ReturnType<typeof normalizePrediction>[]} */
