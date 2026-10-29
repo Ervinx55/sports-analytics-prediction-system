@@ -28,3 +28,8 @@ test('a stale failed request cannot overwrite newer success',async()=>{
 test('deadline replaces pending loading with an explicit timeout and unknown coverage',async()=>{
  const root={innerHTML:''};const controller=createPerformanceController({root,timeoutMs:5,fetchImpl:(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Object.assign(Error('timeout'),{name:'AbortError'}))))});await controller.load({sport:'NBA'});assert.match(root.innerHTML,/Request timed out/);assert.match(root.innerHTML,/Coverage is unknown/);assert.doesNotMatch(root.innerHTML,/Loading performance/);
 });
+
+test('legacy history remains visible separately from qualified performance',()=>{
+ const data=fixture('MLB');data.history={summary:{auditRows:558,grades:550,gameResults:46,latestAuditAt:'2026-10-11T08:20:00Z'},grades:[{side_name:'<img>',away_team:'Away',home_team:'Home',result:'W',starts_at:'2026-10-01T12:00:00Z',verification_status:'PASS'}]};const root={innerHTML:''};renderPerformance(data,root);
+ assert.match(root.innerHTML,/Historical MLB audit/);assert.match(root.innerHTML,/550/);assert.match(root.innerHTML,/Saved result/);assert.match(root.innerHTML,/&lt;img&gt;/);assert.equal(data.summary.wins,0);
+});

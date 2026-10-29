@@ -1,5 +1,6 @@
 import { gradeMarket } from '../_shared/team-market-grading.mjs';
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import postgres from 'npm:postgres@3.4.9';
+import {gradingRepository} from '../_shared/grading-database.mjs';
 
 async function fetchJson(url: string) {
   const r = await fetch(url, { headers: { accept: "application/json" } });
@@ -49,6 +50,7 @@ function resolveDecision(obs: any, sharpRows: any[]) {
 }
 
 Deno.serve(async (req) => {
+  let sql;
   try {
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ error: "POST only" }), {
@@ -57,31 +59,21 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const url=Deno.env.get('SUPABASE_DB_URL');
+    if(!url)throw Error('GRADING_DATABASE_UNAVAILABLE');
+    sql=postgres(url,{max:1,prepare:false,connect_timeout:3,idle_timeout:1});
+    const repository=gradingRepository(sql);
+    if(!await repository.authorized(req.headers.get('authorization')))return new Response(JSON.stringify({error:'Pipeline authentication required'}),{status:401,headers:{'content-type':'application/json'}});
 
     const floor = new Date(Date.now() - 7 * 86400_000).toISOString();
     const cutoff = new Date().toISOString();
 
-    const { data: observations, error: obsError } = await supabase
-      .from("market_grade_observations")
-      .select("*")
-      .gte("starts_at", floor)
-      .lte("starts_at", cutoff)
-      .order("starts_at", { ascending: false })
-      .limit(10000);
-    if (obsError) throw obsError;
+    const observations=await repository.observations('team',floor,cutoff);
 
     const ids = (observations ?? []).map((x: any) => x.id);
     const already = new Set<number>();
     for (let i = 0; i < ids.length; i += 500) {
-      const { data, error } = await supabase
-        .from("team_market_results")
-        .select("observation_id")
-        .in("observation_id", ids.slice(i, i + 500));
-      if (error) throw error;
+      const data=await repository.existing('team',ids.slice(i,i+500));
       for (const row of data ?? []) already.add(Number(row.observation_id));
     }
 
@@ -92,12 +84,7 @@ Deno.serve(async (req) => {
     const eventIds = [...new Set(ungraded.map((x: any) => x.event_id).filter(Boolean))];
     let sharpRows: any[] = [];
     for (let i = 0; i < eventIds.length; i += 100) {
-      const { data, error } = await supabase
-        .from("sharp_gate_history")
-        .select("*")
-        .in("event_id", eventIds.slice(i, i + 100))
-        .order("checked_at", { ascending: false });
-      if (error) throw error;
+      const data=await repository.sharp(eventIds.slice(i,i+100));
       sharpRows.push(...(data ?? []));
     }
 
@@ -172,11 +159,7 @@ Deno.serve(async (req) => {
       }
 
       if (inserts.length) {
-        const { error } = await supabase
-          .from("team_market_results")
-          .upsert(inserts, { onConflict: "observation_id" });
-        if (error) throw error;
-        rowsGraded += inserts.length;
+        rowsGraded += await repository.save('team',inserts);
       }
 
       gamesFinal++;
@@ -193,15 +176,16 @@ Deno.serve(async (req) => {
       { headers: { "content-type": "application/json" } },
     );
   } catch (error) {
+    console.error('GRADING_FAILED',{code:typeof error?.code==='string'&&/^[A-Z0-9_]{1,30}$/.test(error.code)?error.code:'UNKNOWN'});
     return new Response(
       JSON.stringify({
         ok: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "GRADING_FAILED",
       }),
       {
         status: 500,
         headers: { "content-type": "application/json" },
       },
     );
-  }
+  } finally {if(sql)await sql.end({timeout:1}).catch(()=>{});}
 });

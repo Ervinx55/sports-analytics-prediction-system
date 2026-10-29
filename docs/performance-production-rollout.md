@@ -9,3 +9,18 @@ The initial service-key REST reader failed with PGRST303/401: gateway JWT issued
 Deployed prediction-performance version 4. The existing dashboard API returned 200 and the browser Results tab rendered coverage, filters, and honest empty results. No history was manufactured or imported. Cross-sport ledger has zero records; capture/settlement jobs remain inactive. This repairs the reader, not the full prospective tracking rollout. Existing legacy MLB diagnostics remain separate. No model weights or PLAY thresholds changed.
 
 Validation: 385 Node tests, 49 Python tests, and actual PGlite reader fixtures (250 rows, paging, latest settlements, safe projection, denied public access, 10,000-row bound) passed. Native PostgreSQL CI runs the same database reader adapter. Remaining: verify capture source contracts, deploy authenticated capture/settlement workers, configure authorized service credentials, enable per-sport capture, then reconcile eligible history with explicit legacy labeling. Gateway future-token fault may still affect other REST-backed functions and should be resolved with the platform.
+
+## Historical results reader repair
+
+On October 29, dashboard-results v2 was deployed using a bounded read-only direct database transaction under service_role. It preserves the existing GET route, validates filters, binds SQL parameters, limits row lists to 200, excludes raw payloads, and scopes grade/snapshot counts to the selected sport. No write path or model gate changed.
+
+Verification: 387 Node tests passed. The production reader returned 550 graded observations, 558 audit observations, 46 game results and 4,806 MLB snapshots. The existing oygsu1hca Vercel dashboard API returned grades=550, marketSnapshots=4806 and results source ok=true. NFL audit/grade counts returned zero rather than incorrectly inheriting MLB totals. This restores the legacy summary/read API, not the cross-sport ledger or other REST-dependent functions.
+
+## Tracking repair follow-up
+
+- prediction-performance v5 now includes separately labeled all-time MLB historical diagnostics. Prospective/qualified metrics are unchanged.
+- Results renderer includes an expandable historical section, outside current cohort/date filters, with escaped team names and saved result/check labels. Frontend release remains pending.
+- grade-player-props v3 and grade-team-markets v4 use direct database access with bound parameters, service-role transactions, SQL deadlines, a Vault comparison against the existing pipeline credential, and JWT verification still enabled. Results insert idempotently; retries do not overwrite earlier grades.
+- Real scheduled dispatch requests 88873 and 88874 returned HTTP 200, checkedRows=0 and rowsGraded=0. This confirms authentication/read recovery, NOT new capture or live settlement proof.
+- 390 Node tests passed. PGlite tests exercised real result schemas, credential acceptance/rejection, MLB-only reads, writes and immutable retry outcomes.
+- Capture-model-audit still depends on the old decision endpoint, which includes a failing REST market-alerts call. Capture is not yet restored. No daily-play, calibration, or full-system completion claim.
