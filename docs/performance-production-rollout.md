@@ -1,0 +1,11 @@
+# Cross-sport Results backend rollout
+
+Project: yeoxroijaptomomshdii. Verified 2026-10-28 America/Chicago (2026-10-29 UTC).
+
+The existing Vercel Results screen returned 503 because prediction-performance was absent and the performance ledger schema had not been installed. Applied the committed, tested ledger, MLB publication, sport receipt, priority sport, disabled job registry, read, semantic identity, final PASS, and global portfolio read migrations. Management API assigns installation timestamps: do not replay these migration bodies merely because local filename versions differ from hosted history. Private-account migrations and capture dispatch replacement were NOT applied.
+
+The initial service-key REST reader failed with PGRST303/401: gateway JWT issued in the future (opaque service credential). No credentials were logged or changed. The reader now uses the runtime SUPABASE_DB_URL via pinned postgres 3.4.9, a read-only transaction, SET LOCAL ROLE service_role, parameterized fixed RPC, eight-second statement timeout, bounded connection lifetime, and generic public errors. Database permissions are unchanged: anon/authenticated cannot execute the RPC or select the ledger. All new tables have RLS. Public results use the existing safe projection only.
+
+Deployed prediction-performance version 4. The existing dashboard API returned 200 and the browser Results tab rendered coverage, filters, and honest empty results. No history was manufactured or imported. Cross-sport ledger has zero records; capture/settlement jobs remain inactive. This repairs the reader, not the full prospective tracking rollout. Existing legacy MLB diagnostics remain separate. No model weights or PLAY thresholds changed.
+
+Validation: 385 Node tests, 49 Python tests, and actual PGlite reader fixtures (250 rows, paging, latest settlements, safe projection, denied public access, 10,000-row bound) passed. Native PostgreSQL CI runs the same database reader adapter. Remaining: verify capture source contracts, deploy authenticated capture/settlement workers, configure authorized service credentials, enable per-sport capture, then reconcile eligible history with explicit legacy labeling. Gateway future-token fault may still affect other REST-backed functions and should be resolved with the platform.
