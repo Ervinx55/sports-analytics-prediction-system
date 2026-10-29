@@ -24,3 +24,11 @@ Verification: 387 Node tests passed. The production reader returned 550 graded o
 - Real scheduled dispatch requests 88873 and 88874 returned HTTP 200, checkedRows=0 and rowsGraded=0. This confirms authentication/read recovery, NOT new capture or live settlement proof.
 - 390 Node tests passed. PGlite tests exercised real result schemas, credential acceptance/rejection, MLB-only reads, writes and immutable retry outcomes.
 - Capture-model-audit still depends on the old decision endpoint, which includes a failing REST market-alerts call. Capture is not yet restored. No daily-play, calibration, or full-system completion claim.
+
+## Capture dependency verification
+
+market-alerts v4 now reads bounded snapshot data through a read-only direct database transaction. The alert calculations are unchanged; invalid filters and more than 12,000 snapshots fail explicitly. The live alert endpoint and upstream tau /api/decision both return HTTP 200. Scheduled model_audit request 89145 also returned HTTP 200 but auditRowCount=0 and marketGradeRowCount=0.
+
+Current board evidence: SportsGameOdds quota exhausted (2,500/2,500 monthly objects, 429); fallback The Odds API has 453 requests remaining but returned zero MLB events in the queried window. No new production predictions or settlements were demonstrated. Capture insert authentication remains untested while rows are empty.
+
+Final local validation: 391 Node tests, 49 Python tests and the PostgreSQL grading repository integration test passed. Vercel preview creation for commit 24fa9bfed26a3ecc8e59c3fbbb9d53fd7ece40b7 was rejected with HTTP 403. The historical UI is pushed but not released; no master merge.
