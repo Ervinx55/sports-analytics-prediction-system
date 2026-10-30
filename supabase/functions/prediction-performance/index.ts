@@ -1,3 +1,4 @@
+import {explainCoverage} from '../_shared/performance-coverage.mjs';
 import {readHistoricalResults} from '../_shared/historical-results-read.mjs';
 import postgres from 'npm:postgres@3.4.9';
 import {performanceDatabaseClient} from '../_shared/performance-database-read.mjs';
@@ -18,7 +19,7 @@ Deno.serve(async req=>{
    try{result.history=await readHistoricalResults(sql,{sport:'MLB',limit:50});result.historyStatus='AVAILABLE';}
    catch{result.historyStatus='UNAVAILABLE';}
   }
-  return respond(result);
+  return respond(explainCoverage(result));
  }
  catch(error){if(error instanceof Error&&error.message==='PERFORMANCE_READ_LIMIT_EXCEEDED')return respond({error:error.message,message:'Narrow the date interval or sport filter; limit applies to 10000 raw saved observations before cohort selection.'},422);console.error('PERFORMANCE_DATABASE_READ_FAILED',{code:typeof error?.code==='string'&&/^[A-Z0-9_]{1,30}$/.test(error.code)?error.code:'UNKNOWN'});return respond({error:'PERFORMANCE_READ_UNAVAILABLE'},503);}
  finally{await sql.end({timeout:1}).catch(()=>{});}

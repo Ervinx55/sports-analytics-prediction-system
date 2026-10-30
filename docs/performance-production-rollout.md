@@ -44,3 +44,9 @@ A one-time authorized capture saved 130 excluded NBA forecasts across 11 provide
 prediction-performance v6 now reports SAVED_FORECASTS when saved model evidence exists, instead of labeling NBA universally unavailable. Users can inspect these records with NBA and Raw excluded candidates, October 29–30 UTC. The worker source now routes NBA team models to the adapter, but the worker and automatic jobs have NOT been activated/deployed in this step. Automatic capture, exact result mapping and settlement remain unfinished.
 
 395 Node tests pass. All three remote workflows for preceding commit f6c36b92 passed (Tests, Performance SQL fixtures, NFL Player Props Shadow Backtest). No production influence or master merge.
+
+## Coverage language repair
+
+prediction-performance v7 replaces generic saved-contract/unavailable placeholders with saved-evidence states and plain explanations. MLB cards distinguish 550 historical graded observations from no matches in the current ledger/category/date filters. Live provider inventory is explicitly not checked by this results report; no provider is declared verified. Successful result reads are labeled RESULTS_READER_CONNECTED without asserting capture/settlement health. The renderer uses the new explanation and removes developer jargon and unrelated league-inventory text. Older deployed renderers receive non-placeholder model states and readable provider text, but require a frontend release for the full history explanation.
+
+398 Node tests pass; verified the existing Vercel performance route returns the MLB historical explanation and HISTORICAL_RECORDS_AVAILABLE. Frontend deployment remains blocked by the previously confirmed Vercel 403.
