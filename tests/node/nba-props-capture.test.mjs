@@ -132,9 +132,9 @@ test("one fresh book never masks stale, undated, or future book quotes", () => {
     sharpRow({ timestamp: new Date(now).toISOString() }),
     sharpRow({ selection_type: "under", timestamp: new Date(now - 3_600_000).toISOString() }),
     sharpRow({ player_name: "Undated", timestamp: null }),
-    sharpRow({ player_name: "Undated", selection_type: "under" }),
+    sharpRow({ player_name: "Undated", selection_type: "under", timestamp: new Date(now).toISOString() }),
     sharpRow({ player_name: "Future", timestamp: new Date(now + 60_000).toISOString() }),
-    sharpRow({ player_name: "Future", selection_type: "under" })
+    sharpRow({ player_name: "Future", selection_type: "under", timestamp: new Date(now).toISOString() })
   ];
   const props = observedNbaEvents(normalizeSharpApiNbaPropRows(rows), { now })[0].players;
   const byName = new Map(props.map((row) => [row.prop.playerName, row.prop]));

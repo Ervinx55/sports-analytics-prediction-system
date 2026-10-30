@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {renderPerformance, createPerformanceController} from '../../sharp-service/performance-view.js';
 const fixture = (sport='NBA') => ({filters:{sport,cohort:'ALL'},summary:{count:0,wins:0,losses:0,pushes:0,voids:0,unresolved:0,winRate:null,distinctGames:0,pricedCount:0,hypotheticalRoi:null,hypotheticalUnitProfit:null,pairedCount:0,modelBrier:null,marketBrier:null,modelLogLoss:null,marketLogLoss:null},coverage:{selected:0,settledCount:0,missingOdds:0,missingPaired:0,sports:[{sport,samples:0,state:'MODEL_UNAVAILABLE',modelAvailability:'UNAVAILABLE',providerCoverage:'UNVERIFIED'}],providerCoverageState:'UNVERIFIED',providerLeagues:null},rows:[],groups:[],reliabilityBins:[],warnings:[],uncertainty:{status:'INSUFFICIENT_GAMES',games:0},nextCursor:null});
 test('empty unavailable sports and missing metrics never become zero accuracy or returns',()=>{
- for(const sport of ['NBA','CFB']){const root={innerHTML:''};renderPerformance(fixture(sport),root);assert.match(root.innerHTML,/Model unavailable/);assert.match(root.innerHTML,/No captured predictions/);assert.match(root.innerHTML,/Hypothetical ROI/);assert.match(root.innerHTML,/Unavailable/);assert.doesNotMatch(root.innerHTML,/0\.0%/);}
+ for(const sport of ['NBA','CFB']){const root={innerHTML:''};renderPerformance(fixture(sport),root);assert.doesNotMatch(root.innerHTML,/Model unavailable|Saved source contract only|Provider coverage: UNVERIFIED/);assert.match(root.innerHTML,/No captured predictions/);assert.match(root.innerHTML,/Hypothetical ROI/);assert.match(root.innerHTML,/Unavailable/);assert.doesNotMatch(root.innerHTML,/0\.0%/);}
 });
 test('provider and row strings are escaped, exact entry and revision remain visible',()=>{
  const data=fixture('NFL');data.rows=[{eventKey:'<img src=x onerror=alert(1)>',book:'"<script>alert(1)</script>',odds:-115,outcome:'UNRESOLVED',settlementRevision:2,settlementReason:'MISSING_STATS',line:0,modelProbability:null}];data.warnings=['<svg onload=alert(1)>'];const root={innerHTML:''};renderPerformance(data,root);assert.doesNotMatch(root.innerHTML,/<img|<script|<svg/);assert.match(root.innerHTML,/&lt;img/);assert.match(root.innerHTML,/-115/);assert.match(root.innerHTML,/Revision 2/);assert.match(root.innerHTML,/Line 0/);
@@ -27,4 +27,13 @@ test('a stale failed request cannot overwrite newer success',async()=>{
 });
 test('deadline replaces pending loading with an explicit timeout and unknown coverage',async()=>{
  const root={innerHTML:''};const controller=createPerformanceController({root,timeoutMs:5,fetchImpl:(url,{signal})=>new Promise((resolve,reject)=>signal.addEventListener('abort',()=>reject(Object.assign(Error('timeout'),{name:'AbortError'}))))});await controller.load({sport:'NBA'});assert.match(root.innerHTML,/Request timed out/);assert.match(root.innerHTML,/Coverage is unknown/);assert.doesNotMatch(root.innerHTML,/Loading performance/);
+});
+
+test('legacy history remains visible separately from qualified performance',()=>{
+ const data=fixture('MLB');data.history={summary:{auditRows:558,grades:550,gameResults:46,latestAuditAt:'2026-10-11T08:20:00Z'},grades:[{side_name:'<img>',away_team:'Away',home_team:'Home',result:'W',starts_at:'2026-10-01T12:00:00Z',verification_status:'PASS'}]};const root={innerHTML:''};renderPerformance(data,root);
+ assert.match(root.innerHTML,/Historical MLB audit/);assert.match(root.innerHTML,/550/);assert.match(root.innerHTML,/Saved result/);assert.match(root.innerHTML,/&lt;img&gt;/);assert.equal(data.summary.wins,0);
+});
+
+test('sport cards show evidence-based history messages without implementation placeholders',()=>{
+ const data=fixture('MLB');data.coverage.sports[0].message='Historical MLB audit: 550 graded observations, stored separately.';const root={innerHTML:''};renderPerformance(data,root);assert.match(root.innerHTML,/550 graded observations/);assert.doesNotMatch(root.innerHTML,/Saved source contract only|live readiness unverified|Provider inventory UNVERIFIED/);
 });

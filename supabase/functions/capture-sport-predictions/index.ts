@@ -13,7 +13,7 @@ Deno.serve(async req=>{
  const {sport,kind,requestId}=body??{};
  if(!['MLB','NFL','NBA','CFB','NHL','TENNIS','SOCCER'].includes(sport)||typeof requestId!=='string'||! /^[A-Za-z0-9:_-]{1,128}$/.test(requestId)||!(sport==='MLB'?MLB_TABLES.includes(kind):['team','props'].includes(kind)))return respond({error:'Invalid sport, kind or requestId'},400);
  const capturedAt=new Date().toISOString();
- if(['NBA','CFB','NHL','TENNIS','SOCCER'].includes(sport))return respond({ok:true,captured:0,rejected:0,...adaptModelResponse({}, {sport,kind,capturedAt,sourceRequestId:requestId})});
+ if(['CFB','NHL','TENNIS','SOCCER'].includes(sport)||(sport==='NBA'&&kind!=='team'))return respond({ok:true,captured:0,rejected:0,...adaptModelResponse({}, {sport,kind,capturedAt,sourceRequestId:requestId})});
  if(Deno.env.get('PERFORMANCE_SPORT_CAPTURE_ENABLED')!=='true')return respond({error:'Sport capture disabled',coverage:{sport,modelAvailable:sport==='NFL'||sport==='MLB',complete:false,state:'DISABLED'}},503);
  try {
   const client=createClient(Deno.env.get('SUPABASE_URL')!,secret!);
@@ -29,7 +29,7 @@ Deno.serve(async req=>{
   }else {
    const base=Deno.env.get('PERFORMANCE_MODEL_BASE_URL');
    if(!base)return respond({ok:false,error:'MODEL_SOURCE_NOT_CONFIGURED',coverage:{sport,modelAvailable:true,dataAvailable:false,complete:false,state:'UNAVAILABLE'}},503);
-   const url=new URL(kind==='props'?'/api/nflprops':'/api/nflmodel',base);
+   const url=new URL(sport==='NBA'?'/api/nbamodel':kind==='props'?'/api/nflprops':'/api/nflmodel',base);
    if(url.protocol!=='https:')return respond({ok:false,error:'INVALID_MODEL_SOURCE_CONFIG',coverage:{sport,complete:false,state:'ERROR'}},503);
    const fetched=await fetchModelResponse(url.href);
    if(!fetched.ok)return respond({ok:false,error:fetched.error,attempts:fetched.attempts,coverage:{sport,modelAvailable:true,dataAvailable:false,complete:false,state:'ERROR'}},502);

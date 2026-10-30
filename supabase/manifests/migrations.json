@@ -415,6 +415,24 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261025122136",
+      "name": "private_accounts",
+      "path": "supabase/migrations/20261025122136_private_accounts.sql",
+      "sha256": "e7e62063e23add0ad1006def8f73e5f03bd735e8fa26a45eae10849890efa547",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
+    },
+    {
+      "version": "20261028130836",
+      "name": "account_strategy_metadata",
+      "path": "supabase/migrations/20261028130836_account_strategy_metadata.sql",
+      "sha256": "26f7abda5b6eb0ac0f47dbdaa920f0c88d0c3ac250caa05d0053c9aeb0b5d0a7",
+      "recoveredFromProduction": false,
+      "appliedToProduction": false,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -422,7 +440,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 48,
+    "repository_total_migrations": 50,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }

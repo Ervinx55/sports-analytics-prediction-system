@@ -16,9 +16,9 @@ test('worker requires service auth, validates input and defaults disabled',async
  assert.equal((await h(request({sport:'NFL',kind:'bad',requestId:'r'}))).status,400);
  assert.equal((await load({enabled:false})(request({sport:'NFL',kind:'team',requestId:'r'}))).status,503);
 });
-test('NBA/CFB coverage is honest without fetch or writes',async()=>{
+test('unsupported coverage is honest without fetch or writes',async()=>{
  const h=load({fetchImpl:()=>{throw Error('unexpected fetch');}});
- for(const sport of ['NBA','CFB','NHL','TENNIS','SOCCER']){const r=await h(request({sport,kind:'team',requestId:'r'}));const b=await r.json();assert.equal(r.status,200);assert.equal(b.coverage.modelAvailable,false);assert.equal(b.captured,0);}
+ for(const sport of ['CFB','NHL','TENNIS','SOCCER']){const r=await h(request({sport,kind:'team',requestId:'r'}));const b=await r.json();assert.equal(r.status,200);assert.equal(b.coverage.modelAvailable,false);assert.equal(b.captured,0);}
 });
 test('NFL fetches configured source only, stores shadow predictions and exposes ingest faults',async()=>{
  const calls=[],urls=[];const at=new Date().toISOString();const db={rpc:async(name,{payload})=>{calls.push({name,payload});return {error:{message:'secret connection string'}};}};
@@ -55,4 +55,10 @@ test('scheduled NFL capture only writes bounded upcoming windows',async()=>{
  const db={rpc:async()=>{calls++;return {data:{id:'p',eligibilityReasons:[]}};}};
  const response=await load({db,fetchImpl:async()=>Response.json(body)})(request({sport:'NFL',kind:'team',requestId:'scheduled',scheduled:true}));
  assert.equal((await response.json()).captured,0);assert.equal(calls,0);
+});
+
+test('NBA team capture preserves diagnostics and keeps influence zero',async()=>{
+ const calls=[],urls=[],at=new Date().toISOString();
+ const h=load({db:{rpc:async(name,{payload})=>{calls.push({name,payload});return {data:'saved',error:null};}},fetchImpl:async url=>{urls.push(url);return new Response(JSON.stringify({league:'NBA',sport:'BASKETBALL',version:'nba-shadow',forecastAt:at,markets:[{eventID:'nba-event',marketType:'moneyline',side:'home',modelProbability:.6,marketFairProbability:.5,startsAt:new Date(Date.now()+3600000).toISOString()}]}));}});
+ const r=await h(request({sport:'NBA',kind:'team',requestId:'r'})),b=await r.json();assert.equal(urls[0],'https://fixture/api/nbamodel');assert.equal(calls[0].name,'ingest_prediction_v1');assert.equal(calls[0].payload.modelMode,'SHADOW');assert.equal(calls[0].payload.provenance.productionWeight,0);assert.equal(b.captured,1);assert.equal(b.excluded,1);assert.equal(b.coverage.complete,false);
 });

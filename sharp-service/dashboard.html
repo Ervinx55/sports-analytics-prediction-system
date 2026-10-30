@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#08111f" />
+  <meta name="theme-color" content="#111115" />
   <title>Edge Lab Dashboard</title>
   <style>
     :root{
@@ -129,8 +129,9 @@
 
 .performance-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}.performance-filters label{display:flex;flex-direction:column;gap:6px;min-width:0}.performance-filters input,.performance-filters select{font:inherit;padding:10px;background:var(--card,#101e30);color:var(--text,#edf4ff);border:1px solid #36516e;border-radius:8px;width:100%;min-width:0}.performance-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}.performance-metric,.performance-coverage,.performance-row{background:var(--card,#101e30);border:1px solid #36516e;border-radius:10px;padding:14px;min-width:0;overflow-wrap:anywhere}.performance-metric small,.performance-metric strong{display:block}.performance-metric strong{font-size:22px;margin-top:8px}.performance-row{margin:12px 0}.performance-row>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.performance-table{overflow-x:auto;max-width:100%}.performance-table table{border-collapse:collapse;min-width:600px;width:100%}.performance-table th,.performance-table td{text-align:left;padding:10px;border-bottom:1px solid #36516e}.performance-notice{border-left:3px solid #ffbd4a;padding:10px;overflow-wrap:anywhere}#performanceView{overflow-wrap:anywhere;min-width:0}#legacyResults summary{cursor:pointer;font-weight:700;margin:24px 0}#legacyResults .metrics{grid-template-columns:repeat(auto-fit,minmax(120px,1fr))!important}
 </style>
+<link rel="stylesheet" href="/edge-theme.css">
 </head>
-<body>
+<body class="el-theme el-dashboard">
 <div class="app">
   <div class="top">
     <div class="brand">
@@ -167,7 +168,7 @@
     </div>
   </div>
 
-  <nav style="margin:14px 0;display:flex;gap:16px;flex-wrap:wrap"><a href="/nfl.html" style="color:var(--cyan);font-weight:700">Open NFL team models and player props →</a><a href="/nba.html" style="color:var(--cyan);font-weight:700">Inspect NBA shadow models and observed props →</a></nav>
+  <nav style="margin:14px 0;display:flex;gap:16px;flex-wrap:wrap"><a href="/nfl.html" style="color:var(--cyan);font-weight:700">Open NFL team models and player props →</a><a href="/nba.html" style="color:var(--cyan);font-weight:700">Inspect NBA shadow models and observed props →</a><a href="/accounts.html" style="color:var(--cyan);font-weight:700">Accounts &amp; Profit</a><a href="/research.html" style="color:var(--cyan);font-weight:700">Prop research board</a></nav>
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
     <button class="tab" data-tab="plays">Plays</button>
@@ -479,9 +480,13 @@
 
   function statusBadge(c){
     const s = c.status || c.verification_status || c.model_decision || "UNKNOWN";
-    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">PLAY</span>';
-    if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING</span>';
-    if(s==="PASS") return '<span class="badge pass">PASS</span>';
+    const issued = c.tracking?.tracked === true && typeof c.tracking?.issuedAt === "string" ? Date.parse(c.tracking.issuedAt) : NaN;
+    const recorded = Number.isFinite(issued) && issued <= Date.now();
+    const time = recorded ? new Intl.DateTimeFormat(undefined,{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",second:"2-digit",timeZoneName:"short"}).format(new Date(issued)) : "Not recorded";
+    const stamp = '<div class="decision-stamp">Decision issued: '+esc(time)+'</div>';
+    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge '+(recorded?'play':'watch')+'">'+(recorded?'PLAY — cleared':'NOT CLEARED — do not play')+'</span>'+stamp;
+    if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING — do not play</span>'+stamp;
+    if(s==="PASS") return '<span class="badge pass">PASS — do not play</span>'+stamp;
     return '<span class="badge neutral">'+esc(s)+'</span>';
   }
 
@@ -1037,7 +1042,7 @@
               <div class="match">#${i+1} · ${esc(g.market_label)}</div>
               <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
             </div>
-            <span class="badge play">PLAY</span>
+            ${statusBadge(g)}
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
@@ -1205,7 +1210,7 @@
               <div class="match">#${i+1} · ${esc(p.label)}</div>
               <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
             </div>
-            <span class="badge play">PLAY</span>
+            ${statusBadge(p)}
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>

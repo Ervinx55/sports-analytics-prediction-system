@@ -1,4 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import postgres from 'npm:postgres@3.4.9';
+import {readMarketSnapshots} from '../_shared/market-snapshot-read.mjs';
 
 type Row = {
   captured_at: string;
@@ -42,6 +43,7 @@ function lineKey(v: number | null) {
 }
 
 Deno.serve(async (req) => {
+  let sql;
   try {
     if (req.method !== "GET") {
       return new Response(JSON.stringify({ error: "GET only" }), {
@@ -55,22 +57,11 @@ Deno.serve(async (req) => {
     const hours = Math.max(2, Math.min(168, Number(u.searchParams.get("hours") || 36)));
     const minBooks = Math.max(2, Math.min(4, Number(u.searchParams.get("minBooks") || 3)));
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
-
-    const since = new Date(Date.now() - hours * 3600_000).toISOString();
-    const { data, error } = await supabase
-      .from("market_snapshots")
-      .select("captured_at,snapshot_label,league,event_id,starts_at,away_team,home_team,book,market,side,line,odds,available")
-      .eq("league", league)
-      .gte("captured_at", since)
-      .order("captured_at", { ascending: true })
-      .limit(12000);
-
-    if (error) throw error;
-    const rows = (data ?? []) as Row[];
+    if(!Number.isFinite(hours)||!Number.isFinite(minBooks)||!/^[A-Z0-9_-]{1,30}$/.test(league))return new Response(JSON.stringify({error:'INVALID_MARKET_FILTERS'}),{status:400,headers:{'content-type':'application/json'}});
+    const url=Deno.env.get('SUPABASE_DB_URL');if(!url)throw Error('DATABASE_UNAVAILABLE');
+    sql=postgres(url,{max:1,prepare:false,connect_timeout:3,idle_timeout:1});
+    const since=new Date(Date.now()-hours*3600_000).toISOString();
+    const rows=await readMarketSnapshots(sql,league,since) as Row[];
 
     const perBook = new Map<string, Row[]>();
     for (const r of rows) {
@@ -290,10 +281,10 @@ Deno.serve(async (req) => {
     });
   } catch (error) {
     return new Response(JSON.stringify({
-      error: error instanceof Error ? error.message : String(error),
+      error: 'MARKET_ALERTS_UNAVAILABLE',
     }), {
       status: 500,
       headers: { "content-type": "application/json" },
     });
-  }
+  } finally {if(sql)await sql.end({timeout:1}).catch(()=>{});}
 });
