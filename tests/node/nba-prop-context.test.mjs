@@ -20,3 +20,16 @@ test('position sample cannot count several players in one game as multiple games
 test('conflicting duplicate game observations are excluded in either order',()=>{const a=obs(),b=obs();b.players[0].points=99;for(const observations of [[a,b],[b,a]])assert.equal(buildNbaPropContext({...req,observations}).features.expectedMinutes.sampleCount,0);});
 test('conflicting duplicate scoreboard game IDs never request a summary',async()=>{let calls=0;const r=await loadNbaPropHistory({games:[game,{...game,home_team_score:101}],teamIds:['1'],cutoff,fetchImpl:async()=>{calls++;throw Error('should not request');},clock:()=>cutoff});assert.equal(calls,0);assert.ok(r.reasons.includes('CONFLICTING_GAME_RECORDS'));});
 test('possessions prefer total turnovers and only reconstruct from both components',()=>{const a=summary();a.boxscore.teams[0].statistics.push({name:'totalTurnovers',displayValue:'16'},{name:'teamTurnovers',displayValue:'4'});assert.equal(parseNbaPropSummary(a,game,cutoff).teams[0].possessions,94.8);const b=summary();b.boxscore.teams[0].statistics.push({name:'teamTurnovers',displayValue:'4'});assert.equal(parseNbaPropSummary(b,game,cutoff).teams[0].possessions,94.8);});
+
+ test('opponent defense uses opponent games, not player team defense or future games',()=>{
+ const rows=['201','202','203'].map(id=>({...obs(id),teams:[{teamId:'2',score:110,possessions:100},{teamId:'3',score:120,possessions:100}],players:[]}));
+ const r=buildNbaPropContext({...req,observations:[obs(),...rows]});
+ assert.equal(r.features.defensiveRating.value,90);
+ assert.equal(r.features.opponentDefensiveRating.value,115);
+ assert.equal(r.features.opponentDefensiveRating.sampleCount,4);
+ assert.equal(r.features.opponentDefensiveRating.teamId,'2');
+ const missing=rows.map(g=>({...g,teams:g.teams.map(t=>({...t,possessions:null}))}));
+ assert.equal(buildNbaPropContext({...req,observations:missing}).features.opponentDefensiveRating.value,null);
+ assert.equal(buildNbaPropContext({...req,observations:rows.map(g=>({...g,finalObservedAt:'2026-10-28T00:00:00Z'}))}).features.opponentDefensiveRating.value,null);
+ assert.equal(r.productionWeight,0);
+ });

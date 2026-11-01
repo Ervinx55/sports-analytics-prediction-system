@@ -26,6 +26,9 @@ export function buildNbaPropContext({observations=[],playerId,teamId,opponentTea
   const possessions=efficiency.reduce((s,{t,o})=>s+(t.possessions+o.possessions)/2,0);
   const offense=possessions>0?100*efficiency.reduce((s,{t})=>s+t.score,0)/possessions:null;
   const defense=possessions>0?100*efficiency.reduce((s,{o})=>s+o.score,0)/possessions:null;
+  const opponentGames=games.flatMap(g=>{const t=g.teams.find(t=>String(t.teamId)===String(opponentTeamId)),o=g.teams.find(t=>String(t.teamId)!==String(opponentTeamId));return t&&o&&validNumber(o.score)&&validNumber(t.possessions)&&t.possessions>0&&validNumber(o.possessions)&&o.possessions>0?[{t,o}]:[];});
+  const opponentPossessions=opponentGames.reduce((s,{t,o})=>s+(t.possessions+o.possessions)/2,0);
+  const opponentDefense=opponentPossessions>0?100*opponentGames.reduce((s,{o})=>s+o.score,0)/opponentPossessions:null;
   // Exact historical position, not today's roster. Raw per-player-game allowance only.
   const position=playerRows[0]?.position || null;
   const allowed=position?games.flatMap(g=>g.teams.some(t=>String(t.teamId)===String(opponentTeamId))?g.players.filter(p=>String(p.teamId)!==String(opponentTeamId)&&p.position===position&&validNumber(p.minutes)&&p.minutes>0&&validNumber(p[market])).map(p=>({...p,gameId:g.gameId})):[]):[];
@@ -40,6 +43,7 @@ export function buildNbaPropContext({observations=[],playerId,teamId,opponentTea
     recentWinRate:feature(mean(teamGames.slice(0,5).map(({t,o})=>Number(t.score>o.score))),Math.min(5,teamGames.length),null,'last 5 eligible team games'),
     offensiveRating:feature(offense,efficiency.length,'MISSING_POSSESSION_FIELDS'),
     defensiveRating:feature(defense,efficiency.length,'MISSING_POSSESSION_FIELDS'),
+    opponentDefensiveRating:feature(opponentDefense,opponentGames.length,'MISSING_OPPONENT_POSSESSION_FIELDS'),
     netRating:feature(offense!==null&&defense!==null?offense-defense:null,efficiency.length,'MISSING_POSSESSION_FIELDS'),
     estimatedPossessionsPerGame:feature(mean(efficiency.map(({t,o})=>(t.possessions+o.possessions)/2)),efficiency.length,'MISSING_POSSESSION_FIELDS'),
     pace:feature(null,0,'GAME_DURATION_UNVERIFIED'),
@@ -48,6 +52,8 @@ export function buildNbaPropContext({observations=[],playerId,teamId,opponentTea
     injuryStatus:feature(null,0,'PREGAME_INJURY_KNOWLEDGE_UNAVAILABLE'),
     restDays:feature(playerRows.length?(cutoffMs-time(playerRows[0].game.startsAt))/86400000:null,playerRows.length?1:0,'NO_PREVIOUS_PLAYER_GAME')
   };
+  features.opponentDefensiveRating.teamId=String(opponentTeamId??'');
+  features.opponentDefensiveRating.method='100 * opponent points conceded / mean of both teams estimated possessions; higher means more allowed, not a verified league rank';
   features.expectedMinutes.method='mean observed minutes; not confirmed projected minutes';
   features.defenseVsPosition.position=position;
   features.defenseVsPosition.gameCount=new Set(allowed.map(p=>p.gameId)).size;

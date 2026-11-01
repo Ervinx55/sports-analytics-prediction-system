@@ -50,3 +50,16 @@ prediction-performance v6 now reports SAVED_FORECASTS when saved model evidence 
 prediction-performance v7 replaces generic saved-contract/unavailable placeholders with saved-evidence states and plain explanations. MLB cards distinguish 550 historical graded observations from no matches in the current ledger/category/date filters. Live provider inventory is explicitly not checked by this results report; no provider is declared verified. Successful result reads are labeled RESULTS_READER_CONNECTED without asserting capture/settlement health. The renderer uses the new explanation and removes developer jargon and unrelated league-inventory text. Older deployed renderers receive non-placeholder model states and readable provider text, but require a frontend release for the full history explanation.
 
 398 Node tests pass; verified the existing Vercel performance route returns the MLB historical explanation and HISTORICAL_RECORDS_AVAILABLE. Frontend deployment remains blocked by the previously confirmed Vercel 403.
+
+
+## November 1 tracking and opponent-defense repair
+
+Live read-only audit found 130 NBA diagnostic predictions and all cross-sport performance capture/settlement cron jobs inactive. This explains the absence of continuously collected results; it is not evidence that forecasts have passed validation.
+
+The capture worker now uses a narrow direct PostgreSQL adapter, avoiding the REST credential path that previously failed with PGRST303. It retains service-secret authorization, the explicit enable flag, fixed RPC allowlists, bounded MLB-only source reads, service_role transactions, and timeouts. NFL receipts still own first-seen time and remain immutable across kickoff retries. Do not substitute a public/publishable key for privileged worker authorization. No scheduled jobs were enabled by this code repair.
+
+NBA research now distinguishes the player's own team defensive rating from opponentDefensiveRating (opponent points conceded per 100 estimated possessions). Only eligible completed games contribute; missing possessions remain missing. Higher opponent allowance is matchup context, not a verified league rank or calibrated probability boost. NFL already exposes opponentDefense and position-specific allowance. Both context challengers retain zero production influence pending paired baseline/ablation and untouched holdout evidence.
+
+The exact NBA event matcher accepts the observed ten-minute provider/ESPN schedule offset within a 15-minute limit, requires unique exact home/away identities, and keeps the earlier eligibility cutoff. This helper is groundwork: it is not yet connected to automatic settlement and does not retroactively qualify the 130 diagnostics.
+
+Verification: 404 Node tests, 49 Python tests, and the real-schema sport receipt fixture pass. The fixture now executes the HTTP handler through the actual direct database adapter, including kickoff retry, late receipt exclusion, rollback, role restrictions and immutable payload checks. Production scheduled tracking and frontend release remain outstanding; no model weights or master merge changed.
