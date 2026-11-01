@@ -1,6 +1,6 @@
 // Authenticated, fail-closed capture service. Scheduled capture requires a trusted source adapter.
 function reply(data,status=200){return new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store"}})}
-function authorized(req){const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"");const expected=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");return !!expected&&!!token&&token===expected}
+function authorized(req){const token=req.headers.get("authorization")?.replace(/^Bearer\s+/i,"");if(!token)return false;try{const segment=token.split(".")[1];if(!segment)return false;const claims=JSON.parse(atob(segment.replace(/-/g,"+").replace(/_/g,"/")));return claims.role==="service_role"&&Number(claims.exp)*1000>Date.now()}catch{return false}}
 function supabase(){const url=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!url||!key)throw Error("SERVICE_CONFIG_UNAVAILABLE");return {url,key}}
 async function rpc(name,args){const {url,key}=supabase();const res=await fetch(url+"/rest/v1/rpc/"+name,{method:"POST",headers:{"content-type":"application/json","apikey":key,"authorization":"Bearer "+key},body:JSON.stringify(args)});const payload=await res.json().catch(()=>null);if(!res.ok)throw Error("RPC_FAILED:"+res.status);return payload}
 
