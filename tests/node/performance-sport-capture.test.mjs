@@ -8,7 +8,7 @@ import * as mlb from '../../supabase/functions/_shared/performance-mlb-adapter.m
 function load({enabled=true,db={},fetchImpl=()=>{},secret='secret',clock=()=>Date.now()}={}){
  let handler;const source=stripTypeScriptTypes(readFileSync('supabase/functions/capture-sport-predictions/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
  const ClockDate=class extends Date{constructor(...args){super(...(args.length?args:[clock()]));}static now(){return clock();}};
- vm.runInNewContext(source,{...model,...mlb,fetchModelResponse:url=>model.fetchModelResponse(url,{fetchImpl}),createClient:()=>db,fetch:fetchImpl,Response,URL,Date:ClockDate,JSON,AbortController,setTimeout,clearTimeout,Deno:{serve:f=>{handler=f;},env:{get:key=>key==='SUPABASE_SERVICE_ROLE_KEY'?secret:key==='PERFORMANCE_SPORT_CAPTURE_ENABLED'?String(enabled):key==='PERFORMANCE_MODEL_BASE_URL'?'https://fixture':'fixture'}}});return handler;
+ vm.runInNewContext(source,{...model,...mlb,fetchModelResponse:url=>model.fetchModelResponse(url,{fetchImpl}),postgres:()=>({end:async()=>{}}),performanceCaptureDatabase:()=>db,fetch:fetchImpl,Response,URL,Date:ClockDate,JSON,AbortController,setTimeout,clearTimeout,Deno:{serve:f=>{handler=f;},env:{get:key=>key==='SUPABASE_SERVICE_ROLE_KEY'?secret:key==='PERFORMANCE_SPORT_CAPTURE_ENABLED'?String(enabled):key==='PERFORMANCE_MODEL_BASE_URL'?'https://fixture':'fixture'}}});return handler;
 }
 const request=(body={},authorization='Bearer secret')=>new Request('https://fixture/capture',{method:'POST',headers:{authorization,'content-type':'application/json'},body:JSON.stringify(body)});
 test('worker requires service auth, validates input and defaults disabled',async()=>{

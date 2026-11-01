@@ -1,4 +1,5 @@
-import {createClient} from 'https://esm.sh/@supabase/supabase-js@2';
+import postgres from 'npm:postgres@3.4.9';
+import {performanceCaptureDatabase} from '../_shared/performance-capture-database.mjs';
 import {adaptModelResponse,fetchModelResponse} from '../_shared/performance-model-adapters.mjs';
 import {MLB_TABLES,serviceAuthorized} from '../_shared/performance-mlb-adapter.mjs';
 
@@ -15,8 +16,11 @@ Deno.serve(async req=>{
  const capturedAt=new Date().toISOString();
  if(['CFB','NHL','TENNIS','SOCCER'].includes(sport)||(sport==='NBA'&&kind!=='team'))return respond({ok:true,captured:0,rejected:0,...adaptModelResponse({}, {sport,kind,capturedAt,sourceRequestId:requestId})});
  if(Deno.env.get('PERFORMANCE_SPORT_CAPTURE_ENABLED')!=='true')return respond({error:'Sport capture disabled',coverage:{sport,modelAvailable:sport==='NFL'||sport==='MLB',complete:false,state:'DISABLED'}},503);
+ const databaseUrl=Deno.env.get('SUPABASE_DB_URL');
+ if(!databaseUrl)return respond({error:'CAPTURE_DATABASE_UNAVAILABLE'},503);
+ const sql=postgres(databaseUrl,{max:1,prepare:false,connect_timeout:3,idle_timeout:1});
  try {
-  const client=createClient(Deno.env.get('SUPABASE_URL')!,secret!);
+  const client=performanceCaptureDatabase(sql);
   let source:any,nextCursor=null;
   if(sport==='MLB') {
    const cursor=body.cursor??0;
@@ -56,4 +60,5 @@ Deno.serve(async req=>{
   if(sport==='MLB'&&(faults.length||adapted.diagnostics.length))nextCursor=body.cursor??0;
   return respond({ok:faults.length===0&&adapted.coverage.complete,captured,rejected:adapted.coverage.received-adapted.predictions.length,excluded,skippedOutsideWindow:adapted.predictions.length-predictions.length,reasons,diagnostics:adapted.diagnostics,faults,nextCursor,coverage:{...adapted.coverage,complete:adapted.coverage.complete&&faults.length===0}});
  }catch{return respond({ok:false,error:'CAPTURE_FAILED',coverage:{sport,complete:false,state:'ERROR'}},500);}
+ finally{await sql.end({timeout:1}).catch(()=>{});}
 });
