@@ -63,3 +63,14 @@ NBA research now distinguishes the player's own team defensive rating from oppon
 The exact NBA event matcher accepts the observed ten-minute provider/ESPN schedule offset within a 15-minute limit, requires unique exact home/away identities, and keeps the earlier eligibility cutoff. This helper is groundwork: it is not yet connected to automatic settlement and does not retroactively qualify the 130 diagnostics.
 
 Verification: 404 Node tests, 49 Python tests, and the real-schema sport receipt fixture pass. The fixture now executes the HTTP handler through the actual direct database adapter, including kickoff retry, late receipt exclusion, rollback, role restrictions and immutable payload checks. Production scheduled tracking and frontend release remain outstanding; no model weights or master merge changed.
+
+
+## November 2 hosted research tracking checkpoint
+
+Deployed track-nba-research v3 and prediction-performance v8. The dedicated worker authenticates against the private performance_service_role_key in Vault; invalid bearer tokens returned HTTP 401. It preserves first pregame snapshots, matches exact NBA team identities and the earlier scheduled cutoff, and appends explicitly labeled RESEARCH_DIRECTION_ONLY final-score outcomes. These outcomes never establish sportsbook settlement, ROI, qualified PLAYs or calibration eligibility. Diagnostic report counts and plain-language warnings support these separate results.
+
+ESPN returned 403 from the Edge runtime but 200 from the existing database HTTP client. A private RLS-protected scoreboard cache provides an asynchronous pg_net handoff: enqueue on one invocation, consume on the next, rather than waiting on nested HTTP requests. Unknown/missing/stale results stay unresolved. Schema migration 20261101153721 was applied. The original 130 snapshots remain immutable. No successful hosted grading or automatic capture is claimed.
+
+On November 2, authenticated verification request 97773 returned HTTP 402: service restricted due to exceed_egress_quota. The provider response says the project owner must upgrade or remove spend caps to restore service. No billing changes were made. performance_nba_capture_team registry is disabled and its cron remains inactive to avoid repeated failed calls. Once service access is restored: enable that registry entry, dispatch once to request scoreboards, dispatch again after responses arrive, confirm stored outcomes and API diagnostic totals, verify a fresh pregame capture and idempotent replay, then activate the existing five-minute job. Other sports remain separately gated.
+
+409 Node tests and the new real PostgreSQL-compatible schema fixture pass. Fixture covers private auth, immutable captures/results, cache handoff, denied anonymous/authenticated cache access and cooldown storage. No master merge or model-weight changes.
