@@ -433,6 +433,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": false,
       "statementCount": null
+    },
+    {
+      "version": "20261101153721",
+      "name": "nba_research_scoreboard_cache",
+      "path": "supabase/migrations/20261101153721_nba_research_scoreboard_cache.sql",
+      "sha256": "a63f4444514a761ba12b2885cae854c4496ff5a673bc087f6cafa2fb8946071e",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",

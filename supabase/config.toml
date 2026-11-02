@@ -170,3 +170,7 @@ verify_jwt = true
 
 [functions.prediction-performance]
 verify_jwt = false
+
+# Handler validates a private service bearer before any tracking work.
+[functions.track-nba-research]
+verify_jwt = false
