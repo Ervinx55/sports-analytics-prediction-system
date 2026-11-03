@@ -37,3 +37,13 @@ test('legacy history remains visible separately from qualified performance',()=>
 test('sport cards show evidence-based history messages without implementation placeholders',()=>{
  const data=fixture('MLB');data.coverage.sports[0].message='Historical MLB audit: 550 graded observations, stored separately.';const root={innerHTML:''};renderPerformance(data,root);assert.match(root.innerHTML,/550 graded observations/);assert.doesNotMatch(root.innerHTML,/Saved source contract only|live readiness unverified|Provider inventory UNVERIFIED/);
 });
+
+test('excluded hosted records explain zero outcome totals and local data separation',()=>{
+ const data=fixture();data.filters.cohort='DIAGNOSTIC';data.coverage.selected=130;
+ const root={innerHTML:''};renderPerformance(data,root);
+ assert.match(root.innerHTML,/130 saved records/);
+ assert.match(root.innerHTML,/0 records contribute/);
+ assert.match(root.innerHTML,/local tracker is stored separately/);
+ assert.match(root.innerHTML,/Observed side win rate/);
+ assert.match(root.innerHTML,/No paired samples/);
+});

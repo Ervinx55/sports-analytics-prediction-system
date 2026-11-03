@@ -24,3 +24,10 @@ test('refresh and quote timestamps cannot masquerade as decision times',()=>{
  const future=decisionPresentation({decisionAt:'2026-10-28T18:00:00Z'},data,now);
  assert.equal(future.issuedAt,null);
 });
+
+test('disabled production explains why a positive research signal still passes',()=>{
+ const d=decisionPresentation({status:'PASS',productionEligible:false,productionWeight:0,shadowStatus:'PLAY',reason:'Awaiting chronological validation.'},data,now);
+ assert.match(d.reason,/Production use is disabled/);
+ assert.match(d.reason,/research threshold/);
+ assert.equal(d.sourceReason,'Awaiting chronological validation.');
+});
