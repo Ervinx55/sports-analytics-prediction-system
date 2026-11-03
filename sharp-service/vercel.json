@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
+  "ignoreCommand": "node scripts/ignore-build.mjs",
   "functions": {
     "api/sharp.js": {
       "maxDuration": 30
