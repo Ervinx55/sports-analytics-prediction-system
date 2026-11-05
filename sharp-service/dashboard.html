@@ -2115,7 +2115,7 @@
     list.replaceChildren();
     status.textContent = 'Loading private slips…';
     try {
-      const res = await fetch('/api/edge-lab-history', {headers:{Authorization:'Bearer '+token},cache:'no-store',credentials:'same-origin'});
+      const res = await fetch('/api/dashboard?view=edge-lab-history', {headers:{Authorization:'Bearer '+token},cache:'no-store',credentials:'same-origin'});
       if(!res.ok) { status.textContent = res.status === 401 ? 'Incorrect access code.' : 'History unavailable; check secure deployment settings.'; return; }
       const {slips} = await res.json();
       if (!Array.isArray(slips)) throw Error('Invalid response');
