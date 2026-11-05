@@ -1,3 +1,4 @@
+import {performanceCaptureDatabase} from '../../supabase/functions/_shared/performance-capture-database.mjs';
 import {readFileSync,existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -39,7 +40,7 @@ try {
  source.markets[0].resultIdentity={provider:'espn',event:'123',oddsProvider:'nfl-model-provider',oddsEvent:'http-pre',validation:{status:'VALIDATED',reference:'synthetic-http-sql-crosswalk',validatedAt:sourceAt}};
  let handler;
  const handlerSource=stripTypeScriptTypes(readFileSync('supabase/functions/capture-sport-predictions/index.ts','utf8').replace(/^import .*;\r?\n/gm,''));
- vm.runInNewContext(handlerSource,{...model,...mlb,fetchModelResponse:async()=>({ok:true,body:source}),createClient:()=>({rpc:async(name,{payload})=>{assert.equal(name,'ingest_sport_prediction_v1');return {data:await write(payload),error:null};}}),Response,URL,Date,Deno:{serve:fn=>{handler=fn;},env:{get:name=>name==='SUPABASE_SERVICE_ROLE_KEY'?'fixture-secret':name==='PERFORMANCE_SPORT_CAPTURE_ENABLED'?'true':'https://fixture'}}});
+ vm.runInNewContext(handlerSource,{...model,...mlb,fetchModelResponse:async()=>({ok:true,body:source}),performanceCaptureDatabase,postgres:()=>({end:async()=>{},begin:async(mode,fn)=>{await db.exec('begin '+mode);try{const result=await fn({unsafe:async(q,args)=>args?(await db.query(q,args)).rows:(await db.exec(q)).at(-1)?.rows??[]});await db.exec('commit');return result;}catch(e){await db.exec('rollback');throw e;}}}),Response,URL,Date,Deno:{serve:fn=>{handler=fn;},env:{get:name=>name==='SUPABASE_SERVICE_ROLE_KEY'?'fixture-secret':name==='PERFORMANCE_SPORT_CAPTURE_ENABLED'?'true':'https://fixture'}}});
  const request=()=>new Request('https://fixture/capture',{method:'POST',headers:{authorization:'Bearer fixture-secret','content-type':'application/json'},body:JSON.stringify({sport:'NFL',kind:'team',requestId:'http-sql'})});
  await db.exec('set role service_role');
  const beforeHttp=await(await handler(request())).json();assert.equal(beforeHttp.captured,1);assert.equal(beforeHttp.excluded,0);

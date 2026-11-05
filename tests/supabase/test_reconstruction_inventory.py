@@ -75,7 +75,7 @@ def test_historical_migration_inventory_is_exact():
         assert (ROOT / expected_path).exists()
 
 
-EXPECTED_EDGE_FUNCTION_COUNT = 52
+EXPECTED_EDGE_FUNCTION_COUNT = 53
 
 
 def test_edge_function_recovery_is_complete_and_configured():
@@ -251,3 +251,13 @@ def test_pitchmix_capture_is_scheduled_and_authenticated():
     ]
     assert len(match) == 1
     assert match[0]["schedule"] == "*/10 * * * *"
+
+
+def test_nba_research_worker_requires_private_service_authorization():
+    source = (ROOT / "supabase/functions/track-nba-research/index.ts").read_text()
+    authorization = source.index("if(!await repo.authorized(")
+    tracking = source.index("await runNbaResearch(repo)")
+    assert authorization < tracking
+    assert "Service authentication required" in source
+    config = tomllib.loads((ROOT / "supabase/config.toml").read_text())
+    assert config["functions"]["track-nba-research"]["verify_jwt"] is False

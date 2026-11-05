@@ -1,0 +1,2 @@
+id,accountId,source,sourceId,kind,status,sport,description,placedAt,settledAt,stakeCents,returnCents,feeCents,feeIncluded,predictionId,legs,supersedes
+example-entry,replace-account-id,import,replace-stable-provider-id,cash,won,NBA,Synthetic example only,2026-01-01T12:00:00Z,2026-01-02T12:00:00Z,1000,1800,100,false,,[],

@@ -581,6 +581,8 @@ export default async function handler(req, res) {
 
       const playerResults = [];
       const projectOpportunity = createEventOpportunityProjector({
+        contextCutoff: new Date(Math.min(Date.parse(event.startsAt), Date.now())).toISOString(),
+        contextObservedAt: null,
         event,
         schedule: nflData.schedule,
         season,

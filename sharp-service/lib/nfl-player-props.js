@@ -1,3 +1,4 @@
+import { buildNflPropContext } from './nfl-prop-context.js';
 import { gunzipSync } from "node:zlib";
 import { normalizeTeam, parseCsv } from "./nfl-model.js";
 
@@ -784,8 +785,12 @@ function projectPlayerOpportunity({
   ngs,
   depthCharts,
   weatherContext = null,
-  opponentSnapshot = null
+  opponentSnapshot = null,
+  contextBuilder = buildNflPropContext,
+  contextCutoff = null,
+  contextObservedAt = null
 }) {
+  const contextSchedule = Array.isArray(schedule) ? schedule : [...(schedule?.byId?.values() || [])];
   schedule = indexSchedule(schedule);
   const cutoff = event.startsAt;
   const eventTeams = [
@@ -1061,6 +1066,12 @@ function projectPlayerOpportunity({
     opponent: eventTeams.find((team) => team !== identity.team) || null,
     dataQuality,
     historyGames: history.length,
+    context: contextBuilder({
+      schedule: contextSchedule, playerStats, season, cutoff: contextCutoff || cutoff,
+      observedAt: contextObservedAt,
+      team: identity.team,
+      opponent: eventTeams.find((team) => team !== identity.team) || null
+    }),
     role: {
       snapShare,
       targetShare,

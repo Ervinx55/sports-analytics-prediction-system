@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
+  "ignoreCommand": "node scripts/ignore-build.mjs",
   "functions": {
     "api/sharp.js": {
       "maxDuration": 30
@@ -13,6 +13,10 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api/accounts",
+      "destination": "/api/dashboard?accounts=1"
+    },
     {
       "source": "/api/nbaprops",
       "destination": "/api/nflprops?nba=1"
@@ -49,3 +53,4 @@
     }
   }
 }
+

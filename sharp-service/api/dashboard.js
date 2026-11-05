@@ -1,3 +1,5 @@
+import accountsHandler from '../handlers/accounts.js';
+import edgeLabHistoryHandler from '../handlers/edge-lab-history.js';
 import {
   getSportsGameOddsUsageSnapshot
 } from "../lib/provider-protection.js";
@@ -54,6 +56,8 @@ function settled(result) {
 }
 
 export default async function handler(req, res) {
+  if (req.query.accounts === '1') return accountsHandler(req, res);
+  if (req.query.view === 'edge-lab-history') return edgeLabHistoryHandler(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
@@ -433,3 +437,4 @@ export default async function handler(req, res) {
     },
   });
 }
+

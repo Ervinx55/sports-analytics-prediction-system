@@ -25,3 +25,9 @@ test('20MiB limit counts actual UTF8 bytes, accepts exact boundary and rejects m
  data.padding+='é';assert.equal(encoder.encode(JSON.stringify(data)).byteLength,bytes+2);await assert.rejects(readPerformance(client),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
  data.padding='';data.predictions=[{sourceKey:'界'.repeat(8*1024*1024)}];await assert.rejects(readPerformance(client),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
 });
+
+test('saved NBA diagnostics prove model output exists without implying readiness',async()=>{
+ const p={id:'nba',sport:'NBA',modelAvailable:true,modelMode:'SHADOW',valid:false,capturedAt:'2026-10-29T12:00:00Z',startsAt:'2026-10-30T00:00:00Z',eligibilityReasons:['EXACT_RESULT_MAPPING_UNAVAILABLE']};
+ const r=await readPerformance({rpc:async()=>({data:{predictions:[p],decisions:[],settlements:[]}})},{sport:'NBA',from:'2026-10-29',to:'2026-10-30'});
+ assert.equal(r.coverage.sports[0].modelAvailability,'SAVED_FORECASTS');assert.equal(r.coverage.sports[0].state,'DIAGNOSTIC_ONLY');assert.equal(r.summary.count,0);
+});

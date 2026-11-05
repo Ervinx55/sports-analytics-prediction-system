@@ -314,6 +314,26 @@ test("SharpAPI requests use API key header and documented filters", async () => 
 });
 
 
+test("SharpAPI NFL market identity rejects ambiguous and conflicting markets", () => {
+  const row = {
+    sportsbook: "draftkings", event_id: "nfl-fixture", sport: "football", league: "nfl",
+    player_name: "Fixture Receiver", selection_type: "over", odds_american: -110,
+    line: 22.5, event_start_time: "2026-11-01T18:00:00Z", is_live: false,
+    market_type: "player_receiving_yards", stat_category: "receptions"
+  };
+  const normalize = (patch) => normalizeSharpApiNflPropRows([{ ...row, ...patch }]);
+  // Broad categories must never change the explicit market's units.
+  assert.equal(normalize({})[0].props[0].statID, "receiving_yards");
+  for (const patch of [
+    { market_type: "player_receiving_yards_first_half" },
+    { market_type: "player_rushing_receiving_yards" },
+    { market_type: "unknown", stat_category: "receptions" },
+    { market_ref: { id: "player_receptions" } },
+    { league: "ncaaf" }, { sport: "basketball" },
+    { is_live: true }, { is_active: false }, { is_stale_pregame_price: true }
+  ]) assert.deepEqual(normalize(patch), [], JSON.stringify(patch));
+});
+
 test("SharpAPI NFL props normalize supported v2 markets", () => {
   const rows = [
     ["player_passing_yards", "passing_yards", "Patrick Mahomes", "over", 279.5, -110],

@@ -64,3 +64,10 @@ test('scope projection validates values under allowed keys and cannot return nes
  }
  assert.deepEqual(publicRow(p('valid',{marketScope:{period:'REGULATION',unit:'GAME',set:2,game:9007199254740991}})).marketScope,{period:'REGULATION',unit:'GAME',set:2,game:9007199254740991});
 });
+
+test('diagnostic research outcomes count directions without ROI or calibration eligibility',()=>{
+ const rows=[{...p('research'),valid:false,outcome:'WIN',settlementReason:'RESEARCH_DIRECTION_ONLY'},{...p('pending'),valid:false,outcome:'UNRESOLVED'}];
+ assert.equal(summarizePerformance(rows).summary.wins,0);
+ const r=summarizePerformance(rows,{filters:{cohort:'DIAGNOSTIC'}});
+ assert.equal(r.summary.wins,1);assert.equal(r.summary.unresolved,0);assert.equal(r.summary.hypotheticalRoi,null);assert.equal(r.summary.pairedCount,0);
+});
