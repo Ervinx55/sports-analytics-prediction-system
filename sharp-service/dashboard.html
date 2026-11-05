@@ -176,9 +176,26 @@
     <button class="tab" data-tab="market">Market</button>
     <button class="tab" data-tab="sharp">Sharp Gate</button>
     <button class="tab" data-tab="results">Results</button>
+    <button class="tab" data-tab="slipHistory">Slip History</button>
     <button class="tab" data-tab="calibration">Calibration</button>
     <button class="tab" data-tab="system">System</button>
   </div>
+
+  <section class="section" id="slipHistory">
+    <div class="section-title"><h2>Edge Lab · Slip History</h2><p>Private, user-supplied tickets</p></div>
+    <div class="card">
+      <div class="match">Your archived PrizePicks slips</div>
+      <div class="reason">Read-only historical evidence. A green in-game screenshot does not mean a wager has officially settled. The model's pregame hypotheses are tracked separately from tickets you entered.</div>
+      <form id="edgeLabUnlockForm" style="margin-top:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <label for="edgeLabToken" class="small">Private access code</label>
+        <input id="edgeLabToken" type="password" autocomplete="off" required minlength="24" placeholder="Enter your Edge Lab code" style="flex:1;min-width:170px;padding:11px;border-radius:10px;color:var(--text);background:var(--panel2);border:1px solid var(--line)">
+        <button type="submit" class="refresh">Load slips</button>
+        <button type="button" id="edgeLabLock" class="refresh">Lock</button>
+      </form>
+      <div id="edgeLabHistoryStatus" class="reason" role="status">Private history is locked. Your code is used for this request only and is not stored by the page.</div>
+    </div>
+    <div id="edgeLabHistoryList"></div>
+  </section>
 
   <section class="section active" id="today">
     <div class="section-title"><h2>Final Market Card</h2><p id="todayStamp"></p></div>
@@ -2083,6 +2100,75 @@
   }
   $("refreshBtn").addEventListener("click",()=>load(true));
   load(false);
+</script>
+<script>
+(() => {
+  const form = document.getElementById('edgeLabUnlockForm');
+  const status = document.getElementById('edgeLabHistoryStatus');
+  const list = document.getElementById('edgeLabHistoryList');
+  const input = document.getElementById('edgeLabToken');
+  const escapeText = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const token = input.value;
+    input.value = '';
+    list.replaceChildren();
+    status.textContent = 'Loading private slips…';
+    try {
+      const res = await fetch('/api/edge-lab-history', {headers:{Authorization:'Bearer '+token},cache:'no-store',credentials:'same-origin'});
+      if(!res.ok) { status.textContent = res.status === 401 ? 'Incorrect access code.' : 'History unavailable; check secure deployment settings.'; return; }
+      const {slips} = await res.json();
+      if (!Array.isArray(slips)) throw Error('Invalid response');
+      status.textContent = slips.length + ' saved slip(s). Statuses reflect stored evidence, not automatic official settlement.';
+      for (const slip of slips) {
+        const root = document.createElement('article');root.className='card';
+        const fmt = value => value == null ? '—' : ' from './performance-view.js';
+const form=document.getElementById('performanceFilters');
+const root=document.getElementById('performanceView');
+const controller=createPerformanceController({root});
+const now=new Date();form.elements.to.value=now.toISOString().slice(0,10);form.elements.from.value=new Date(now.getTime()-30*86400000).toISOString().slice(0,10);
+const params=new URLSearchParams(location.search);if(['NBA','NFL','NHL','TENNIS','SOCCER','MLB','CFB'].includes(params.get('sport')))form.elements.sport.value=params.get('sport');
+const filters=()=>Object.fromEntries(new FormData(form));
+const refresh=()=>{
+ controller.invalidate();
+ if(!form.reportValidity())return;
+ const selected=filters();
+ if(!selected.from||!selected.to||selected.from>=selected.to)return;
+ controller.load(selected);
+};
+form.addEventListener('submit',event=>{event.preventDefault();refresh();});
+form.addEventListener('change',refresh);
+root.addEventListener('click',event=>{const button=event.target.closest('[data-performance-next]');if(button)controller.load(filters(),button.dataset.performanceNext);});
+if(location.hash==='#results')document.querySelector('[data-tab="results"]').click();
+refresh();
+</script>
+</body>
+</html>
++Number(value).toFixed(2);
+        const title = document.createElement('div'); title.className='match';
+        title.textContent = (slip.event_date || 'Unknown date') + ' · ' + (slip.source || 'Saved ticket');
+        root.appendChild(title);
+        const subtitle = document.createElement('div');subtitle.className='reason';
+        subtitle.textContent = 'Entry '+fmt(slip.ticket_wager_usd)+' · Potential payout '+fmt(slip.potential_payout_usd)+' · '+String(slip.reported_slip_status || 'UNKNOWN').replaceAll('_',' ')+' · Captured '+(slip.recorded_at_stage || 'unknown');
+        root.appendChild(subtitle);
+        const grid=document.createElement('div');grid.style.cssText='display:grid;gap:8px;margin-top:12px';
+        for(const leg of slip.legs || []) {
+          const item=document.createElement('div');item.className='stat';
+          const market=String(leg.market || '').replaceAll('_',' ');
+          const original=leg.prior_assistant_paper_buy ? 'Paper model candidate'+(leg.prior_paper_line != null ? ' (original line '+leg.prior_paper_line+')' : '') : 'User ticket leg only';
+          item.innerHTML='<strong>'+escapeText(leg.player)+'</strong> · '+escapeText(leg.side)+' '+escapeText(leg.line)+' '+escapeText(market)+'<div class="small">Screenshot stat: '+escapeText(leg.screenshot_stat)+' · '+escapeText(original)+'</div>';
+          grid.appendChild(item);
+        }
+        root.appendChild(grid);
+        const note=document.createElement('p');note.className='reason';note.textContent=slip.integrity_notes || 'Unverified screenshot data';root.appendChild(note);
+        list.appendChild(root);
+      }
+    } catch { status.textContent = 'History request failed.'; }
+  });
+  document.getElementById('edgeLabLock').addEventListener('click', () => {
+    input.value = '';list.replaceChildren();status.textContent = 'Private history locked.';
+  });
+})();
 </script>
 <script type="module">
 import {createPerformanceController} from './performance-view.js';
