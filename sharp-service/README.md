@@ -148,3 +148,48 @@ By default it trains on season 2024 and scores untouched season 2025. It exclude
 Even if a fit beats the book baseline in the holdout, the runner returns `productionEligible: false`: profitability under realistic execution prices, injuries, opportunity features and an independent fee-aware review must be verified before promotion. The V3 API and dashboard continue to reject all uncalibrated BUYs.
 
 **Current source limitation (2026-11-07):** the connected Supabase `public.player_prop_quote_archive`, `public.player_prop_observations` and `public.player_prop_results` contained only MLB records. They do not supply historical NBA/NFL player-prop pricing and paired pregame model snapshots. Therefore an honest NBA/NFL win-rate, ROI and promotion decision cannot yet be computed from those tables.
+
+
+### Edge Lab V3 historical NBA/NFL data: November 7, 2026 import
+
+A **free, time-bounded reference sample** from The Odds Gap was imported into the
+private `edge_lab.external_prop_archive` table. Source files:
+- https://theoddsgap.com/api/prop-summary.csv?league=nba
+- https://theoddsgap.com/api/prop-summary.csv?league=nfl
+
+Rows use the source's identifiers, market label, opening/closing line and price,
+final stat and over/under/void outcome where present. These are provider-claimed
+historical results, **not** independently verified end-to-end. All source records
+have `quote_timestamps_verified=false`,
+`independent_result_verified=false`, `pregame_model_snapshot_available=false`
+and `calibration_eligible=false`.
+
+Import coverage at ingestion:
+- NBA Oct 20–25: 4,622 markets / 43 games / 230 players; 4,220 graded,
+  3,771 with graded outcome and closing quote
+- NFL Oct 19–25: 1,289 markets / 14 games / 408 players; 1,254 graded,
+  1,021 with graded outcome and closing quote
+- Combined: 5,911 markets and 5,474 reported graded outcomes
+
+This source does not provide an immutable Edge Lab **model prediction made
+before each game**, nor individually verified quote timestamps. It cannot
+backfill those facts and must never be passed to the calibration runner as
+`IMMUTABLE_PREGAME_SNAPSHOT`. It is valid for exploratory market and outcome
+summaries, schema tests and manual audits only.
+
+The private `edge_lab.prop_market_capture` and
+`edge_lab.prop_market_settlements` tables separate future genuinely observed
+pregame quotes from historical provider imports and verified settlement values.
+The `public.edge_lab_prop_ingest_v1` RPC is callable only by a Supabase service
+role and verifies the JWT role before insertion. The preview branch enables
+`EDGE_LAB_PROP_ARCHIVE_ENABLED=true`, whereas the stable production environment
+is unchanged. Refreshing the NBA/NFL props endpoint invokes the recorder
+opportunistically, up to 200 fresh market-book-side observations per call.
+It does not manufacture player forecasts, clear promotion gates or place bets.
+
+To perform proper backtesting, record pregame shadow predictions with a
+timestamped, versioned source and independently verify final statistics;
+preserve historical book odds snapshots and validate line/price availability;
+then train on predeclared older seasons and evaluate untouched later seasons.
+Do not score model accuracy using probabilities retroactively derived from
+the final stats or bookmaker prices alone.
