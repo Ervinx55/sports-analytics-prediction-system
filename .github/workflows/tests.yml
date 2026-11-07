@@ -32,6 +32,9 @@ jobs:
       - name: Run API regression tests
         run: node --test tests/node/*.test.mjs
 
+      - name: Run Edge Lab chronological calibration safeguards
+        run: node --test sharp-service/test/calibrate-prop-probabilities.test.mjs
+
       - name: Run Python tests
         env:
           PYTHONPATH: .
