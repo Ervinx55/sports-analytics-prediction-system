@@ -1,3 +1,4 @@
+import { screenNflPropsV3 } from "../lib/edge-lab-v3-traps.js";
 import {
   leagueBaselines,
   loadNflData,
@@ -780,6 +781,7 @@ export default async function handler(req, res) {
       shadowPlayCount: shadowPlays.length,
       shadowPlays,
       candidates,
+      edgeLabV3: screenNflPropsV3(candidates, { now: Date.now() }),
       events: eventResults,
       refreshPolicy,
       objectOptimization: {
