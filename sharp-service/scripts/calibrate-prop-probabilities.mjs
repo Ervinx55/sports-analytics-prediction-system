@@ -15,7 +15,7 @@ import { readFileSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 
 export const CALIBRATION_VERSION = 'edge-lab-v3-chronological-calibration-v1';
-const stamp = s => typeof s === 'string' && /(?:Z|[+-]\\d\\d:\\d\\d)$/.test(s) ? Date.parse(s) : NaN;
+const stamp = s => typeof s === 'string' && /(?:Z|[+-]\d\d:\d\d)$/.test(s) ? Date.parse(s) : NaN;
 const num = x => typeof x === 'number' && Number.isFinite(x);
 const clamp = (x,a,b) => Math.max(a,Math.min(b,x));
 const sigmoid = x => 1 / (1 + Math.exp(-clamp(x,-30,30)));
@@ -132,9 +132,9 @@ export function calibrate(rows,{trainSeasons=[2024],holdoutSeasons=[2025],
 }
 function main(){
   const input=process.argv.find(x=>x.startsWith('--input='))?.slice(8);
-  if(!input){process.stderr.write('Usage: node scripts/calibrate-prop-probabilities.mjs --input=historical.jsonl\\n');process.exitCode=2;return;}
-  try {const rows=readFileSync(input,'utf8').split(/\\r?\\n/).filter(Boolean).map(s=>JSON.parse(s));
-    process.stdout.write(JSON.stringify(calibrate(rows),null,2)+'\\n');}
-  catch(e){process.stderr.write(String(e.message||e)+'\\n');process.exitCode=1;}
+  if(!input){process.stderr.write('Usage: node scripts/calibrate-prop-probabilities.mjs --input=historical.jsonl\n');process.exitCode=2;return;}
+  try {const rows=readFileSync(input,'utf8').split(/\r?\n/).filter(Boolean).map(s=>JSON.parse(s));
+    process.stdout.write(JSON.stringify(calibrate(rows),null,2)+'\n');}
+  catch(e){process.stderr.write(String(e.message||e)+'\n');process.exitCode=1;}
 }
 if(process.argv[1] && import.meta.url===pathToFileURL(process.argv[1]).href)main();
