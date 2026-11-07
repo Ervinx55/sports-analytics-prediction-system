@@ -1,3 +1,4 @@
+import { screenNbaPropsV3 } from "../lib/edge-lab-v3-traps.js";
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -281,7 +282,8 @@ export default async function handler(req, res) {
       eventCount: result.events.length,
       playerCount: result.events.reduce((sum, event) => sum + event.players.length, 0),
       candidateCount: 0, shadowPlayCount: 0, shadowPlays: [], candidates: [], events: result.events,
-      refreshPolicy
+      refreshPolicy,
+      edgeLabV3: screenNbaPropsV3(result.events, { now })
     });
   } catch (error) {
     res.setHeader("Cache-Control", "no-store");
