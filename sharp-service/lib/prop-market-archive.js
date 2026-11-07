@@ -101,18 +101,17 @@ export async function capturePropResearchRows(rows, {
   const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),timeoutMs);
   try{
     const endpoint=url.replace(/\/$/,'')+
-      '/rest/v1/prop_market_capture?on_conflict=sport,event_id,player_id,stat_id,side,line,book,source_quote_at';
+      '/rest/v1/rpc/edge_lab_prop_ingest_v1';
     const response=await fetcher(endpoint,{
       method:'POST',signal:abort.signal,redirect:'error',cache:'no-store',
       headers:{
         apikey:token,Authorization:'Bearer '+token,
-        'Content-Type':'application/json','Content-Profile':'edge_lab',
-        'Prefer':'resolution=ignore-duplicates,return=minimal'
-      },body:JSON.stringify(rows.slice(0,LIMIT))
+        'Content-Type':'application/json','Accept':'application/json'
+      },body:JSON.stringify({p_rows: rows.slice(0,LIMIT)})
     });
-    return response.ok
-      ?{status:'CAPTURED_OR_DUPLICATE',count:Math.min(rows.length,LIMIT)}
-      :{status:'ARCHIVE_UNAVAILABLE',count:0};
+    if(!response.ok)return {status:'ARCHIVE_UNAVAILABLE',count:0};
+    const data = typeof response.json === 'function' ? await response.json() : null;
+    return {status:'CAPTURED_OR_DUPLICATE',count:Number.isInteger(data?.inserted)?data.inserted:0};
   }catch{return {status:'ARCHIVE_UNAVAILABLE',count:0}}
   finally{clearTimeout(timer)}
 }
