@@ -35,6 +35,9 @@ jobs:
       - name: Run Edge Lab chronological calibration safeguards
         run: node --test sharp-service/test/calibrate-prop-probabilities.test.mjs
 
+      - name: Test NBA NFL pregame quote archiving safeguards
+        run: node --test sharp-service/test/prop-market-archive.test.mjs
+
       - name: Run Python tests
         env:
           PYTHONPATH: .
