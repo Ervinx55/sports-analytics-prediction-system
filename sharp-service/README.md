@@ -133,3 +133,18 @@ The chronological player-prop workflow replays 2024-2025 for projection-error
 validation while intentionally excluding finalized historical weather. It
 cannot authorize production weight until historical sharp player-prop prices
 are available for 2024 calibration and untouched 2025 market validation.
+
+
+### Edge Lab V3 chronological prop calibration (research-only)
+
+`node --test test/calibrate-prop-probabilities.test.mjs`
+
+`node scripts/calibrate-prop-probabilities.mjs --input=/path/to/verified-pregame-history.jsonl`
+
+This offline runner accepts immutable pregame NBA or NFL market snapshots (one JSON object per line). Each row must have `sport`, `market`, `eventId`, `playerId`, `book`, `line`, `side`, `americanOdds`, `startsAt`, `predictionAt`, `quoteAt`, `settledAt`, `season`, `predictedProbability`, `actualValue`, plus explicitly verified `predictionSource: IMMUTABLE_PREGAME_SNAPSHOT`, `quoteSource: ARCHIVED_PREGAME_BOOK`, `outcomeSource: OFFICIAL_FINAL_BOX_SCORE`. No fabricated or retrospectively estimated forecasts are allowed. Source labels are claims supplied by the export pipeline and must be independently audited.
+
+By default it trains on season 2024 and scores untouched season 2025. It excludes stale/post-decision quotes, postgame data, pushes, and correlated multiple sportsbook/alternate quotes for the same player-game-stat. It requires at least 300 training and 150 held-out examples **per sport/market group** and both outcomes represented. It reports Brier score, log loss, decile reliability bins and an **unfiltered paper-return diagnostic**; that metric is not live profitability or BUY-strategy ROI. The price baseline is the exact bookmaker break-even probability, **not a no-vig fair estimate**.
+
+Even if a fit beats the book baseline in the holdout, the runner returns `productionEligible: false`: profitability under realistic execution prices, injuries, opportunity features and an independent fee-aware review must be verified before promotion. The V3 API and dashboard continue to reject all uncalibrated BUYs.
+
+**Current source limitation (2026-11-07):** the connected Supabase `public.player_prop_quote_archive`, `public.player_prop_observations` and `public.player_prop_results` contained only MLB records. They do not supply historical NBA/NFL player-prop pricing and paired pregame model snapshots. Therefore an honest NBA/NFL win-rate, ROI and promotion decision cannot yet be computed from those tables.
