@@ -1,3 +1,4 @@
+import { mapNbaArchiveQuotes, capturePropResearchRows } from "../lib/prop-market-archive.js";
 import { screenNbaPropsV3 } from "../lib/edge-lab-v3-traps.js";
 import {
   optimizeSportsGameOddsObjectLimit,
@@ -257,6 +258,7 @@ export default async function handler(req, res) {
     const identity = await verifyNbaPropRosters(result.events);
     const context = await enrichNbaPropResearchContext(identity.events);
     result.events = context.events;
+    const archiveHealth = await capturePropResearchRows(mapNbaArchiveQuotes(result.events, { now }));
     const quoteStates = result.events.flatMap((event) => event.players.map((player) => player.prop.quoteState));
     const degradedQuotes = quoteStates.filter((state) => state !== "OBSERVED").length;
     res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=120");
@@ -277,6 +279,7 @@ export default async function handler(req, res) {
         },
         playerIdentity: identity.health,
         propContext: context.health,
+        researchQuoteArchive: archiveHealth,
         playerAvailability: { status: "UNVERIFIED", source: "No verified pregame NBA injury status" }
       },
       eventCount: result.events.length,
