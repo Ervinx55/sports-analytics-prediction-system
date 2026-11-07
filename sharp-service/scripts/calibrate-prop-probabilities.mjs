@@ -50,7 +50,8 @@ export function prepareHistory(rows) {
   const rejects={},accepted=[],keys=new Set();
   for(const r of rows){
     let error=validateHistoricalRow(r);
-    // One outcome per player-game-market: correlated books, sides and alternate lines do NOT count as independent samples.\n    const key=[r.sport,r.market,r.eventId,r.playerId].join('|');
+    // One outcome per player-game-market: correlated books, sides and alternate lines do NOT count as independent samples.
+    const key=[r.sport,r.market,r.eventId,r.playerId].join('|');
     if (!error && keys.has(key)) error='CORRELATED_DUPLICATE_PLAYER_GAME_MARKET';
     if(error){rejects[error]=(rejects[error]||0)+1;continue;}
     keys.add(key);
