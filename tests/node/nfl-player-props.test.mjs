@@ -418,3 +418,30 @@ test('event projection reuse preserves real projections and every sportsbook can
   }
   assert.deepEqual(actual, original);
 });
+
+test('event context builds once per team and remains isolated between requests', () => {
+  const calls = [];
+  const builder = args => { calls.push(args); return { team: args.team, opponent: args.opponent, generation: calls.length }; };
+  const project = args => ({ context: args.contextBuilder({ team: args.preferredTeam, opponent: args.preferredTeam === 'GB' ? 'CHI' : 'GB', cutoff: args.contextCutoff }) });
+  const data = { contextCutoff: '2026-09-01T12:00:00Z' };
+  const first = createEventOpportunityProjector(data, project, builder);
+  const a = first({ playerName: 'One', preferredTeam: 'GB' });
+  const b = first({ playerName: 'Two', preferredTeam: 'GB' });
+  assert.strictEqual(a.context, b.context);
+  first({ playerName: 'Three', preferredTeam: 'CHI' });
+  assert.equal(calls.length, 2);
+  const second = createEventOpportunityProjector(data, project, builder);
+  assert.notStrictEqual(second({ playerName: 'One', preferredTeam: 'GB' }).context, a.context);
+  assert.equal(calls.length, 3);
+});
+
+test('context-only cutoff leaves historical control projection unchanged', () => {
+  const args = { event, schedule, season: 2026, playerStats, snapCounts, ngs, depthCharts, playerName: 'Jayden Reed' };
+  const control = projectPlayerOpportunity(args);
+  let input;
+  const actual = projectPlayerOpportunity({ ...args, contextCutoff: '2026-09-01T12:00:00Z', contextObservedAt: '2026-09-01T11:00:00Z', contextBuilder: value => { input = value; return { marker: true }; } });
+  assert.deepEqual(actual.projections, control.projections);
+  assert.equal(input.cutoff, '2026-09-01T12:00:00Z');
+  assert.equal(input.observedAt, '2026-09-01T11:00:00Z');
+  assert.deepEqual(actual.context, { marker: true });
+});

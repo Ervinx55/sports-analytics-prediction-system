@@ -1,9 +1,14 @@
+import { mapNbaArchiveQuotes, capturePropResearchRows } from "../lib/prop-market-archive.js";
+import { screenNbaPropsV3 } from "../lib/edge-lab-v3-traps.js";
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
 } from "../lib/provider-protection.js";
 import { adaptiveRefreshPolicy } from "../lib/adaptive-refresh.js";
 import { fetchSharpApiNbaProps } from "../lib/sharpapi-provider.js";
+
+import { enrichNbaPropResearchContext } from "../lib/nba-prop-research-context.js";
+import { verifyNbaPropRosters } from "../lib/nba-prop-identity.js";
 
 const VERSION = "nba-observed-player-markets-v1";
 const REASON = "PLAYER_IDENTITY_OR_AVAILABILITY_UNVERIFIED";
@@ -250,6 +255,10 @@ export default async function handler(req, res) {
       priority: "critical", now
     });
     const result = await resolveProvider({ keys, books: selectedBooks, window, requestedLimit, refreshPolicy, now });
+    const identity = await verifyNbaPropRosters(result.events);
+    const context = await enrichNbaPropResearchContext(identity.events);
+    result.events = context.events;
+    const archiveHealth = await capturePropResearchRows(mapNbaArchiveQuotes(result.events, { now }));
     const quoteStates = result.events.flatMap((event) => event.players.map((player) => player.prop.quoteState));
     const degradedQuotes = quoteStates.filter((state) => state !== "OBSERVED").length;
     res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60, stale-while-revalidate=120");
@@ -268,13 +277,16 @@ export default async function handler(req, res) {
             [state, quoteStates.filter((value) => value === state).length])),
           usage: result.usage, objectPolicy: result.objectPolicy, failures: result.failures
         },
-        playerIdentity: { status: "UNVERIFIED", source: "Provider identity only; no ESPN player join" },
+        playerIdentity: identity.health,
+        propContext: context.health,
+        researchQuoteArchive: archiveHealth,
         playerAvailability: { status: "UNVERIFIED", source: "No verified pregame NBA injury status" }
       },
       eventCount: result.events.length,
       playerCount: result.events.reduce((sum, event) => sum + event.players.length, 0),
       candidateCount: 0, shadowPlayCount: 0, shadowPlays: [], candidates: [], events: result.events,
-      refreshPolicy
+      refreshPolicy,
+      edgeLabV3: screenNbaPropsV3(result.events, { now })
     });
   } catch (error) {
     res.setHeader("Cache-Control", "no-store");

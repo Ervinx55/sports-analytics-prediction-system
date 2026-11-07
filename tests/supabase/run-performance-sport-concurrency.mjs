@@ -16,8 +16,9 @@ try {
   const waitLock=async()=>{for(let i=0;i<100;i++){const [s]=await db`select wait_event_type from pg_stat_activity where pid=${pidB}`;if(s?.wait_event_type==='Lock')return;await new Promise(r=>setTimeout(r,10));}throw Error('expected independent source lock wait');};
   const waitStart=async start=>{const ms=Date.parse(start)-Date.now()+30;if(ms>0)await new Promise(r=>setTimeout(r,ms));};
   const fixture=(key,start)=>({sourceKey:key,sport:'NFL',eventKey:key,marketType:'moneyline',side:'home',modelVersion:'receipt-native',modelMode:'SHADOW',modelAvailable:true,capturedAt:new Date(Date.now()-60000).toISOString(),startsAt:start,eligibilityStartsAt:start,quoteAt:new Date(Date.now()-60000).toISOString(),book:'fixture',odds:-110,modelProbability:.6,marketProbability:.5,probabilityBasis:'CONDITIONAL_NO_PUSH',sourceIds:{provider:'fixture',event:key},settlementRule:{version:'fixture'},provenance:{productionWeight:0},eligibilityReasons:[]});
-  const p=fixture('receipt:prestart',new Date(Date.now()+400).toISOString());
   await a`begin`;await b`begin`;await a`set local role service_role`;await b`set local role service_role`;
+  // Establish roles before starting the deadline; shared CI runners can spend more than 400ms here.
+  const p=fixture('receipt:prestart',new Date(Date.now()+5000).toISOString());
   const [first]=await a`select ingest_sport_prediction_v1(${db.json(p)}::jsonb)->>'id' as id`;
   const pending=b`select ingest_sport_prediction_v1(${db.json(p)}::jsonb)->>'id' as id`.then(x=>x);await waitLock();await waitStart(p.startsAt);await a`commit`;const [retry]=await pending;await b`commit`;assert.equal(retry.id,first.id);
   const [saved]=await db`select valid,payload from performance_predictions where id=${first.id}`;assert.equal(saved.valid,true);assert.equal(saved.payload.provenance.captureReceipt.postStart,false);
@@ -36,5 +37,5 @@ try {
   const [count]=await db`select count(*)::int as n from performance_predictions`;assert.equal(count.n,3);
   console.log('Native sport receipt concurrency passed: pre/post immutable retry; source-lock wait crossing kickoff excluded; concurrent post-start duplicate; source drift rejected.');
  }finally{try{await a`rollback`;await b`rollback`;}finally{a.release();b.release();}}
-}catch(e){console.error(e.message,e.code??'');process.exitCode=1;}finally{if(db)await db.end();await admin`drop database if exists ${admin(name)} with (force)`;await admin.end();}
+}catch(e){console.error(e.stack??e.message,e.code??'');process.exitCode=1;}finally{if(db)await db.end();await admin`drop database if exists ${admin(name)} with (force)`;await admin.end();}
 

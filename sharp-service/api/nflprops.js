@@ -1,3 +1,5 @@
+import { mapNflArchiveQuotes, capturePropResearchRows } from "../lib/prop-market-archive.js";
+import { screenNflPropsV3 } from "../lib/edge-lab-v3-traps.js";
 import {
   leagueBaselines,
   loadNflData,
@@ -581,6 +583,8 @@ export default async function handler(req, res) {
 
       const playerResults = [];
       const projectOpportunity = createEventOpportunityProjector({
+        contextCutoff: new Date(Math.min(Date.parse(event.startsAt), Date.now())).toISOString(),
+        contextObservedAt: null,
         event,
         schedule: nflData.schedule,
         season,
@@ -678,6 +682,8 @@ export default async function handler(req, res) {
       return (b.evPct ?? -999) - (a.evPct ?? -999);
     });
 
+    const archiveHealth = await capturePropResearchRows(mapNflArchiveQuotes(candidates, { now: Date.now() }));
+
     const shadowPlays = candidates.filter(
       (candidate) => candidate.shadowStatus === "PLAY"
     );
@@ -754,6 +760,7 @@ export default async function handler(req, res) {
       sourceHealth: {
         ...playerData.sourceHealth,
         teamModel: nflData.sourceHealth,
+        researchQuoteArchive: archiveHealth,
         provider: {
           source: provider.source,
           chain: [
@@ -778,6 +785,7 @@ export default async function handler(req, res) {
       shadowPlayCount: shadowPlays.length,
       shadowPlays,
       candidates,
+      edgeLabV3: screenNflPropsV3(candidates, { now: Date.now() }),
       events: eventResults,
       refreshPolicy,
       objectOptimization: {

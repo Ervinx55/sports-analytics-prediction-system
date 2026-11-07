@@ -899,6 +899,23 @@
           "sha256": "60d3c33c4772d95c206de7cce596492e688124d46fa852b731ebaab2ebf17e0b"
         }
       ]
+    },
+    {
+      "slug": "track-nba-research",
+      "status": "ACTIVE",
+      "verify_jwt": false,
+      "appliedToProduction": true,
+      "bundle_sha256": "d0ce2e3a42c0967e8b105a2ecb4e265058ec65f4ece031124dcc117d488439b7",
+      "bundle_hash_basis": "Local entrypoint source; deployed bundle hash not asserted",
+      "entrypoint": "index.ts",
+      "authentication": "Private service bearer validated against Vault before tracking",
+      "files": [
+        {
+          "path": "supabase/functions/track-nba-research/index.ts",
+          "name": "index.ts",
+          "sha256": "d0ce2e3a42c0967e8b105a2ecb4e265058ec65f4ece031124dcc117d488439b7"
+        }
+      ]
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

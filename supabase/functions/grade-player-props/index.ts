@@ -1,4 +1,5 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import postgres from 'npm:postgres@3.4.9';
+import {gradingRepository} from '../_shared/grading-database.mjs';
 
 async function fetchJson(url: string) {
   const r = await fetch(url, { headers: { accept: "application/json" } });
@@ -34,6 +35,7 @@ function actualStat(feed: any, playerId: number, statId: string): number | null 
 }
 
 Deno.serve(async (req) => {
+  let sql;
   try {
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ error: "POST only" }), {
@@ -42,33 +44,22 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-    );
+    const url=Deno.env.get('SUPABASE_DB_URL');
+    if(!url)throw Error('GRADING_DATABASE_UNAVAILABLE');
+    sql=postgres(url,{max:1,prepare:false,connect_timeout:3,idle_timeout:1});
+    const repository=gradingRepository(sql);
+    if(!await repository.authorized(req.headers.get('authorization')))return new Response(JSON.stringify({error:'Pipeline authentication required'}),{status:401,headers:{'content-type':'application/json'}});
 
     const floor = new Date(Date.now() - 7 * 86400_000).toISOString();
     const cutoff = new Date().toISOString();
 
-    const { data: observations, error: obsError } = await supabase
-      .from("player_prop_observations")
-      .select("*")
-      .gte("starts_at", floor)
-      .lte("starts_at", cutoff)
-      .order("starts_at", { ascending: false })
-      .limit(5000);
-
-    if (obsError) throw obsError;
+    const observations=await repository.observations('prop',floor,cutoff);
 
     const ids = (observations ?? []).map((x: any) => x.id);
     const graded = new Set<number>();
 
     for (let i = 0; i < ids.length; i += 500) {
-      const { data, error } = await supabase
-        .from("player_prop_results")
-        .select("observation_id")
-        .in("observation_id", ids.slice(i, i + 500));
-      if (error) throw error;
+      const data=await repository.existing('prop',ids.slice(i,i+500));
       for (const row of data ?? []) graded.add(Number(row.observation_id));
     }
 
@@ -145,11 +136,7 @@ Deno.serve(async (req) => {
       }
 
       if (inserts.length) {
-        const { error } = await supabase
-          .from("player_prop_results")
-          .upsert(inserts, { onConflict: "observation_id" });
-        if (error) throw error;
-        rowsGraded += inserts.length;
+        rowsGraded += await repository.save('prop',inserts);
       }
 
       gamesGraded++;
@@ -166,15 +153,16 @@ Deno.serve(async (req) => {
       { headers: { "content-type": "application/json" } },
     );
   } catch (error) {
+    console.error('GRADING_FAILED',{code:typeof error?.code==='string'&&/^[A-Z0-9_]{1,30}$/.test(error.code)?error.code:'UNKNOWN'});
     return new Response(
       JSON.stringify({
         ok: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "GRADING_FAILED",
       }),
       {
         status: 500,
         headers: { "content-type": "application/json" },
       },
     );
-  }
+  } finally {if(sql)await sql.end({timeout:1}).catch(()=>{});}
 });

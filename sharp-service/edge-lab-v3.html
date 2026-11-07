@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edge Lab V3 — Trap Review</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif;background:#07101d;color:#edf4ff}
+*{box-sizing:border-box}body{margin:0 auto;max-width:1120px;padding:28px 18px;line-height:1.5}
+a{color:#78c8ff}h1{margin:0 0 4px}p,small{color:#afc1d8}
+.panel{background:#101f35;border:1px solid #263e5c;border-radius:14px;padding:17px;margin:16px 0}
+button,select{background:#203a59;color:white;border:1px solid #42658b;border-radius:8px;padding:10px 14px;font:inherit}
+button{cursor:pointer}button:hover{background:#2c5075}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.grow{flex:1}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:left;padding:10px;border-bottom:1px solid #24364e;vertical-align:top}
+th{color:#9ab0ca}.table{overflow-x:auto}
+.warn{color:#ffca73}.good{color:#6ce4aa}.pill{display:inline-block;border:1px solid #aa6b42;border-radius:20px;padding:2px 8px;color:#ffca73}
+.muted{color:#a4b6cc}#status{min-height:25px}
+</style></head><body>
+<div class="row"><div class="grow"><h1>Edge Lab V3</h1><p>Probability · Value · Trap Review — research preview</p></div><a href="/dashboard">Return to dashboard</a></div>
+<section class="panel">
+<p><strong>Execution gate:</strong> Only independently calibrated production probabilities can support a BUY. Market implied probability is the price's break-even requirement, <em>not</em> the probability of winning. The NBA/NFL models remain shadow-only.</p>
+<div class="row"><label for="sport">Sport</label><select id="sport"><option value="NBA">NBA</option><option value="NFL">NFL</option></select>
+<button id="load" type="button">Refresh research quotes</button></div>
+<p id="status" aria-live="polite">Select a sport and refresh. Refreshing may use your odds-provider quota.</p>
+</section>
+<section class="panel"><div class="row"><h2 class="grow">Summary</h2><span id="summary" class="muted">Not loaded</span></div>
+<p class="muted">Most-likely and best-value lists only show markets with a validated probability. Price-only comparisons are not betting recommendations.</p>
+<div id="metrics" class="row"></div></section>
+<section class="panel"><div class="row"><h2 class="grow">Market diagnostics</h2><label for="filter">Filter</label><select id="filter"><option value="all">All</option><option value="risk">High-risk traps</option></select></div>
+<div class="table"><table><thead><tr><th>Player</th><th>Market</th><th>Book / quote</th><th>Break-even</th><th>Calibrated P(hit)</th><th>Decision</th><th>Trap reasons</th></tr></thead><tbody id="markets"><tr><td colspan="7" class="muted">No research data loaded.</td></tr></tbody></table></div></section>
+<script type="module">
+const $=id=>document.getElementById(id);let markets=[];
+const fmtPct=v=>typeof v==="number"&&Number.isFinite(v)?(v*100).toFixed(1)+"%":"Unavailable";
+function cell(tr,t){const td=document.createElement("td");td.textContent=t;tr.append(td);return td}
+function render(){const body=$("markets");body.replaceChildren();let shown=markets.filter(x=>$("filter").value!=="risk"||(x.trapFlags||[]).some(f=>f.severity==="HIGH"));
+if(!shown.length){const tr=document.createElement("tr");const td=cell(tr,"No matching markets.");td.colSpan=7;body.append(tr);return}
+for(const x of shown.slice(0,50)){const tr=document.createElement("tr");cell(tr,x.playerName||"Unknown");cell(tr,[x.side||"",x.line??"",x.market||""].join(" "));cell(tr,[x.book||"",x.americanOdds??""].join(" "));cell(tr,fmtPct(x.breakEvenProbability));cell(tr,fmtPct(x.calibratedHitProbability));const d=cell(tr,x.decision||"AVOID");d.className=x.decision==="BUY"?"good":"warn";cell(tr,(x.trapFlags||[]).map(f=>f.code.replaceAll("_"," ")).join(", ")||"None");body.append(tr)}}
+$("filter").addEventListener("change",render);
+$("load").addEventListener("click",async()=>{const btn=$("load");btn.disabled=true;$("status").textContent="Loading current published markets…";$("summary").textContent="";$("metrics").replaceChildren();markets=[];render();
+try{const league=$("sport").value;const path=league==="NBA"?"/api/nbaprops":"/api/nflprops";const ctl=new AbortController();const timeout=setTimeout(()=>ctl.abort(),30000);let r;try{r=await fetch(path,{signal:ctl.signal,cache:"no-store",headers:{accept:"application/json"}})}finally{clearTimeout(timeout)}const json=await r.json();if(!r.ok)throw Error(json.error||"Markets unavailable");const v=json.edgeLabV3;if(!v)throw Error("This deployment does not include V3 diagnostics");markets=v.priceComparisonOnly||[];const archive=json.sourceHealth?.researchQuoteArchive;const archiveMessage=archive?" · Archive: "+String(archive.status||"UNAVAILABLE").replaceAll("_"," ")+" ("+(Number(archive.count)||0)+" newly stored)":"";$("status").textContent="Loaded "+league+" research quotes. Last response: "+(json.generatedAt||"not specified")+archiveMessage;$("summary").textContent=v.marketsReviewed+" market/book sides screened · "+v.buyCount+" verified BUYs";for(const [name,val] of [["Validated most-likely markets",v.mostLikely.length],["Validated value-ranked markets",v.bestValue.length],["Price-only rows displayed",markets.length]]){const pill=document.createElement("span");pill.className="pill";pill.textContent=name+": "+val;$("metrics").append(pill)}render()}catch(e){$("status").textContent="Could not load market data: "+(e.message||String(e));}finally{btn.disabled=false}});
+</script></body></html>

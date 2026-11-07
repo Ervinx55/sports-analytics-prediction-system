@@ -1,3 +1,4 @@
+import {performanceDatabaseClient} from '../../supabase/functions/_shared/performance-database-read.mjs';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {pathToFileURL} from 'node:url';
@@ -27,25 +28,27 @@ try{
  await sql.unsafe("insert into performance_settlement_queue(prediction_id,sport,provider,attempts,last_error) select id,'MLB','fixture',1,'HTTP_429' from performance_predictions where source_key='fixture:2';");
  await sql.unsafe("insert into performance_decisions(source_key,prediction_id,market_key,issued_at,status,qualified,evidence,legacy_reconstructed,payload) select 'legacy:fixture2',id,'market:2','2026-10-01T12:01:00Z'::timestamptz,'PASS',false,'{}',true,'{}' from performance_predictions where source_key='fixture:2';");
  await sql.unsafe('set role service_role');
- const client={rpc:async(_name,args)=>({data:(await sql.unsafe('select read_performance_v1($1::timestamptz,$2::timestamptz,$3::text) value',[args.p_from,args.p_to,args.p_sport]))[0].value,error:null})};
+ const transactionSql=sql.begin?sql:{begin:async(options,fn)=>{await sql.unsafe('begin '+options);try{const result=await fn(sql);await sql.unsafe('commit');return result;}catch(error){await sql.unsafe('rollback');throw error;}}};
+ const client=performanceDatabaseClient(transactionSql);
+ await assert.rejects(client.rpc('ingest_prediction_v1',{}),/Unsupported performance read/);
  const f={sport:'MLB',from:'2026-10-01',to:'2026-10-03'};
  const first=await readPerformance(client,f);assert.equal(first.summary.count,250);assert.equal(first.summary.wins,249);assert.equal(first.summary.losses,1);assert.equal(first.rows.length,100);assert.equal(first.nextCursor,'100');assert.equal(first.summary.distinctGames,250);
- const all=(await client.rpc('',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;const imported=all.predictions.find(p=>p.sourceKey==='fixture:1');assert.equal(imported.legacyReconstructed,true,'SQL must project immutable imported provenance');
+ const all=(await client.rpc('read_performance_v1',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;const imported=all.predictions.find(p=>p.sourceKey==='fixture:1');assert.equal(imported.legacyReconstructed,true,'SQL must project immutable imported provenance');
  const legacy=await readPerformance(client,{...f,cohort:'LEGACY'});assert.equal(legacy.rows.length,2);assert.ok(legacy.rows.every(r=>r.legacyReconstructed===true));assert.equal(legacy.rows.find(r=>r.id===imported.id).issuedAt,null);
  const allPages=[first.rows,(await readPerformance(client,{...f,cursor:'100'})).rows,(await readPerformance(client,{...f,cursor:'200'})).rows].flat();assert.equal(allPages.find(r=>r.id===imported.id).legacyReconstructed,true);
  assert.equal(first.coverage.retryReasons.HTTP_429,1);assert.equal(first.coverage.providerState,'PROVIDER_UNAVAILABLE_OR_RETRY_PENDING');
  const third=await readPerformance(client,{...f,cursor:'200'});assert.equal(third.rows.length,50);assert.equal(third.summary.count,250);assert.equal(third.nextCursor,null);assert.ok(!JSON.stringify(first).includes('never public'));
  const diagnostic=await readPerformance(client,{...f,sport:'NFL'});assert.equal(diagnostic.coverage.diagnosticCount,1);assert.equal(diagnostic.coverage.exclusions.MODEL_UNAVAILABLE,1);assert.equal(diagnostic.summary.count,0);const diagnosticHistory=await readPerformance(client,{...f,sport:'NFL',cohort:'DIAGNOSTIC'});assert.equal(diagnosticHistory.rows[0].legacyReconstructed,true);
- const raw=(await client.rpc('',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;assert.equal(raw.settlements.length,250);assert.equal(raw.settlements.find(s=>s.revision===2).outcome,'LOSS');
+ const raw=(await client.rpc('read_performance_v1',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;assert.equal(raw.settlements.length,250);assert.equal(raw.settlements.find(s=>s.revision===2).outcome,'LOSS');
  for(const role of ['anon','authenticated']){await sql.unsafe('reset role');await sql.unsafe('set role '+role);await assert.rejects(sql.unsafe("select read_performance_v1('2026-10-01','2026-10-03',null)"),/permission denied/);await assert.rejects(sql.unsafe('select * from performance_predictions'),/permission denied/);}
  await sql.unsafe('reset role');
  const decisions="insert into performance_decisions(source_key,prediction_id,market_key,issued_at,status,qualified,evidence,legacy_reconstructed,payload) select 'decision:'||i,p.id,'diagnostic','2026-10-01T12:01:00Z'::timestamptz,'PASS',false,'{}',false,'{}' from performance_predictions p cross join generate_series($1::int,$2::int)i where p.source_key='diagnostic'";
  await sql.unsafe(decisions,[1,30000]);await sql.unsafe('set role service_role');
- assert.equal((await client.rpc('',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'NFL'})).data.decisions.length,30000);
+ assert.equal((await client.rpc('read_performance_v1',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'NFL'})).data.decisions.length,30000);
  await sql.unsafe('reset role');await sql.unsafe(decisions,[30001,30001]);await sql.unsafe('set role service_role');
  await assert.rejects(readPerformance(client,{...f,sport:'NFL'}),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
  await sql.unsafe('reset role');await sql.unsafe(insert,[251,10000]);await sql.unsafe('set role service_role');
- const exact=(await client.rpc('',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;assert.equal(exact.predictions.length,10000);
+ const exact=(await client.rpc('read_performance_v1',{p_from:'2026-10-01',p_to:'2026-10-03',p_sport:'MLB'})).data;assert.equal(exact.predictions.length,10000);
  await sql.unsafe('reset role');await sql.unsafe("insert into performance_predictions(source_key,model_available,captured_at,source_ids,provenance,market_key,eligibility_reasons,valid,payload) values('over-limit',false,'2026-10-01T12:00:00Z','{}','{}','over-limit','[]',false,'{\"sport\":\"MLB\"}');");await sql.unsafe('set role service_role');
  await assert.rejects(readPerformance(client,f),/PERFORMANCE_READ_LIMIT_EXCEEDED/);
  assert.equal((await sql.unsafe("select count(*)::int count from performance_predictions"))[0].count,10002,'read never mutates ledger');

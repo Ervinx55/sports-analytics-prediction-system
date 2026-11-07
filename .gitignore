@@ -12,3 +12,6 @@ supabase/.temp/
 supabase/.branches/
 tests/supabase/tooling/node_modules/
 /.superpowers/
+
+# Local-only research ledger, logs and reports
+/local-data/
