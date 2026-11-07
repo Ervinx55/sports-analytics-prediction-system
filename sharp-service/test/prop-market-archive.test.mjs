@@ -43,11 +43,10 @@ test('archiver uses private schema and deduplicated conflict target',async()=>{
     SUPABASE_SERVICE_ROLE_KEY:'private-test-only'},
   fetcher:async(url,opt)=>{
     called=true;
-    assert.match(url,/\/rest\/v1\/prop_market_capture\?on_conflict=/);
-    assert.equal(opt.headers['Content-Profile'],'edge_lab');
-    assert.equal(opt.headers.Prefer,'resolution=ignore-duplicates,return=minimal');
-    assert.equal(JSON.parse(opt.body)[0].sport,'NBA');
-    return {ok:true};
+    assert.match(url,/\/rest\/v1\/rpc\/edge_lab_prop_ingest_v1$/);
+    assert.equal(opt.headers.Accept,'application/json');
+    assert.equal(JSON.parse(opt.body).p_rows[0].sport,'NBA');
+    return {ok:true,json:async()=>({inserted:1})};
   }
  });
  assert.equal(called,true);
