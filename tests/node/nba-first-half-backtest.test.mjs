@@ -10,7 +10,8 @@ function fixture(n = 40) {
     return {
       game_id: "TEST_" + i, tipoff_utc: tipoff,
       quote_checked_utc: checked, sharp_checked_utc: checked,
-      home_spread: "-3.5", american_odds: "-110",
+      home_spread: "-3.5", sharp_home_spread: "-3.5", american_odds: "-110",
+      model_captured_utc: checked,
       sharp_no_vig_home_cover: "0.54",
       pregame_expected_home_margin: "4",
       pregame_margin_stddev: "12",
@@ -39,6 +40,10 @@ test("normalize rejects post-tipoff odds, future data and duplicate IDs", () => 
     sharp_checked_utc: "2025-01-01T19:00:00Z"}]), /stale price/);
   assert.throws(() => normalizeRows([{...data[0],
     halftime_home_score: ""}]), /missing halftime_home_score/);
+  assert.throws(() => normalizeRows([{...data[0],
+    sharp_home_spread: "-4.5"}]), /sharp line does not match/);
+  assert.throws(() => normalizeRows([{...data[0],
+    model_captured_utc: data[0].tipoff_utc}]), /post-tipoff/);
 });
 
 test("no in-game/previous-day leakage and push excluded from binary scoring", () => {
@@ -77,6 +82,7 @@ test("push outcomes are excluded from binary Brier but included in ticket ROI", 
   const rows = fixture(40);
   for (const row of rows) {
     row.home_spread = "-3";
+    row.sharp_home_spread = "-3";
     row.halftime_home_score = "55";
     row.halftime_away_score = "52";
   }
