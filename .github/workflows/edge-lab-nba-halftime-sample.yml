@@ -1,0 +1,42 @@
+name: Edge Lab NBA Historical Halftime Score Sample
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/edge-lab-first-half-shadow-v1
+    paths:
+      - scripts/nba/collect-first-half-history.mjs
+      - .github/workflows/edge-lab-nba-halftime-sample.yml
+
+permissions:
+  contents: read
+
+jobs:
+  collect-real-scores:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Stage real November 7 2026 NBA first-half scoreboard records
+        run: |
+          node scripts/nba/collect-first-half-history.mjs --date=2026-11-07 --scores-only --output=artifacts/nba-halftime-2026-11-07.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const r=JSON.parse(fs.readFileSync("artifacts/nba-halftime-2026-11-07.json","utf8"));
+            if(r.market!=="spreads_h1" || r.scores.length<1 || r.odds.length!==0) throw new Error("Unexpected or empty real-score staging");
+            for(const g of r.scores){
+              if(!Number.isInteger(g.halftime_home_score)||!Number.isInteger(g.halftime_away_score)) throw new Error("Missing quarter scores");
+              if(!g.tipoff_utc||!g.score_event_id) throw new Error("Missing provenance");
+            }
+            console.log(JSON.stringify({source:"ESPN scoreboard",date:r.date,finalGames:r.scores.length,paidOddsRequests:0,backtestReady:false}));
+          '
+      - name: Upload raw source-backed staging for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: nba-halftime-real-scores-2026-11-07
+          path: artifacts/nba-halftime-2026-11-07.json
+          retention-days: 14
