@@ -8,6 +8,7 @@ on:
       - "scripts/nba/collect-first-half-history.mjs"
       - "tests/node/nba-first-half-*.test.mjs"
       - ".github/workflows/edge-lab-nba-first-half-shadow.yml"
+      - ".github/workflows/edge-lab-nba-halftime-sample.yml"
   push:
     branches:
       - "feature/edge-lab-first-half-shadow-v1"
@@ -38,3 +39,25 @@ jobs:
           node --check sharp-service/lib/nba-first-half-shadow.js
           node --check scripts/nba/backtest-first-half-shadow.mjs
           node --check scripts/nba/collect-first-half-history.mjs
+  historical-score-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Fetch final NBA Nov 7 halftime scores (no paid odds queries)
+        run: |
+          node scripts/nba/collect-first-half-history.mjs --date=2026-11-07 --scores-only --output=artifacts/nba-halftime-2026-11-07.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const r=JSON.parse(fs.readFileSync("artifacts/nba-halftime-2026-11-07.json","utf8"));
+            if(r.scores.length<1 || r.odds.length!==0) throw new Error("No verified final NBA score records or unintended paid data");
+            console.log(JSON.stringify({finalGames:r.scores.length,source:r.metadata.scoreboard,oddsRequests:0,backtestReady:false}));
+          '
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nba-halftime-staging-2026-11-07
+          path: artifacts/nba-halftime-2026-11-07.json
+          retention-days: 14
