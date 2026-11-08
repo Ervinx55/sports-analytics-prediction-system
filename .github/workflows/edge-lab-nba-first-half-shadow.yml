@@ -5,6 +5,7 @@ on:
     paths:
       - "sharp-service/lib/nba-first-half-shadow.js"
       - "scripts/nba/backtest-first-half-shadow.mjs"
+      - "scripts/nba/evaluate-first-half-readiness.mjs"
       - "scripts/nba/collect-first-half-history.mjs"
       - "tests/node/nba-first-half-*.test.mjs"
       - ".github/workflows/edge-lab-nba-first-half-shadow.yml"
@@ -15,6 +16,7 @@ on:
     paths:
       - "sharp-service/lib/nba-first-half-shadow.js"
       - "scripts/nba/backtest-first-half-shadow.mjs"
+      - "scripts/nba/evaluate-first-half-readiness.mjs"
       - "scripts/nba/collect-first-half-history.mjs"
       - "tests/node/nba-first-half-*.test.mjs"
       - ".github/workflows/edge-lab-nba-first-half-shadow.yml"
@@ -33,11 +35,12 @@ jobs:
         with:
           node-version: "20"
       - name: Run first-half shadow and audit tests
-        run: node --test tests/node/nba-first-half-shadow.test.mjs tests/node/nba-first-half-backtest.test.mjs tests/node/nba-first-half-collector.test.mjs
+        run: node --test tests/node/nba-first-half-shadow.test.mjs tests/node/nba-first-half-backtest.test.mjs tests/node/nba-first-half-collector.test.mjs tests/node/nba-first-half-readiness.test.mjs
       - name: Syntax-check engine and audit
         run: |
           node --check sharp-service/lib/nba-first-half-shadow.js
           node --check scripts/nba/backtest-first-half-shadow.mjs
+          node --check scripts/nba/evaluate-first-half-readiness.mjs
           node --check scripts/nba/collect-first-half-history.mjs
   historical-score-smoke:
     runs-on: ubuntu-latest
