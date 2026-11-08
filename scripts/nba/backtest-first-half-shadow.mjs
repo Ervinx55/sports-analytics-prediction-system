@@ -11,8 +11,8 @@ import { spreadOutcome, sportsbookEv } from "../../sharp-service/lib/nba-first-h
 
 export const HEADERS = [
   "game_id", "tipoff_utc", "quote_checked_utc", "sharp_checked_utc",
-  "home_spread", "american_odds", "sharp_no_vig_home_cover",
-  "pregame_expected_home_margin", "pregame_margin_stddev",
+  "home_spread", "sharp_home_spread", "american_odds", "sharp_no_vig_home_cover",
+  "model_captured_utc", "pregame_expected_home_margin", "pregame_margin_stddev",
   "halftime_home_score", "halftime_away_score", "rotation_confirmed"
 ];
 
@@ -70,12 +70,14 @@ export function normalizeRows(raw) {
     const tipoff = strictTime(r.tipoff_utc, "tipoff_utc", id);
     const quoteTime = strictTime(r.quote_checked_utc, "quote_checked_utc", id);
     const sharpTime = strictTime(r.sharp_checked_utc, "sharp_checked_utc", id);
-    if (quoteTime >= tipoff || sharpTime >= tipoff) throw new Error(id + ": post-tipoff price leakage");
+    const modelTime = strictTime(r.model_captured_utc, "model_captured_utc", id);
+    if (quoteTime >= tipoff || sharpTime >= tipoff || modelTime >= tipoff) throw new Error(id + ": post-tipoff price leakage");
     if (tipoff - quoteTime > 30 * 60000 || tipoff - sharpTime > 30 * 60000) {
       throw new Error(id + ": stale price more than 30 minutes before tipoff");
     }
     const n = field => strictNumber(r[field], field, id);
-    const spread = n("home_spread"), odds = n("american_odds");
+    const spread = n("home_spread"), sharpSpread = n("sharp_home_spread"), odds = n("american_odds");
+    if (Math.abs(spread - sharpSpread) > 1e-9) throw new Error(id + ": sharp line does not match quoted spread");
     const sharpFair = n("sharp_no_vig_home_cover");
     const mean = n("pregame_expected_home_margin"), stddev = n("pregame_margin_stddev");
     const home = n("halftime_home_score"), away = n("halftime_away_score");
@@ -91,7 +93,7 @@ export function normalizeRows(raw) {
     const push = Number.isInteger(-spread) && margin === -spread;
     const win = margin > -spread;
     return {
-      id, tipoff, quoteTime, sharpTime, spread, odds, sharpFair,
+      id, tipoff, quoteTime, sharpTime, modelTime, spread, odds, sharpFair,
       mean, stddev, margin, push, win,
       rotationConfirmed: String(r.rotation_confirmed).toLowerCase() === "true"
     };
