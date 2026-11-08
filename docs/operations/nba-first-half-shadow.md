@@ -98,3 +98,27 @@ node scripts/nba/collect-first-half-history.mjs --date=2025-11-07 --historical-o
 - Current repo/connected database has no qualifying NBA first-half price+model+halftime record set; don't report a historical ROI until authenticated data collection and matching are verified.
 
 Data source documentation: https://the-odds-api.com/liveapi/guides/v4/ and https://the-odds-api.com/sports-odds-data/betting-markets.html.
+
+## Promotion-readiness checklist (Phase 4)
+
+Run the **independent evidence gate** after a genuine historical audit:
+
+```bash
+node scripts/nba/evaluate-first-half-readiness.mjs \
+  --input=artifacts/nba-first-half-audit.json \
+  --evidence=/secure/path/source-attestation.json \
+  --output=artifacts/nba-first-half-readiness.json
+```
+
+Do **not** generate a source-attestation file automatically. It must be signed off by an independent reviewer after checking original data licenses, model timestamp archives, matched exact-line sharp odds and actual halftime results.
+
+Initial research release thresholds (conservative defaults, **not** a guarantee or statistically validated trading rule):
+- At least 300 eligible holdout observations, 100 candidate selections, 60 distinct days and a 120-day evaluation span.
+- Model Brier improvement >= 0.002 and log-loss improvement >= 0.003 compared with a contemporaneous no-vig sharp baseline on the same non-push outcomes.
+- Expected calibration error <= 0.05 and positive realized candidate ROI.
+- The lower 2.5th percentile of **date-block bootstrapped** candidate return distributions must be above zero, not just the observed point estimate.
+- Reconcile missing/no-vig data and source provenance. Evidence must include a named, timestamped human review.
+
+The script always returns `productionEligible:false` and `automaticBuyEnabled:false`, even when all checks pass. The highest automatic outcome is `MANUAL_REVIEW_REQUIRED`; enabling live BUY is a separate explicitly reviewed code change after operational safety controls, a kill switch and ongoing monitoring are available.
+
+The November 7, 2026 7-game historical **halftime score** artifact is not sufficient: it lacks archived pregame 1H odds and frozen forecasts. This is intentionally `NOT_READY`, not a failed wagering strategy.
