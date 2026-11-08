@@ -1,0 +1,37 @@
+name: Edge Lab NBA First Half Shadow Tests
+
+on:
+  pull_request:
+    paths:
+      - "sharp-service/lib/nba-first-half-shadow.js"
+      - "scripts/nba/backtest-first-half-shadow.mjs"
+      - "tests/node/nba-first-half-*.test.mjs"
+      - ".github/workflows/edge-lab-nba-first-half-shadow.yml"
+  push:
+    branches:
+      - "feature/edge-lab-first-half-shadow-v1"
+    paths:
+      - "sharp-service/lib/nba-first-half-shadow.js"
+      - "scripts/nba/backtest-first-half-shadow.mjs"
+      - "tests/node/nba-first-half-*.test.mjs"
+      - ".github/workflows/edge-lab-nba-first-half-shadow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run first-half shadow and audit tests
+        run: node --test tests/node/nba-first-half-shadow.test.mjs tests/node/nba-first-half-backtest.test.mjs
+      - name: Syntax-check engine and audit
+        run: |
+          node --check sharp-service/lib/nba-first-half-shadow.js
+          node --check scripts/nba/backtest-first-half-shadow.mjs
