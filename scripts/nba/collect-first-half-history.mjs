@@ -25,7 +25,7 @@ const ODDS_BASE = "https://api.the-odds-api.com/v4/historical/sports/basketball_
 const MARKET = "spreads_h1";
 
 function isoMs(dateString, name) {
-  if (typeof dateString !== "string" || !/T.*(?:Z|[+-]\\d\\d:\\d\\d)$/.test(dateString)) {
+  if (typeof dateString !== "string" || !/T.*(?:Z|[+-]\d\d:\d\d)$/.test(dateString)) {
     throw new Error(name + " must be timezone-aware ISO-8601");
   }
   const ts = Date.parse(dateString);
@@ -35,7 +35,7 @@ function isoMs(dateString, name) {
 
 export function normalizeTeam(value) {
   return String(value || "").toLowerCase()
-    .replace(/\\b(the|nba)\\b/g, "")
+    .replace(/\b(the|nba)\b/g, "")
     .replace(/[^a-z0-9]/g, "");
 }
 
@@ -151,7 +151,7 @@ export function matchGames(scoreGames, oddsEvents, toleranceMinutes = 180) {
 /** Collect safely with injected fetch for deterministic tests. */
 export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   maxEvents = 10, fetcher = fetch}) {
-  if (typeof date !== "string" || !/^\\d{4}-\\d{2}-\\d{2}$/.test(date) ||
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
       new Date(date + "T00:00:00Z").toISOString().slice(0, 10) !== date) {
     throw new Error("--date must be YYYY-MM-DD");
   }
