@@ -179,6 +179,25 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   };
   if (scoresOnly) return report;
   if (!apiKey) throw new Error("THE_ODDS_API_KEY required for paid historical odds");
+  // Explicit 11-credit ceiling: one historical discovery (1) and one
+  // event-market/region request (up to 10). Never retry billable requests.
+  if (quotaLimitedTest) {
+    if (maxEvents !== 1 || regions !== "us") {
+      throw new Error("Quota-limited trial requires one event and region us");
+    }
+    const quotaUrl = new URL("https://api.the-odds-api.com/v4/sports");
+    quotaUrl.searchParams.set("apiKey", apiKey);
+    const quotaRes = await fetcher(quotaUrl);
+    if (!quotaRes.ok) throw new Error("Free quota inspection failed: HTTP " + quotaRes.status);
+    const raw = quotaRes.headers?.get?.("x-requests-remaining");
+    const remaining = raw === null || raw === undefined || !/^\d+$/.test(raw)
+      ? null : Number(raw);
+    if (remaining === null || remaining < 11) {
+      throw new Error("Insufficient or unverified API quota for 11-credit test");
+    }
+    report.metadata.quotaBefore = remaining;
+    report.metadata.maxTrialCredits = 11;
+  }
   // The snapshot is 20 minutes before each historical event tipoff.
   // Discover event IDs from a prior historical events snapshot for this date.
   const discoveryTime = date + "T12:00:00Z";
@@ -188,6 +207,19 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   const eventsRes = await fetcher(eventsUrl);
   if (!eventsRes.ok) throw new Error("Historical events discovery failed: HTTP " + eventsRes.status);
   const eventEnvelope = await eventsRes.json();
+  if (quotaLimitedTest) {
+    const raw = eventsRes.headers?.get?.("x-requests-remaining");
+    if (raw === null || raw === undefined || !/^\d+$/.test(raw) || Number(raw) < 10) {
+      throw new Error("Remaining quota after discovery insufficient or unverified");
+    }
+  }
+  const localGameDate = (iso) => {
+    const pieces = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date(iso));
+    const part = name => pieces.find(p => p.type === name)?.value;
+    return part("year") + "-" + part("month") + "-" + part("day");
+  };
   const oddsEvents = (eventEnvelope?.data || []).filter(e =>
     e?.id && e?.commence_time && e.home_team && e.away_team
    );
