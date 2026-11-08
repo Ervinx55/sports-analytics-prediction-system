@@ -50,3 +50,27 @@ From repository root, Node.js 20+: `node --test tests/node/nba-first-half-shadow
   LSU to win by more than 3.5: NO — WIN.
 - Realized ticket payout $0 and realized net $-35.38.
 - Two of three legs winning does **not** imply a profitable ticket.
+
+## Historical walk-forward audit (Phase 2)
+
+Run:
+
+```bash
+node scripts/nba/backtest-first-half-shadow.mjs --input=/secure/path/nba_first_half_history.csv --output=artifacts/nba-first-half-audit.json
+```
+
+Required historical CSV columns (one observation per **distinct game ID**, home team point of view):
+
+```csv
+game_id,tipoff_utc,quote_checked_utc,sharp_checked_utc,home_spread,sharp_home_spread,american_odds,sharp_no_vig_home_cover,model_captured_utc,pregame_expected_home_margin,pregame_margin_stddev,halftime_home_score,halftime_away_score,rotation_confirmed
+```
+
+- Store actual game identifiers, real halftime scores and genuine time-stamped **pregame** model forecasts. Never backfill forecasts from a finished game's performance.
+- `home_spread` is the signed home handicap (e.g. -3.5 means home must lead by 4+ at halftime); the quoted `american_odds` must price **that home-cover side**. `sharp_home_spread` must match it exactly; `sharp_no_vig_home_cover` is the corresponding sharp no-vig conditional cover probability (on nonpush results). Do not use a full-game line in a 1H dataset.
+- All timestamps include a timezone; the quote and sharp checks must be within 30 minutes before tipoff. Historical coverage, source authenticity, stale data and availability confirmation are independent ingestion responsibilities.
+- `model_captured_utc` proves the estimated margin and its standard deviation existed before tipoff, although the importer cannot verify that the underlying features were not revised later. The variance is a pregame input, **not calculated from the game being graded**.
+- `rotation_confirmed` must be `true` or `false`. Unconfirmed examples do not contribute to the research model or training set. For the audit, only settled games with complete fields should be supplied.
+- The audit trains a residual bias and error-variance correction on observations at least 24 hours older than the evaluated game. It deliberately requires at least 30 earlier qualifying rows by default.
+- Outputs: evaluated and skipped counts, Brier/log loss for model and sharp, reliability buckets, research-only candidate ROI, individual predictions and outcomes. Pushes are excluded from binary accuracy scoring but retained in ROI.
+- **No genuine historical NBA 1H odds dataset has been attached to this branch.** Synthetic fixtures in unit tests validate code only and are not evidence of betting performance.
+- Even favorable historical metrics do not enable production trading; code always remains shadow-only until further validation and explicit approval.
