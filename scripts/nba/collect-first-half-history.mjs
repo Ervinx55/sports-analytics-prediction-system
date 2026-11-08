@@ -150,7 +150,7 @@ export function matchGames(scoreGames, oddsEvents, toleranceMinutes = 180) {
 
 /** Collect safely with injected fetch for deterministic tests. */
 export async function collect({date, scoresOnly = true, apiKey, regions = "us",
-  maxEvents = 10, fetcher = fetch}) {
+  maxEvents = 1, maxCredits = 10, fetcher = fetch}) {
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
       new Date(date + "T00:00:00Z").toISOString().slice(0, 10) !== date) {
     throw new Error("--date must be YYYY-MM-DD");
@@ -159,6 +159,12 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
     throw new Error("--max-events must be between 1 and 20");
   }
   if (!/^[a-z0-9,]+$/.test(regions)) throw new Error("Invalid region list");
+  if (!Number.isInteger(maxCredits) || maxCredits < 0 || maxCredits > 1000) throw new Error("Invalid maxCredits");
+  const regionCount = regions.split(",").length;
+  const creditPerEvent = 10 * regionCount;
+  if (!scoresOnly && maxEvents * creditPerEvent > maxCredits) {
+    throw new Error("HISTORICAL_CREDIT_LIMIT: estimated usage exceeds --max-credits");
+  }
   const scoreboardUrl = new URL(NBA_SCOREBOARD);
   scoreboardUrl.searchParams.set("dates", date.replaceAll("-", ""));
   const scoreboardRes = await fetcher(scoreboardUrl);
@@ -168,7 +174,8 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
     kind: "nba_first_half_historical_staging_v1",
     market: MARKET, date, scores: games,
     odds: [], matches: [], warnings: ["NOT_BACKTEST_READY", "NO_FROZEN_PREGAME_MODEL_FORECASTS"],
-    metadata: {scoreboard: "ESPN", oddsProvider: "The Odds API", paidOddsQueried: !scoresOnly}
+    metadata: {scoreboard: "ESPN", oddsProvider: "The Odds API", paidOddsQueried: !scoresOnly,
+      estimatedMaxCredits: scoresOnly ? 0 : maxEvents * creditPerEvent, creditsSpentReported: 0}
   };
   if (scoresOnly) return report;
   if (!apiKey) throw new Error("THE_ODDS_API_KEY required for paid historical odds");
@@ -182,11 +189,17 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   if (!eventsRes.ok) throw new Error("Historical events discovery failed: HTTP " + eventsRes.status);
   const eventEnvelope = await eventsRes.json();
   const oddsEvents = (eventEnvelope?.data || []).filter(e =>
-    e?.id && e?.commence_time && e.home_team && e.away_team &&
-    e.commence_time.slice(0, 10) === date
-  ).slice(0, maxEvents);
-  report.matches = matchGames(games, oddsEvents);
-  for (const e of oddsEvents) {
+    e?.id && e?.commence_time && e.home_team && e.away_team
+   );
+  // Scoreboard date follows the NBA local slate; events after midnight UTC
+  // may belong to the previous local date. Never filter on UTC date equality.
+  const verifiedMatches = matchGames(games, oddsEvents);
+  const matched = verifiedMatches.filter(m => m.status === "MATCHED");
+  const included = matched.slice(0, maxEvents);
+  const selectedIds = new Set(included.map(m => m.odds_event_id));
+  report.matches = included;
+  const matchedEvents = oddsEvents.filter(e => selectedIds.has(e.id));
+  for (const e of matchedEvents) {
     const requestTime = new Date(Date.parse(e.commence_time) - 20 * 60000).toISOString();
     const url = new URL(ODDS_BASE + "/events/" + encodeURIComponent(e.id) + "/odds");
     url.searchParams.set("apiKey", apiKey);
@@ -195,6 +208,13 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
     url.searchParams.set("oddsFormat", "american");
     url.searchParams.set("date", requestTime);
     const response = await fetcher(url);
+    const billed = Number(response.headers?.get?.("x-requests-last"));
+    const remaining = Number(response.headers?.get?.("x-requests-remaining"));
+    if (Number.isFinite(billed) && billed >= 0) report.metadata.creditsSpentReported += billed;
+    report.metadata.remainingCredits = Number.isFinite(remaining) ? remaining : null;
+    if (report.metadata.creditsSpentReported > maxCredits) {
+      report.warnings.push("HISTORICAL_CREDIT_LIMIT_EXCEEDED_STOP");
+    }
     if (!response.ok) {
       report.odds.push({odds_event_id: e.id, status: "UNAVAILABLE", httpStatus: response.status});
       continue;
@@ -204,6 +224,8 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
     } catch (err) {
       report.odds.push({odds_event_id: e.id, status: "REJECTED", reason: err.message});
     }
+    if (report.metadata.creditsSpentReported > maxCredits ||
+        (Number.isFinite(remaining) && remaining < creditPerEvent)) break;
   }
   return report;
 }
@@ -224,7 +246,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
         date, scoresOnly: !withOdds,
         apiKey: process.env.THE_ODDS_API_KEY,
         regions: option("regions") || "us",
-        maxEvents: Number(option("max-events") || 10)
+        maxEvents: Number(option("max-events") || 1),
+        maxCredits: Number(option("max-credits") || 10)
       });
       const out = option("output");
       if (out) {
