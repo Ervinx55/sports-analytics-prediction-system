@@ -155,7 +155,10 @@ production secret into GitHub source files, artifacts, commands, or chat.
 A secure operator can provision `THE_ODDS_API_KEY` as a **GitHub Actions
 repository secret** using GitHub's own secrets UI, after verifying plan
 entitlements. The manual workflow
-`.github/workflows/edge-lab-one-event-historical-trial.yml` then runs only
+`.github/workflows/edge-lab-one-event-historical-trial.yml` is currently staged
+only on the draft feature branch. GitHub requires a `workflow_dispatch` file
+on the repository default branch for manual runs to be available. Review and
+merge the workflow separately before attempting a paid run. It then runs only
 on an explicit `workflow_dispatch` action with approval text
 `APPROVE_11_CREDITS` and a chosen date. No push or scheduler triggers
 the paid requests. It uploads a short-lived staging JSON artifact and does
