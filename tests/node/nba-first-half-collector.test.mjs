@@ -172,3 +172,31 @@ test("trial with missing quota header fails closed",async()=>{
    ? response(score) : response([])
  }),/Insufficient or unverified/);
 });
+
+test("quota-limited trial can stage exactly one genuine-style first-half quote",async()=>{
+ const urls=[];
+ const withQuota=(body,left,last)=>({
+   ...response(body),
+   headers:new Headers({
+     "x-requests-remaining":String(left),
+     "x-requests-last":String(last)
+   })
+ });
+ const report=await collect({
+   date:"2025-11-07",scoresOnly:false,apiKey:"MOCK",
+   maxEvents:1,maxCredits:11,quotaLimitedTest:true,
+   fetcher:async url=>{
+     const u=new URL(String(url));urls.push(u);
+     if(u.hostname==="site.api.espn.com") return response(score);
+     if(u.pathname==="/v4/sports") return withQuota([],20,0);
+     if(u.pathname.endsWith("/events")) return withQuota({data:[event]},19,1);
+     if(u.pathname.endsWith("/odds")) return withQuota(prices,9,10);
+     throw new Error("Unwanted paid request");
+   }
+ });
+ assert.equal(urls.length,4);
+ assert.equal(urls.filter(u=>u.pathname.endsWith("/odds")).length,1);
+ assert.equal(urls.at(-1).searchParams.get("markets"),"spreads_h1");
+ assert.equal(report.metadata.creditsSpentReported,11);
+ assert.equal(report.odds[0].quotes.length,2);
+});
