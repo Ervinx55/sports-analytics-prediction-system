@@ -174,7 +174,7 @@ export function evaluateReadiness(report, evidence = {}, gate = DEFAULT_GATE) {
     automaticBuyEnabled:false,
     checks:findings,
     metrics:{evaluated:rows.length,candidates:candidates.length,distinctDays,
-      holdoutSpanDays:testSpan,brierGain,logLossGain,ece,
+      holdoutSpanDays:testSpan,brierGain,logLossGain:logGain,ece,
       candidateRoi,lowerRoiConfidenceBound95:roiLow},
     note:"Passing automated checks only permits independent human review. Deployment and production BUY require a separate change."
   };
