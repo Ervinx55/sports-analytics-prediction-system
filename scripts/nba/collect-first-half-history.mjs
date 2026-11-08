@@ -150,7 +150,7 @@ export function matchGames(scoreGames, oddsEvents, toleranceMinutes = 180) {
 
 /** Collect safely with injected fetch for deterministic tests. */
 export async function collect({date, scoresOnly = true, apiKey, regions = "us",
-  maxEvents = 1, maxCredits = 10, fetcher = fetch}) {
+  maxEvents = 1, maxCredits = 11, quotaLimitedTest = false, fetcher = fetch}) {
   if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
       new Date(date + "T00:00:00Z").toISOString().slice(0, 10) !== date) {
     throw new Error("--date must be YYYY-MM-DD");
@@ -162,7 +162,7 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   if (!Number.isInteger(maxCredits) || maxCredits < 0 || maxCredits > 1000) throw new Error("Invalid maxCredits");
   const regionCount = regions.split(",").length;
   const creditPerEvent = 10 * regionCount;
-  if (!scoresOnly && maxEvents * creditPerEvent > maxCredits) {
+  if (!scoresOnly && maxEvents * creditPerEvent + 1 > maxCredits) {
     throw new Error("HISTORICAL_CREDIT_LIMIT: estimated usage exceeds --max-credits");
   }
   const scoreboardUrl = new URL(NBA_SCOREBOARD);
@@ -175,7 +175,7 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
     market: MARKET, date, scores: games,
     odds: [], matches: [], warnings: ["NOT_BACKTEST_READY", "NO_FROZEN_PREGAME_MODEL_FORECASTS"],
     metadata: {scoreboard: "ESPN", oddsProvider: "The Odds API", paidOddsQueried: !scoresOnly,
-      estimatedMaxCredits: scoresOnly ? 0 : maxEvents * creditPerEvent, creditsSpentReported: 0}
+      estimatedMaxCredits: scoresOnly ? 0 : 1 + maxEvents * creditPerEvent, creditsSpentReported: 0}
   };
   if (scoresOnly) return report;
   if (!apiKey) throw new Error("THE_ODDS_API_KEY required for paid historical odds");
@@ -200,13 +200,21 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   }
   // The snapshot is 20 minutes before each historical event tipoff.
   // Discover event IDs from a prior historical events snapshot for this date.
-  const discoveryTime = date + "T12:00:00Z";
+  const discoveryTime = date + "T17:00:00Z";
   const eventsUrl = new URL(ODDS_BASE + "/events");
   eventsUrl.searchParams.set("apiKey", apiKey);
   eventsUrl.searchParams.set("date", discoveryTime);
   const eventsRes = await fetcher(eventsUrl);
   if (!eventsRes.ok) throw new Error("Historical events discovery failed: HTTP " + eventsRes.status);
   const eventEnvelope = await eventsRes.json();
+  // Historical discovery consumes one credit when events are returned.
+  const lastCost = eventsRes.headers?.get?.("x-requests-last");
+  if (lastCost !== null && lastCost !== undefined && /^\d+$/.test(String(lastCost))) {
+    report.metadata.creditsSpentReported += Number(lastCost);
+  } else if (quotaLimitedTest) {
+    throw new Error("Historical discovery did not report quota cost");
+  }
+
   if (quotaLimitedTest) {
     const raw = eventsRes.headers?.get?.("x-requests-remaining");
     if (raw === null || raw === undefined || !/^\d+$/.test(raw) || Number(raw) < 10) {
@@ -228,6 +236,7 @@ export async function collect({date, scoresOnly = true, apiKey, regions = "us",
   const verifiedMatches = matchGames(games, oddsEvents);
   const matched = verifiedMatches.filter(m => m.status === "MATCHED");
   const included = matched.slice(0, maxEvents);
+  if (report.metadata.creditsSpentReported + (included.length ? creditPerEvent : 0) > maxCredits) throw new Error("HISTORICAL_CREDIT_LIMIT: discovery left insufficient allowance");
   const selectedIds = new Set(included.map(m => m.odds_event_id));
   report.matches = included;
   const matchedEvents = oddsEvents.filter(e => selectedIds.has(e.id));
@@ -279,7 +288,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
         apiKey: process.env.THE_ODDS_API_KEY,
         regions: option("regions") || "us",
         maxEvents: Number(option("max-events") || 1),
-        maxCredits: Number(option("max-credits") || 10)
+        maxCredits: Number(option("max-credits") || 11),
+        quotaLimitedTest: process.argv.includes("--quota-limited-test")
       });
       const out = option("output");
       if (out) {
