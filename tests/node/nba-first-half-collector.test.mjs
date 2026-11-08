@@ -116,3 +116,35 @@ test("paid collection without key fails closed", async () => {
     fetcher: async () => response(score)
   }), /THE_ODDS_API_KEY/);
 });
+
+test("historical trial rejects any request budget exceeding one event and ten credits", async () => {
+  let calls = 0;
+  await assert.rejects(() => collect({
+    date:"2025-11-07", scoresOnly:false, apiKey:"MOCK",
+    maxEvents:2,maxCredits:10,fetcher: async () => { calls++;return response(score); }
+  }), /HISTORICAL_CREDIT_LIMIT/);
+  assert.equal(calls,0);
+});
+
+test("scoreboard local date can match a game after midnight UTC", async () => {
+  const lateEvent = {...event,id:"event_late",commence_time:"2025-11-08T01:00:00Z"};
+  const localScore = structuredClone(score);
+  localScore.events[0].date=lateEvent.commence_time;
+  const report=await collect({
+    date:"2025-11-07",scoresOnly:false,apiKey:"MOCK",
+    maxEvents:1,maxCredits:10,
+    fetcher: async url => {
+      const u=new URL(String(url));
+      if(u.hostname==="site.api.espn.com") return response(localScore);
+      if(u.pathname.endsWith("/events")) return response({data:[lateEvent]});
+      return response({...prices,timestamp:"2025-11-08T00:40:00Z",
+        data:{...prices.data,id:"event_late",
+          bookmakers:[{key:"book",markets:[{key:"spreads_h1",
+            last_update:"2025-11-08T00:39:00Z",
+            outcomes:[{name:"Houston Rockets",point:-3.5,price:-110}]}]}] }});
+    }
+  });
+  assert.equal(report.matches[0].status,"MATCHED");
+  assert.equal(report.odds[0].quotes.length,1);
+  assert.equal(report.metadata.estimatedMaxCredits,10);
+});
