@@ -1,0 +1,80 @@
+name: Edge Lab — One-Event Historical NBA Odds Trial
+
+# Operator-only: no scheduled or push-triggered paid requests.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "NBA slate date (YYYY-MM-DD), e.g. 2026-11-07"
+        required: true
+        type: string
+        default: "2026-11-07"
+      approve_quota:
+        description: "Type APPROVE_11_CREDITS after confirming provider entitlement and balance"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-lab-historical-odds-trial
+  cancel-in-progress: false
+
+jobs:
+  historical-trial:
+    # This workflow intentionally does NOT auto-promote the model or write a DB.
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Enforce explicit per-run quota approval
+        env:
+          APPROVAL: ${{ inputs.approve_quota }}
+        run: |
+          test "$APPROVAL" = "APPROVE_11_CREDITS" || {
+            echo "Approval missing; no paid provider requests executed"
+            exit 1
+          }
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Confirm secret exists without revealing it
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+        run: |
+          test -n "$THE_ODDS_API_KEY" || {
+            echo "GitHub Actions secret THE_ODDS_API_KEY is missing. Vercel production variables are not automatically available here."
+            exit 1
+          }
+      - name: Fetch EXACTLY ONE historical 1H spread event (<= 11 credits)
+        env:
+          THE_ODDS_API_KEY: ${{ secrets.THE_ODDS_API_KEY }}
+          SLATE_DATE: ${{ inputs.date }}
+        run: |
+          node scripts/nba/collect-first-half-history.mjs \
+            --date="$SLATE_DATE" \
+            --historical-odds \
+            --quota-limited-test \
+            --regions=us \
+            --max-events=1 \
+            --max-credits=11 \
+            --output=artifacts/edge-lab-one-event-odds.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const r=JSON.parse(fs.readFileSync("artifacts/edge-lab-one-event-odds.json","utf8"));
+            if (r.metadata?.maxTrialCredits!==11 || r.metadata?.estimatedMaxCredits!==11) {
+              throw new Error("Unexpected quota trial configuration");
+            }
+            console.log(JSON.stringify({
+              date:r.date,matchedEvents:r.matches.length,
+              quoteGroups:r.odds.length,reportedCredits:r.metadata.creditsSpentReported,
+              backtestReady:false
+            }));
+          '
+      - name: Save read-only staging artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-lab-nba-one-event-historical-odds
+          path: artifacts/edge-lab-one-event-odds.json
+          retention-days: 7
