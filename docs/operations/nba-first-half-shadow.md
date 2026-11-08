@@ -122,3 +122,20 @@ Initial research release thresholds (conservative defaults, **not** a guarantee 
 The script always returns `productionEligible:false` and `automaticBuyEnabled:false`, even when all checks pass. The highest automatic outcome is `MANUAL_REVIEW_REQUIRED`; enabling live BUY is a separate explicitly reviewed code change after operational safety controls, a kill switch and ongoing monitoring are available.
 
 The November 7, 2026 7-game historical **halftime score** artifact is not sufficient: it lacks archived pregame 1H odds and frozen forecasts. This is intentionally `NOT_READY`, not a failed wagering strategy.
+
+## Bounded historical-odds trial (approved research, not yet run)
+
+Provider documentation: the historical single-event `spreads_h1` API charges **up to 10 credits for 1 market x 1 region x 1 event**, with usage headers `x-requests-last`, `x-requests-remaining` and `x-requests-used`. The collector defaults to **one matched event and a 10-credit ceiling**; it aborts before any network call if the requested theoretical maximum exceeds `--max-credits`. The `--historical-odds` switch remains opt-in. This is a request-count/estimated-credit limit, not a dollar-spend guarantee.
+
+```bash
+# ONLY in a private runtime where THE_ODDS_API_KEY is injected as a secret:
+node scripts/nba/collect-first-half-history.mjs \
+  --date=2026-11-07 --historical-odds --regions=us \
+  --max-events=1 --max-credits=10 --output=artifacts/nba-h1-one-event.json
+```
+
+The existing secret in Vercel is assigned to the **production environment only**. It was *not* decrypted, moved to preview or used in a paid request. Do not push experimental collector code into production to gain access to that credential; use an isolated, access-controlled runner with deliberately assigned credentials and provider entitlement confirmed.
+
+Historical event IDs are matched to the selected NBA scoreboard slate by exact teams and near tipoff, including games on the next UTC date. Never treat the presence of an API key as evidence that historical-data entitlement is active. Empty markets are a data-availability outcome, not permission to substitute full-game spreads.
+
+No real model ROI or promotion-readiness result is claimed from this trial.
