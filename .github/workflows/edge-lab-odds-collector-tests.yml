@@ -1,0 +1,32 @@
+name: Edge Lab Historical Odds Collector Unit Tests
+
+on:
+  pull_request:
+    paths:
+      - "scripts/nba/collect-first-half-history.mjs"
+      - "tests/node/nba-first-half-collector.test.mjs"
+      - ".github/workflows/edge-lab-odds-collector-tests.yml"
+      - ".github/workflows/edge-lab-one-event-historical-trial.yml"
+  push:
+    paths:
+      - "scripts/nba/collect-first-half-history.mjs"
+      - "tests/node/nba-first-half-collector.test.mjs"
+      - ".github/workflows/edge-lab-odds-collector-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax validation
+        run: node --check scripts/nba/collect-first-half-history.mjs
+      - name: Mocked no-cost collector tests
+        run: node --test tests/node/nba-first-half-collector.test.mjs
