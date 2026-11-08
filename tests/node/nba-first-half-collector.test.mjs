@@ -132,7 +132,7 @@ test("scoreboard local date can match a game after midnight UTC", async () => {
   localScore.events[0].date=lateEvent.commence_time;
   const report=await collect({
     date:"2025-11-07",scoresOnly:false,apiKey:"MOCK",
-    maxEvents:1,maxCredits:10,
+    maxEvents:1,maxCredits:11,
     fetcher: async url => {
       const u=new URL(String(url));
       if(u.hostname==="site.api.espn.com") return response(localScore);
@@ -146,5 +146,29 @@ test("scoreboard local date can match a game after midnight UTC", async () => {
   });
   assert.equal(report.matches[0].status,"MATCHED");
   assert.equal(report.odds[0].quotes.length,1);
-  assert.equal(report.metadata.estimatedMaxCredits,10);
+  assert.equal(report.metadata.estimatedMaxCredits,11);
+});
+
+test("11-credit trial inspects free quota and fails before billable calls",async()=>{
+ const calls=[];
+ await assert.rejects(()=>collect({
+  date:"2025-11-07",scoresOnly:false,apiKey:"MOCK",maxEvents:1,
+  maxCredits:11,quotaLimitedTest:true,
+  fetcher:async u=>{
+   const url=new URL(String(u));calls.push(url.pathname);
+   if(url.hostname==="site.api.espn.com") return response(score);
+   return {...response([]),headers:new Headers({"x-requests-remaining":"10"})};
+  }
+ }),/Insufficient or unverified/);
+ assert.equal(calls.length,2);
+ assert.equal(calls.at(-1),"/v4/sports");
+});
+
+test("trial with missing quota header fails closed",async()=>{
+ await assert.rejects(()=>collect({
+  date:"2025-11-07",scoresOnly:false,apiKey:"MOCK",maxEvents:1,
+  maxCredits:11,quotaLimitedTest:true,
+  fetcher:async u=>new URL(String(u)).hostname==="site.api.espn.com"
+   ? response(score) : response([])
+ }),/Insufficient or unverified/);
 });
