@@ -49,7 +49,7 @@ test("no in-game/previous-day leakage and push excluded from binary scoring", ()
   assert.equal(result.skippedForTraining, 5);
   assert.equal(result.evaluatedRows, 35);
   assert.equal(result.rows[0].trainingRows, 5);
-  assert.equal(result.rows[0].tipoff, records[5].tipoff_utc);
+  assert.equal(result.rows[0].tipoff, new Date(records[5].tipoff).toISOString());
   assert.ok(Number.isFinite(result.model.brier));
   assert.ok(Number.isFinite(result.sharp.brier));
   assert.equal(result.model.count, result.evaluatedRows);
