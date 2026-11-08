@@ -74,3 +74,27 @@ game_id,tipoff_utc,quote_checked_utc,sharp_checked_utc,home_spread,sharp_home_sp
 - Outputs: evaluated and skipped counts, Brier/log loss for model and sharp, reliability buckets, research-only candidate ROI, individual predictions and outcomes. Pushes are excluded from binary accuracy scoring but retained in ROI.
 - **No genuine historical NBA 1H odds dataset has been attached to this branch.** Synthetic fixtures in unit tests validate code only and are not evidence of betting performance.
 - Even favorable historical metrics do not enable production trading; code always remains shadow-only until further validation and explicit approval.
+
+## Historical source collection (Phase 3)
+
+The collector is intentionally **read-only and staged**:
+
+```bash
+node scripts/nba/collect-first-half-history.mjs --date=2025-11-07 --scores-only --output=artifacts/nba-half-scores.json
+```
+
+For licensed event-odds history, set `THE_ODDS_API_KEY` **only in a private runtime environment** and explicitly opt into billable API requests:
+
+```bash
+node scripts/nba/collect-first-half-history.mjs --date=2025-11-07 --historical-odds --regions=us --max-events=10 --output=artifacts/nba-half-odds.json
+```
+
+- Halftime scores are derived from quarters 1 and 2 in ESPN scoreboard data, not NBA official statistics. Confirm source coverage independently before using scores for authoritative grading.
+- Odds provider: The Odds API v4 paid historical **event odds**, market **`spreads_h1` only**, using a historical snapshot requested 20 minutes before each game's provider-supplied start time. Each quote preserves its provider timestamp.
+- Events are discovered from a snapshot at 12:00 UTC on the requested date; coverage can be incomplete for late local-time tipoffs and events not on that discovery snapshot. The result explicitly reports unmatched events; this stage is **not an exhaustive season ingestion pipeline**.
+- A matching algorithm requires uniquely matching home/away team names and close tipoff times. Ambiguous games are not guessed.
+- This collector does not manufacture model predictions, sharp fair probabilities, injury/rotation confirmations, or backtest-ready rows. Those require **separate, genuinely pregame-stored** records.
+- The paid command consumes The Odds API historical request quota. No key is embedded in code or CI and test mocks do not make paid requests.
+- Current repo/connected database has no qualifying NBA first-half price+model+halftime record set; don't report a historical ROI until authenticated data collection and matching are verified.
+
+Data source documentation: https://the-odds-api.com/liveapi/guides/v4/ and https://the-odds-api.com/sports-odds-data/betting-markets.html.
