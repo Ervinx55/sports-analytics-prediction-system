@@ -139,3 +139,39 @@ The existing secret in Vercel is assigned to the **production environment only**
 Historical event IDs are matched to the selected NBA scoreboard slate by exact teams and near tipoff, including games on the next UTC date. Never treat the presence of an API key as evidence that historical-data entitlement is active. Empty markets are a data-availability outcome, not permission to substitute full-game spreads.
 
 No real model ROI or promotion-readiness result is claimed from this trial.
+
+## Explicit 11-credit historical trial (manual only)
+
+The historical provider documents a free `GET /v4/sports` quota check, a
+1-credit historical events lookup, and up to 10 credits per event for one
+`spreads_h1` market in one region. The collector has an opt-in quota preflight,
+an exact one-event / `us` constraint, and a hard `--max-credits=11` gate.
+
+The existing Vercel production-scoped `THE_ODDS_API_KEY` value is **not
+accessible through the connected Vercel app**, which protects sensitive values.
+It is not automatically shared with GitHub Actions. Do **not** copy the
+production secret into GitHub source files, artifacts, commands, or chat.
+
+A secure operator can provision `THE_ODDS_API_KEY` as a **GitHub Actions
+repository secret** using GitHub's own secrets UI, after verifying plan
+entitlements. The manual workflow
+`.github/workflows/edge-lab-one-event-historical-trial.yml` then runs only
+on an explicit `workflow_dispatch` action with approval text
+`APPROVE_11_CREDITS` and a chosen date. No push or scheduler triggers
+the paid requests. It uploads a short-lived staging JSON artifact and does
+not touch live BUY or Supabase.
+
+Direct trusted-server command (requires secret already present in environment):
+
+```sh
+node scripts/nba/collect-first-half-history.mjs \
+  --date=2026-11-07 --historical-odds --quota-limited-test \
+  --regions=us --max-events=1 --max-credits=11 \
+  --output=artifacts/edge-lab-one-event-odds.json
+```
+
+**Do not assume success or historical market access** until a real provider
+response returns a timestamped `spreads_h1` quote. Odds history without
+an original pregame prediction cannot be used to claim model calibration.
+The explicit 11-credit ceiling is a quota *credit* allowance, not a
+monetary charge or subscription entitlement.
