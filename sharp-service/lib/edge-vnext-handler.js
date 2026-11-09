@@ -1,5 +1,6 @@
 import { buildEdgeBoard } from "./edge-vnext-board.js";
 import { parseEspnScoreboard, projectNbaGames } from "./nba-vnext-baseline.js";
+import { backtestNbaBaseline } from "./nba-vnext-backtest.js";
 import { poissonMass, thresholdProbability, priceKalshi, priceAmerican,
   comboProbability, summarizePositions } from "./edge-vnext.js";
 
@@ -49,7 +50,7 @@ function dateForOffset(iso,days){
   const d=new Date(Date.parse(iso+"T12:00:00Z") + days*86400000);
   return d.toISOString().slice(0,10);
 }
-async function fetchNbaBaseline(target) {
+async function fetchNbaBaseline(target, audit=false) {
   if(!/^\d{4}-\d{2}-\d{2}$/.test(target)||
      new Date(target+"T00:00:00Z").toISOString().slice(0,10)!==target)
     throw Error("Valid NBA slate date YYYY-MM-DD required");
@@ -75,7 +76,9 @@ async function fetchNbaBaseline(target) {
     upcomingGames:results.at(-1).games,asOf,
     historyComplete:successful>=19
   });
-  return {...report,scoreboardCoverage:{daysRequested:history.length,
+  const validation = audit ? backtestNbaBaseline({games:history.flatMap(x=>x.games||[])}) : null;
+  const auditSummary = validation ? (({records, ...summary}) => summary)(validation) : null;
+  return {...report,backtest:auditSummary,scoreboardCoverage:{daysRequested:history.length,
     daysAvailable:successful,upcomingAvailable:true,source:"ESPN NBA scoreboard"}};
 }
 
@@ -122,9 +125,14 @@ export default async function handler(req,res) {
       return respond(res,200,{state:"NOT_REQUESTED",productionEligible:false,
         message:"NBA baseline loads only after explicit refresh. Free scoreboard requests."});
     }
-    const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+    const today=new Intl.DateTimeFormat("en-US",{
+      timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date()).reduce((acc,p)=>{
+      if(p.type==="year"||p.type==="month"||p.type==="day")acc[p.type]=p.value;
+      return acc;
+    },{});
     try {
-      const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)));
+      const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)),String(req.query.audit||"0")==="1");
       return respond(res,200,report);
     } catch(e) {
       return respond(res,200,{status:"UNAVAILABLE",productionEligible:false,

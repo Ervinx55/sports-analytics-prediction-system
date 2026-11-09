@@ -51,8 +51,8 @@ const $=id=>document.getElementById(id);
 $("refreshNba").onclick=async()=>{
  $("refreshNba").disabled=true;$("nbaStatus").textContent="Loading scoreboards and generating uncalibrated NBA forecasts…";
  try{
-  const d=await request({mode:"nba",live:1});
-  $("nbaStatus").textContent=(d.status||"UNAVAILABLE")+" · "+(d.scoreboardCoverage?.daysAvailable??0)+"/"+(d.scoreboardCoverage?.daysRequested??0)+" historical dates loaded · "+(d.reason||"No production BUY enabled");
+  const d=await request({mode:"nba",live:1,audit:1});
+  $("nbaStatus").textContent=(d.status||"UNAVAILABLE")+" · "+(d.scoreboardCoverage?.daysAvailable??0)+"/"+(d.scoreboardCoverage?.daysRequested??0)+" historical dates loaded · Walk-forward: "+(d.backtest?.status||"not available")+", "+(d.backtest?.evaluatedGames??0)+" games · Brier "+(typeof d.backtest?.brier==="number"?d.backtest.brier.toFixed(3):"unavailable")+" · ECE "+(typeof d.backtest?.ece==="number"?d.backtest.ece.toFixed(3):"unavailable")+" · "+(d.reason||"No production BUY enabled");
   $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">AVOID · uncalibrated</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
  }catch(e){$("nbaStatus").textContent="NBA baseline unavailable: "+e.message}
  finally{$("refreshNba").disabled=false;}
