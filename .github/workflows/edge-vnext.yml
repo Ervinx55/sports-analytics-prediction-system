@@ -44,4 +44,4 @@ jobs:
           node --check sharp-service/lib/nba-vnext-backtest.js
           node --check scripts/edge-lab/daily-nba-vnext.mjs
       - name: Run probability, pricing, and safety tests without paid APIs
-        run: node --test tests/node/edge-vnext.test.mjs tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs
+        run: node --test tests/node/edge-vnext.test.mjs tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs tests/node/vercel-config.test.mjs
