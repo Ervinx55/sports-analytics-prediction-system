@@ -6,7 +6,7 @@ import {
   comboProbability, summarizePositions, decisionGate
 } from "../../sharp-service/lib/edge-vnext.js";
 import { buildEdgeBoard } from "../../sharp-service/lib/edge-vnext-board.js";
-import handler from "../../sharp-service/api/edge-vnext.js";
+import handler from "../../sharp-service/lib/edge-vnext-handler.js";
 
 const close=(x,y,tol=1e-8)=>assert.ok(Math.abs(x-y)<=tol,"Expected "+x+" ~ "+y);
 
