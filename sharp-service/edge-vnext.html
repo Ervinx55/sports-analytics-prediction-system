@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Edge Lab vNext | Probability Lab</title>
+<style>
+:root{color-scheme:dark;--bg:#07111e;--panel:#101f32;--border:#263d58;--text:#ecf4ff;--muted:#9aafc8;--accent:#69bddc;--green:#7fe0ae;--amber:#ffd17d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#152f49,var(--bg) 65%);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:1160px;margin:0 auto;padding:28px 16px 72px}h1{font-size:clamp(28px,5vw,42px);letter-spacing:-.04em;margin:0}h2{font-size:19px;margin:0 0 8px}
+p{color:var(--muted);margin:8px 0 18px}.tag{font-size:11px;color:var(--accent);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:18px 0}.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:18px}
+.wide{grid-column:1/-1}.small{font-size:12px;color:var(--muted)}.message{padding:11px 14px;border-left:3px solid var(--amber);background:#322a20;border-radius:4px;color:#ffe4ae}
+button{background:#277da7;color:white;border:0;border-radius:8px;padding:10px 15px;font-weight:700;cursor:pointer}button:disabled{opacity:.5}
+label{display:block;color:var(--muted);font-size:13px;margin-top:12px}input,select,textarea{background:#0a1728;border:1px solid #395170;border-radius:7px;color:white;padding:10px 11px;width:100%;font:inherit}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid #263c54;padding:10px 7px;font-size:13px}th{color:var(--muted);font-weight:600}strong{color:#fff}
+.metric{font-size:27px;font-weight:800} .good{color:var(--green)}.warn{color:var(--amber)}.scroll{overflow-x:auto}
+a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
+</style></head><body><main>
+<div class="tag">Edge Lab / Research only / No automatic wagers</div>
+<h1>Probability Lab <span style="color:#6cb7da">vNext</span></h1>
+<p>Our model vs. fair market · Alternative thresholds · Kalshi contract math · Combo dependence</p>
+<div class="message" role="status">Every displayed model is shadow-only until independent pregame calibration, sharp quote verification, and human review pass. A successful scenario does not create an official BUY.</div>
+<section class="grid">
+<article class="card wide"><div class="row" style="align-items:center"><div><h2>Live model status</h2><span class="small">Fetching the NFL model may consume third-party odds-provider quota. Never runs automatically.</span></div><div><button id="refresh">Refresh NFL model (manual)</button></div></div>
+<div id="status" class="small" aria-live="polite">No live request made</div>
+<div id="modelSummary" class="row"></div>
+<div class="scroll"><table><thead><tr><th>Game / Market</th><th>Model %</th><th>Market fair %</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL shadow model. NBA independently calibrated model is not yet connected.</td></tr></tbody></table></div></article>
+<article class="card"><h2>Alternative count threshold</h2>
+<p class="small">Exploratory Poisson distribution for count data only, using an explicitly entered mean. This is not a forecast for NBA rebounds, rushing yards or game margins.</p>
+<div class="row"><div><label for="mean">Assumed expected count</label><input id="mean" type="number" value="4.5" min="0" max="200" step=".1"></div><div><label for="threshold">Threshold</label><input id="threshold" type="number" value="6" min="0" max="1000"></div></div>
+<label for="direction">Contract condition</label><select id="direction"><option value="at_least">At least (6+)</option><option value="over">Strictly over</option><option value="under">Strictly under</option><option value="at_most">At most</option></select>
+<div class="row"><div><label for="odds">American odds</label><input id="odds" type="number" value="-110"></div><div><label for="contractPrice">Kalshi cost per $1 contract</label><input id="contractPrice" type="number" value=".50" min=".01" max=".99" step=".01"></div><div><label for="fees">Fees per contract ($)</label><input id="fees" type="number" value="0.02" min="0" step=".01"></div></div>
+<button id="calculate" style="margin-top:14px">Evaluate scenario</button><div id="altResult" class="small" aria-live="polite"></div></article>
+<article class="card"><h2>Combo risk (no independence assumption)</h2>
+<p class="small">Enter individual win probabilities between 0 and 1. We show rigorous upper/lower bounds, not a misleading multiplication of correlated legs.</p><label for="legs">Leg probabilities, comma separated</label><textarea id="legs" rows="3">0.85, 0.80, 0.75</textarea>
+<button id="combo" style="margin-top:14px">Inspect combo bounds</button><div id="comboResult" class="small" aria-live="polite"></div></article>
+<article class="card wide"><h2>Position reconciliation</h2><p class="small">Calculate net realized return from settled positions. The dashboard does not save or transmit your betting ledger to a database.</p>
+<label for="positions">JSON entries, stake and payout (e.g. [{"stake":10,"payout":30}])</label>
+<textarea id="positions" rows="3">[{"stake":10,"payout":30},{"stake":10,"payout":0}]</textarea>
+<button id="ledger" style="margin-top:14px">Calculate settled results</button><div id="ledgerResult" class="small" aria-live="polite"></div></article>
+</section>
+<p class="small">Read-only research tool. Provider fees and historical access require separate verification. Missing source data returns an unavailable state, not a manufactured estimate.</p>
+</main><script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct=p=>typeof p==="number"?(100*p).toFixed(1)+"%":"—";
+async function request(params){
+ const u=new URL("/api/edge-vnext",location.origin);
+ for(const [k,v] of Object.entries(params))u.searchParams.set(k,String(v));
+ const res=await fetch(u,{cache:"no-store"}), data=await res.json();
+ if(!res.ok)throw Error(data.error||"HTTP "+res.status);
+ return data;
+}
+$("refresh").onclick=async()=>{
+ $("refresh").disabled=true;$("status").textContent="Loading existing NFL model; no automatic BUY activation…";
+ try{
+ const d=await request({mode:"board",live:1});
+ $("status").textContent=d.sourceError?"Model unavailable: "+d.sourceError:"Model snapshot "+d.generatedAt;
+ $("modelSummary").innerHTML=Object.entries(d.sports||{}).map(([sport,v])=>'<div><strong>'+esc(sport)+'</strong><div class="small">'+esc(v.state)+'</div></div>').join("");
+ $("models").innerHTML=(d.rows||[]).length ? d.rows.slice(0,40).map(r=>'<tr><td>'+esc(r.matchup||r.eventId)+' · '+esc(r.label)+' '+esc(r.marketType)+' '+esc(r.line??"")+'</td><td>'+pct(r.modelProbability)+'</td><td>'+pct(r.marketFairProbability)+'</td><td>'+ (typeof r.edgePercentagePoints==="number"?r.edgePercentagePoints.toFixed(1)+" pp":"—")+'</td><td class="warn">'+esc(r.decision)+' (shadow)</td></tr>').join(""):'<tr><td colspan="5">No current validated model rows. Check availability, game window or model service.</td></tr>';
+ }catch(e){$("status").textContent=e.message;}finally{$("refresh").disabled=false;}
+};
+$("calculate").onclick=async()=>{
+ try{
+ const d=await request({mode:"alt",mean:$("mean").value,threshold:$("threshold").value,direction:$("direction").value,odds:$("odds").value,kalshiPrice:$("contractPrice").value,fees:$("fees").value});
+ $("altResult").innerHTML='<p><strong>Scenario hit probability: '+pct(d.probability.winProbability)+'</strong></p><p>Push: '+pct(d.probability.pushProbability)+' · American odds EV/$: '+(d.americanQuote?.netEVPerDollar?.toFixed(3)??"unavailable")+' · Kalshi EV/contract: $'+(d.kalshiContract?.netEV?.toFixed(3)??"unavailable")+'</p><span class="warn">'+esc(d.warning)+'</span>';
+ }catch(e){$("altResult").textContent=e.message;}
+};
+$("combo").onclick=async()=>{
+ try{const d=await request({mode:"combo",probabilities:$("legs").value});
+ $("comboResult").innerHTML='<p><strong>Guaranteed mathematical interval: '+pct(d.joint.lowerBound)+' to '+pct(d.joint.upperBound)+'</strong></p><p class="warn">No joint prediction without a validated correlation model. Automatic BUY disabled.</p>';
+ }catch(e){$("comboResult").textContent=e.message;}
+};
+$("ledger").onclick=async()=>{
+ try{const d=await request({mode:"ledger",entries:$("positions").value});
+ $("ledgerResult").innerHTML='<p><strong>'+d.count+' settled · Profit $'+d.profit.toFixed(2)+'</strong></p><p>Stake $'+d.stake.toFixed(2)+' · Returned $'+d.payout.toFixed(2)+' · ROI '+pct(d.roi)+'</p>';
+ }catch(e){$("ledgerResult").textContent=e.message;}
+};
+</script></body></html>
