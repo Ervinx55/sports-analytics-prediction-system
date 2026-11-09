@@ -1,4 +1,5 @@
 import { buildEdgeBoard } from "../lib/edge-vnext-board.js";
+import { parseEspnScoreboard, projectNbaGames } from "../lib/nba-vnext-baseline.js";
 import { poissonMass, thresholdProbability, priceKalshi, priceAmerican,
   comboProbability, summarizePositions } from "../lib/edge-vnext.js";
 
@@ -30,6 +31,52 @@ async function getNflModel(req) {
     return data;
   } finally { clearTimeout(timeout); }
 }
+const ESPN_NBA="https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard";
+async function fetchNbaScoreboard(date) {
+  const url=new URL(ESPN_NBA);
+  url.searchParams.set("dates",date.replaceAll("-",""));
+  url.searchParams.set("limit","200");
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),5000);
+  try {
+    const r=await fetch(url,{signal:controller.signal,cache:"no-store",
+      headers:{accept:"application/json"}});
+    if(!r.ok)throw new Error("NBA scores feed HTTP "+r.status);
+    return parseEspnScoreboard(await r.json());
+  } finally {clearTimeout(timeout);}
+}
+function dateForOffset(iso,days){
+  const d=new Date(Date.parse(iso+"T12:00:00Z") + days*86400000);
+  return d.toISOString().slice(0,10);
+}
+async function fetchNbaBaseline(target) {
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(target)||
+     new Date(target+"T00:00:00Z").toISOString().slice(0,10)!==target)
+    throw Error("Valid NBA slate date YYYY-MM-DD required");
+  const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+  const daysDiff=(Date.parse(target+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000;
+  if(daysDiff < -1 || daysDiff > 2)throw Error("NBA research limited to current and next two dates");
+  const dates=Array.from({length:22},(_,i)=>dateForOffset(target,i-21));
+  const results=new Array(dates.length);let cursor=0;
+  async function worker() {
+    while(cursor<dates.length){
+      const i=cursor++;try{results[i]={ok:true,games:await fetchNbaScoreboard(dates[i])};}
+      catch(e){results[i]={ok:false,error:String(e.message||e)};}
+    }
+  }
+  await Promise.all(Array.from({length:6},worker));
+  if(!results.at(-1)?.ok)throw Error("Upcoming NBA scoreboard unavailable");
+  const history=results.slice(0,-1),successful=history.filter(x=>x.ok).length;
+  const asOf=new Date().toISOString();
+  const report=projectNbaGames({
+    historicalGames:history.flatMap(x=>x.games||[]),
+    upcomingGames:results.at(-1).games,asOf,
+    historyComplete:successful>=19
+  });
+  return {...report,scoreboardCoverage:{daysRequested:history.length,
+    daysAvailable:successful,upcomingAvailable:true,source:"ESPN NBA scoreboard"}};
+}
+
 function finiteInput(value, max=1e6) {
   const x = Number(value);
   return value === undefined || value === null || value === "" || !Number.isFinite(x) || Math.abs(x)>max ? null : x;
@@ -67,6 +114,20 @@ export default async function handler(req,res) {
     return joint?respond(res,200,{mode,decision:"AVOID",joint,
       warning:"Shared teams, players or markets can be correlated. Independence is not assumed."})
       :respond(res,400,{error:"Probabilities must each be between zero and one"});
+  }
+  if(mode==="nba") {
+    if(String(req.query.live||"0")!=="1") {
+      return respond(res,200,{state:"NOT_REQUESTED",productionEligible:false,
+        message:"NBA baseline loads only after explicit refresh. Free scoreboard requests."});
+    }
+    const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+    try {
+      const report=await fetchNbaBaseline(String(req.query.date||today));
+      return respond(res,200,report);
+    } catch(e) {
+      return respond(res,200,{status:"UNAVAILABLE",productionEligible:false,
+        rows:[],reason:e instanceof Error?e.message:"NBA baseline unavailable"});
+    }
   }
   if(mode==="ledger") {
     let entries;
