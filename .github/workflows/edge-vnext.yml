@@ -3,9 +3,11 @@ on:
   pull_request:
     paths:
       - "sharp-service/lib/edge-vnext*.js"
+      - "sharp-service/lib/nba-vnext-baseline.js"
       - "sharp-service/api/edge-vnext.js"
       - "sharp-service/edge-vnext.html"
       - "tests/node/edge-vnext.test.mjs"
+      - "tests/node/nba-vnext-baseline.test.mjs"
       - ".github/workflows/edge-vnext.yml"
   push:
     paths:
@@ -33,5 +35,6 @@ jobs:
           node --check sharp-service/lib/edge-vnext.js
           node --check sharp-service/lib/edge-vnext-board.js
           node --check sharp-service/api/edge-vnext.js
+          node --check sharp-service/lib/nba-vnext-baseline.js
       - name: Run probability, pricing, and safety tests without paid APIs
-        run: node --test tests/node/edge-vnext.test.mjs
+        run: node --test tests/node/edge-vnext.test.mjs tests/node/nba-vnext-baseline.test.mjs
