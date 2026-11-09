@@ -125,7 +125,12 @@ export default async function handler(req,res) {
       return respond(res,200,{state:"NOT_REQUESTED",productionEligible:false,
         message:"NBA baseline loads only after explicit refresh. Free scoreboard requests."});
     }
-    const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
+    const today=new Intl.DateTimeFormat("en-US",{
+      timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"
+    }).formatToParts(new Date()).reduce((acc,p)=>{
+      if(p.type==="year"||p.type==="month"||p.type==="day")acc[p.type]=p.value;
+      return acc;
+    },{});
     try {
       const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)),String(req.query.audit||"0")==="1");
       return respond(res,200,report);
