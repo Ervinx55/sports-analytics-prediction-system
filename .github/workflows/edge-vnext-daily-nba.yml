@@ -1,0 +1,40 @@
+name: Edge Lab Free NBA Daily Research Snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 14:17 UTC is 08:17 CST / 09:17 CDT; no sportsbook API use.
+    - cron: "17 14 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: edge-vnext-nba-free-daily
+  cancel-in-progress: false
+
+jobs:
+  nba-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Unit tests first (zero paid requests)
+        run: |
+          node --test tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs
+      - name: Fetch public NBA scores and stage research forecasts
+        run: |
+          node scripts/edge-lab/daily-nba-vnext.mjs \
+            --days=21 \
+            --output=artifacts/edge-vnext/nba-daily.json
+      - name: Upload auditable score/model snapshot, even on source errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: edge-vnext-nba-free-daily
+          path: artifacts/edge-vnext/nba-daily.json
+          if-no-files-found: warn
+          retention-days: 14

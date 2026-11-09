@@ -10,12 +10,19 @@
     },
     "api/nflmodel.js": {
       "maxDuration": 30
+    },
+    "api/edge-vnext.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
     {
       "source": "/api/crypto-candles",
       "destination": "/api/providerstatus?cryptoCandles=1"
+    },
+    {
+      "source": "/edge-vnext",
+      "destination": "/edge-vnext.html"
     },
     {
       "source": "/dashboard",
