@@ -1,0 +1,37 @@
+name: Edge Lab vNext Probability Lab
+on:
+  pull_request:
+    paths:
+      - "sharp-service/lib/edge-vnext*.js"
+      - "sharp-service/api/edge-vnext.js"
+      - "sharp-service/edge-vnext.html"
+      - "tests/node/edge-vnext.test.mjs"
+      - ".github/workflows/edge-vnext.yml"
+  push:
+    paths:
+      - "sharp-service/lib/edge-vnext*.js"
+      - "sharp-service/api/edge-vnext.js"
+      - "sharp-service/edge-vnext.html"
+      - "tests/node/edge-vnext.test.mjs"
+      - ".github/workflows/edge-vnext.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Syntax validation
+        run: |
+          node --check sharp-service/lib/edge-vnext.js
+          node --check sharp-service/lib/edge-vnext-board.js
+          node --check sharp-service/api/edge-vnext.js
+      - name: Run probability, pricing, and safety tests without paid APIs
+        run: node --test tests/node/edge-vnext.test.mjs
