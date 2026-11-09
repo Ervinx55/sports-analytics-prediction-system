@@ -18,10 +18,13 @@ export function backtestNbaBaseline({games, minimumEvaluated = 30} = {}) {
   const records=[];
   for(const game of unique) {
     const cutoff=game.startsAt;
+    // Forecast snapshot is strictly before tipoff. Projector excludes
+    // games whose scheduled start is <= asOf, so use T-1 millisecond.
+    const forecastAt=new Date(Date.parse(cutoff)-1).toISOString();
     const prior=unique.filter(x=>Date.parse(x.startsAt)<Date.parse(cutoff));
     if(prior.length<24)continue;
     const snap=projectNbaGames({historicalGames:prior,upcomingGames:[{...game,completed:false}],
-      asOf:cutoff,historyComplete:true});
+      asOf:forecastAt,historyComplete:true});
     const p=snap.rows?.[0]?.homeWinProbability;
     if(typeof p!=="number")continue;
     const actual=game.homeScore>game.awayScore?1:0;
@@ -31,7 +34,7 @@ export function backtestNbaBaseline({games, minimumEvaluated = 30} = {}) {
     bins[i].n+=1;bins[i].predictionSum+=p;bins[i].outcomeSum+=actual;
     sumBrier+=brier;sumLog+=logloss;n++;
     records.push({eventId:game.eventId,startsAt:game.startsAt,
-      home:game.home,away:game.away,forecastAt:cutoff,
+      home:game.home,away:game.away,forecastAt,
       predictedHomeWinProbability:p,actualHomeWin:actual,
       brier,logloss,source:"scoreboard_results_only"});
   }

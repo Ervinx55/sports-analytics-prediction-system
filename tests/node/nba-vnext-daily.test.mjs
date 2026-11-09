@@ -17,7 +17,8 @@ test("NBA walk-forward forecasts never use same-game or future scores",()=>{
  assert.equal(one.payoutROI,null);
  assert.equal(one.productionEligible,false);
  assert.ok(one.evaluatedGames<=games.length);
- assert.ok(one.records.every(r=>r.forecastAt===r.startsAt));
+ assert.ok(one.evaluatedGames > 0, "Walk-forward audit must produce scored predictions");
+ assert.ok(one.records.every(r=>Date.parse(r.forecastAt) === Date.parse(r.startsAt)-1));
  // Alter only the last outcome: earlier forecasts cannot change.
  const altered=structuredClone(games);
  altered.at(-1).homeScore=50;altered.at(-1).awayScore=180;
