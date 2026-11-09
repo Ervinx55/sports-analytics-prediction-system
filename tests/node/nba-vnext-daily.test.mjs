@@ -48,5 +48,5 @@ test("daily collector fails closed if historical scoreboards are missing",async(
  assert.equal(model.source.complete,false);
  assert.ok(model.source.failedDates.length>=2);
  assert.equal(model.productionEligible,false);
- assert.throws(()=>collectDaily({date:"bad",days:10}),/Invalid date/);
+ await assert.rejects(()=>collectDaily({date:"bad",days:10}),/Invalid date/);
 });
