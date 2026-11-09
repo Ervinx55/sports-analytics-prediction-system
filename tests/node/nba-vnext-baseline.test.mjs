@@ -74,3 +74,24 @@ test("NBA HTTP endpoint never fetches remote scoreboards before explicit refresh
   assert.equal(res.body.productionEligible,false);
  }finally{globalThis.fetch=old;}
 });
+
+test("NBA manual refresh optionally returns honest walk-forward audit without paid APIs",async()=>{
+ const previous=globalThis.fetch;
+ let calls=0;
+ globalThis.fetch=async input=>{
+   const url=new URL(String(input));calls++;
+   assert.equal(url.hostname,"site.api.espn.com");
+   return {ok:true,json:async()=>({events:[]})};
+ };
+ try {
+   const response=fakeRes();
+   await handler({method:"GET",query:{mode:"nba",live:"1",audit:"1"}},response);
+   assert.equal(response.statusCode,200);
+   assert.equal(response.body.scoreboardCoverage.daysAvailable,21);
+   assert.equal(response.body.backtest.evaluatedGames,0);
+   assert.equal(response.body.backtest.status,"INSUFFICIENT_HOLDOUT");
+   assert.equal(response.body.backtest.marketBaselineBrier,null);
+   assert.equal(response.body.productionEligible,false);
+   assert.equal(calls,22);
+ } finally {globalThis.fetch=previous;}
+});
