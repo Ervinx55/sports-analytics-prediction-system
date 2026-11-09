@@ -1,7 +1,7 @@
-import { buildEdgeBoard } from "../lib/edge-vnext-board.js";
-import { parseEspnScoreboard, projectNbaGames } from "../lib/nba-vnext-baseline.js";
+import { buildEdgeBoard } from "./edge-vnext-board.js";
+import { parseEspnScoreboard, projectNbaGames } from "./nba-vnext-baseline.js";
 import { poissonMass, thresholdProbability, priceKalshi, priceAmerican,
-  comboProbability, summarizePositions } from "../lib/edge-vnext.js";
+  comboProbability, summarizePositions } from "./edge-vnext.js";
 
 const MAX_WAIT_MS = 18000;
 function cleanUrl(raw) {

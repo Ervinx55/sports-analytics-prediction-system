@@ -1,3 +1,4 @@
+import edgeVnextHandler from "../lib/edge-vnext-handler.js";
 import {
   getSportsGameOddsUsageSnapshot
 } from "../lib/provider-protection.js";
@@ -54,6 +55,7 @@ function settled(result) {
 }
 
 export default async function handler(req, res) {
+  if (req.query?.edgeVnext === "1") return edgeVnextHandler(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
     return res.status(405).json({ error: "GET only" });
