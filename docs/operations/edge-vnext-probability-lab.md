@@ -17,11 +17,16 @@ API endpoints: \`/api/edge-vnext\` (GET, read-only).
   market-only moneyline/spread outputs must NOT be described as independent
   Edge Lab confidence estimates. Missing, stale, failed and already-started
   games are not marketed as current picks.
-- **NBA: NOT CONNECTED.** Our existing main prediction database was observed
-  to have zero November 8, 2026 forecasts (last global performance capture
-  October 29). This UI does **not** put sportsbook probabilities into the
-  independent model column. An independently trained and backtested NBA
-  feed needs to be implemented and verified separately.
+- **NBA independent BASELINE (research only).** The original main prediction
+  database had zero November 8, 2026 forecasts (last global performance
+  capture October 29). New `/api/edge-vnext?mode=nba&live=1` explicitly
+  requests up to 22 public ESPN scoreboard dates, builds schedule-adjusted
+  margin ratings from prior completed games, and estimates win probabilities
+  independent of sportsbook odds. Requires 4 games per team and at least
+  19 successful historic scoreboards out of 21; otherwise returns unavailable.
+  This model is NOT calibrated, contains no injury or rotation adjustment,
+  has no sharp-price validation, and always labels outcomes AVOID.
+  It does not write production predictions into Supabase.
 - **Discrete alternative thresholds.** Pure functions validate complete
   discrete probability mass, distinguish 5+, >5 and 5.5 thresholds, account
   for pushes, and offer a Poisson scenario for explicit **count** means.
@@ -49,7 +54,10 @@ From repository root:
 node --check sharp-service/lib/edge-vnext.js
 node --check sharp-service/lib/edge-vnext-board.js
 node --check sharp-service/api/edge-vnext.js
-node --test tests/node/edge-vnext.test.mjs
+node --check sharp-service/lib/nba-vnext-baseline.js
+node --check sharp-service/lib/nba-vnext-backtest.js
+node --check scripts/edge-lab/daily-nba-vnext.mjs
+node --test tests/node/edge-vnext.test.mjs tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs
 \`\`\`
 
 On Vercel, \`/edge-vnext\` serves the new UI and \`/api/edge-vnext\` serves
