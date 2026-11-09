@@ -22,8 +22,15 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 <section class="grid">
 <article class="card wide"><div class="row" style="align-items:center"><div><h2>Live model status</h2><span class="small">Fetching the NFL model may consume third-party odds-provider quota. Never runs automatically.</span></div><div><button id="refresh">Refresh NFL model (manual)</button></div></div>
 <div id="status" class="small" aria-live="polite">No live request made</div>
+<div style="margin:14px 0;padding:12px;border:1px solid #2a4662;border-radius:9px">
+  <div class="row" style="align-items:end"><div><h2>Independent NBA baseline (experimental)</h2>
+  <span class="small">Scores-based margin model, uncalibrated. No injuries, rotation adjustments, or verified odds. Manually fetches public daily scoreboards.</span></div>
+  <div><button id="refreshNba">Refresh NBA baseline</button></div></div>
+  <div id="nbaStatus" class="small" aria-live="polite">NBA baseline not requested</div>
+  <div class="scroll"><table><thead><tr><th>Matchup</th><th>Home win %</th><th>Away win %</th><th>Projected margin</th><th>Status</th></tr></thead><tbody id="nbaRows"><tr><td colspan="5">Independent model has not been requested.</td></tr></tbody></table></div>
+</div>
 <div id="modelSummary" class="row"></div>
-<div class="scroll"><table><thead><tr><th>Game / Market</th><th>Model %</th><th>Market fair %</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL shadow model. NBA independently calibrated model is not yet connected.</td></tr></tbody></table></div></article>
+<div class="scroll"><table><thead><tr><th>Game / Market</th><th>Model %</th><th>Market fair %</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL shadow model. NBA independent baseline is available separately, but remains uncalibrated.</td></tr></tbody></table></div></article>
 <article class="card"><h2>Alternative count threshold</h2>
 <p class="small">Exploratory Poisson distribution for count data only, using an explicitly entered mean. This is not a forecast for NBA rebounds, rushing yards or game margins.</p>
 <div class="row"><div><label for="mean">Assumed expected count</label><input id="mean" type="number" value="4.5" min="0" max="200" step=".1"></div><div><label for="threshold">Threshold</label><input id="threshold" type="number" value="6" min="0" max="1000"></div></div>
@@ -41,6 +48,15 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 <p class="small">Read-only research tool. Provider fees and historical access require separate verification. Missing source data returns an unavailable state, not a manufactured estimate.</p>
 </main><script>
 const $=id=>document.getElementById(id);
+$("refreshNba").onclick=async()=>{
+ $("refreshNba").disabled=true;$("nbaStatus").textContent="Loading scoreboards and generating uncalibrated NBA forecasts…";
+ try{
+  const d=await request({mode:"nba",live:1});
+  $("nbaStatus").textContent=(d.status||"UNAVAILABLE")+" · "+(d.scoreboardCoverage?.daysAvailable??0)+"/"+(d.scoreboardCoverage?.daysRequested??0)+" historical dates loaded · "+(d.reason||"No production BUY enabled");
+  $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">AVOID · uncalibrated</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
+ }catch(e){$("nbaStatus").textContent="NBA baseline unavailable: "+e.message}
+ finally{$("refreshNba").disabled=false;}
+};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pct=p=>typeof p==="number"?(100*p).toFixed(1)+"%":"—";
 async function request(params){
