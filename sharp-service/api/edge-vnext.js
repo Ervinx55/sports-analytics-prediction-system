@@ -53,8 +53,10 @@ async function fetchNbaBaseline(target) {
   if(!/^\d{4}-\d{2}-\d{2}$/.test(target)||
      new Date(target+"T00:00:00Z").toISOString().slice(0,10)!==target)
     throw Error("Valid NBA slate date YYYY-MM-DD required");
-  const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
-  const daysDiff=(Date.parse(target+"T00:00:00Z")-Date.parse(today+"T00:00:00Z"))/86400000;
+  const today=new Intl.DateTimeFormat("en-US",{
+    timeZone:"America/New_York",year:"numeric",month:"2-digit",day:"2-digit"
+  }).formatToParts(new Date()).reduce((acc,p)=>{if(p.type==="year"||p.type==="month"||p.type==="day")acc[p.type]=p.value;return acc;},{});
+  const daysDiff=(Date.parse(target+"T00:00:00Z")-Date.parse(today.year+"-"+today.month+"-"+today.day+"T00:00:00Z"))/86400000;
   if(daysDiff < -1 || daysDiff > 2)throw Error("NBA research limited to current and next two dates");
   const dates=Array.from({length:22},(_,i)=>dateForOffset(target,i-21));
   const results=new Array(dates.length);let cursor=0;
@@ -122,7 +124,7 @@ export default async function handler(req,res) {
     }
     const today=new Date().toLocaleDateString("en-CA",{timeZone:"America/New_York"});
     try {
-      const report=await fetchNbaBaseline(String(req.query.date||today));
+      const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)));
       return respond(res,200,report);
     } catch(e) {
       return respond(res,200,{status:"UNAVAILABLE",productionEligible:false,
