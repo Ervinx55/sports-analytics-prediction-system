@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {parseEspnScoreboard,fitNbaRatings,projectNbaGames,NBA_BASELINE_VERSION}
  from "../../sharp-service/lib/nba-vnext-baseline.js";
-import handler from "../../sharp-service/api/edge-vnext.js";
+import handler from "../../sharp-service/lib/edge-vnext-handler.js";
 
 const at=(day)=>"2026-11-"+String(day).padStart(2,"0")+"T01:00:00Z";
 const game=(id,home,away,hs,as,day)=>({
