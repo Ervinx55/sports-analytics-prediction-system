@@ -93,3 +93,17 @@ available quota.
 This change adds **no paid subscriptions** or scheduled provider calls.
 The initial development budget was capped at $150, but no service purchase
 is required to test the offline components. Never commit provider keys.
+
+## Vercel Hobby deployment compatibility
+
+The Edge Lab `sharp-service` already has 12 serverless entry points. The first
+vNext deployment failed with Vercel's
+`exceeded_serverless_functions_per_deployment` error because a 13th handler
+was introduced. To avoid an unnecessary paid upgrade, vNext now reuses
+`sharp-service/api/dashboard.js` as its serverless entry point via
+`/api/edge-vnext -> /api/dashboard?edgeVnext=1`, with all vNext application
+logic in the ordinary imported library `lib/edge-vnext-handler.js`.
+
+The existing dashboard behavior is unchanged for requests without
+`edgeVnext=1`; dedicated tests verify the 12-function limit and rewrite.
+No Vercel subscription upgrade is required for this integration.
