@@ -14,7 +14,37 @@ import {
 const BASE =
   "https://yeoxroijaptomomshdii.supabase.co/functions/v1";
 
-async function fetchJson(url, timeoutMs = 12000) {
+// Bound dashboard database fan-out per runtime; share only in-flight reads.
+export function createReadScheduler(limit = 4) {
+  let active = 0;
+  const waiting = [];
+  const pending = new Map();
+  function drain() {
+    while (active < limit && waiting.length) {
+      const {key, task, resolve, reject} = waiting.shift();
+      active++;
+      Promise.resolve().then(task).then(
+        value => { pending.delete(key); active--; resolve(value); drain(); },
+        error => { pending.delete(key); active--; reject(error); drain(); }
+      );
+    }
+  }
+  return (key, task) => {
+    if (pending.has(key)) return pending.get(key);
+    let resolve, reject;
+    const promise = new Promise((ok, fail) => { resolve = ok; reject = fail; });
+    pending.set(key, promise);
+    waiting.push({key, task, resolve, reject});
+    drain();
+    return promise;
+  };
+}
+const scheduleDashboardRead = createReadScheduler();
+function fetchJson(url, timeoutMs = 12000) {
+  return scheduleDashboardRead(url + '|' + timeoutMs, () => fetchJsonNow(url, timeoutMs));
+}
+
+async function fetchJsonNow(url, timeoutMs = 12000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
