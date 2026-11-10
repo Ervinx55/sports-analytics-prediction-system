@@ -1,5 +1,6 @@
 import { gunzipSync } from "node:zlib";
 import { normalizeTeam, parseCsv } from "./nfl-model.js";
+import { projectGameScriptScenarios } from "./nfl-game-script.js";
 
 const NFLVERSE_PLAYER_STATS_URL = (season) =>
   `https://github.com/nflverse/nflverse-data/releases/download/stats_player/stats_player_week_${season}.csv.gz`;
@@ -865,6 +866,15 @@ function projectPlayerOpportunity({
   );
   const passAttempts = projectedPlays * passRate;
   const rushes = projectedPlays - passAttempts;
+  // Diagnostic only: deliberately does not change production means or BUY/PASS.
+  const gameScriptShadow = projectGameScriptScenarios({
+    teamSpread: marketContext.teamSpread,
+    projectedPlays,
+    historicalPassRate,
+    baselineYardsPerAttempt: identity.position === "QB"
+      ? historicalMetric(history, "passing_yards", "attempts", null)
+      : null
+  });
 
   const targetShares = shareHistory({
     playerRows: history,
@@ -1078,7 +1088,8 @@ function projectPlayerOpportunity({
       teamSpread: marketContext.teamSpread,
       total: marketContext.total,
       opponentYardageFactor: Number(opponentFactor.toFixed(4)),
-      weatherYardageFactor: Number(weatherYardageFactor.toFixed(4))
+      weatherYardageFactor: Number(weatherYardageFactor.toFixed(4)),
+      gameScriptShadow
     },
     featureAvailability: {
       playerStats: featureEnvelope(history.length, {
