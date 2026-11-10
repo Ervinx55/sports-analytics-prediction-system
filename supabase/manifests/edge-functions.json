@@ -829,12 +829,22 @@
       "entrypoint": "index.ts",
       "files": [
         {
+          "path": "supabase/functions/github-ml-training-export/credentials.mjs",
+          "name": "credentials.mjs",
+          "sha256": "544043ee7817909a218a912a4d7876b35ac0b9eb6277dc64927010041a3604d8"
+        },
+        {
           "path": "supabase/functions/github-ml-training-export/index.ts",
           "name": "index.ts",
-          "sha256": "a4d7a2e5a2f1054672cb8afbd6724cb10f5ee66af7c26cb4da50c3c55af4399d"
+          "sha256": "e8e184de7868e6ccbaf9c8b6874e80d4da08f524cded1ed54531304f15bd132e"
         }
       ],
-      "deployed_at": "2026-09-24"
+      "deployed_at": "2026-09-24",
+      "localSourceChange": {
+        "changedOn": "2026-11-10",
+        "appliedToProduction": false,
+        "reason": "Prefer the existing server-role JWT for the training export while the modern-key gateway returns PGRST303; retain narrow GitHub OIDC authorization."
+      }
     },
     {
       "slug": "capture-sport-predictions",
