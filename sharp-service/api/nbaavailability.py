@@ -27,9 +27,9 @@ def report_response(now=None,load=fetch_report):
                 raise ValueError('Stale/future report')
             _cache.update(report=report,at=now.timestamp())
             return 200,report
-        except Exception:
+        except Exception as error:
             _cache.clear()
-            return 503,{'status':'UNAVAILABLE','reason':'OFFICIAL_REPORT_UNAVAILABLE_OR_STALE','productionEligible':False}
+            return 503,{'status':'UNAVAILABLE','reason':'OFFICIAL_REPORT_UNAVAILABLE_OR_STALE','productionEligible':False,'diagnostic':{'category':type(error).__name__,'httpStatus':getattr(error,'code',None) if isinstance(getattr(error,'code',None),int) else None}}
 
 def cache_seconds(report,now=None):
     now=now or datetime.now(timezone.utc)
@@ -45,3 +45,4 @@ class handler(BaseHTTPRequestHandler):
         self.send_header('Cache-Control',f'public, max-age=0, s-maxage={ttl}' if ttl>0 else 'no-store')
         self.end_headers()
         self.wfile.write(json.dumps(body).encode('utf-8'))
+
