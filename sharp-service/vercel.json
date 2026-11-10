@@ -10,6 +10,12 @@
     },
     "api/nflmodel.js": {
       "maxDuration": 30
+    },
+    "api/nbaavailability.py": {
+      "maxDuration": 60
+    },
+    "api/nbaprops.js": {
+      "maxDuration": 30
     }
   },
   "rewrites": [
