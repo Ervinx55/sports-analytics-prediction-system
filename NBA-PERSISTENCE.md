@@ -1,0 +1,1 @@
+Incremental backup through e17fdef, prerequisite 162455d in nba-accuracy-readiness.bundle. Collector v38 and batch persistence migration deployed. 531 Node, 132 Python tests, and service-role rollback tests passed. Frozen models and live gates unchanged.
