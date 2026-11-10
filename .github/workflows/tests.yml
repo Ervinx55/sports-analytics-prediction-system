@@ -24,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt -r sharp-service/requirements.txt
 
       - name: Scan Supabase reconstruction source for secrets
         run: python scripts/supabase/validate_reconstruction.py --check-secrets .
@@ -36,3 +36,4 @@ jobs:
         env:
           PYTHONPATH: .
         run: pytest -q
+
