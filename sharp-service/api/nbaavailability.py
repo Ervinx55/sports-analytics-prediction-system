@@ -31,11 +31,17 @@ def report_response(now=None,load=fetch_report):
             _cache.clear()
             return 503,{'status':'UNAVAILABLE','reason':'OFFICIAL_REPORT_UNAVAILABLE_OR_STALE','productionEligible':False}
 
+def cache_seconds(report,now=None):
+    now=now or datetime.now(timezone.utc)
+    age=(now-datetime.fromisoformat(report['publishedAt'])).total_seconds()
+    return max(0,min(300,int(5400-age))) if age>=0 else 0
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         status,body=report_response()
         self.send_response(status)
         self.send_header('Content-Type','application/json; charset=utf-8')
-        self.send_header('Cache-Control','public, max-age=0, s-maxage=300' if status==200 else 'no-store')
+        ttl=cache_seconds(body) if status==200 else 0
+        self.send_header('Cache-Control',f'public, max-age=0, s-maxage={ttl}' if ttl>0 else 'no-store')
         self.end_headers()
         self.wfile.write(json.dumps(body).encode('utf-8'))

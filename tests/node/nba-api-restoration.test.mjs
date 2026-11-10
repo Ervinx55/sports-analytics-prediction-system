@@ -12,3 +12,7 @@ test('NBA endpoint fails closed on missing keys, malformed data and provider err
  assert.equal((await propsResponse({key:'test',fetchPage:async()=>({payload:{success:true,data:'bad'}})})).status,503);
  const r=await propsResponse({key:'test',fetchPage:async()=>{throw Error('private API key');}});assert.equal(r.status,503);assert.ok(!JSON.stringify(r).includes('private API'));
 });
+test('provider query window is stable across requests within one minute',async()=>{
+ const urls=[];for(const offset of [1000,2000])await propsResponse({now:Date.parse('2026-11-10T08:00:00Z')+offset,key:'test',fetchPage:async r=>{urls.push(r.url);return {payload:{success:true,data:[]},fetchedAt:Date.parse('2026-11-10T08:00:00Z'),cacheStatus:'HIT'};}});
+ assert.equal(urls[0],urls[1]);
+});

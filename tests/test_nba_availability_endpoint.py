@@ -28,3 +28,10 @@ def test_local_archive_entrypoint_finishes_after_shared_parser_refactor(tmp_path
     module.collect(str(tmp_path))
     assert (tmp_path/'latest.json').exists()
     assert '"rows": 1' in capsys.readouterr().out
+
+def test_cdn_cache_does_not_extend_report_freshness():
+    spec=importlib.util.spec_from_file_location('nbaavailability',Path('sharp-service/api/nbaavailability.py'))
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    report={'publishedAt':'2026-11-10T07:00:00+00:00'}
+    assert module.cache_seconds(report,datetime(2026,11,10,8,29,59,tzinfo=timezone.utc))==1
+    assert module.cache_seconds(report,datetime(2026,11,10,8,30,tzinfo=timezone.utc))==0
