@@ -23,10 +23,10 @@ test("Edge Lab Vercel project only auto-deploys master", () => {
   });
 });
 
-test("Hobby deployment keeps at most 12 API serverless functions",()=>{
+test("Pro deployment stays within the explicit 14-function project budget",()=>{
   const apiDir = new URL("../../sharp-service/api/", import.meta.url);
-  const handlers = fs.readdirSync(apiDir).filter(name=>name.endsWith(".js"));
-  assert.ok(handlers.length <= 12, "Hobby permits at most 12 functions; found "+handlers.length);
+  const handlers = fs.readdirSync(apiDir).filter(name=>/\.(js|py)$/.test(name));
+  assert.ok(handlers.length <= 14, "Project budget is 14 functions (Vercel Pro); found "+handlers.length);
   assert.equal(handlers.includes("edge-vnext.js"),false);
   assert.deepEqual(edgeLab.rewrites.find(rule=>rule.source==="/api/edge-vnext"),{
     source:"/api/edge-vnext",destination:"/api/dashboard?edgeVnext=1"
