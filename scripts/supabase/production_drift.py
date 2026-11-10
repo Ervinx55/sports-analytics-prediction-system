@@ -147,6 +147,23 @@ def compare_exact(expected: list[dict[str, Any]], actual: list[dict[str, Any]], 
     }
 
 
+def expected_function_inventory(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Compare deployed observations, never a local source hash, with live bundles."""
+    expected = []
+    for item in items:
+        source = item.get('deploymentObservation') if item['status'] == 'LOCAL_SOURCE' else item
+        if source is None:
+            continue
+        expected.append({
+            'slug': item['slug'],
+            'status': source['status'],
+            'version': int(source['version']),
+            'verify_jwt': bool(source['verify_jwt']),
+            'ezbr_sha256': source['bundle_sha256'],
+        })
+    return expected
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("drift-report.json"))
@@ -163,16 +180,7 @@ def main() -> int:
         for x in migration_manifest if x.get("recoveredFromProduction")
     ]
     edge_manifest = json.loads((ROOT / "supabase/manifests/edge-functions.json").read_text())["items"]
-    expected_functions = [
-        {
-            "slug": x["slug"],
-            "status": x["status"],
-            "version": int(x["version"]),
-            "verify_jwt": bool(x["verify_jwt"]),
-            "ezbr_sha256": x["bundle_sha256"],
-        }
-        for x in edge_manifest
-    ]
+    expected_functions = expected_function_inventory(edge_manifest)
 
     actual_inventory = live_inventory(project_ref)
     schema_diff = compare_inventory(expected_inventory, actual_inventory)

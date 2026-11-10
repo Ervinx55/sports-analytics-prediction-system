@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 import tomllib
 from pathlib import Path
@@ -83,7 +84,20 @@ def test_edge_function_recovery_is_complete_and_configured():
         (ROOT / "supabase" / "manifests" / "edge-functions.json").read_text()
     )
     items = manifest["items"]
-    assert len(items) == EXPECTED_EDGE_FUNCTION_COUNT
+    recovered = [item for item in items if item['status'] == 'ACTIVE']
+    local = [item for item in items if item['status'] == 'LOCAL_SOURCE']
+    assert len(recovered) == EXPECTED_EDGE_FUNCTION_COUNT
+    assert {item['slug'] for item in local} == {
+        'capture-sport-predictions', 'settle-sport-predictions'
+    }
+    assert len(items) == len(recovered) + len(local)
+    for item in local:
+        assert item['appliedToProduction'] is False
+        assert item['verify_jwt'] is True
+        assert item['entrypoint'] == 'index.ts'
+        assert item['deploymentObservation']['localSourceParityVerified'] is False
+        for entry in item['files']:
+            assert hashlib.sha256((ROOT / entry['path']).read_bytes()).hexdigest() == entry['sha256']
 
     slugs = [item["slug"] for item in items]
     assert len(slugs) == len(set(slugs))
@@ -100,7 +114,7 @@ def test_edge_function_recovery_is_complete_and_configured():
     configured = config.get("functions", {})
 
     for item in items:
-        assert item["status"] == "ACTIVE"
+        assert item["status"] in {"ACTIVE", "LOCAL_SOURCE"}
         assert item["bundle_sha256"]
         assert item["files"]
         assert item["slug"] in configured
