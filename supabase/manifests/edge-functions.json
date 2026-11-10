@@ -835,6 +835,54 @@
         }
       ],
       "deployed_at": "2026-09-24"
+    },
+    {
+      "slug": "capture-sport-predictions",
+      "status": "LOCAL_SOURCE",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "07c030ebfcc67b46aacf6298132b31b58e96087d0d0764ccaa464a79de2009a1",
+      "bundle_hash_basis": "Local source only; deployed source parity has not been established",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/capture-sport-predictions/index.ts",
+          "name": "index.ts",
+          "sha256": "07c030ebfcc67b46aacf6298132b31b58e96087d0d0764ccaa464a79de2009a1"
+        }
+      ],
+      "deploymentObservation": {
+        "status": "ACTIVE",
+        "version": 4,
+        "verify_jwt": true,
+        "bundle_sha256": "c78acc5faa825eec879e642f37e0387fe4941030b070bfe390085394ce9eccbf",
+        "observedOn": "2026-11-10",
+        "localSourceParityVerified": false
+      }
+    },
+    {
+      "slug": "settle-sport-predictions",
+      "status": "LOCAL_SOURCE",
+      "verify_jwt": true,
+      "appliedToProduction": false,
+      "bundle_sha256": "09a4d88bdc7f9867db4e62e7f9a77d4686c6229d81c2a697721f4ea9ec333866",
+      "bundle_hash_basis": "Local source only; deployed source parity has not been established",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/settle-sport-predictions/index.ts",
+          "name": "index.ts",
+          "sha256": "09a4d88bdc7f9867db4e62e7f9a77d4686c6229d81c2a697721f4ea9ec333866"
+        }
+      ],
+      "deploymentObservation": {
+        "status": "ACTIVE",
+        "version": 4,
+        "verify_jwt": true,
+        "bundle_sha256": "2155404a321f5e897fbac57790aebed2581f0967745833b13eb19f8879d3976e",
+        "observedOn": "2026-11-10",
+        "localSourceParityVerified": false
+      }
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",
