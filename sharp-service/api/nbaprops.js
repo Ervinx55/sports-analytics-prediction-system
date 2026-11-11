@@ -1,3 +1,4 @@
+import {enrichQuoteExplanations,explanationSnapshot} from '../lib/nba-explanation-snapshot.js';
 import {protectedSportsGameOddsFetch} from '../lib/provider-protection.js';
 import {directSgoProps} from '../lib/nba-direct-props.js';
 export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KEY||process.env.Sports_Game_Odds_API||'',fetchPage=protectedSportsGameOddsFetch}={}){
@@ -19,5 +20,7 @@ export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KE
 }
 export default async function handler(req,res){
  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({error:'GET required'});}
- const {status,body}=await propsResponse();const ttl=status===200?Math.max(0,Math.min(30,Math.floor((600000-(Date.now()-Date.parse(body.generatedAt)))/1000))):0;res.setHeader('Cache-Control',ttl>0?`public, max-age=0, s-maxage=${ttl}`:'no-store');return res.status(status).json(body);
+ const explanation=explanationSnapshot();const {status,body}=await propsResponse();const ttl=status===200?Math.max(0,Math.min(30,Math.floor((600000-(Date.now()-Date.parse(body.generatedAt)))/1000))):0;res.setHeader('Cache-Control',ttl>0?`public, max-age=0, s-maxage=${ttl}`:'no-store');return res.status(status).json(status===200?await enrichQuoteExplanations(body,explanation):body);
 }
+
+
