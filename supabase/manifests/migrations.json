@@ -390,6 +390,15 @@
       "statementCount": null
     },
     {
+      "version": "20261111122519",
+      "name": "nba_live_read_narrow_selection",
+      "path": "supabase/migrations/20261111122519_nba_live_read_narrow_selection.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
       "version": "20261111190000",
       "name": "nba_explanation_snapshot",
       "path": "supabase/migrations/20261111190000_nba_explanation_snapshot.sql",
