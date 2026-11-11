@@ -22,3 +22,8 @@ test('dashboard percent-point fields and NFL book aliases preserve units',()=>{
  const text=JSON.stringify(buildDeepDive({final_probability:.61,bestBook:'Book',bestOdds:-110,edge_pct_points:3.2,ev_pct:4.5}));
  assert.match(text,/Book: Book/);assert.match(text,/Odds: -110/);assert.match(text,/Model: 61.0%/);assert.match(text,/3.20 percentage points/);assert.match(text,/4.50% per unit/);
 });
+
+test('frozen model variants keep independent disclosure state for the same selection',()=>{
+ const r={eventID:'e',playerID:'p',market:'points',side:'OVER',line:20.5,book:'b'};
+ assert.notEqual(selectionKey({...r,modelHash:'baseline'}),selectionKey({...r,modelHash:'minutes'}));
+});
