@@ -27,3 +27,10 @@ test('NBA page does not override reviewed live decisions with a blanket PASS cla
  assert.doesNotMatch(html,/Every priced NBA market currently says|There are no cleared NBA plays/);
  assert.match(html,/Current PLAY or PASS decisions appear in the reviewed live section/);
 });
+
+test('direct quote source is shown without inventing a failed health check',()=>{
+ const html=readFileSync(new URL('../../sharp-service/nba.html',import.meta.url),'utf8');
+ assert.match(html,/data.oddsProvider\|\|data.source/);
+ assert.match(html,/Health not supplied/);
+ assert.doesNotMatch(html,/renderTeam\(\{events:\[\],markets:\[\]\}\)/);
+});
