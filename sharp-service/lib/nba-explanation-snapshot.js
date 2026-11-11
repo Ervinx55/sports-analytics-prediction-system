@@ -16,12 +16,14 @@ export async function explanationSnapshot(){
   finally{pending=null;}
  })();return pending;
 }
-export function contextForSelection(snapshot,eventID,playerID,market,now=new Date().toISOString()){
+export function contextForSelection(snapshot,eventID,playerID,market,now=new Date().toISOString(),binding=null){
  try{
  const matches=(snapshot?.targets||[]).filter(t=>t.eventID===eventID&&t.playerID===playerID&&t.teamId&&t.opponentTeamId&&t.teamId!==t.opponentTeamId);
  const unique=[...new Map(matches.map(t=>[JSON.stringify(t),t])).values()];
- if(unique.length!==1)return null;
- return explanationContext(snapshot,unique[0],market,now);
+ const validBinding=binding?.contract==='sgo-event-roster-v1'&&binding.eventID===eventID&&binding.playerID===playerID&&[binding.teamId,binding.opponentTeamId].every(t=>typeof t==='string'&&t.endsWith('_NBA'))&&binding.teamId!==binding.opponentTeamId&&Number.isFinite(Date.parse(binding.startsAt));
+ if(unique.length>1||(!unique.length&&!validBinding)||!snapshot)return null;
+ if(unique.length&&validBinding&&(unique[0].teamId!==binding.teamId||unique[0].opponentTeamId!==binding.opponentTeamId||Date.parse(unique[0].startsAt)!==Date.parse(binding.startsAt)))return null;
+ return explanationContext(snapshot,unique[0]||binding,market,now);
  }catch{return null;}
 }
 export async function enrichLiveExplanations(body,snapshot){
@@ -32,5 +34,5 @@ export async function enrichLiveExplanations(body,snapshot){
 export async function enrichQuoteExplanations(body,snapshot){
  const s=await (snapshot===undefined?explanationSnapshot():snapshot);
  const now=new Date().toISOString();
- return {...body,events:(body.events||[]).map(e=>({...e,players:(e.players||[]).map(p=>({...p,context:contextForSelection(s,e.eventID,p.prop?.playerID,p.prop?.statID,now)}))}))};
+ return {...body,events:(body.events||[]).map(e=>({...e,players:(e.players||[]).map(p=>({...p,context:contextForSelection(s,e.eventID,p.prop?.playerID,p.prop?.statID,now,p.explanationBinding)}))}))};
 }

@@ -1,6 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {contextForSelection,enrichLiveExplanations,enrichQuoteExplanations} from '../../sharp-service/lib/nba-explanation-snapshot.js';
+import {directSgoProps} from '../../sharp-service/lib/nba-direct-props.js';
+test('exact provider event roster binds quotes not yet represented in forecasts',async()=>{
+ const event={eventID:'e',leagueID:'NBA',type:'match',status:{startsAt:'2026-11-12T00:00:00Z'},teams:{home:{teamID:'A_NBA'},away:{teamID:'B_NBA'}},players:{p:{playerID:'p',teamID:'A_NBA',name:'Player'}},odds:{x:{playerID:'p',sideID:'over',statID:'points',periodID:'game',betTypeID:'ou',oddID:'points-p-game-ou-over',byBookmaker:{draftkings:{overUnder:20.5,odds:-110}}}}};
+ const body=await directSgoProps({clock:()=> '2026-11-11T00:00:00Z',page:async()=>({events:[event],observedAt:'2026-11-11T00:00:00Z'})});
+ const binding=body.events[0].players[0].explanationBinding;assert.equal(binding.teamId,'A_NBA');assert.equal(binding.opponentTeamId,'B_NBA');
+ assert.equal(contextForSelection({targets:[],history:[]},'sgo:e','p','points','2026-11-11T00:00:00Z',binding).productionWeight,0);
+ assert.equal(contextForSelection({targets:[],history:[]},'sgo:other','p','points','2026-11-11T00:00:00Z',binding),null);
+ assert.equal(contextForSelection({targets:[{...binding,teamId:'C_NBA'}],history:[]},'sgo:e','p','points','2026-11-11T00:00:00Z',binding),null);
+});
 test('ambiguous or mismatched selection binding cannot attach context',()=>{
  const t={eventID:'e',playerID:'p',teamId:'A',opponentTeamId:'B',startsAt:'2026-11-12'};
  assert.equal(contextForSelection({targets:[t]},'other','p','points'),null);

@@ -17,7 +17,11 @@ export async function directSgoProps({page,clock}){
    if(!props.has(key))props.set(key,{playerID,playerName:e.players[playerID].name||playerID,statID:market});
    props.get(key)[side]={books:{draftkings:{line,odds,available:true,updatedAt:b.lastUpdatedAt??null}}};
   }
-  events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,players:[...props.values()].map(prop=>({prop}))});
+  events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,players:[...props.values()].map(prop=>{
+   const teamId=e.players[prop.playerID].teamID,teams=[e.teams?.home?.teamID,e.teams?.away?.teamID];
+   const valid=teams.every(t=>typeof t==='string'&&t.endsWith('_NBA'))&&teams[0]!==teams[1]&&teams.includes(teamId);
+   return {prop,...(valid?{explanationBinding:{contract:'sgo-event-roster-v1',eventID:'sgo:'+e.eventID,playerID:prop.playerID,startsAt:e.status.startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}}:{})};
+  })});
  }
  return {generatedAt:result.observedAt,events,partialCoverage:true,source:'DIRECT_SGO_BOUNDED_FALLBACK'};
 }
