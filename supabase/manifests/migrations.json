@@ -354,6 +354,42 @@
       "statementCount": null
     },
     {
+      "version": "20261111114726",
+      "name": "dashboard_health_incremental_history",
+      "path": "supabase/migrations/20261111114726_dashboard_health_incremental_history.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111120910",
+      "name": "nba_dashboard_future_read_index",
+      "path": "supabase/migrations/20261111120910_nba_dashboard_future_read_index.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111121202",
+      "name": "dashboard_health_indexed_lookups",
+      "path": "supabase/migrations/20261111121202_dashboard_health_indexed_lookups.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111121713",
+      "name": "pipeline_pending_request_index",
+      "path": "supabase/migrations/20261111121713_pipeline_pending_request_index.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
       "version": "20261111190000",
       "name": "nba_explanation_snapshot",
       "path": "supabase/migrations/20261111190000_nba_explanation_snapshot.sql",
@@ -361,6 +397,15 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": 3
+    },
+    {
+      "version": "20261111190001",
+      "name": "nba_explanation_verified_backfill",
+      "path": "supabase/migrations/20261111190001_nba_explanation_verified_backfill.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -373,4 +418,3 @@
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
 }
-
