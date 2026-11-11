@@ -74,7 +74,7 @@ test("Reconciled ledger grades net profit, including losers",()=>{
 });
 
 test("Decision gate rejects stale, uncalibrated, anchored inputs even with 90% model probability",()=>{
-  const t={modelProbability:.9,marketFairProbability:.5,
+  const t={modelProbability:.9,marketFairProbability:.5,offeredOdds:-110,pushProbability:0,
     modelCapturedAt:"2026-11-09T11:55:00Z",quoteCapturedAt:"2026-11-09T11:56:00Z",
     startsAt:"2026-11-09T12:30:00Z",now:"2026-11-09T12:00:00Z"};
   const bad=decisionGate(t);
@@ -104,6 +104,7 @@ test("Model board never promotes old NFL rows or manufactures NBA probability",(
   assert.ok(board.rows[0].reasons.includes("UNCALIBRATED"));
   assert.equal(board.sports.NBA.state,"NO_VERIFIED_INDEPENDENT_MODEL");
   assert.equal(board.productionEligible,false);
+  assert.equal(board.sports.NHL.state,"NO_VERIFIED_NHL_PROP_MODEL");
 });
 
 function res() {
