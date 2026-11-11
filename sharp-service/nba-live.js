@@ -1,3 +1,4 @@
+import {appendDeepDive,preserveDeepDives} from './deep-dive.js';
 export function isCurrentPlay(row,data,now=Date.now()){
  const stamp=Date.parse(data?.generatedAt),issued=Date.parse(row?.issuedAt),expires=Date.parse(row?.validUntil),start=Date.parse(row?.startsAt);
  return data?.contract==='nba-reviewed-live-v1'&&row?.status==='PLAY'&&row.productionEligible===true&&row.productionWeight===1&&typeof row.approvalId==='string'&&Number.isFinite(stamp)&&stamp<=now&&now-stamp<30000&&issued<=now&&now-issued<600000&&expires>now&&start>now;
@@ -10,7 +11,7 @@ if(typeof document!=='undefined'){
  let data=null,controller=null;
  const percent=x=>typeof x==='number'&&Number.isFinite(x)?(100*x).toFixed(1)+'%':'Unavailable';
  function render(){
-  list.replaceChildren();const rows=data?.decisions??[];const plays=rows.filter(r=>isCurrentPlay(r,data));
+  preserveDeepDives(list);list.replaceChildren();const rows=data?.decisions??[];const plays=rows.filter(r=>isCurrentPlay(r,data));
   status.textContent=!data?'Live decision verification unavailable. No plays cleared.':`${plays.length} currently cleared · ${rows.length} decisions checked. Approval, availability and exact prices are required. Rechecked every 15 seconds.`;
   const shown=[...plays,...rows.filter(r=>!isCurrentPlay(r,data))].slice(0,20);
   if(data&&!rows.length)status.textContent='No reviewed live decisions yet. Collection continues; a completed review is required before a model can clear plays.';
@@ -18,7 +19,7 @@ if(typeof document!=='undefined'){
    const card=document.createElement('article');card.className='card';const clear=isCurrentPlay(r,data);
    const h=document.createElement('h3');h.textContent=(clear?'PLAY — cleared: ':'PASS — do not play: ')+(r.playerName||String(r.playerID||'Player').replaceAll('_',' '));card.append(h);
    const details=[`${r.side} ${r.line} ${r.market} · ${r.book} · odds ${r.odds>0?'+':''}${r.odds}`,`Model ${percent(r.modelProbability)} · Market ${percent(r.marketProbability)}`,`Decision: ${new Date(r.issuedAt).toLocaleString()} · Valid until ${new Date(r.validUntil).toLocaleString()}`,clear?'Recheck the exact price before acting.':r.status==='PLAY'?'Live clearance expired; waiting for fresh verification.':r.reason];
-   for(const value of details){const p=document.createElement('p');p.textContent=value;card.append(p);}list.append(card);
+   for(const value of details){const p=document.createElement('p');p.textContent=value;card.append(p);}appendDeepDive(card,r,{scope:"nba-live",presentation:{title:clear?"PLAY — cleared":"PASS — do not play",reason:clear?"All live approval checks passed.":r.status==="PLAY"?"Live clearance expired; waiting for fresh verification.":r.reason}});list.append(card);
   }
  }
  async function refresh(){controller?.abort();const current=new AbortController();controller=current;const timer=setTimeout(()=>current.abort(),12000);
@@ -27,4 +28,3 @@ if(typeof document!=='undefined'){
  }
  refresh();setInterval(refresh,15000);setInterval(render,1000);
 }
-
