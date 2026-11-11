@@ -4,6 +4,8 @@ const sum=a=>a.reduce((s,x)=>s+x,0);
 const minutes=x=>typeof x==='string'&&/^\d+:\d{2}$/.test(x)?Number(x.split(':')[0])+Number(x.split(':')[1])/60:NaN;
 const before=(x,t)=>Number.isFinite(Date.parse(x))&&Date.parse(x)<=t;
 const positions=new Set(['G','F','C','G-F','F-G','F-C','C-F']);
+// One response can contain hundreds of markets from the same archive snapshot.
+const preparedSnapshots=new WeakMap();
 function verifiedPlayers(item,cutoff){
  const s=item.summary,b=s.backupEvidence,r=item.raw;
  if(!b||!r||r.id!==b.bdlGameID||r.status!=='Final'||!b.sourceSha256||b.sourceSha256!==item.archiveSha256||!before(b.retrievedAt,cutoff))return [];
@@ -20,8 +22,13 @@ function verifiedPlayers(item,cutoff){
 }
 export function explanationContext(snapshot,target,market,cutoff=new Date().toISOString()){
  const time=Date.parse(cutoff),limit=Math.min(time,Date.parse(target.startsAt)||time);
- const seen=new Set();
- const history=(snapshot?.history||[]).filter(i=>{const s=i.summary;return s?.id!==target.eventID&&before(s?.startsAt,limit-1)&&before(s?.observedAt,time)&&Array.isArray(s.teams)&&s.teams.length===2;}).sort((a,b)=>Date.parse(b.summary.startsAt)-Date.parse(a.summary.startsAt)).filter(i=>{if(seen.has(i.summary.id))return false;seen.add(i.summary.id);return true;}).map(i=>({...i,verified:verifiedPlayers(i,time)}));
+ let prepared=preparedSnapshots.get(snapshot);
+ if(!prepared||prepared.time!==time){
+  const seen=new Set();
+  const rows=(snapshot?.history||[]).filter(i=>{const s=i.summary;return before(s?.startsAt,time)&&before(s?.observedAt,time)&&Array.isArray(s.teams)&&s.teams.length===2;}).sort((a,b)=>Date.parse(b.summary.startsAt)-Date.parse(a.summary.startsAt)).filter(i=>{if(seen.has(i.summary.id))return false;seen.add(i.summary.id);return true;}).map(i=>({...i,verified:verifiedPlayers(i,time)}));
+  prepared={time,rows};if(snapshot)preparedSnapshots.set(snapshot,prepared);
+ }
+ const history=prepared.rows.filter(i=>i.summary.id!==target.eventID&&before(i.summary.startsAt,limit-1));
  const source='Reconciled SportsGameOdds / archived BALLDONTLIE';
  function fact(value,games,samples,method){return {value:games.length>=3&&finite(value)?Math.round(value*100)/100:null,source,cutoff,observedAt:games.length?new Date(Math.max(...games.map(g=>Date.parse(g.summary.observedAt)),...games.map(g=>Date.parse(g.summary.backupEvidence?.retrievedAt)||0))).toISOString():null,gameCount:games.length,sampleCount:samples,method,missingReason:'At least three eligible games with matching archived evidence are required.'};}
  const opponents=history.filter(h=>h.summary.teams.some(t=>t.id===target.opponentTeamId)).slice(0,10);

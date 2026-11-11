@@ -26,9 +26,11 @@ export function contextForSelection(snapshot,eventID,playerID,market,now=new Dat
 }
 export async function enrichLiveExplanations(body,snapshot){
  const s=await (snapshot===undefined?explanationSnapshot():snapshot);
- return {...body,decisions:body.decisions.map(r=>({...r,context:contextForSelection(s,r.eventID,r.playerID,r.marketType??r.market)}))};
+ const now=new Date().toISOString();
+ return {...body,decisions:body.decisions.map(r=>({...r,context:contextForSelection(s,r.eventID,r.playerID,r.marketType??r.market,now)}))};
 }
 export async function enrichQuoteExplanations(body,snapshot){
  const s=await (snapshot===undefined?explanationSnapshot():snapshot);
- return {...body,events:(body.events||[]).map(e=>({...e,players:(e.players||[]).map(p=>({...p,context:contextForSelection(s,e.eventID,p.prop?.playerID,p.prop?.statID)}))}))};
+ const now=new Date().toISOString();
+ return {...body,events:(body.events||[]).map(e=>({...e,players:(e.players||[]).map(p=>({...p,context:contextForSelection(s,e.eventID,p.prop?.playerID,p.prop?.statID,now)}))}))};
 }
