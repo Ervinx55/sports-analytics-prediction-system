@@ -1,0 +1,6105 @@
+[
+  {
+    "event_id": "sgo:XzdoB0yqfKeFro9WNRV7",
+    "basis_id": "sgo:XzdoB0yqfKeFro9WNRV7:57b9083ffd9071578d40a6f25219b60bde333d282d4106a29c2f0e1af6106e2b",
+    "evidence": {
+      "eventID": "XzdoB0yqfKeFro9WNRV7",
+      "bdlGameID": 21718051,
+      "officialGameID": "0022600033",
+      "startsAt": "2026-11-07T03:00:00.000Z",
+      "home": "SACRAMENTO_KINGS_NBA",
+      "away": "SAN_ANTONIO_SPURS_NBA",
+      "source": "https://www.nba.com/game/0022600033/box-score",
+      "sourceSha256": "07901677df0477fe96d11c6e59b69a6eae4251a6ff2bc783469d23e5aef64c35",
+      "officialRetrievedAt": "2026-11-11T12:44:55.930Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "f058b992712f68a898d8ba9cd6f1776ca62bbfdd6b1a7fb3eb07ae775f56d3b1",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DYLAN_CARDWELL_1_NBA",
+          "teamID": "SACRAMENTO_KINGS_NBA",
+          "name": "Dylan Cardwell",
+          "officialPlayerID": 1642928,
+          "fields": {
+            "blocks": [
+              3,
+              2
+            ],
+            "blocks+steals": [
+              4,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "SACRAMENTO_KINGS_NBA",
+          "fields": {
+            "blocks": [
+              5,
+              4
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "4ed955b58dc1d55dd35402dec406fd17daf638fe253c96716a489b498516882a"
+    }
+  },
+  {
+    "event_id": "sgo:GfMzTtLYBZCyxHZ6R2LN",
+    "basis_id": "sgo:GfMzTtLYBZCyxHZ6R2LN:bdda35b54f48ff0043ff61be376275682e1a5e1184b1247f39f9ec4f2dba1ed0",
+    "evidence": {
+      "eventID": "GfMzTtLYBZCyxHZ6R2LN",
+      "bdlGameID": 21718054,
+      "officialGameID": "0022600191",
+      "startsAt": "2026-11-08T01:00:00.000Z",
+      "home": "CLEVELAND_CAVALIERS_NBA",
+      "away": "NEW_YORK_KNICKS_NBA",
+      "source": "https://www.nba.com/game/0022600191/box-score",
+      "sourceSha256": "f11e75cb91bf467b2323c3a54a11a804522a36b1eef61532405623205af82258",
+      "officialRetrievedAt": "2026-11-11T12:44:56.590Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "6202ba899435a96ce4f2589b0e2b7858e2e0291b572972dafc89b4538b3b126f",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PEYTON_WATSON_1_NBA",
+          "teamID": "CLEVELAND_CAVALIERS_NBA",
+          "name": "Peyton Watson",
+          "officialPlayerID": 1631212,
+          "fields": {
+            "assists": [
+              2,
+              3
+            ],
+            "points+assists": [
+              14,
+              15
+            ],
+            "rebounds+assists": [
+              8,
+              9
+            ],
+            "points+rebounds+assists": [
+              20,
+              21
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TYRESE_PROCTOR_1_NBA",
+          "teamID": "CLEVELAND_CAVALIERS_NBA",
+          "name": "Tyrese Proctor",
+          "officialPlayerID": 1642878,
+          "fields": {
+            "assists": [
+              2,
+              3
+            ],
+            "points+assists": [
+              9,
+              10
+            ],
+            "rebounds+assists": [
+              5,
+              6
+            ],
+            "points+rebounds+assists": [
+              12,
+              13
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "CLEVELAND_CAVALIERS_NBA",
+          "fields": {
+            "assists": [
+              21,
+              23
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "OG_ANUNOBY_1_NBA",
+          "teamID": "NEW_YORK_KNICKS_NBA",
+          "name": "OG Anunoby",
+          "officialPlayerID": 1628384,
+          "fields": {
+            "steals": [
+              0,
+              1
+            ],
+            "blocks+steals": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LANDRY_SHAMET_1_NBA",
+          "teamID": "NEW_YORK_KNICKS_NBA",
+          "name": "Landry Shamet",
+          "officialPlayerID": 1629013,
+          "fields": {
+            "steals": [
+              2,
+              1
+            ],
+            "blocks+steals": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "MIKAL_BRIDGES_1_NBA",
+          "teamID": "NEW_YORK_KNICKS_NBA",
+          "name": "Mikal Bridges",
+          "officialPlayerID": 1628969,
+          "fields": {
+            "blocks": [
+              1,
+              2
+            ],
+            "blocks+steals": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "NEW_YORK_KNICKS_NBA",
+          "fields": {
+            "blocks": [
+              3,
+              4
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "93c42f40ca92f76bd8085d50933b702f2d52c8668b5ad952e65a2702d216956e"
+    }
+  },
+  {
+    "event_id": "sgo:XGn1SVwegewyFAMrdWSh",
+    "basis_id": "sgo:XGn1SVwegewyFAMrdWSh:7bc68e8e755de8de1e7d5324c888a0070d81b374834b91b13ff22bc847c7b70c",
+    "evidence": {
+      "eventID": "XGn1SVwegewyFAMrdWSh",
+      "bdlGameID": 21718056,
+      "officialGameID": "0022600193",
+      "startsAt": "2026-11-08T01:30:00.000Z",
+      "home": "GOLDEN_STATE_WARRIORS_NBA",
+      "away": "ORLANDO_MAGIC_NBA",
+      "source": "https://www.nba.com/game/0022600193/box-score",
+      "sourceSha256": "dbc9b48632a36ac16cd4a81ecf15f27837b3b8ec1e251008c6850a64f4338bdf",
+      "officialRetrievedAt": "2026-11-11T12:44:57.195Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "77a5e8e29ca38d457b44f796ccacfe6533cd45fb3b86623c68fbaa64d5e79b18",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "YAXEL_LENDEBORG_1_NBA",
+          "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+          "name": "Yaxel Lendeborg",
+          "officialPlayerID": 1642865,
+          "fields": {
+            "assists": [
+              2,
+              3
+            ],
+            "points+assists": [
+              25,
+              26
+            ],
+            "rebounds+assists": [
+              10,
+              11
+            ],
+            "points+rebounds+assists": [
+              33,
+              34
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BRANDIN_PODZIEMSKI_1_NBA",
+          "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+          "name": "Brandin Podziemski",
+          "officialPlayerID": 1641764,
+          "fields": {
+            "fieldGoalsAttempted": [
+              6,
+              7
+            ],
+            "fieldGoalsMade": [
+              4,
+              5
+            ],
+            "threePointersMade": [
+              3,
+              4
+            ],
+            "threePointersAttempted": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+          "fields": {
+            "assists": [
+              31,
+              32
+            ],
+            "fieldGoalsAttempted": [
+              79,
+              80
+            ],
+            "fieldGoalsMade": [
+              42,
+              43
+            ],
+            "threePointersMade": [
+              14,
+              15
+            ],
+            "threePointersAttempted": [
+              31,
+              32
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "59aff3ce83d574c6571799c0ad92bf202786cbd2bcd136a0caef622d0242c862"
+    }
+  },
+  {
+    "event_id": "sgo:5pWgGpK0VzJgbvMgss8C",
+    "basis_id": "sgo:5pWgGpK0VzJgbvMgss8C:f2a62e5e7666f1ea60a8a90a92640ccf5b8267c442aa47e3cf4d060bfc266aa2",
+    "evidence": {
+      "eventID": "5pWgGpK0VzJgbvMgss8C",
+      "bdlGameID": 21718058,
+      "officialGameID": "0022600195",
+      "startsAt": "2026-11-08T03:00:00.000Z",
+      "home": "PORTLAND_TRAIL_BLAZERS_NBA",
+      "away": "SAN_ANTONIO_SPURS_NBA",
+      "source": "https://www.nba.com/game/0022600195/box-score",
+      "sourceSha256": "3eaf248f5fa424d04c46d232835b2f8534f7e4d6a527f9d328038b8ff79359d9",
+      "officialRetrievedAt": "2026-11-11T12:44:58.090Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "f032e6a513056f6ec6d6ece303532a7916804709f2a204bd00643e53917d0e2e",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "VICTOR_WEMBANYAMA_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Victor Wembanyama",
+          "officialPlayerID": 1641705,
+          "fields": {
+            "blocks": [
+              1,
+              2
+            ],
+            "blocks+steals": [
+              2,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "fields": {
+            "blocks": [
+              7,
+              8
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "c49f4e11dcdc1ff97379337b4d0a209440bdb8c7c1b93165186ac3e6b3f1adfb"
+    }
+  },
+  {
+    "event_id": "sgo:TR7SOq9KvdaaS0woYJ6u",
+    "basis_id": "sgo:TR7SOq9KvdaaS0woYJ6u:a51dfa4e755f9556be15d679c898554df72c2195c46b39f802cfd1e2ee64ca36",
+    "evidence": {
+      "eventID": "TR7SOq9KvdaaS0woYJ6u",
+      "bdlGameID": 21718059,
+      "officialGameID": "0022600196",
+      "startsAt": "2026-11-08T20:30:00.000Z",
+      "home": "CHICAGO_BULLS_NBA",
+      "away": "PHILADELPHIA_76ERS_NBA",
+      "source": "https://www.nba.com/game/0022600196/box-score",
+      "sourceSha256": "d8c4c722b49f43d1e5edb4d3eb4a292f6e81353a73e61b5fae39b69d9cc519fa",
+      "officialRetrievedAt": "2026-11-11T12:44:58.854Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "3e6c5a9db18ebef21832aaf753950d50877d8f6f42a9fed03add3bbb2e294c1c",
+      "corrections": [],
+      "identityCorrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NIC_CLAXTON_1_NBA",
+          "officialPlayerID": 1629651,
+          "bdlPlayerID": 666508,
+          "teamID": "CHICAGO_BULLS_NBA",
+          "before": {
+            "name": "Nic Claxton",
+            "firstName": "Nic",
+            "lastName": "Claxton"
+          },
+          "after": {
+            "name": "Nicolas Claxton",
+            "firstName": "Nicolas",
+            "lastName": "Claxton"
+          },
+          "method": "official profile DISPLAY_FIRST_LAST and PLAYERCODE alias; exact game and team"
+        }
+      ],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "7ab5f0355c292646bb6dbfed872b1ecfbe1b4966a4909bb5412b898fa8b2ee92"
+    }
+  },
+  {
+    "event_id": "sgo:GgnktZGxhtMg5MbyY0G9",
+    "basis_id": "sgo:GgnktZGxhtMg5MbyY0G9:7177120b1acebe3ba63097894836f15cef882275fa4d829b9ad54700ca944c1d",
+    "evidence": {
+      "eventID": "GgnktZGxhtMg5MbyY0G9",
+      "bdlGameID": 21718063,
+      "officialGameID": "0022600200",
+      "startsAt": "2026-11-09T01:00:00.000Z",
+      "home": "MILWAUKEE_BUCKS_NBA",
+      "away": "BOSTON_CELTICS_NBA",
+      "source": "https://www.nba.com/game/0022600200/box-score",
+      "sourceSha256": "0fa6bfdef6f329b2c0dbc64e21b89ce51d6ea14ad5db52d8578ab4e531199a07",
+      "officialRetrievedAt": "2026-11-11T12:45:01.521Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "081de8c91f6052a0ffb28e3b1e48870f3a0a1e0a3be8b1a21819950eac29e247",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NATE_AMENT_1_NBA",
+          "teamID": "MILWAUKEE_BUCKS_NBA",
+          "name": "Nate Ament",
+          "officialPlayerID": 1643417,
+          "fields": {
+            "fouls": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "MILWAUKEE_BUCKS_NBA",
+          "fields": {
+            "fouls": [
+              16,
+              15
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "15c5f61bf2a1c75d46826f0a7ebf076831435d0546328f6e2f80ea51fc8fce04"
+    }
+  },
+  {
+    "event_id": "sgo:9NAOugK4eeecpBQm5SYj",
+    "basis_id": "sgo:9NAOugK4eeecpBQm5SYj:41361fd1796be799cecb91a25e0076f2b29734594c774ae1545234183aa8213a",
+    "evidence": {
+      "eventID": "9NAOugK4eeecpBQm5SYj",
+      "bdlGameID": 21718065,
+      "officialGameID": "0022600202",
+      "startsAt": "2026-11-09T02:00:00.000Z",
+      "home": "SACRAMENTO_KINGS_NBA",
+      "away": "MIAMI_HEAT_NBA",
+      "source": "https://www.nba.com/game/0022600202/box-score",
+      "sourceSha256": "20ce44d6561394fe49ce2340aa1bd5f947e55f67adf517d1ec8efec54592705e",
+      "officialRetrievedAt": "2026-11-11T12:45:02.298Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "230888f71d1fa59f654a6dfaec849e4796f59a4306d1dc55c78906f4ba45dd1c",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DAVION_MITCHELL_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Davion Mitchell",
+          "officialPlayerID": 1630558,
+          "fields": {
+            "fieldGoalsAttempted": [
+              11,
+              10
+            ],
+            "twoPointersAttempted": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TIM_HARDAWAY_JR_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Tim Hardaway Jr.",
+          "officialPlayerID": 203501,
+          "fields": {
+            "fieldGoalsAttempted": [
+              2,
+              3
+            ],
+            "twoPointersAttempted": [
+              1,
+              2
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "2c96aa7137febbb0e836408fd7691af18ce44b4da962228375fcc0e79715db36"
+    }
+  },
+  {
+    "event_id": "sgo:sNeOqoXz5s0HbR3FOYO6",
+    "basis_id": "sgo:sNeOqoXz5s0HbR3FOYO6:ef6b45dbab93868eb379d7712df7d86e9216564ab86e41e9d537a2a855d266c2",
+    "evidence": {
+      "eventID": "sNeOqoXz5s0HbR3FOYO6",
+      "bdlGameID": 21718067,
+      "officialGameID": "0022600204",
+      "startsAt": "2026-11-10T00:00:00.000Z",
+      "home": "CHARLOTTE_HORNETS_NBA",
+      "away": "CLEVELAND_CAVALIERS_NBA",
+      "source": "https://www.nba.com/game/0022600204/box-score",
+      "sourceSha256": "0a2fe6d3fd38ee75a7f5cb52c47651a93edf42ceea7b89ffd096403c9a46c9d3",
+      "officialRetrievedAt": "2026-11-11T12:45:03.544Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "b7682ce2c35a9b145dc78b1f440fb1494f7599235e26962e44de8d16e5927b74",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NAZ_REID_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Naz Reid",
+          "officialPlayerID": 1629675,
+          "fields": {
+            "steals": [
+              1,
+              2
+            ],
+            "blocks+steals": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "COBY_WHITE_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Coby White",
+          "officialPlayerID": 1629632,
+          "fields": {
+            "rebounds": [
+              3,
+              2
+            ],
+            "assists": [
+              8,
+              9
+            ],
+            "defensiveRebounds": [
+              2,
+              1
+            ],
+            "points+assists": [
+              18,
+              19
+            ],
+            "points+rebounds": [
+              13,
+              12
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LIAM_MCNEELEY_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Liam McNeeley",
+          "officialPlayerID": 1642862,
+          "fields": {
+            "offensiveRebounds": [
+              1,
+              0
+            ],
+            "defensiveRebounds": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "HANNES_STEINBACH_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Hannes Steinbach",
+          "officialPlayerID": 1643419,
+          "fields": {
+            "rebounds": [
+              2,
+              3
+            ],
+            "assists": [
+              1,
+              0
+            ],
+            "offensiveRebounds": [
+              2,
+              3
+            ],
+            "points+assists": [
+              3,
+              2
+            ],
+            "points+rebounds": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "RYAN_KALKBRENNER_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Ryan Kalkbrenner",
+          "officialPlayerID": 1641750,
+          "fields": {
+            "steals": [
+              2,
+              1
+            ],
+            "blocks+steals": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NORCHAD_OMIER_1_NBA",
+          "teamID": "CLEVELAND_CAVALIERS_NBA",
+          "name": "Norchad Omier",
+          "officialPlayerID": 1641807,
+          "fields": {
+            "assists": [
+              1,
+              2
+            ],
+            "points+assists": [
+              1,
+              2
+            ],
+            "rebounds+assists": [
+              4,
+              5
+            ],
+            "points+rebounds+assists": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "CLEVELAND_CAVALIERS_NBA",
+          "fields": {
+            "assists": [
+              26,
+              27
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "38c9c272d7fc5e8848fb4a976e095172a63e8e03877cfee3ad097b4b6ceb43f0"
+    }
+  },
+  {
+    "event_id": "sgo:pQKPBuYJINPiRbTMEYCq",
+    "basis_id": "sgo:pQKPBuYJINPiRbTMEYCq:982f1c73a195359b75ca7a5e0449a37fb7e4779e9630390df007cea772430f78",
+    "evidence": {
+      "eventID": "pQKPBuYJINPiRbTMEYCq",
+      "bdlGameID": 21718070,
+      "officialGameID": "0022600207",
+      "startsAt": "2026-11-10T01:00:00.000Z",
+      "home": "DALLAS_MAVERICKS_NBA",
+      "away": "INDIANA_PACERS_NBA",
+      "source": "https://www.nba.com/game/0022600207/box-score",
+      "sourceSha256": "15048214fe2f808d0b922399418252c6ba7fee0187c97fe670464876136667e5",
+      "officialRetrievedAt": "2026-11-11T12:45:03.907Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "3859124bb0c68bf904b54da243b6816522bc4da47846e01ab2d1365c78983f69",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "DALLAS_MAVERICKS_NBA",
+          "fields": {
+            "threePointersMade": [
+              13,
+              14
+            ],
+            "threePointersAttempted": [
+              33,
+              34
+            ],
+            "twoPointersMade": [
+              30,
+              29
+            ],
+            "twoPointersAttempted": [
+              50,
+              49
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 44477085,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Quenton Jackson",
+          "officialPlayerID": 1631245,
+          "fields": {
+            "min": [
+              "24:51",
+              "24:47"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JARACE_WALKER_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Jarace Walker",
+          "officialPlayerID": 1641716,
+          "fields": {
+            "fouls": [
+              2,
+              3
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "bfd0d50fa872849c73d8e3a5f2c9b455dea21f47a8b8a31803bf507908a608c9"
+    }
+  },
+  {
+    "event_id": "sgo:Nw3WlnQnITP4DwkbMw6K",
+    "basis_id": "sgo:Nw3WlnQnITP4DwkbMw6K:df8027126ca19ea77cb78979819d5c2135fa40f0f41c974256221f91939b18d7",
+    "evidence": {
+      "eventID": "Nw3WlnQnITP4DwkbMw6K",
+      "bdlGameID": 21718072,
+      "officialGameID": "0022600209",
+      "startsAt": "2026-11-10T02:00:00.000Z",
+      "home": "PHOENIX_SUNS_NBA",
+      "away": "SAN_ANTONIO_SPURS_NBA",
+      "source": "https://www.nba.com/game/0022600209/box-score",
+      "sourceSha256": "bfa2ad5cb342f9a6e31fb6759882540ddda12d711e86c24b2562ce1a6109f8f6",
+      "officialRetrievedAt": "2026-11-11T12:45:05.024Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "d98356917cfad63a3d98e4969a30eff1359a1465d2c19d7b7bffaa91b34f3a20",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057268513,
+          "teamID": "PHOENIX_SUNS_NBA",
+          "name": "Khaman Maluach",
+          "officialPlayerID": 1642863,
+          "fields": {
+            "blk": [
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KHAMAN_MALUACH_1_NBA",
+          "teamID": "PHOENIX_SUNS_NBA",
+          "name": "Khaman Maluach",
+          "officialPlayerID": 1642863,
+          "fields": {
+            "blocks": [
+              1,
+              0
+            ],
+            "blocks+steals": [
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "PHOENIX_SUNS_NBA",
+          "fields": {
+            "blocks": [
+              7,
+              6
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 56677822,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Victor Wembanyama",
+          "officialPlayerID": 1641705,
+          "fields": {
+            "blk": [
+              9,
+              8
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028025261,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Stephon Castle",
+          "officialPlayerID": 1642264,
+          "fields": {
+            "reb": [
+              8,
+              7
+            ],
+            "fga": [
+              10,
+              9
+            ],
+            "oreb": [
+              4,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "STEPHON_CASTLE_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Stephon Castle",
+          "officialPlayerID": 1642264,
+          "fields": {
+            "rebounds": [
+              8,
+              7
+            ],
+            "fieldGoalsAttempted": [
+              10,
+              9
+            ],
+            "offensiveRebounds": [
+              4,
+              3
+            ],
+            "twoPointersAttempted": [
+              9,
+              8
+            ],
+            "points+rebounds": [
+              12,
+              11
+            ],
+            "rebounds+assists": [
+              15,
+              14
+            ],
+            "points+rebounds+assists": [
+              19,
+              18
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "fields": {
+            "rebounds": [
+              55,
+              54
+            ],
+            "fieldGoalsAttempted": [
+              90,
+              89
+            ],
+            "offensiveRebounds": [
+              15,
+              14
+            ],
+            "twoPointersAttempted": [
+              60,
+              59
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "98ab82a4dffe536c2f5db8732a4de36c2ba132c0bfb9ef68db37e46411319795"
+    }
+  },
+  {
+    "event_id": "sgo:gdPxIUkZq9h39cSvqIm3",
+    "basis_id": "sgo:gdPxIUkZq9h39cSvqIm3:d619b803f178435942ede3f3df52f6bea9c8578e9c5e7739537a8d368f00f6f3",
+    "evidence": {
+      "eventID": "gdPxIUkZq9h39cSvqIm3",
+      "bdlGameID": 21718023,
+      "officialGameID": "0022600169",
+      "startsAt": "2026-11-03T02:00:00.000Z",
+      "home": "DENVER_NUGGETS_NBA",
+      "away": "PORTLAND_TRAIL_BLAZERS_NBA",
+      "source": "https://www.nba.com/game/0022600169/box-score",
+      "sourceSha256": "93ad0cea94d02ef70b0e877e3af7e33e9a40fb251a5074b784f77718bed76d5f",
+      "officialRetrievedAt": "2026-11-11T12:45:05.846Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "43b86f62373366fdaf29c84c9e5756e413a84e59a8518f3832bb9b3c0362fb65",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JAMAL_MURRAY_1_NBA",
+          "teamID": "DENVER_NUGGETS_NBA",
+          "name": "Jamal Murray",
+          "officialPlayerID": 1627750,
+          "fields": {
+            "steals": [
+              0,
+              1
+            ],
+            "blocks+steals": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CHRISTIAN_BRAUN_1_NBA",
+          "teamID": "DENVER_NUGGETS_NBA",
+          "name": "Christian Braun",
+          "officialPlayerID": 1631128,
+          "fields": {
+            "steals": [
+              3,
+              2
+            ],
+            "blocks+steals": [
+              3,
+              2
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "b48fee24294e63904db30c9b40fb0e2feec4aae63f5b8a4de747fb3ac725b962"
+    }
+  },
+  {
+    "event_id": "sgo:neJeUaqX3B8H7qGMIDXS",
+    "basis_id": "sgo:neJeUaqX3B8H7qGMIDXS:b26d7ac6d9730ec4a799144e8602eb28c95568edf683665e947b16154e100c0e",
+    "evidence": {
+      "eventID": "neJeUaqX3B8H7qGMIDXS",
+      "bdlGameID": 21718024,
+      "officialGameID": "0022600170",
+      "startsAt": "2026-11-03T03:00:00.000Z",
+      "home": "GOLDEN_STATE_WARRIORS_NBA",
+      "away": "PHOENIX_SUNS_NBA",
+      "source": "https://www.nba.com/game/0022600170/box-score",
+      "sourceSha256": "fefbae89676ff9e3dcecd6a66db13a347ccfb2e536b19c9209db41217a25cc39",
+      "officialRetrievedAt": "2026-11-11T12:45:06.401Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "a20eb898e57e487c646d91f8941b4469b1000e8bb09ac6c988c530cc84b33cfe",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BRANDIN_PODZIEMSKI_1_NBA",
+          "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+          "name": "Brandin Podziemski",
+          "officialPlayerID": 1641764,
+          "fields": {
+            "rebounds": [
+              2,
+              3
+            ],
+            "defensiveRebounds": [
+              1,
+              2
+            ],
+            "points+rebounds": [
+              22,
+              23
+            ],
+            "rebounds+assists": [
+              4,
+              5
+            ],
+            "points+rebounds+assists": [
+              24,
+              25
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+          "fields": {
+            "rebounds": [
+              43,
+              44
+            ],
+            "defensiveRebounds": [
+              31,
+              32
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KHAMAN_MALUACH_1_NBA",
+          "teamID": "PHOENIX_SUNS_NBA",
+          "name": "Khaman Maluach",
+          "officialPlayerID": 1642863,
+          "fields": {
+            "freeThrowsAttempted": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "PHOENIX_SUNS_NBA",
+          "fields": {
+            "freeThrowsAttempted": [
+              29,
+              30
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "942ea347a95f9099118adc19475f2c44a2ae6412c59152d317fe81d5a3db5bf9"
+    }
+  },
+  {
+    "event_id": "sgo:uKjcOGTOm5hVooEjFUO6",
+    "basis_id": "sgo:uKjcOGTOm5hVooEjFUO6:fd77079448db30053c71a8f9a5654aa9d2ffe68a3912a29ea3b406be2cbb91ee",
+    "evidence": {
+      "eventID": "uKjcOGTOm5hVooEjFUO6",
+      "bdlGameID": 21718028,
+      "officialGameID": "0022600174",
+      "startsAt": "2026-11-05T00:00:00.000Z",
+      "home": "WASHINGTON_WIZARDS_NBA",
+      "away": "ATLANTA_HAWKS_NBA",
+      "source": "https://www.nba.com/game/0022600174/box-score",
+      "sourceSha256": "5da70f63b6aaafa49be8edeb34af3e0d0b14835cb42f670566e6586a22bb1613",
+      "officialRetrievedAt": "2026-11-11T12:45:07.347Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "438dd997cccffb76b72aa7d09b40e66c732799f332516a65fdfe0900855ed2f5",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DYSON_DANIELS_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Dyson Daniels",
+          "officialPlayerID": 1630700,
+          "fields": {
+            "rebounds": [
+              17,
+              16
+            ],
+            "defensiveRebounds": [
+              10,
+              9
+            ],
+            "points+rebounds": [
+              25,
+              24
+            ],
+            "rebounds+assists": [
+              25,
+              24
+            ],
+            "points+rebounds+assists": [
+              33,
+              32
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NICKEIL_ALEXANDERWALKER_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Nickeil Alexander-Walker",
+          "officialPlayerID": 1629638,
+          "fields": {
+            "rebounds": [
+              3,
+              4
+            ],
+            "defensiveRebounds": [
+              2,
+              3
+            ],
+            "points+rebounds": [
+              29,
+              30
+            ],
+            "rebounds+assists": [
+              5,
+              6
+            ],
+            "points+rebounds+assists": [
+              31,
+              32
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "07a04109ae1c11f1eb6cba1f9e7553aae717803e0bfe57e8477b3ddeecbb5cd6"
+    }
+  },
+  {
+    "event_id": "sgo:zH5yS1D0GwXIrfQKQt2p",
+    "basis_id": "sgo:zH5yS1D0GwXIrfQKQt2p:63899758a6fb000852ef75b5b7137041883af4be69876679d9de03908441fa32",
+    "evidence": {
+      "eventID": "zH5yS1D0GwXIrfQKQt2p",
+      "bdlGameID": 21718027,
+      "officialGameID": "0022600173",
+      "startsAt": "2026-11-05T00:00:00.000Z",
+      "home": "DETROIT_PISTONS_NBA",
+      "away": "PHILADELPHIA_76ERS_NBA",
+      "source": "https://www.nba.com/game/0022600173/box-score",
+      "sourceSha256": "df89e7254fffef45b5833eb4c9281934b037c357a5b625f8e42258ab6a8b04ad",
+      "officialRetrievedAt": "2026-11-11T12:45:07.983Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "9d84f82afc112a1cf0476ee303e464451e253c5eda6f9ee35cb3af44098cbc6b",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEVIN_HUERTER_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Kevin Huerter",
+          "officialPlayerID": 1628989,
+          "fields": {
+            "rebounds": [
+              1,
+              0
+            ],
+            "defensiveRebounds": [
+              1,
+              0
+            ],
+            "points+rebounds": [
+              9,
+              8
+            ],
+            "rebounds+assists": [
+              1,
+              0
+            ],
+            "points+rebounds+assists": [
+              9,
+              8
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "fields": {
+            "rebounds": [
+              41,
+              40
+            ],
+            "defensiveRebounds": [
+              37,
+              36
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "0374bd993474a29aea3de95a2006f42c2c99ca3cffb844387c5caa9dee605589"
+    }
+  },
+  {
+    "event_id": "sgo:HhtiwKwrFcro0itW9oJk",
+    "basis_id": "sgo:HhtiwKwrFcro0itW9oJk:33674949e07e2f40361ba48427b9515cbc7d30fd7e656ecff1b83dd58ee668b9",
+    "evidence": {
+      "eventID": "HhtiwKwrFcro0itW9oJk",
+      "bdlGameID": 21718033,
+      "officialGameID": "0022600179",
+      "startsAt": "2026-11-05T01:00:00.000Z",
+      "home": "NEW_ORLEANS_PELICANS_NBA",
+      "away": "UTAH_JAZZ_NBA",
+      "source": "https://www.nba.com/game/0022600179/box-score",
+      "sourceSha256": "25d8aa0a683631208e155fb13a7395f5f53e4e8d00a43d65484556ef7039655e",
+      "officialRetrievedAt": "2026-11-11T12:45:08.861Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "21f0151de1c6988780ad8fb5a63df818a2be7e38961e37866ab9fe9eab0df3f1",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JOSH_OKOGIE_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Josh Okogie",
+          "officialPlayerID": 1629006,
+          "fields": {
+            "fieldGoalsAttempted": [
+              4,
+              3
+            ],
+            "twoPointersAttempted": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEYONTE_GEORGE_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Keyonte George",
+          "officialPlayerID": 1641718,
+          "fields": {
+            "fieldGoalsAttempted": [
+              26,
+              27
+            ],
+            "twoPointersAttempted": [
+              17,
+              18
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "54df90108111d4e3d136f6ad93075c025ea6dbb298281bb368ced068e2c8d84c"
+    }
+  },
+  {
+    "event_id": "sgo:YQH7ORjpj8NiPjJ4CYQw",
+    "basis_id": "sgo:YQH7ORjpj8NiPjJ4CYQw:f212189c606339bd54144c73bf98396fec07d34ecbd85418161fea60df214fd5",
+    "evidence": {
+      "eventID": "YQH7ORjpj8NiPjJ4CYQw",
+      "bdlGameID": 21718032,
+      "officialGameID": "0022600178",
+      "startsAt": "2026-11-05T01:00:00.000Z",
+      "home": "MEMPHIS_GRIZZLIES_NBA",
+      "away": "INDIANA_PACERS_NBA",
+      "source": "https://www.nba.com/game/0022600178/box-score",
+      "sourceSha256": "bd05c26bcf10a53dd3449df9ebd534ab704fbac9821ee229e176d4e0c1ee8847",
+      "officialRetrievedAt": "2026-11-11T12:45:09.518Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "ceb4fc614aaa3bbfbfdeda5914696b00522f1e766dc3834944bf991ab6ffae6e",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TY_JEROME_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Ty Jerome",
+          "officialPlayerID": 1629660,
+          "fields": {
+            "turnovers": [
+              4,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JAYLEN_WELLS_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Jaylen Wells",
+          "officialPlayerID": 1642377,
+          "fields": {
+            "rebounds": [
+              1,
+              2
+            ],
+            "defensiveRebounds": [
+              1,
+              2
+            ],
+            "points+rebounds": [
+              1,
+              2
+            ],
+            "rebounds+assists": [
+              4,
+              5
+            ],
+            "points+rebounds+assists": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CAMERON_BOOZER_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Cameron Boozer",
+          "officialPlayerID": 1643409,
+          "fields": {
+            "turnovers": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "OLIVIERMAXENCE_PROSPER_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Olivier-Maxence Prosper",
+          "officialPlayerID": 1641765,
+          "fields": {
+            "rebounds": [
+              3,
+              2
+            ],
+            "defensiveRebounds": [
+              2,
+              1
+            ],
+            "points+rebounds": [
+              7,
+              6
+            ],
+            "rebounds+assists": [
+              4,
+              3
+            ],
+            "points+rebounds+assists": [
+              8,
+              7
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "AARON_NESMITH_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Aaron Nesmith",
+          "officialPlayerID": 1630174,
+          "fields": {
+            "rebounds": [
+              2,
+              1
+            ],
+            "defensiveRebounds": [
+              2,
+              1
+            ],
+            "points+rebounds": [
+              18,
+              17
+            ],
+            "rebounds+assists": [
+              4,
+              3
+            ],
+            "points+rebounds+assists": [
+              20,
+              19
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PASCAL_SIAKAM_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Pascal Siakam",
+          "officialPlayerID": 1627783,
+          "fields": {
+            "rebounds": [
+              4,
+              5
+            ],
+            "defensiveRebounds": [
+              4,
+              5
+            ],
+            "points+rebounds": [
+              24,
+              25
+            ],
+            "rebounds+assists": [
+              6,
+              7
+            ],
+            "points+rebounds+assists": [
+              26,
+              27
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ANDREW_NEMBHARD_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Andrew Nembhard",
+          "officialPlayerID": 1629614,
+          "fields": {
+            "assists": [
+              5,
+              4
+            ],
+            "points+assists": [
+              27,
+              26
+            ],
+            "rebounds+assists": [
+              7,
+              6
+            ],
+            "points+rebounds+assists": [
+              29,
+              28
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "INDIANA_PACERS_NBA",
+          "fields": {
+            "assists": [
+              23,
+              22
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "aecd7986f12bb24ac96cf507dae7b634f42e7a9338ac9b25ddfa71c7eebed94f"
+    }
+  },
+  {
+    "event_id": "sgo:NdWj2SKUs2DQl5b4sI3t",
+    "basis_id": "sgo:NdWj2SKUs2DQl5b4sI3t:d13e63576f1e217a8f7fd1bbeabc3d297670da81a32913146b0b7fd45228a7c8",
+    "evidence": {
+      "eventID": "NdWj2SKUs2DQl5b4sI3t",
+      "bdlGameID": 21718035,
+      "officialGameID": "0022600181",
+      "startsAt": "2026-11-05T01:30:00.000Z",
+      "home": "HOUSTON_ROCKETS_NBA",
+      "away": "MINNESOTA_TIMBERWOLVES_NBA",
+      "source": "https://www.nba.com/game/0022600181/box-score",
+      "sourceSha256": "ca4494bd226614160353ece026414000fda9df569230aef26dbbddeadd2ed465",
+      "officialRetrievedAt": "2026-11-11T12:45:10.052Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "6b5ad69d9f7203c178eb4e99d3e3def3f7ace56bd6e61984ead277164552a4d3",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 140,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Kevin Durant",
+          "officialPlayerID": 201142,
+          "fields": {
+            "turnover": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 458,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Fred VanVleet",
+          "officialPlayerID": 1627832,
+          "fields": {
+            "turnover": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEVIN_DURANT_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Kevin Durant",
+          "officialPlayerID": 201142,
+          "fields": {
+            "turnovers": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "FRED_VANVLEET_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Fred VanVleet",
+          "officialPlayerID": 1627832,
+          "fields": {
+            "turnovers": [
+              4,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ALPEREN_SENGUN_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "turnovers": [
+              4,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 176,
+          "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+          "name": "Rudy Gobert",
+          "officialPlayerID": 203497,
+          "fields": {
+            "stl": [
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "RUDY_GOBERT_1_NBA",
+          "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+          "name": "Rudy Gobert",
+          "officialPlayerID": 203497,
+          "fields": {
+            "steals": [
+              1,
+              0
+            ],
+            "blocks+steals": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+          "fields": {
+            "steals": [
+              12,
+              11
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "74c8148fea4f0e98c293b208ca63684aa60cca78c0c97522dd12ba63528e46f6"
+    }
+  },
+  {
+    "event_id": "sgo:jnlQn64ndQfsw9ig3V4O",
+    "basis_id": "sgo:jnlQn64ndQfsw9ig3V4O:827200c6e88b4e2303a96b80b26fc6dc2069cc3d3e5a0187d89561e4fbd0931f",
+    "evidence": {
+      "eventID": "jnlQn64ndQfsw9ig3V4O",
+      "bdlGameID": 21718036,
+      "officialGameID": "0022600182",
+      "startsAt": "2026-11-05T02:00:00.000Z",
+      "home": "DENVER_NUGGETS_NBA",
+      "away": "TORONTO_RAPTORS_NBA",
+      "source": "https://www.nba.com/game/0022600182/box-score",
+      "sourceSha256": "06249390562f6637bed69321339e03ddc48a5ab7cff35ab28fddafffb033f188",
+      "officialRetrievedAt": "2026-11-11T12:45:11.021Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "01a162bf4057e1a82aedf4682141cc361f7ae0c5130605f5c30c99868bfc11ff",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "SCOTTIE_BARNES_1_NBA",
+          "teamID": "TORONTO_RAPTORS_NBA",
+          "name": "Scottie Barnes",
+          "officialPlayerID": 1630567,
+          "fields": {
+            "turnovers": [
+              5,
+              6
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "COLLIN_MURRAYBOYLES_1_NBA",
+          "teamID": "TORONTO_RAPTORS_NBA",
+          "name": "Collin Murray-Boyles",
+          "officialPlayerID": 1642867,
+          "fields": {
+            "turnovers": [
+              2,
+              1
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "0966cc488a0c76f6d1791c4525c43faa18f953220e393e4700089fd6d40bb442"
+    }
+  },
+  {
+    "event_id": "sgo:995OqmeRv7wzJ3CO2eJL",
+    "basis_id": "sgo:995OqmeRv7wzJ3CO2eJL:9cf166aae3b483306100b9b0bef002d258628163fc49c5d564105f8190ed3939",
+    "evidence": {
+      "eventID": "995OqmeRv7wzJ3CO2eJL",
+      "bdlGameID": 21718043,
+      "officialGameID": "0022600025",
+      "startsAt": "2026-11-07T00:00:00.000Z",
+      "home": "ATLANTA_HAWKS_NBA",
+      "away": "WASHINGTON_WIZARDS_NBA",
+      "source": "https://www.nba.com/game/0022600025/box-score",
+      "sourceSha256": "b91ec1c2f384eb28b02dba3950396f956e27b6a3235f62cb0e4d775a73c5213e",
+      "officialRetrievedAt": "2026-11-11T12:45:11.764Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "f4cba90b4487c7f5dcf09e3187d2b3da90e350609974e9a9a2da11c7dc214706",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KINGSTON_FLEMINGS_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Kingston Flemings",
+          "officialPlayerID": 1643412,
+          "fields": {
+            "threePointersAttempted": [
+              3,
+              2
+            ],
+            "twoPointersAttempted": [
+              6,
+              7
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "fields": {
+            "threePointersAttempted": [
+              38,
+              37
+            ],
+            "twoPointersAttempted": [
+              60,
+              61
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TRAE_YOUNG_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Trae Young",
+          "officialPlayerID": 1629027,
+          "fields": {
+            "turnovers": [
+              8,
+              9
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "WILL_RILEY_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Will Riley",
+          "officialPlayerID": 1642860,
+          "fields": {
+            "fieldGoalsAttempted": [
+              3,
+              4
+            ],
+            "plusMinus": [
+              -1,
+              -3
+            ],
+            "secondsPlayed": [
+              473,
+              535
+            ],
+            "twoPointersAttempted": [
+              2,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BUB_CARRINGTON_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Bub Carrington",
+          "officialPlayerID": 1642267,
+          "fields": {
+            "assists": [
+              1,
+              0
+            ],
+            "points+assists": [
+              6,
+              5
+            ],
+            "rebounds+assists": [
+              2,
+              1
+            ],
+            "points+rebounds+assists": [
+              7,
+              6
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KYSHAWN_GEORGE_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Kyshawn George",
+          "officialPlayerID": 1642273,
+          "fields": {
+            "assists": [
+              7,
+              8
+            ],
+            "fieldGoalsAttempted": [
+              20,
+              19
+            ],
+            "plusMinus": [
+              -5,
+              -3
+            ],
+            "secondsPlayed": [
+              2417,
+              2355
+            ],
+            "twoPointersAttempted": [
+              13,
+              12
+            ],
+            "points+assists": [
+              40,
+              41
+            ],
+            "rebounds+assists": [
+              11,
+              12
+            ],
+            "points+rebounds+assists": [
+              44,
+              45
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BILAL_COULIBALY_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Bilal Coulibaly",
+          "officialPlayerID": 1641731,
+          "fields": {
+            "turnovers": [
+              2,
+              1
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "c6321ae05c70580629fe557c1640dc89e7eabf0c9d6ae42f930bb13e09e9e3cd"
+    }
+  },
+  {
+    "event_id": "sgo:vNchQGPNSIcmnyk6zzy8",
+    "basis_id": "sgo:vNchQGPNSIcmnyk6zzy8:325ec3f97e1a0eca3c997bc432925e1eb32734107bd377576e93a3e04dcd4a69",
+    "evidence": {
+      "eventID": "vNchQGPNSIcmnyk6zzy8",
+      "bdlGameID": 21718044,
+      "officialGameID": "0022600026",
+      "startsAt": "2026-11-07T00:00:00.000Z",
+      "home": "CHARLOTTE_HORNETS_NBA",
+      "away": "BOSTON_CELTICS_NBA",
+      "source": "https://www.nba.com/game/0022600026/box-score",
+      "sourceSha256": "d688a3d5463e4817980d2f739bfbdb3b1974f6aa98a3a19ff31a21d42afe5f15",
+      "officialRetrievedAt": "2026-11-11T12:45:12.628Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "4279fad1e40a648a9124ca2f161a9dc836cba49aa415f790e8a5547ff1f24541",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ROYCE_ONEALE_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Royce O'Neale",
+          "officialPlayerID": 1626220,
+          "fields": {
+            "blocks": [
+              1,
+              0
+            ],
+            "blocks+steals": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BRANDON_MILLER_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Brandon Miller",
+          "officialPlayerID": 1641706,
+          "fields": {
+            "blocks": [
+              1,
+              0
+            ],
+            "blocks+steals": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "fields": {
+            "blocks": [
+              5,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LUKA_GARZA_1_NBA",
+          "teamID": "BOSTON_CELTICS_NBA",
+          "name": "Luka Garza",
+          "officialPlayerID": 1630568,
+          "fields": {
+            "rebounds": [
+              7,
+              8
+            ],
+            "defensiveRebounds": [
+              3,
+              4
+            ],
+            "points+rebounds": [
+              13,
+              14
+            ],
+            "rebounds+assists": [
+              11,
+              12
+            ],
+            "points+rebounds+assists": [
+              17,
+              18
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DERRICK_WHITE_1_NBA",
+          "teamID": "BOSTON_CELTICS_NBA",
+          "name": "Derrick White",
+          "officialPlayerID": 1628401,
+          "fields": {
+            "freeThrowsAttempted": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BAYLOR_SCHEIERMAN_1_NBA",
+          "teamID": "BOSTON_CELTICS_NBA",
+          "name": "Baylor Scheierman",
+          "officialPlayerID": 1631248,
+          "fields": {
+            "rebounds": [
+              4,
+              3
+            ],
+            "defensiveRebounds": [
+              3,
+              2
+            ],
+            "points+rebounds": [
+              9,
+              8
+            ],
+            "rebounds+assists": [
+              6,
+              5
+            ],
+            "points+rebounds+assists": [
+              11,
+              10
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "MITCHELL_ROBINSON_1_NBA",
+          "teamID": "BOSTON_CELTICS_NBA",
+          "name": "Mitchell Robinson",
+          "officialPlayerID": 1629011,
+          "fields": {
+            "freeThrowsAttempted": [
+              0,
+              1
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "f1dfbfff981025f26bfef9de5419c16ecb612094980c062e3a28304912ea334a"
+    }
+  },
+  {
+    "event_id": "sgo:H0E2rMVs0zkvufqe8yjM",
+    "basis_id": "sgo:H0E2rMVs0zkvufqe8yjM:3620b1bd37ce29574b0fdc314bfe7ace75b02ac059eaec687cd30ce21ca6a9b6",
+    "evidence": {
+      "eventID": "H0E2rMVs0zkvufqe8yjM",
+      "bdlGameID": 21718045,
+      "officialGameID": "0022600027",
+      "startsAt": "2026-11-07T00:30:00.000Z",
+      "home": "CLEVELAND_CAVALIERS_NBA",
+      "away": "PHILADELPHIA_76ERS_NBA",
+      "source": "https://www.nba.com/game/0022600027/box-score",
+      "sourceSha256": "a7e5980931d5c11a5cd71c09cfd9958c000035b7d8913a2c505ea4ab0d970407",
+      "officialRetrievedAt": "2026-11-11T12:45:13.370Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "d2cbf84cc922b32cbb37d8d8184c4a66fad8a82abf6d3d22100a0c104638f94d",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JABARI_WALKER_1_NBA",
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "name": "Jabari Walker",
+          "officialPlayerID": 1631133,
+          "fields": {
+            "assists": [
+              0,
+              1
+            ],
+            "points+assists": [
+              8,
+              9
+            ],
+            "rebounds+assists": [
+              5,
+              6
+            ],
+            "points+rebounds+assists": [
+              13,
+              14
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "fields": {
+            "assists": [
+              19,
+              20
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "f07f016aaba137acca5bb15323a7fecc72a8efc7fcc3e78542c6dbe5216a1c1c"
+    }
+  },
+  {
+    "event_id": "sgo:A69luVTP67vxvloyiLL2",
+    "basis_id": "sgo:A69luVTP67vxvloyiLL2:bdc066c709d653d23ba683b44fcd53c875d810eb669c531fc8aace38e07ec3ea",
+    "evidence": {
+      "eventID": "A69luVTP67vxvloyiLL2",
+      "bdlGameID": 21718000,
+      "officialGameID": "0022600024",
+      "startsAt": "2026-10-31T02:00:00.000Z",
+      "home": "PHOENIX_SUNS_NBA",
+      "away": "DENVER_NUGGETS_NBA",
+      "source": "https://www.nba.com/game/0022600024/box-score",
+      "sourceSha256": "ae5f2d6126d09d5195aee3500818b2f7c0eb125ae422f945940370600f6cf8ed",
+      "officialRetrievedAt": "2026-11-11T12:45:14.264Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "740407e4d93ca051114a3b02ebeab68644fac32565addac8681ea954e2e9b6d8",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CAMERON_JOHNSON_1_NBA",
+          "teamID": "DENVER_NUGGETS_NBA",
+          "name": "Cameron Johnson",
+          "officialPlayerID": 1629661,
+          "fields": {
+            "rebounds": [
+              10,
+              9
+            ],
+            "fieldGoalsAttempted": [
+              14,
+              13
+            ],
+            "offensiveRebounds": [
+              4,
+              3
+            ],
+            "threePointersAttempted": [
+              9,
+              8
+            ],
+            "points+rebounds": [
+              22,
+              21
+            ],
+            "rebounds+assists": [
+              13,
+              12
+            ],
+            "points+rebounds+assists": [
+              25,
+              24
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "DENVER_NUGGETS_NBA",
+          "fields": {
+            "rebounds": [
+              41,
+              40
+            ],
+            "fieldGoalsAttempted": [
+              81,
+              80
+            ],
+            "offensiveRebounds": [
+              13,
+              12
+            ],
+            "threePointersAttempted": [
+              38,
+              37
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "40c646b0c6799239236c69d09cd4fc7c3418fa27ec709bb826d9d919814a63b6"
+    }
+  },
+  {
+    "event_id": "sgo:vF7mrlCAIjmb7rtvfi4s",
+    "basis_id": "sgo:vF7mrlCAIjmb7rtvfi4s:12528f45f1dcb9c0b8f5be8e5d452084b512d7d4d4b19f60b5ec32e52205ed04",
+    "evidence": {
+      "eventID": "vF7mrlCAIjmb7rtvfi4s",
+      "bdlGameID": 21718016,
+      "officialGameID": "0022600162",
+      "startsAt": "2026-11-03T00:30:00.000Z",
+      "home": "ORLANDO_MAGIC_NBA",
+      "away": "WASHINGTON_WIZARDS_NBA",
+      "source": "https://www.nba.com/game/0022600162/box-score",
+      "sourceSha256": "48ab92b9a5ffb16cdde9e8bc4338f3895a5db10887aeaa975b050cd8d5d7dbdc",
+      "officialRetrievedAt": "2026-11-11T12:45:14.828Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "ac1b1490503448bdbe7ccdf8a1416028dd3532d3b45492323a5ad70219303018",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ANTHONY_DAVIS_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Anthony Davis",
+          "officialPlayerID": 203076,
+          "fields": {
+            "steals": [
+              3,
+              4
+            ],
+            "blocks+steals": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BILAL_COULIBALY_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Bilal Coulibaly",
+          "officialPlayerID": 1641731,
+          "fields": {
+            "steals": [
+              2,
+              1
+            ],
+            "blocks+steals": [
+              5,
+              4
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "86d4be2faa7e44d29a94c73b8f99752627c6f4d5b26d4eb7452eaa6fedda2973"
+    }
+  },
+  {
+    "event_id": "sgo:x4q7hhvxJ5L0a4mILVVZ",
+    "basis_id": "sgo:x4q7hhvxJ5L0a4mILVVZ:19b1bc1bd6abac2986749e9a1119de4a15e69f90959e7b07b4e097aa4a4f33d6",
+    "evidence": {
+      "eventID": "x4q7hhvxJ5L0a4mILVVZ",
+      "bdlGameID": 21718019,
+      "officialGameID": "0022600165",
+      "startsAt": "2026-11-03T01:00:00.000Z",
+      "home": "MEMPHIS_GRIZZLIES_NBA",
+      "away": "NEW_ORLEANS_PELICANS_NBA",
+      "source": "https://www.nba.com/game/0022600165/box-score",
+      "sourceSha256": "781b79bb82161ad6ad4951819c4699de205d7ad6450b9c6cb023f174ad3d04c8",
+      "officialRetrievedAt": "2026-11-11T12:45:17.095Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "322193583ca5856eec693b7e680ca0d1cb6299e3b8b80286d5c528917585d394",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CEDRIC_COWARD_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Cedric Coward",
+          "officialPlayerID": 1642907,
+          "fields": {
+            "turnovers": [
+              1,
+              0
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CAMERON_BOOZER_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Cameron Boozer",
+          "officialPlayerID": 1643409,
+          "fields": {
+            "turnovers": [
+              2,
+              3
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "a7443f59e2ee4d21114f0ffa33b9a5e9867c62ad53b50561954fdedba7eafd27"
+    }
+  },
+  {
+    "event_id": "sgo:IgHLrEqydwY17NNK3wil",
+    "basis_id": "sgo:IgHLrEqydwY17NNK3wil:55ed163fcea2262363b04f772a6d3f248103f0bdd94b746528a3c289ea9ae90a",
+    "evidence": {
+      "eventID": "IgHLrEqydwY17NNK3wil",
+      "bdlGameID": 21717944,
+      "officialGameID": "0022600102",
+      "startsAt": "2026-10-24T02:00:00.000Z",
+      "home": "LOS_ANGELES_LAKERS_NBA",
+      "away": "LA_CLIPPERS_NBA",
+      "source": "https://www.nba.com/game/0022600102/box-score",
+      "sourceSha256": "c5db8672740d5e53c15c568a37f6c131a92dec04c35b7a599789e7cb13d2274c",
+      "officialRetrievedAt": "2026-11-11T12:45:18.403Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "d19581a02244e2ccb8a133534cccdf6c0afcba0ccf20cd1b56c8e37216d9ea06",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 282,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Kevon Looney",
+          "officialPlayerID": 1626172,
+          "fields": {
+            "min": [
+              "4:32",
+              "4:33"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 666923,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Matisse Thybulle",
+          "officialPlayerID": 1629680,
+          "fields": {
+            "min": [
+              "23:54",
+              "23:55"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896027,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Ziaire Williams",
+          "officialPlayerID": 1630533,
+          "fields": {
+            "min": [
+              "30:41",
+              "30:42"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896059,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Sandro Mamukelashvili",
+          "officialPlayerID": 1630572,
+          "fields": {
+            "min": [
+              "23:40",
+              "23:41"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017705,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Walker Kessler",
+          "officialPlayerID": 1631117,
+          "fields": {
+            "min": [
+              "34:53",
+              "34:54"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEVON_LOONEY_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Kevon Looney",
+          "officialPlayerID": 1626172,
+          "fields": {
+            "secondsPlayed": [
+              272,
+              273
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "WALKER_KESSLER_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Walker Kessler",
+          "officialPlayerID": 1631117,
+          "fields": {
+            "secondsPlayed": [
+              2093,
+              2094
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ZIAIRE_WILLIAMS_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Ziaire Williams",
+          "officialPlayerID": 1630533,
+          "fields": {
+            "secondsPlayed": [
+              1841,
+              1842
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "MATISSE_THYBULLE_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Matisse Thybulle",
+          "officialPlayerID": 1629680,
+          "fields": {
+            "secondsPlayed": [
+              1434,
+              1435
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "SANDRO_MAMUKELASHVILI_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Sandro Mamukelashvili",
+          "officialPlayerID": 1630572,
+          "fields": {
+            "secondsPlayed": [
+              1420,
+              1421
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 283,
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Brook Lopez",
+          "officialPlayerID": 201572,
+          "fields": {
+            "min": [
+              "19:49",
+              "19:50"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1091343544,
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Keaton Wagler",
+          "officialPlayerID": 1643413,
+          "fields": {
+            "min": [
+              "23:36",
+              "23:37"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KRIS_DUNN_1_NBA",
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Kris Dunn",
+          "officialPlayerID": 1627739,
+          "fields": {
+            "rebounds": [
+              4,
+              5
+            ],
+            "turnovers": [
+              2,
+              3
+            ],
+            "defensiveRebounds": [
+              4,
+              5
+            ],
+            "points+rebounds": [
+              11,
+              12
+            ],
+            "rebounds+assists": [
+              9,
+              10
+            ],
+            "points+rebounds+assists": [
+              16,
+              17
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BROOK_LOPEZ_1_NBA",
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Brook Lopez",
+          "officialPlayerID": 201572,
+          "fields": {
+            "secondsPlayed": [
+              1189,
+              1190
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEATON_WAGLER_1_NBA",
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Keaton Wagler",
+          "officialPlayerID": 1643413,
+          "fields": {
+            "secondsPlayed": [
+              1416,
+              1417
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ISAIAH_JACKSON_1_NBA",
+          "teamID": "LA_CLIPPERS_NBA",
+          "name": "Isaiah Jackson",
+          "officialPlayerID": 1630543,
+          "fields": {
+            "turnovers": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "LA_CLIPPERS_NBA",
+          "fields": {
+            "rebounds": [
+              34,
+              35
+            ],
+            "defensiveRebounds": [
+              23,
+              24
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "265ca56ef5ed7f78486e574daec2a0caf1f30c53fc3c52f0591040f6e9140eaa"
+    }
+  },
+  {
+    "event_id": "sgo:Ihr25jqhmrR8EJT8oFyn",
+    "basis_id": "sgo:Ihr25jqhmrR8EJT8oFyn:605d737efd408d5f2caf9fcd62e7288450bb1128e5d08f6f75a847c6dd57070a",
+    "evidence": {
+      "eventID": "Ihr25jqhmrR8EJT8oFyn",
+      "bdlGameID": 21717949,
+      "officialGameID": "0022600107",
+      "startsAt": "2026-10-25T00:30:00.000Z",
+      "home": "ATLANTA_HAWKS_NBA",
+      "away": "HOUSTON_ROCKETS_NBA",
+      "source": "https://www.nba.com/game/0022600107/box-score",
+      "sourceSha256": "2c3b053312ffc0533ffc557eeba7f8354df376537780b4f3c0ccc8d45cc79b70",
+      "officialRetrievedAt": "2026-11-11T12:45:19.473Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "58c2a0e376f7da08cb3d207825f09c8d2a67e03381c2a430614c3f75bdd719c0",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 666400,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Nickeil Alexander-Walker",
+          "officialPlayerID": 1629638,
+          "fields": {
+            "min": [
+              "32:23",
+              "32:24"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547244,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Onyeka Okongwu",
+          "officialPlayerID": 1630168,
+          "fields": {
+            "min": [
+              "26:00",
+              "26:01"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1091340263,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Kingston Flemings",
+          "officialPlayerID": 1643412,
+          "fields": {
+            "min": [
+              "14:31",
+              "14:32"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JOCK_LANDALE_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jock Landale",
+          "officialPlayerID": 1629111,
+          "fields": {
+            "rebounds": [
+              5,
+              4
+            ],
+            "fieldGoalsAttempted": [
+              6,
+              5
+            ],
+            "offensiveRebounds": [
+              2,
+              1
+            ],
+            "twoPointersAttempted": [
+              2,
+              1
+            ],
+            "points+rebounds": [
+              7,
+              6
+            ],
+            "rebounds+assists": [
+              7,
+              6
+            ],
+            "points+rebounds+assists": [
+              9,
+              8
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JALEN_JOHNSON_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jalen Johnson",
+          "officialPlayerID": 1630552,
+          "fields": {
+            "threePointersAttempted": [
+              8,
+              7
+            ],
+            "twoPointersAttempted": [
+              11,
+              12
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ONYEKA_OKONGWU_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Onyeka Okongwu",
+          "officialPlayerID": 1630168,
+          "fields": {
+            "rebounds": [
+              7,
+              6
+            ],
+            "fieldGoalsAttempted": [
+              9,
+              8
+            ],
+            "offensiveRebounds": [
+              4,
+              3
+            ],
+            "secondsPlayed": [
+              1560,
+              1561
+            ],
+            "twoPointersAttempted": [
+              4,
+              3
+            ],
+            "points+rebounds": [
+              15,
+              14
+            ],
+            "rebounds+assists": [
+              9,
+              8
+            ],
+            "points+rebounds+assists": [
+              17,
+              16
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KINGSTON_FLEMINGS_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Kingston Flemings",
+          "officialPlayerID": 1643412,
+          "fields": {
+            "secondsPlayed": [
+              871,
+              872
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NICKEIL_ALEXANDERWALKER_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Nickeil Alexander-Walker",
+          "officialPlayerID": 1629638,
+          "fields": {
+            "threePointersAttempted": [
+              11,
+              12
+            ],
+            "secondsPlayed": [
+              1943,
+              1944
+            ],
+            "twoPointersAttempted": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "fields": {
+            "rebounds": [
+              44,
+              42
+            ],
+            "fieldGoalsAttempted": [
+              98,
+              96
+            ],
+            "offensiveRebounds": [
+              19,
+              17
+            ],
+            "twoPointersAttempted": [
+              49,
+              47
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896062,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "min": [
+              "32:53",
+              "32:54"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JABARI_SMITH_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Jabari Smith Jr.",
+          "officialPlayerID": 1631095,
+          "fields": {
+            "blocks": [
+              2,
+              1
+            ],
+            "blocks+steals": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ALPEREN_SENGUN_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "secondsPlayed": [
+              1973,
+              1974
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "fields": {
+            "blocks": [
+              5,
+              4
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "14430f75e9e10788be04e0d2d738bfd94c6311bb68e202242a771e54c77e5218"
+    }
+  },
+  {
+    "event_id": "sgo:kBcJQ2GFFav8l5tVa0d3",
+    "basis_id": "sgo:kBcJQ2GFFav8l5tVa0d3:0880106b92740469dcbaea3d75f33340d4d5616ec065ebb613c7d0233b87c8fb",
+    "evidence": {
+      "eventID": "kBcJQ2GFFav8l5tVa0d3",
+      "bdlGameID": 21717955,
+      "officialGameID": "0022600112",
+      "startsAt": "2026-10-25T21:00:00.000Z",
+      "home": "UTAH_JAZZ_NBA",
+      "away": "LOS_ANGELES_LAKERS_NBA",
+      "source": "https://www.nba.com/game/0022600112/box-score",
+      "sourceSha256": "a73b94172de5c61b53658605efca76ff73b40807ee7c4cfb425ae82438ab4564",
+      "officialRetrievedAt": "2026-11-11T12:45:20.211Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "6833c7c7ba91eafe8a81be54a033ad5d52b1710ea46a2c647045e36722d3812b",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 338,
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Svi Mykhailiuk",
+          "officialPlayerID": 1629004,
+          "fields": {
+            "min": [
+              "13:50",
+              "13:51"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "SVI_MYKHAILIUK_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Svi Mykhailiuk",
+          "officialPlayerID": 1629004,
+          "fields": {
+            "secondsPlayed": [
+              830,
+              831
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LAURI_MARKKANEN_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Lauri Markkanen",
+          "officialPlayerID": 1628374,
+          "fields": {
+            "rebounds": [
+              6,
+              7
+            ],
+            "fieldGoalsAttempted": [
+              19,
+              20
+            ],
+            "offensiveRebounds": [
+              3,
+              4
+            ],
+            "twoPointersAttempted": [
+              8,
+              9
+            ],
+            "points+rebounds": [
+              34,
+              35
+            ],
+            "rebounds+assists": [
+              7,
+              8
+            ],
+            "points+rebounds+assists": [
+              35,
+              36
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "UTAH_JAZZ_NBA",
+          "fields": {
+            "rebounds": [
+              51,
+              52
+            ],
+            "fieldGoalsAttempted": [
+              94,
+              95
+            ],
+            "offensiveRebounds": [
+              19,
+              20
+            ],
+            "twoPointersAttempted": [
+              59,
+              60
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17553995,
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Austin Reaves",
+          "officialPlayerID": 1630559,
+          "fields": {
+            "min": [
+              "35:42",
+              "35:43"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEVON_LOONEY_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Kevon Looney",
+          "officialPlayerID": 1626172,
+          "fields": {
+            "rebounds": [
+              1,
+              2
+            ],
+            "fieldGoalsAttempted": [
+              0,
+              1
+            ],
+            "offensiveRebounds": [
+              0,
+              1
+            ],
+            "twoPointersAttempted": [
+              0,
+              1
+            ],
+            "points+rebounds": [
+              3,
+              4
+            ],
+            "rebounds+assists": [
+              1,
+              2
+            ],
+            "points+rebounds+assists": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "AUSTIN_REAVES_1_NBA",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "name": "Austin Reaves",
+          "officialPlayerID": 1630559,
+          "fields": {
+            "secondsPlayed": [
+              2142,
+              2143
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "LOS_ANGELES_LAKERS_NBA",
+          "fields": {
+            "rebounds": [
+              30,
+              31
+            ],
+            "fieldGoalsAttempted": [
+              81,
+              82
+            ],
+            "offensiveRebounds": [
+              4,
+              5
+            ],
+            "twoPointersAttempted": [
+              34,
+              35
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "fd6b0b9f55cd012ae331c0cb137f5c4b38e961b5554b7aa301100ad40ea5e438"
+    }
+  },
+  {
+    "event_id": "sgo:LRK2JUBcfzaBFclHv3xX",
+    "basis_id": "sgo:LRK2JUBcfzaBFclHv3xX:90675b7ff14686b6d3f86009dd6214d15d271ae5e0a869c378b451626356738d",
+    "evidence": {
+      "eventID": "LRK2JUBcfzaBFclHv3xX",
+      "bdlGameID": 21717956,
+      "officialGameID": "0022600113",
+      "startsAt": "2026-10-25T22:00:00.000Z",
+      "home": "BROOKLYN_NETS_NBA",
+      "away": "INDIANA_PACERS_NBA",
+      "source": "https://www.nba.com/game/0022600113/box-score",
+      "sourceSha256": "9483f0601a7726558ecc9ebd17fff99234116820b934add66bf9326d2c221bf3",
+      "officialRetrievedAt": "2026-11-11T12:45:21.422Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "3a03150c206ab603ad5cb233aa588b520f21b1fa523183c3e2c7e111d69a7e4a",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057275262,
+          "teamID": "BROOKLYN_NETS_NBA",
+          "name": "Nolan Traoré",
+          "officialPlayerID": 1642849,
+          "fields": {
+            "min": [
+              "24:41",
+              "24:42"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057846840,
+          "teamID": "BROOKLYN_NETS_NBA",
+          "name": "Chaney Johnson",
+          "officialPlayerID": 1643052,
+          "fields": {
+            "min": [
+              "21:13",
+              "21:14"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NOLAN_TRAORE_1_NBA",
+          "teamID": "BROOKLYN_NETS_NBA",
+          "name": "Nolan Traore",
+          "officialPlayerID": 1642849,
+          "fields": {
+            "secondsPlayed": [
+              1481,
+              1482
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 416,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Pascal Siakam",
+          "officialPlayerID": 1627783,
+          "fields": {
+            "min": [
+              "25:37",
+              "25:38"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 44477085,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Quenton Jackson",
+          "officialPlayerID": 1631245,
+          "fields": {
+            "min": [
+              "17:55",
+              "17:56"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PASCAL_SIAKAM_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Pascal Siakam",
+          "officialPlayerID": 1627783,
+          "fields": {
+            "secondsPlayed": [
+              1537,
+              1538
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "QUENTON_JACKSON_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Quenton Jackson",
+          "officialPlayerID": 1631245,
+          "fields": {
+            "secondsPlayed": [
+              1075,
+              1076
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "f8133e24a4730ff7883dbfb87574588195feef9600002c4074890277ad68b5ec"
+    }
+  },
+  {
+    "event_id": "sgo:qzBMWI7ubI2g2rDwcoUN",
+    "basis_id": "sgo:qzBMWI7ubI2g2rDwcoUN:9dec7f4f52e82de84af534593baecd19c65bc6aa1d6bae7c13d5dafcc5559fce",
+    "evidence": {
+      "eventID": "qzBMWI7ubI2g2rDwcoUN",
+      "bdlGameID": 21717960,
+      "officialGameID": "0022600117",
+      "startsAt": "2026-10-25T23:30:00.000Z",
+      "home": "PHILADELPHIA_76ERS_NBA",
+      "away": "DETROIT_PISTONS_NBA",
+      "source": "https://www.nba.com/game/0022600117/box-score",
+      "sourceSha256": "c09811280480e787b14105b8896399a29a931ab2bea475d844f9eb0d55014f69",
+      "officialRetrievedAt": "2026-11-11T12:45:22.343Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "26cde30caf27d6d35aa25ed9a48a8df5ca268511b4e0261d74fb4d2582a14072",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 237,
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "name": "LeBron James",
+          "officialPlayerID": 2544,
+          "fields": {
+            "min": [
+              "33:10",
+              "33:11"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547254,
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "name": "Tyrese Maxey",
+          "officialPlayerID": 1630178,
+          "fields": {
+            "min": [
+              "33:42",
+              "33:43"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LEBRON_JAMES_1_NBA",
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "name": "LeBron James",
+          "officialPlayerID": 2544,
+          "fields": {
+            "secondsPlayed": [
+              1990,
+              1991
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TYRESE_MAXEY_1_NBA",
+          "teamID": "PHILADELPHIA_76ERS_NBA",
+          "name": "Tyrese Maxey",
+          "officialPlayerID": 1630178,
+          "fields": {
+            "secondsPlayed": [
+              2022,
+              2023
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547270,
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Paul Reed",
+          "officialPlayerID": 1630194,
+          "fields": {
+            "min": [
+              "23:13",
+              "23:14"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896075,
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Cade Cunningham",
+          "officialPlayerID": 1630595,
+          "fields": {
+            "min": [
+              "33:16",
+              "33:17"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028026508,
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Ronald Holland II",
+          "officialPlayerID": 1641842,
+          "fields": {
+            "min": [
+              "23:29",
+              "23:30"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1091352549,
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Ebuka Okorie",
+          "officialPlayerID": 1643536,
+          "fields": {
+            "min": [
+              "1:38",
+              "1:39"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PAUL_REED_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Paul Reed",
+          "officialPlayerID": 1630194,
+          "fields": {
+            "blocks": [
+              3,
+              2
+            ],
+            "secondsPlayed": [
+              1393,
+              1394
+            ],
+            "blocks+steals": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "RON_HOLLAND_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Ron Holland",
+          "officialPlayerID": 1641842,
+          "fields": {
+            "secondsPlayed": [
+              1409,
+              1410
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "EBUKA_OKORIE_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Ebuka Okorie",
+          "officialPlayerID": 1643536,
+          "fields": {
+            "secondsPlayed": [
+              98,
+              99
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CADE_CUNNINGHAM_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Cade Cunningham",
+          "officialPlayerID": 1630595,
+          "fields": {
+            "secondsPlayed": [
+              1996,
+              1997
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "fields": {
+            "blocks": [
+              11,
+              10
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "39b094176ec79a853ab5420a0ab1beabdd8374dec6a3859c4a85cb43e6b7957b"
+    }
+  },
+  {
+    "event_id": "sgo:wXpf48J3m5ksYcM21vc5",
+    "basis_id": "sgo:wXpf48J3m5ksYcM21vc5:f110da1b3c989a5f29a00bfed3ab67ab784d50d36951a4f1fb6eac2246aa4c74",
+    "evidence": {
+      "eventID": "wXpf48J3m5ksYcM21vc5",
+      "bdlGameID": 21717975,
+      "officialGameID": "0022600132",
+      "startsAt": "2026-10-28T23:00:00.000Z",
+      "home": "ATLANTA_HAWKS_NBA",
+      "away": "MIAMI_HEAT_NBA",
+      "source": "https://www.nba.com/game/0022600132/box-score",
+      "sourceSha256": "5b34f5023e5e72fec96b142c520c43be9578e72cdebfc228d40bf3d0204ca227",
+      "officialRetrievedAt": "2026-11-11T12:45:23.850Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "b4bad595bc82ab61cbaf7dc3c5d988085c99cc980f4f0b8242ba7aed698ced7f",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547244,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Onyeka Okongwu",
+          "officialPlayerID": 1630168,
+          "fields": {
+            "min": [
+              "31:09",
+              "31:10"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896040,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jalen Johnson",
+          "officialPlayerID": 1630552,
+          "fields": {
+            "min": [
+              "36:08",
+              "36:09"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JALEN_JOHNSON_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jalen Johnson",
+          "officialPlayerID": 1630552,
+          "fields": {
+            "secondsPlayed": [
+              2168,
+              2169
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ONYEKA_OKONGWU_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Onyeka Okongwu",
+          "officialPlayerID": 1630168,
+          "fields": {
+            "secondsPlayed": [
+              1869,
+              1870
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 15,
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Giannis Antetokounmpo",
+          "officialPlayerID": 203507,
+          "fields": {
+            "min": [
+              "30:55",
+              "30:56"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 475,
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Andrew Wiggins",
+          "officialPlayerID": 203952,
+          "fields": {
+            "min": [
+              "29:00",
+              "29:01"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028036986,
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Pelle Larsson",
+          "officialPlayerID": 1641796,
+          "fields": {
+            "min": [
+              "30:37",
+              "30:38"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DRU_SMITH_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Dru Smith",
+          "officialPlayerID": 1630696,
+          "fields": {
+            "rebounds": [
+              0,
+              1
+            ],
+            "defensiveRebounds": [
+              0,
+              1
+            ],
+            "points+rebounds": [
+              3,
+              4
+            ],
+            "rebounds+assists": [
+              3,
+              4
+            ],
+            "points+rebounds+assists": [
+              6,
+              7
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PELLE_LARSSON_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Pelle Larsson",
+          "officialPlayerID": 1641796,
+          "fields": {
+            "secondsPlayed": [
+              1837,
+              1838
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ANDREW_WIGGINS_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Andrew Wiggins",
+          "officialPlayerID": 203952,
+          "fields": {
+            "secondsPlayed": [
+              1740,
+              1741
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TIM_HARDAWAY_JR_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Tim Hardaway Jr.",
+          "officialPlayerID": 203501,
+          "fields": {
+            "rebounds": [
+              3,
+              2
+            ],
+            "defensiveRebounds": [
+              3,
+              2
+            ],
+            "points+rebounds": [
+              17,
+              16
+            ],
+            "rebounds+assists": [
+              4,
+              3
+            ],
+            "points+rebounds+assists": [
+              18,
+              17
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "GIANNIS_ANTETOKOUNMPO_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Giannis Antetokounmpo",
+          "officialPlayerID": 203507,
+          "fields": {
+            "secondsPlayed": [
+              1855,
+              1856
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "db2066d7f74998e4533e561a83015b34a5d4dd67ccb254bdb45c5ddfbc3f03ac"
+    }
+  },
+  {
+    "event_id": "sgo:eYPZAppxaIOOGJo3sl95",
+    "basis_id": "sgo:eYPZAppxaIOOGJo3sl95:e2ced8fae11cb2520c5b1fd8d7260bcf5bee8745043c5d5146a6171979e9f7c8",
+    "evidence": {
+      "eventID": "eYPZAppxaIOOGJo3sl95",
+      "bdlGameID": 21717990,
+      "officialGameID": "0022600015",
+      "startsAt": "2026-10-30T23:00:00.000Z",
+      "home": "WASHINGTON_WIZARDS_NBA",
+      "away": "CHARLOTTE_HORNETS_NBA",
+      "source": "https://www.nba.com/game/0022600015/box-score",
+      "sourceSha256": "f0b7012ad30edc98bb7ddef333f6a21d7f5e7243bda9b35cdd4840c5741e26b0",
+      "officialRetrievedAt": "2026-11-11T12:45:24.924Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "c76aafd7c24f7ec551b35532376c2098e91b624667a02ec27651f556f59471e2",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TRAE_YOUNG_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Trae Young",
+          "officialPlayerID": 1629027,
+          "fields": {
+            "rebounds": [
+              7,
+              6
+            ],
+            "defensiveRebounds": [
+              6,
+              5
+            ],
+            "points+rebounds": [
+              28,
+              27
+            ],
+            "rebounds+assists": [
+              16,
+              15
+            ],
+            "points+rebounds+assists": [
+              37,
+              36
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "AJ_DYBANTSA_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "AJ Dybantsa",
+          "officialPlayerID": 1643407,
+          "fields": {
+            "rebounds": [
+              8,
+              7
+            ],
+            "offensiveRebounds": [
+              1,
+              0
+            ],
+            "points+rebounds": [
+              25,
+              24
+            ],
+            "rebounds+assists": [
+              9,
+              8
+            ],
+            "points+rebounds+assists": [
+              26,
+              25
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ANTHONY_DAVIS_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Anthony Davis",
+          "officialPlayerID": 203076,
+          "fields": {
+            "fieldGoalsAttempted": [
+              18,
+              17
+            ],
+            "twoPointersAttempted": [
+              17,
+              16
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DEANDRE_AYTON_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Deandre Ayton",
+          "officialPlayerID": 1629028,
+          "fields": {
+            "rebounds": [
+              3,
+              4
+            ],
+            "defensiveRebounds": [
+              1,
+              2
+            ],
+            "points+rebounds": [
+              6,
+              7
+            ],
+            "rebounds+assists": [
+              4,
+              5
+            ],
+            "points+rebounds+assists": [
+              7,
+              8
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BUB_CARRINGTON_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Bub Carrington",
+          "officialPlayerID": 1642267,
+          "fields": {
+            "steals": [
+              0,
+              1
+            ],
+            "blocks+steals": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KYSHAWN_GEORGE_1_NBA",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "name": "Kyshawn George",
+          "officialPlayerID": 1642273,
+          "fields": {
+            "steals": [
+              1,
+              0
+            ],
+            "blocks+steals": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "WASHINGTON_WIZARDS_NBA",
+          "fields": {
+            "rebounds": [
+              53,
+              52
+            ],
+            "fieldGoalsAttempted": [
+              73,
+              72
+            ],
+            "offensiveRebounds": [
+              9,
+              8
+            ],
+            "twoPointersAttempted": [
+              43,
+              42
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028028379,
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Tidjane Salaun",
+          "officialPlayerID": 1642275,
+          "fields": {
+            "turnover": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TIDJANE_SALAUN_1_NBA",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "name": "Tidjane Salaun",
+          "officialPlayerID": 1642275,
+          "fields": {
+            "turnovers": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "CHARLOTTE_HORNETS_NBA",
+          "fields": {
+            "turnovers": [
+              10,
+              11
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "b5166bcf16b230f12c9c7069fe5c013876ba2d9e23c8491b94cc6a5dac89c5eb"
+    }
+  },
+  {
+    "event_id": "sgo:X5Iw2CXcmgLpun0dA6EU",
+    "basis_id": "sgo:X5Iw2CXcmgLpun0dA6EU:0c5f3e914f4794b73b1bc446edb79d009ab47ec54dc6a8e741b3860d1fb6d61e",
+    "evidence": {
+      "eventID": "X5Iw2CXcmgLpun0dA6EU",
+      "bdlGameID": 21717922,
+      "officialGameID": "0022600085",
+      "startsAt": "2026-10-21T23:00:00.000Z",
+      "home": "ORLANDO_MAGIC_NBA",
+      "away": "ATLANTA_HAWKS_NBA",
+      "source": "https://www.nba.com/game/0022600085/box-score",
+      "sourceSha256": "24382e495697c25f21dc97e9d74acaba6b2ea060a961858e64ea72a7930b2a23",
+      "officialRetrievedAt": "2026-11-11T12:45:25.442Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "c5b14308312a3fa8e530c56783e81c9f50be961bccca756e4b1c87c75f190aeb",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 85,
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Wendell Carter Jr.",
+          "officialPlayerID": 1628976,
+          "fields": {
+            "stl": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 666442,
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Goga Bitadze",
+          "officialPlayerID": 1629048,
+          "fields": {
+            "min": [
+              "11:43",
+              "11:44"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547287,
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Desmond Bane",
+          "officialPlayerID": 1630217,
+          "fields": {
+            "stl": [
+              3,
+              2
+            ],
+            "min": [
+              "33:06",
+              "33:07"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896073,
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Jalen Suggs",
+          "officialPlayerID": 1630591,
+          "fields": {
+            "plus_minus": [
+              -11,
+              -13
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028025497,
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Tristan Da Silva",
+          "officialPlayerID": 1641783,
+          "fields": {
+            "plus_minus": [
+              1,
+              3
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DESMOND_BANE_1_NBA",
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Desmond Bane",
+          "officialPlayerID": 1630217,
+          "fields": {
+            "steals": [
+              3,
+              2
+            ],
+            "secondsPlayed": [
+              1986,
+              1987
+            ],
+            "blocks+steals": [
+              3,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "GOGA_BITADZE_1_NBA",
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Goga Bitadze",
+          "officialPlayerID": 1629048,
+          "fields": {
+            "secondsPlayed": [
+              703,
+              704
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "WENDELL_CARTER_JR_1_NBA",
+          "teamID": "ORLANDO_MAGIC_NBA",
+          "name": "Wendell Carter Jr.",
+          "officialPlayerID": 1628976,
+          "fields": {
+            "steals": [
+              1,
+              2
+            ],
+            "blocks+steals": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 303,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "CJ McCollum",
+          "officialPlayerID": 203468,
+          "fields": {
+            "min": [
+              "24:39",
+              "24:40"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 19465326,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jock Landale",
+          "officialPlayerID": 1629111,
+          "fields": {
+            "min": [
+              "18:35",
+              "18:36"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017677,
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Dyson Daniels",
+          "officialPlayerID": 1630700,
+          "fields": {
+            "min": [
+              "34:38",
+              "34:39"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CJ_MCCOLLUM_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "CJ McCollum",
+          "officialPlayerID": 203468,
+          "fields": {
+            "secondsPlayed": [
+              1479,
+              1480
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JOCK_LANDALE_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Jock Landale",
+          "officialPlayerID": 1629111,
+          "fields": {
+            "secondsPlayed": [
+              1115,
+              1116
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DYSON_DANIELS_1_NBA",
+          "teamID": "ATLANTA_HAWKS_NBA",
+          "name": "Dyson Daniels",
+          "officialPlayerID": 1630700,
+          "fields": {
+            "secondsPlayed": [
+              2078,
+              2079
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "a8ec3adfa70d864f6273c4a53321211ef7cb0db7b986f38069d494b64d5d2349"
+    }
+  },
+  {
+    "event_id": "sgo:hlnAzlSadMxre7D14rmZ",
+    "basis_id": "sgo:hlnAzlSadMxre7D14rmZ:4b8cde5729810f20919472673c00c7ae3aba4fc921d3c85660ab333b109c9743",
+    "evidence": {
+      "eventID": "hlnAzlSadMxre7D14rmZ",
+      "bdlGameID": 21717927,
+      "officialGameID": "0022600089",
+      "startsAt": "2026-10-22T00:00:00.000Z",
+      "home": "MEMPHIS_GRIZZLIES_NBA",
+      "away": "UTAH_JAZZ_NBA",
+      "source": "https://www.nba.com/game/0022600089/box-score",
+      "sourceSha256": "a9b3488d128745c11902364fcc56359e6b3cfc0ec5e845f9dc4a7960e4d2fcfa",
+      "officialRetrievedAt": "2026-11-11T12:45:26.038Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "d7e8a26fed24ec6a936ba98846624b69a9ba5bfed3fbb200a76127afa7cb498e",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028039105,
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Jaylen Wells",
+          "officialPlayerID": 1642377,
+          "fields": {
+            "min": [
+              "27:44",
+              "27:45"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JAYLEN_WELLS_1_NBA",
+          "teamID": "MEMPHIS_GRIZZLIES_NBA",
+          "name": "Jaylen Wells",
+          "officialPlayerID": 1642377,
+          "fields": {
+            "secondsPlayed": [
+              1664,
+              1665
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 297,
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Lauri Markkanen",
+          "officialPlayerID": 1628374,
+          "fields": {
+            "min": [
+              "36:20",
+              "36:21"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ISAIAH_COLLIER_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Isaiah Collier",
+          "officialPlayerID": 1642268,
+          "fields": {
+            "fieldGoalsAttempted": [
+              8,
+              7
+            ],
+            "threePointersAttempted": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LAURI_MARKKANEN_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Lauri Markkanen",
+          "officialPlayerID": 1628374,
+          "fields": {
+            "secondsPlayed": [
+              2180,
+              2181
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "UTAH_JAZZ_NBA",
+          "fields": {
+            "fieldGoalsAttempted": [
+              76,
+              75
+            ],
+            "threePointersAttempted": [
+              33,
+              32
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "f00ddd473a38e42cc27d86486f836b084926d193d0fed86298f0c41e1bb07f37"
+    }
+  },
+  {
+    "event_id": "sgo:tJ8PSr7GVgYtqlUwujde",
+    "basis_id": "sgo:tJ8PSr7GVgYtqlUwujde:41c15b3136ef1bc6d21d2551a4395cd35a219d36ea804b25e2ba53d9ef42c4fb",
+    "evidence": {
+      "eventID": "tJ8PSr7GVgYtqlUwujde",
+      "bdlGameID": 21717928,
+      "officialGameID": "0022600090",
+      "startsAt": "2026-10-22T00:00:00.000Z",
+      "home": "NEW_ORLEANS_PELICANS_NBA",
+      "away": "INDIANA_PACERS_NBA",
+      "source": "https://www.nba.com/game/0022600090/box-score",
+      "sourceSha256": "4916a8f458cabc8846077f72a4c3950cb1be78f202b2ac34192ba318bd919b9c",
+      "officialRetrievedAt": "2026-11-11T12:45:27.253Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "32873a413c6b6ca48ea405facd15fd364b9a6dfb279a5c96941085a2f5a4384c",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 666969,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Zion Williamson",
+          "officialPlayerID": 1629627,
+          "fields": {
+            "plus_minus": [
+              0,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547256,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Saddiq Bey",
+          "officialPlayerID": 1630180,
+          "fields": {
+            "plus_minus": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896024,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Herbert Jones",
+          "officialPlayerID": 1630529,
+          "fields": {
+            "plus_minus": [
+              6,
+              5
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 18677986,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Trey Murphy III",
+          "officialPlayerID": 1630530,
+          "fields": {
+            "plus_minus": [
+              -9,
+              -8
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017686,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Bennedict Mathurin",
+          "officialPlayerID": 1631097,
+          "fields": {
+            "plus_minus": [
+              -4,
+              -5
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028027567,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Yves Missi",
+          "officialPlayerID": 1642274,
+          "fields": {
+            "plus_minus": [
+              -8,
+              -7
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057267077,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Jeremiah Fears",
+          "officialPlayerID": 1642847,
+          "fields": {
+            "plus_minus": [
+              -13,
+              -12
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057274415,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Derik Queen",
+          "officialPlayerID": 1642852,
+          "fields": {
+            "plus_minus": [
+              5,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017507,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Andrew Nembhard",
+          "officialPlayerID": 1629614,
+          "fields": {
+            "plus_minus": [
+              10,
+              9
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547245,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Tyrese Haliburton",
+          "officialPlayerID": 1630169,
+          "fields": {
+            "plus_minus": [
+              -5,
+              -4
+            ],
+            "min": [
+              "33:31",
+              "33:32"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 44477085,
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Quenton Jackson",
+          "officialPlayerID": 1631245,
+          "fields": {
+            "min": [
+              "15:31",
+              "15:32"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "QUENTON_JACKSON_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Quenton Jackson",
+          "officialPlayerID": 1631245,
+          "fields": {
+            "secondsPlayed": [
+              931,
+              932
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "TYRESE_HALIBURTON_1_NBA",
+          "teamID": "INDIANA_PACERS_NBA",
+          "name": "Tyrese Haliburton",
+          "officialPlayerID": 1630169,
+          "fields": {
+            "secondsPlayed": [
+              2011,
+              2012
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "21160281399373f71bc1add6d313385b43f4b42202ee0ea0ef3401e38e8633c7"
+    }
+  },
+  {
+    "event_id": "sgo:JHwOPnDKO3oluXO6jSZ8",
+    "basis_id": "sgo:JHwOPnDKO3oluXO6jSZ8:c70cfe8f4f30e9506b13ccdcb4dbe36a3a564de5d1d07b4a073494450a7315e4",
+    "evidence": {
+      "eventID": "JHwOPnDKO3oluXO6jSZ8",
+      "bdlGameID": 21717940,
+      "officialGameID": "0022600098",
+      "startsAt": "2026-10-24T00:00:00.000Z",
+      "home": "MIAMI_HEAT_NBA",
+      "away": "DETROIT_PISTONS_NBA",
+      "source": "https://www.nba.com/game/0022600098/box-score",
+      "sourceSha256": "52ba10f2d34acdfe72b87aac54b9e63800c4fdef59378690d675950a8474b84c",
+      "officialRetrievedAt": "2026-11-11T12:45:28.202Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "52b7adf67391b3970d67867d7d35eb4088ac65b09fdfaf867142436164f2cbde",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BAM_ADEBAYO_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Bam Adebayo",
+          "officialPlayerID": 1628389,
+          "fields": {
+            "secondsPlayed": [
+              1397,
+              1398
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "NIKOLA_JOVIC_1_NBA",
+          "teamID": "MIAMI_HEAT_NBA",
+          "name": "Nikola Jović",
+          "officialPlayerID": 1631107,
+          "fields": {
+            "secondsPlayed": [
+              809,
+              808
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896075,
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Cade Cunningham",
+          "officialPlayerID": 1630595,
+          "fields": {
+            "min": [
+              "29:55",
+              "29:56"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "PAUL_REED_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Paul Reed",
+          "officialPlayerID": 1630194,
+          "fields": {
+            "assists": [
+              4,
+              3
+            ],
+            "points+assists": [
+              23,
+              22
+            ],
+            "rebounds+assists": [
+              15,
+              14
+            ],
+            "points+rebounds+assists": [
+              34,
+              33
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ISAIAH_JOE_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Isaiah Joe",
+          "officialPlayerID": 1630198,
+          "fields": {
+            "secondsPlayed": [
+              1109,
+              1108
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "AUSAR_THOMPSON_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Ausar Thompson",
+          "officialPlayerID": 1641709,
+          "fields": {
+            "assists": [
+              4,
+              5
+            ],
+            "points+assists": [
+              8,
+              9
+            ],
+            "rebounds+assists": [
+              7,
+              8
+            ],
+            "points+rebounds+assists": [
+              11,
+              12
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CADE_CUNNINGHAM_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Cade Cunningham",
+          "officialPlayerID": 1630595,
+          "fields": {
+            "secondsPlayed": [
+              1795,
+              1796
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DUNCAN_ROBINSON_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "name": "Duncan Robinson",
+          "officialPlayerID": 1629130,
+          "fields": {
+            "secondsPlayed": [
+              1649,
+              1650
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "8897e241d4f2591e48b1002a8c16c6683b475f47d6140e9a450642012a4c3771"
+    }
+  },
+  {
+    "event_id": "sgo:ZJWAz7ep8GgLdyc9p1C4",
+    "basis_id": "sgo:ZJWAz7ep8GgLdyc9p1C4:ad75ee55e949c539c5d242fc14dd6af3b9030188f0b4bb976d5d8254a09e1a6e",
+    "evidence": {
+      "eventID": "ZJWAz7ep8GgLdyc9p1C4",
+      "bdlGameID": 21717942,
+      "officialGameID": "0022600100",
+      "startsAt": "2026-10-24T01:30:00.000Z",
+      "home": "UTAH_JAZZ_NBA",
+      "away": "NEW_ORLEANS_PELICANS_NBA",
+      "source": "https://www.nba.com/game/0022600100/box-score",
+      "sourceSha256": "e4e88c637b6adec3c502d18eb8757aa4306d9f89fedde24eca38194686ad0c52",
+      "officialRetrievedAt": "2026-11-11T12:45:29.229Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "98b59dc6f9dc684f5a25a76b55696ce6f1870ce7357fcea1c8344c78fe4528b2",
+      "corrections": [
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JAREN_JACKSON_JR_1_NBA",
+          "teamID": "UTAH_JAZZ_NBA",
+          "name": "Jaren Jackson Jr.",
+          "officialPlayerID": 1628991,
+          "fields": {
+            "rebounds": [
+              11,
+              10
+            ],
+            "defensiveRebounds": [
+              7,
+              6
+            ],
+            "points+rebounds": [
+              35,
+              34
+            ],
+            "rebounds+assists": [
+              14,
+              13
+            ],
+            "points+rebounds+assists": [
+              38,
+              37
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "home",
+          "teamID": "UTAH_JAZZ_NBA",
+          "fields": {
+            "rebounds": [
+              43,
+              42
+            ],
+            "defensiveRebounds": [
+              29,
+              28
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896024,
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Herbert Jones",
+          "officialPlayerID": 1630529,
+          "fields": {
+            "min": [
+              "17:46",
+              "17:47"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "HERBERT_JONES_1_NBA",
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Herb Jones",
+          "officialPlayerID": 1630529,
+          "fields": {
+            "secondsPlayed": [
+              1066,
+              1067
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DEJOUNTE_MURRAY_1_NBA",
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Dejounte Murray",
+          "officialPlayerID": 1627749,
+          "fields": {
+            "rebounds": [
+              5,
+              6
+            ],
+            "defensiveRebounds": [
+              4,
+              5
+            ],
+            "points+rebounds": [
+              21,
+              22
+            ],
+            "rebounds+assists": [
+              11,
+              12
+            ],
+            "points+rebounds+assists": [
+              27,
+              28
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ZION_WILLIAMSON_1_NBA",
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "name": "Zion Williamson",
+          "officialPlayerID": 1629627,
+          "fields": {
+            "fieldGoalsAttempted": [
+              13,
+              12
+            ],
+            "twoPointersAttempted": [
+              12,
+              11
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "NEW_ORLEANS_PELICANS_NBA",
+          "fields": {
+            "rebounds": [
+              36,
+              37
+            ],
+            "fieldGoalsAttempted": [
+              88,
+              87
+            ],
+            "defensiveRebounds": [
+              27,
+              28
+            ],
+            "twoPointersAttempted": [
+              62,
+              61
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "6f91be3c90a7b8a6916e4fac9c9432052d9bce5144a7fdf7a28b826f0a9fec0f"
+    }
+  },
+  {
+    "event_id": "sgo:kZPS26xGCpFEkPrdAn9n",
+    "basis_id": "sgo:kZPS26xGCpFEkPrdAn9n:c3647b8cbba10a4e011bad0f1216d0e6f02a689e9a896c1ce810624e70804081",
+    "evidence": {
+      "eventID": "kZPS26xGCpFEkPrdAn9n",
+      "bdlGameID": 21717863,
+      "officialGameID": "0022600009",
+      "startsAt": "2026-10-24T01:30:00.000Z",
+      "home": "SAN_ANTONIO_SPURS_NBA",
+      "away": "HOUSTON_ROCKETS_NBA",
+      "source": "https://www.nba.com/game/0022600009/box-score",
+      "sourceSha256": "ce990daecf4d67632374b9d983a663887131a4569d1ae195108f1d69f008fa23",
+      "officialRetrievedAt": "2026-11-11T12:45:29.978Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "c8eecdf0c3182a9d709be1b21afee465931a5fcf318724b2a63ea59641ddb48d",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 161,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "De'Aaron Fox",
+          "officialPlayerID": 1628368,
+          "fields": {
+            "plus_minus": [
+              -14,
+              -13
+            ],
+            "min": [
+              "33:42",
+              "32:24"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 261,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Luke Kornet",
+          "officialPlayerID": 1628436,
+          "fields": {
+            "min": [
+              "16:01",
+              "15:53"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3547246,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Devin Vassell",
+          "officialPlayerID": 1630170,
+          "fields": {
+            "plus_minus": [
+              1,
+              5
+            ],
+            "min": [
+              "35:31",
+              "33:33"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017649,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Julian Champagnie",
+          "officialPlayerID": 1630577,
+          "fields": {
+            "plus_minus": [
+              7,
+              2
+            ],
+            "min": [
+              "25:13",
+              "28:29"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 56677822,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Victor Wembanyama",
+          "officialPlayerID": 1641705,
+          "fields": {
+            "min": [
+              "31:59",
+              "32:07"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1028025261,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Stephon Castle",
+          "officialPlayerID": 1642264,
+          "fields": {
+            "min": [
+              "32:57",
+              "33:05"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057262518,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Dylan Harper",
+          "officialPlayerID": 1642844,
+          "fields": {
+            "plus_minus": [
+              4,
+              8
+            ],
+            "min": [
+              "35:52",
+              "33:54"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 1057271360,
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Carter Bryant",
+          "officialPlayerID": 1642868,
+          "fields": {
+            "plus_minus": [
+              -5,
+              -9
+            ],
+            "min": [
+              "4:18",
+              "6:08"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DEAARON_FOX_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "De'Aaron Fox",
+          "officialPlayerID": 1628368,
+          "fields": {
+            "plusMinus": [
+              -14,
+              -13
+            ],
+            "secondsPlayed": [
+              2022,
+              1944
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "LUKE_KORNET_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Luke Kornet",
+          "officialPlayerID": 1628436,
+          "fields": {
+            "secondsPlayed": [
+              961,
+              953
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DYLAN_HARPER_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Dylan Harper",
+          "officialPlayerID": 1642844,
+          "fields": {
+            "plusMinus": [
+              4,
+              8
+            ],
+            "secondsPlayed": [
+              2152,
+              2034
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "CARTER_BRYANT_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Carter Bryant",
+          "officialPlayerID": 1642868,
+          "fields": {
+            "plusMinus": [
+              -5,
+              -9
+            ],
+            "secondsPlayed": [
+              258,
+              368
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "DEVIN_VASSELL_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Devin Vassell",
+          "officialPlayerID": 1630170,
+          "fields": {
+            "plusMinus": [
+              1,
+              5
+            ],
+            "secondsPlayed": [
+              2131,
+              2013
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "STEPHON_CASTLE_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Stephon Castle",
+          "officialPlayerID": 1642264,
+          "fields": {
+            "secondsPlayed": [
+              1977,
+              1985
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JULIAN_CHAMPAGNIE_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Julian Champagnie",
+          "officialPlayerID": 1630577,
+          "fields": {
+            "plusMinus": [
+              7,
+              2
+            ],
+            "secondsPlayed": [
+              1513,
+              1709
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "VICTOR_WEMBANYAMA_1_NBA",
+          "teamID": "SAN_ANTONIO_SPURS_NBA",
+          "name": "Victor Wembanyama",
+          "officialPlayerID": 1641705,
+          "fields": {
+            "secondsPlayed": [
+              1919,
+              1927
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 140,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Kevin Durant",
+          "officialPlayerID": 201142,
+          "fields": {
+            "ast": [
+              6,
+              5
+            ],
+            "min": [
+              "36:59",
+              "36:51"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 3,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Steven Adams",
+          "officialPlayerID": 203500,
+          "fields": {
+            "plus_minus": [
+              6,
+              3
+            ],
+            "min": [
+              "8:53",
+              "8:26"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896062,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "plus_minus": [
+              3,
+              6
+            ],
+            "min": [
+              "35:40",
+              "36:07"
+            ]
+          }
+        },
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 38017684,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Jabari Smith Jr.",
+          "officialPlayerID": 1631095,
+          "fields": {
+            "min": [
+              "33:52",
+              "34:00"
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "JABARI_SMITH_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Jabari Smith Jr.",
+          "officialPlayerID": 1631095,
+          "fields": {
+            "steals": [
+              1,
+              2
+            ],
+            "secondsPlayed": [
+              1875,
+              2040
+            ],
+            "blocks+steals": [
+              3,
+              4
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "KEVIN_DURANT_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Kevin Durant",
+          "officialPlayerID": 201142,
+          "fields": {
+            "assists": [
+              6,
+              5
+            ],
+            "secondsPlayed": [
+              2219,
+              2211
+            ],
+            "points+assists": [
+              26,
+              25
+            ],
+            "rebounds+assists": [
+              13,
+              12
+            ],
+            "points+rebounds+assists": [
+              33,
+              32
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "STEVEN_ADAMS_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Steven Adams",
+          "officialPlayerID": 203500,
+          "fields": {
+            "plusMinus": [
+              6,
+              3
+            ],
+            "secondsPlayed": [
+              533,
+              506
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "ALPEREN_SENGUN_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "steals": [
+              1,
+              0
+            ],
+            "plusMinus": [
+              3,
+              6
+            ],
+            "secondsPlayed": [
+              2140,
+              2167
+            ],
+            "blocks+steals": [
+              2,
+              1
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "playerID": "BOGDAN_BOGDANOVIC_1_NBA",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Bogdan Bogdanović",
+          "officialPlayerID": 203992,
+          "fields": {
+            "secondsPlayed": [
+              690,
+              533
+            ]
+          }
+        },
+        {
+          "provider": "SportsGameOdds",
+          "side": "away",
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "fields": {
+            "assists": [
+              25,
+              24
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "23e34fa96369734958c167db4fb5f8714644d85de4bf21985e94b49629512027"
+    }
+  }
+]

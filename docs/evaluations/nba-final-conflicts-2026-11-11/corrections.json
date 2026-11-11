@@ -1,0 +1,208 @@
+[
+  {
+    "event_id": "sgo:W9lJjjTktenUmQ1ww9T3",
+    "basis_id": "sgo:W9lJjjTktenUmQ1ww9T3:cdcc53e2bd61476452ff1425d69967293006278541c6b1ef7c5b3b8e0c09d636",
+    "evidence": {
+      "eventID": "W9lJjjTktenUmQ1ww9T3",
+      "bdlGameID": 21718068,
+      "officialGameID": "0022600205",
+      "startsAt": "2026-11-10T00:00:00.000Z",
+      "home": "DETROIT_PISTONS_NBA",
+      "away": "WASHINGTON_WIZARDS_NBA",
+      "source": "https://www.nba.com/game/0022600205/box-score",
+      "sourceSha256": "1607e69f093bb0fde619a0cd45240cc666eeb39f06593423f1e83e5f14780319",
+      "gamebook": {
+        "url": "https://statsdmz.nba.com/pdfs/20261109/20261109_WASDET_book.pdf",
+        "sha256": "336c1fa9758ce6da163fa84203a5aebe23f443e679a63b8a7ca21f3138327d48",
+        "retrievedAt": "2026-11-11T13:02:27.913Z",
+        "page": 1
+      },
+      "officialSourceCorrections": [],
+      "officialRetrievedAt": "2026-11-11T13:01:01.718Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "b9abb79d68ceacaf8d4a4500a3413dae523aa2f09da2807f5461f98fb7781bb8",
+      "corrections": [],
+      "identityCorrections": [
+        {
+          "provider": "SportsGameOdds",
+          "action": "exclude_unverified_participant_from_explanation_copy",
+          "playerID": "MASON_JONES_1_NBA",
+          "teamID": "DETROIT_PISTONS_NBA",
+          "originalProfile": {
+            "name": "Mason Jones",
+            "teamID": "DETROIT_PISTONS_NBA",
+            "lastName": "Jones",
+            "playerID": "MASON_JONES_1_NBA",
+            "firstName": "Mason"
+          },
+          "originalResult": {
+            "fouls": 0,
+            "blocks": 0,
+            "points": 0,
+            "steals": 0,
+            "assists": 0,
+            "rebounds": 0,
+            "plusMinus": -5,
+            "turnovers": 0,
+            "doubleDouble": 0,
+            "tripleDouble": 0,
+            "blocks+steals": 0,
+            "minutesPlayed": 1.57,
+            "secondsPlayed": 94,
+            "fieldGoalsMade": 0,
+            "freeThrowsMade": 0,
+            "points+assists": 0,
+            "points+rebounds": 0,
+            "twoPointersMade": 0,
+            "fieldGoalPercent": 0,
+            "freeThrowPercent": 0,
+            "rebounds+assists": 0,
+            "defensiveRebounds": 0,
+            "offensiveRebounds": 0,
+            "threePointersMade": 0,
+            "fieldGoalsAttempted": 0,
+            "freeThrowsAttempted": 0,
+            "threePointerPercent": 0,
+            "twoPointersAttempted": 0,
+            "threePointersAttempted": 0,
+            "points+rebounds+assists": 0
+          },
+          "reason": "Absent from complete NBA official HTML roster, NBA final gamebook and BALLDONTLIE roster. No identity substitution; Isaac Jones retains independent BDL-native identity."
+        }
+      ],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "b88d241123abaf795ad2cc85b71b38bb729b24be2c5882bfffb71e72dac40328"
+    }
+  },
+  {
+    "event_id": "sgo:I03UQDCFJhTCzrAvdEVA",
+    "basis_id": "sgo:I03UQDCFJhTCzrAvdEVA:f7066cc0272024de96558804220980e67d9a33675dabba9669495626137e5048",
+    "evidence": {
+      "eventID": "I03UQDCFJhTCzrAvdEVA",
+      "bdlGameID": 21718071,
+      "officialGameID": "0022600208",
+      "startsAt": "2026-11-10T01:30:00.000Z",
+      "home": "HOUSTON_ROCKETS_NBA",
+      "away": "DENVER_NUGGETS_NBA",
+      "source": "https://www.nba.com/game/0022600208/box-score",
+      "sourceSha256": "e1f3d079ad20c8782a9eda60b7c6f1721ff7f4b6369fc6dc7f47c85c1ef5ac07",
+      "gamebook": {
+        "url": "https://statsdmz.nba.com/pdfs/20261109/20261109_DENHOU_book.pdf",
+        "sha256": "7ee45e394d624c0cc72f374910d1d8dbe6406542508a258e886d3e6306b05a3a",
+        "retrievedAt": "2026-11-11T13:02:28.442Z",
+        "page": 1
+      },
+      "officialSourceCorrections": [
+        {
+          "officialPlayerID": 1630578,
+          "field": "reboundsDefensive",
+          "before": 6,
+          "after": 7,
+          "reason": "Final official scorer report and 12 play-by-play rebound events, corroborated by current SGO; HTML and BDL disagree"
+        },
+        {
+          "officialPlayerID": 1630578,
+          "field": "reboundsTotal",
+          "before": 11,
+          "after": 12,
+          "reason": "Final official scorer report and 12 play-by-play rebound events, corroborated by current SGO; HTML and BDL disagree"
+        },
+        {
+          "officialPlayerID": 1627832,
+          "field": "minutes",
+          "before": "29:60",
+          "after": "30:00"
+        }
+      ],
+      "officialRetrievedAt": "2026-11-11T13:01:03.057Z",
+      "identitySources": [
+        {
+          "officialPlayerID": 1642357,
+          "names": [
+            "David Jones Garcia",
+            "david_jones"
+          ],
+          "url": "https://www.nba.com/player/1642357/bio",
+          "sha256": "0ff9dfceaeda10cd1b5d55e31de04f29d9bdf9ab17dd027c58134e3dbe724f5e",
+          "retrievedAt": "2026-11-11T12:52:18.761Z"
+        },
+        {
+          "officialPlayerID": 1629651,
+          "names": [
+            "Nic Claxton",
+            "nicolas_claxton"
+          ],
+          "url": "https://www.nba.com/player/1629651/bio",
+          "sha256": "36924d9f2be59b932f1afc94cec937207d0736893162fbc8def96b0cd4d94e52",
+          "retrievedAt": "2026-11-11T12:52:19.141Z"
+        },
+        {
+          "officialPlayerID": 1642259,
+          "names": [
+            "Alex Sarr",
+            "alexandre_sarr"
+          ],
+          "url": "https://www.nba.com/player/1642259/bio",
+          "sha256": "6345ce49f95d6e2887c51b80a92f6843a662ed1ee78b2693524b150566620420",
+          "retrievedAt": "2026-11-11T12:52:19.427Z"
+        }
+      ],
+      "sourceFingerprint": "523ddfbfb01ca4b3cc39d4f88848cd8093a3304e69a3c7e7691f149515f510bb",
+      "corrections": [
+        {
+          "provider": "BALLDONTLIE",
+          "playerID": 17896062,
+          "teamID": "HOUSTON_ROCKETS_NBA",
+          "name": "Alperen Sengun",
+          "officialPlayerID": 1630578,
+          "fields": {
+            "reb": [
+              11,
+              12
+            ],
+            "dreb": [
+              6,
+              7
+            ]
+          }
+        }
+      ],
+      "identityCorrections": [],
+      "originalProvidersPreserved": true,
+      "teamAggregateBasis": "sum of official player statistics",
+      "contract": "9756bea0e33fd669b19ad6204ca282ea30f19f16eab35de10b80882789e30cef"
+    }
+  }
+]
