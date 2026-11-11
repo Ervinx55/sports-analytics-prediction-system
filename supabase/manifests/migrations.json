@@ -361,6 +361,24 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": 3
+    },
+    {
+      "version": "20261111114726",
+      "name": "dashboard_health_incremental_history",
+      "path": "supabase/migrations/20261111114726_dashboard_health_incremental_history.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111190001",
+      "name": "nba_explanation_verified_backfill",
+      "path": "supabase/migrations/20261111190001_nba_explanation_verified_backfill.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -373,4 +391,3 @@
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
 }
-

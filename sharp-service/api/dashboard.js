@@ -17,41 +17,48 @@ const BASE =
 // Bound dashboard database fan-out per runtime; share only in-flight reads.
 export function createReadScheduler(limit = 4) {
   let active = 0;
-  const waiting = [];
-  const pending = new Map();
+  const waiting = [], pending = new Map();
   function drain() {
     while (active < limit && waiting.length) {
-      const {key, task, resolve, reject} = waiting.shift();
-      active++;
-      Promise.resolve().then(task).then(
-        value => { pending.delete(key); active--; resolve(value); drain(); },
-        error => { pending.delete(key); active--; reject(error); drain(); }
-      );
+      const entry=waiting.shift();if(entry.expired)continue;
+      entry.started=true;active++;
+      Promise.resolve().then(()=>entry.task(entry.controller.signal)).then(entry.resolve,entry.reject).finally(()=>{
+        clearTimeout(entry.timer);pending.delete(entry.key);active--;drain();
+      });
     }
   }
-  return (key, task) => {
-    if (pending.has(key)) return pending.get(key);
-    let resolve, reject;
-    const promise = new Promise((ok, fail) => { resolve = ok; reject = fail; });
-    pending.set(key, promise);
-    waiting.push({key, task, resolve, reject});
-    drain();
-    return promise;
+  return (key,task,{timeoutMs=Infinity}={})=>{
+    if(pending.has(key))return pending.get(key);
+    let resolve,reject;const promise=new Promise((ok,fail)=>{resolve=ok;reject=fail;});
+    const entry={key,task,resolve,reject,controller:new AbortController(),started:false,expired:false};
+    if(Number.isFinite(timeoutMs))entry.timer=setTimeout(()=>{
+      entry.expired=true;entry.controller.abort();reject(new Error('Dashboard source deadline exceeded'));
+      if(!entry.started){pending.delete(key);const i=waiting.indexOf(entry);if(i>=0)waiting.splice(i,1);}
+    },timeoutMs);
+    pending.set(key,promise);waiting.push(entry);drain();return promise;
   };
 }
-const scheduleDashboardRead = createReadScheduler();
-function fetchJson(url, timeoutMs = 12000) {
-  return scheduleDashboardRead(url + '|' + timeoutMs, () => fetchJsonNow(url, timeoutMs));
+const scheduleDashboardRead=createReadScheduler();
+const historicalReads=new Map();
+const historicalPaths=new Set(['model-calibration','market-calibration','sharp-disagreement-calibration','decision-fusion-calibration','player-prop-fusion-calibration','player-prop-clv-calibration','parlay-correlation-calibration','decision-timing-calibration']);
+function fetchJson(url,timeoutMs=8000){
+  const historical=historicalPaths.has(new URL(url).pathname.split('/').pop());
+  const saved=historicalReads.get(url);if(historical&&saved&&Date.now()-saved.at<60000)return Promise.resolve(saved.data);
+  return scheduleDashboardRead(url+'|'+timeoutMs,async signal=>{
+    const data=await fetchJsonNow(url,timeoutMs,signal);
+    if(historical){historicalReads.set(url,{at:Date.now(),data});if(historicalReads.size>64)historicalReads.delete(historicalReads.keys().next().value);}
+    return data;
+  },{timeoutMs});
 }
 
-async function fetchJsonNow(url, timeoutMs = 12000) {
+async function fetchJsonNow(url, timeoutMs = 8000, externalSignal = null) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const r = await fetch(url, {
       headers: { accept: "application/json" },
       cache: "no-store",
-      signal: controller.signal,
+      signal: externalSignal || controller.signal,
     });
     const text = await r.text();
     let data;
@@ -140,6 +147,10 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
+  // Put current cards and health ahead of historical analytics in the bounded queue.
+  for(const name of ['audit','marketCard','playerProps','pipelineHealth','results','providerHealth'])fetchJson(urls[name]).catch(()=>{});
+  const scheduleRead=Promise.allSettled([fetchScheduleFallback({sport,hours,now:Date.now()})]);
+
   const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, providerHealth, providerUsage, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
       fetchJson(urls.audit),
@@ -219,9 +230,7 @@ export default async function handler(req, res) {
     error: null
   };
   if (!activeCandidates.length) {
-    const [scheduleResult] = await Promise.allSettled([
-      fetchScheduleFallback({ sport, hours, now })
-    ]);
+    const [scheduleResult] = await scheduleRead;
     scheduleFallback = settled(scheduleResult);
   }
   sourceHealth.scheduleFallback = {
