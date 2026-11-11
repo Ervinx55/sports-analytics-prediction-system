@@ -2,6 +2,7 @@ import {
   createRemoteJWKSet,
   jwtVerify,
 } from "npm:jose@6.1.0";
+import { serverKey, trainingHeaders } from "./credentials.mjs";
 
 const GITHUB_ISSUER = "https://token.actions.githubusercontent.com";
 const GITHUB_JWKS = createRemoteJWKSet(
@@ -20,19 +21,6 @@ const ALLOWED_EVENTS = new Set([
 ]);
 
 class AuthError extends Error {}
-
-function adminKey(): string {
-  const modern = Deno.env.get("SUPABASE_SECRET_KEYS");
-  if (modern) {
-    try {
-      const parsed = JSON.parse(modern);
-      if (parsed?.default) return String(parsed.default);
-    } catch {
-      // Fall through to the legacy service-role key.
-    }
-  }
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-}
 
 async function authorize(req: Request) {
   const auth = req.headers.get("authorization") || "";
@@ -100,7 +88,7 @@ Deno.serve(async (req) => {
     }
 
     const caller = await authorize(req);
-    const key = adminKey();
+    const key = serverKey((name: string) => Deno.env.get(name));
     const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
     if (!key || !supabaseUrl) {
       throw new Error("Supabase server credentials are unavailable");
@@ -114,7 +102,6 @@ Deno.serve(async (req) => {
       10_000_000,
     );
     const limit = boundedInteger(body?.limit, 500, 1, 500);
-    const end = offset + limit - 1;
 
     const url = new URL(
       supabaseUrl + "/rest/v1/player_prop_training_export",
@@ -125,19 +112,9 @@ Deno.serve(async (req) => {
       "starts_at.asc,feature_available_at.asc,observation_id.asc",
     );
 
-    const headers: Record<string, string> = {
-      apikey: key,
-      accept: "application/json",
-      "range-unit": "items",
-      range: offset + "-" + end,
-    };
-    if (key.startsWith("eyJ")) {
-      headers.authorization = "Bearer " + key;
-    }
-
     const response = await fetch(url, {
       method: "GET",
-      headers,
+      headers: trainingHeaders(key, offset, limit),
     });
     const text = await response.text();
     let rows: unknown;
