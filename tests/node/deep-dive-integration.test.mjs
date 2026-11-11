@@ -21,3 +21,9 @@ test('every targeted renderer imports the shared disclosure and inline modules p
   if(path.endsWith('.html'))for(const match of source.matchAll(/<script type="module">([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>new Function(match[1].replace(/^import .*;$/gm,'')));
  }
 });
+
+test('NBA page does not override reviewed live decisions with a blanket PASS claim',()=>{
+ const html=readFileSync(new URL('../../sharp-service/nba.html',import.meta.url),'utf8');
+ assert.doesNotMatch(html,/Every priced NBA market currently says|There are no cleared NBA plays/);
+ assert.match(html,/Current PLAY or PASS decisions appear in the reviewed live section/);
+});
