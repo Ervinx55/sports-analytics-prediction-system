@@ -41,7 +41,7 @@ export function createReadScheduler(limit = 4) {
 const scheduleDashboardRead=createReadScheduler();
 const historicalReads=new Map();
 const historicalPaths=new Set(['model-calibration','market-calibration','sharp-disagreement-calibration','decision-fusion-calibration','player-prop-fusion-calibration','player-prop-clv-calibration','parlay-correlation-calibration','decision-timing-calibration']);
-function fetchJson(url,timeoutMs=8000){
+function fetchJson(url,timeoutMs=12000){
   const historical=historicalPaths.has(new URL(url).pathname.split('/').pop());
   const saved=historicalReads.get(url);if(historical&&saved&&Date.now()-saved.at<60000)return Promise.resolve(saved.data);
   return scheduleDashboardRead(url+'|'+timeoutMs,async signal=>{
@@ -51,7 +51,7 @@ function fetchJson(url,timeoutMs=8000){
   },{timeoutMs});
 }
 
-async function fetchJsonNow(url, timeoutMs = 8000, externalSignal = null) {
+async function fetchJsonNow(url, timeoutMs = 12000, externalSignal = null) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

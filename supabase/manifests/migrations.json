@@ -354,15 +354,6 @@
       "statementCount": null
     },
     {
-      "version": "20261111190000",
-      "name": "nba_explanation_snapshot",
-      "path": "supabase/migrations/20261111190000_nba_explanation_snapshot.sql",
-      "sha256": null,
-      "recoveredFromProduction": false,
-      "appliedToProduction": true,
-      "statementCount": 3
-    },
-    {
       "version": "20261111114726",
       "name": "dashboard_health_incremental_history",
       "path": "supabase/migrations/20261111114726_dashboard_health_incremental_history.sql",
@@ -370,6 +361,33 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261111120910",
+      "name": "nba_dashboard_future_read_index",
+      "path": "supabase/migrations/20261111120910_nba_dashboard_future_read_index.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111121202",
+      "name": "dashboard_health_indexed_lookups",
+      "path": "supabase/migrations/20261111121202_dashboard_health_indexed_lookups.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261111190000",
+      "name": "nba_explanation_snapshot",
+      "path": "supabase/migrations/20261111190000_nba_explanation_snapshot.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": 3
     },
     {
       "version": "20261111190001",
