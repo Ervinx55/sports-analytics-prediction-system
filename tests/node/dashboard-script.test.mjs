@@ -5,9 +5,9 @@ import { readFileSync } from "node:fs";
 const html = readFileSync("sharp-service/dashboard.html", "utf8");
 
 test("dashboard inline script parses", () => {
-  const match = html.match(/<script>([\s\S]*?)<\/script>/);
+  const match = html.match(/<script type="module">([\s\S]*?)<\/script>/);
   assert.ok(match, "dashboard script block must exist");
-  assert.doesNotThrow(() => new Function(match[1]));
+  assert.doesNotThrow(() => new Function(match[1].replace(/^import .*;$/gm, "")));
 });
 
 test("provider health observability is wired into the dashboard", () => {

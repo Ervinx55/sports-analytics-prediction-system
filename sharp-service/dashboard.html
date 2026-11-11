@@ -127,8 +127,8 @@
       h1{font-size:19px}
     }
   </style>
-</head>
-<body>
+<link rel="stylesheet" href="/edge-theme.css"></head>
+<body class="el-theme">
 <div class="app">
   <div class="top">
     <div class="brand">
@@ -166,6 +166,7 @@
   </div>
 
   <nav style="margin:14px 0"><a href="/nfl.html" style="color:var(--cyan);font-weight:700">Open NFL team models and player props →</a></nav>
+  <nav aria-label="Research navigation"><a href="/nba.html">NBA decisions</a> · <a href="/research.html">Prop research &amp; deep dives</a> · <a href="/edge-vnext">Existing research board</a></nav>
   <div class="tabs">
     <button class="tab active" data-tab="today">Today</button>
     <button class="tab" data-tab="plays">Plays</button>
@@ -433,7 +434,8 @@
   </div>
 </div>
 
-<script>
+<script type="module">
+import {deepDiveHtml,preserveDeepDives} from "./deep-dive.js";
   const $ = (id) => document.getElementById(id);
   const fmtPct = (x, digits=1) => x == null ? "—" : (Number(x)*100).toFixed(digits)+"%";
   const fmtPP = (x) => x == null ? "—" : (Number(x)>=0?"+":"")+Number(x).toFixed(2)+" pp";
@@ -910,6 +912,7 @@
                   <div class="main">${esc(m.market_label)}</div>
                   <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
                   <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
+${deepDiveHtml(m,{scope:"dashboard-1",reason:marketWhy(m),presentation:{title:m.status==="PLAY"?"PLAY — recorded decision":m.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
                   ${freshnessPanel(m)}
                   ${fusionPanel(m)}
                   ${timingPanel(m)}
@@ -955,6 +958,7 @@
             </div>
           </div>
           ${statusBadge(c)}
+${deepDiveHtml(c,{scope:"candidates",reason:(c.blockers||[]).join("; ")})}
         </div>
         <div class="grid4">
           <div class="stat"><div class="k">Best Price</div><div class="v">${fmtOdds(c.best_odds)}</div><div class="small">${esc(c.best_book||"—")}</div></div>
@@ -1029,6 +1033,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
           </div>
           <div class="why play">${esc(marketWhy(g))}</div>
+${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.status==="PLAY"?"PLAY — recorded decision":g.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
           ${freshnessPanel(g)}
           ${fusionPanel(g)}
           ${timingPanel(g)}
@@ -1095,6 +1100,7 @@
           <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
         </div>
         <div class="why play">${esc(propWhy(p))}</div>
+${deepDiveHtml(p,{scope:"dashboard-3",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
         ${freshnessPanel(p)}
         ${fusionPanel(p)}
         ${timingPanel(p)}
@@ -1125,6 +1131,7 @@
           <div class="stat"><div class="k">Threshold</div><div class="v">${fmtOdds(g.playable_threshold)}</div></div>
         </div>
         <div class="reason">${esc(g.reason||"Sharp gate cleared.")}</div>
+${deepDiveHtml(g,{scope:"final-plays",presentation:{title:g.final_status==="FINAL_PLAY"?"PLAY — recorded decision":"NOT CLEARED — do not play"}})}
       </div>`).join("");
   }
 
@@ -1197,6 +1204,7 @@
             <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
           </div>
           <div class="why play">${esc(propWhy(p))}</div>
+${deepDiveHtml(p,{scope:"dashboard-4",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
           ${freshnessPanel(p)}
           ${tensorflowShadowPanel(p)}
           ${fusionPanel(p)}
@@ -1218,6 +1226,7 @@
             <span class="badge watch">PENDING</span>
           </div>
           <div class="why pending">${esc(propWhy(p))}</div>
+${deepDiveHtml(p,{scope:"dashboard-5",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
           ${freshnessPanel(p)}
           ${tensorflowShadowPanel(p)}
           ${fusionPanel(p)}
@@ -1237,6 +1246,7 @@
             <div class="main">${esc(p.label)}</div>
             <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
             <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
+${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
             ${freshnessPanel(p)}
             ${tensorflowShadowPanel(p)}
             ${fusionPanel(p)}
@@ -1921,6 +1931,7 @@
   }
 
   function render(data){
+    preserveDeepDives(document.body);
     DATA=data;
     const s=data.summary||{};
     $("mActive").textContent=s.gradedMarkets??data.marketCard?.summary?.markets??0;
