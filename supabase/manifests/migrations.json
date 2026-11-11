@@ -381,6 +381,15 @@
       "statementCount": null
     },
     {
+      "version": "20261111121713",
+      "name": "pipeline_pending_request_index",
+      "path": "supabase/migrations/20261111121713_pipeline_pending_request_index.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
       "version": "20261111190000",
       "name": "nba_explanation_snapshot",
       "path": "supabase/migrations/20261111190000_nba_explanation_snapshot.sql",
