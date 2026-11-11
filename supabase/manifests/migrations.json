@@ -325,6 +325,33 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": 1
+    },
+    {
+      "version": "20261110202539",
+      "name": "index_dashboard_timing_and_outcomes",
+      "path": "supabase/migrations/20261110202539_index_dashboard_timing_and_outcomes.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261110202646",
+      "name": "limit_health_history_to_monitored_jobs",
+      "path": "supabase/migrations/20261110202646_limit_health_history_to_monitored_jobs.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261110203105",
+      "name": "cache_pipeline_health_snapshot",
+      "path": "supabase/migrations/20261110203105_cache_pipeline_health_snapshot.sql",
+      "sha256": null,
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",

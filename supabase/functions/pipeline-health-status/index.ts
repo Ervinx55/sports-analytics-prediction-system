@@ -1,3 +1,5 @@
+import { readHealthSnapshot } from './snapshot.mjs';
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const DEGRADED = new Set([
@@ -15,18 +17,18 @@ Deno.serve(async(req)=>{
 
     const supabase=createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      serviceRoleKey()!
     );
 
     const {data,error}=await supabase
-      .from("pipeline_component_health_v1")
-      .select("*")
-      .order("critical",{ascending:false})
-      .order("subsystem",{ascending:true})
-      .order("display_name",{ascending:true});
+      .from("pipeline_health_snapshot")
+      .select("observed_at,data")
+      .eq("id",true)
+      .maybeSingle();
     if(error) throw error;
 
-    const rows=data??[];
+    const snapshot=readHealthSnapshot(data);
+    const rows=snapshot.rows;
     const critical=rows.filter((x:any)=>x.critical);
     const criticalDegraded=critical.filter((x:any)=>DEGRADED.has(String(x.health_status)));
     const warming=rows.filter((x:any)=>["WARMING_UP","HTTP_PENDING"].includes(String(x.health_status)));
@@ -42,6 +44,9 @@ Deno.serve(async(req)=>{
     return new Response(JSON.stringify({
       fetchedAt:new Date().toISOString(),
       version:"pipeline-health-v1",
+      snapshotObservedAt:snapshot.observedAt,
+      snapshotAgeSeconds:snapshot.ageSeconds,
+      snapshotMaxAgeSeconds:120,
       overallStatus,
       summary:{
         components:rows.length,
@@ -76,7 +81,7 @@ Deno.serve(async(req)=>{
     return new Response(JSON.stringify({
       error:error instanceof Error?error.message:JSON.stringify(error)
     }),{
-      status:500,
+      status:error instanceof Error && error.name === "HealthSnapshotUnavailable" ? 503 : 500,
       headers:{"content-type":"application/json"}
     });
   }
