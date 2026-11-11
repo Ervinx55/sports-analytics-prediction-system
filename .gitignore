@@ -10,3 +10,6 @@ supabase/.env
 supabase/.env.*
 supabase/.temp/
 supabase/.branches/
+
+.vercel
+.env*

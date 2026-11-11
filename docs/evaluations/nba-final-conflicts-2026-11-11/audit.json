@@ -1,0 +1,16 @@
+{
+  "checkedAt": "2026-11-11T13:08:30.408Z",
+  "accepted": 2,
+  "remaining": 0,
+  "before": {
+    "opponentDefensiveRating": 77,
+    "defenseVsPosition": 69,
+    "historicalUsage": 77
+  },
+  "after": {
+    "opponentDefensiveRating": 77,
+    "defenseVsPosition": 69,
+    "historicalUsage": 77
+  },
+  "frozenModelsUnchanged": true
+}

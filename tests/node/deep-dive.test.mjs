@@ -2,6 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {buildDeepDive,deepDiveHtml,selectionKey} from '../../sharp-service/deep-dive.js';
 test('research PLAY cannot authorize a play',()=>{assert.match(buildDeepDive({status:'PLAY',modelProbability:.9}).title,/NOT CLEARED/);});
+test('cached historical context discloses refresh failure and acquisition timestamp',()=>{
+ const d=JSON.stringify(buildDeepDive({context:{features:{},evidenceRead:{status:'cached_after_error',fetchedAt:'2026-11-11T13:00:00Z'}}}));
+ assert.match(d,/refresh failed/i);assert.match(d,/2026-11-11T13:00:00Z/);assert.match(d,/historical evidence/i);
+});
 test('authoritative PASS and reason are retained',()=>{const d=buildDeepDive({reason:'Missing opposite price'},{presentation:{kind:'pass',title:'PASS — do not play',reason:'Not approved'}});assert.match(d.reason,/Missing opposite price/);assert.match(d.title,/PASS/);});
 test('context is research only with units, sample and missing usage',()=>{const d=JSON.stringify(buildDeepDive({context:{features:{defenseVsPosition:{value:0,source:'test',sampleCount:12,cutoff:'2026-11-10'},expectedMinutes:{value:28}}}}));assert.match(d,/0.*per opposing player appearance/);assert.match(d,/Research context only/);assert.match(d,/Usage share is unavailable/);assert.match(d,/12/);});
 test('unsafe text is escaped and no source links execute',()=>{const h=deepDiveHtml({reason:'<img src=x onerror=alert(1)>',context:{features:{opponentDefensiveRating:{value:100,source:'javascript:alert(1)'}}}});assert.ok(!h.includes('<img'));assert.ok(!h.includes('href='));});

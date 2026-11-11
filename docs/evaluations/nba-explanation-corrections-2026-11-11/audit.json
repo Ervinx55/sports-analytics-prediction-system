@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-11-11T12:53:58.054Z",
+  "verified": 37,
+  "remaining": [
+    {
+      "id": "W9lJjjTktenUmQ1ww9T3",
+      "reason": "OFFICIAL_IDENTITY_SGO:MASON_JONES_1_NBA:Mason Jones"
+    },
+    {
+      "id": "I03UQDCFJhTCzrAvdEVA",
+      "reason": "OFFICIAL_MINUTES_INCOMPLETE"
+    }
+  ],
+  "validatedBdlFieldCorrections": 83,
+  "targets": 77,
+  "before": {
+    "opponentDefensiveRating": 77,
+    "defenseVsPosition": 67,
+    "historicalUsage": 73,
+    "expectedMinutes": 77
+  },
+  "after": {
+    "opponentDefensiveRating": 77,
+    "defenseVsPosition": 69,
+    "historicalUsage": 77,
+    "expectedMinutes": 77
+  },
+  "modelInputsChanged": false,
+  "approvalRulesChanged": false
+}
