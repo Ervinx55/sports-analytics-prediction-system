@@ -100,6 +100,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "GET only" });
   }
 
+  const view=String(req.query.view||'all');
+  const extraSources={today:[],plays:['parlayCorrelation'],props:[],market:['movement','alerts'],sharp:['sharpGate'],results:['decisionResults'],calibration:['calibration','marketCalibration','sharpDisagreementCalibration','decisionFusionCalibration','playerPropFusionCalibration','playerPropClvCalibration','parlayCorrelationCalibration','decisionTimingCalibration','modelGovernance','outcomeAttribution'],system:['sharpSourceHealth','modelGovernance']};
+  if(view!=='all'&&!Object.hasOwn(extraSources,view))return res.status(400).json({error:'Unknown dashboard view'});
   const sport = String(req.query.sport || "MLB").toUpperCase();
   const hours = Math.max(
     6,
@@ -147,31 +150,33 @@ export default async function handler(req, res) {
     decisionResults: `${BASE}/decision-results?days=7`,
   };
 
+  const requested=new Set(view==='all'?Object.keys(urls):['audit','marketCard','playerProps','pipelineHealth','results','providerHealth',...extraSources[view]]);
+  const read=name=>requested.has(name)?fetchJson(urls[name]):Promise.resolve(null);
   // Put current cards and health ahead of historical analytics in the bounded queue.
-  for(const name of ['audit','marketCard','playerProps','pipelineHealth','results','providerHealth'])fetchJson(urls[name]).catch(()=>{});
+  for(const name of ['audit','marketCard','playerProps','pipelineHealth','results','providerHealth'])read(name).catch(()=>{});
   const scheduleRead=Promise.allSettled([fetchScheduleFallback({sport,hours,now:Date.now()})]);
 
   const [audit, calibration, marketCalibration, results, movement, alerts, sharpGate, sharpDisagreementCalibration, decisionFusionCalibration, playerPropFusionCalibration, playerPropClvCalibration, parlayCorrelation, parlayCorrelationCalibration, decisionTimingCalibration, modelGovernance, outcomeAttribution, pipelineHealth, sharpSourceHealth, providerHealth, providerUsage, marketCard, playerProps, decisionResults] =
     await Promise.allSettled([
-      fetchJson(urls.audit),
-      fetchJson(urls.calibration),
-      fetchJson(urls.marketCalibration),
-      fetchJson(urls.results),
-      fetchJson(urls.movement),
-      fetchJson(urls.alerts),
-      fetchJson(urls.sharpGate),
-      fetchJson(urls.sharpDisagreementCalibration),
-      fetchJson(urls.decisionFusionCalibration),
-      fetchJson(urls.playerPropFusionCalibration),
-      fetchJson(urls.playerPropClvCalibration),
-      fetchJson(urls.parlayCorrelation),
-      fetchJson(urls.parlayCorrelationCalibration),
-      fetchJson(urls.decisionTimingCalibration),
-      fetchJson(urls.modelGovernance),
-      fetchJson(urls.outcomeAttribution),
-      fetchJson(urls.pipelineHealth),
-      fetchJson(urls.sharpSourceHealth),
-      fetchJson(urls.providerHealth),
+      read('audit'),
+      read('calibration'),
+      read('marketCalibration'),
+      read('results'),
+      read('movement'),
+      read('alerts'),
+      read('sharpGate'),
+      read('sharpDisagreementCalibration'),
+      read('decisionFusionCalibration'),
+      read('playerPropFusionCalibration'),
+      read('playerPropClvCalibration'),
+      read('parlayCorrelation'),
+      read('parlayCorrelationCalibration'),
+      read('decisionTimingCalibration'),
+      read('modelGovernance'),
+      read('outcomeAttribution'),
+      read('pipelineHealth'),
+      read('sharpSourceHealth'),
+      read('providerHealth'),
       process.env.SPORTS_ODDS_API_KEY
         ? getSportsGameOddsUsageSnapshot(
             process.env.SPORTS_ODDS_API_KEY
@@ -179,9 +184,9 @@ export default async function handler(req, res) {
         : Promise.reject(
             new Error("SPORTS_ODDS_API_KEY missing")
           ),
-      fetchJson(urls.marketCard),
-      fetchJson(urls.playerProps),
-      fetchJson(urls.decisionResults),
+      read('marketCard'),
+      read('playerProps'),
+      read('decisionResults'),
     ]);
 
   const sources = {
@@ -211,7 +216,7 @@ export default async function handler(req, res) {
   };
 
   const sourceHealth = Object.fromEntries(
-    Object.entries(sources).map(([name, value]) => [
+    Object.entries(sources).filter(([name])=>requested.has(name)||name==='providerUsage').map(([name, value]) => [
       name,
       { ok: value.ok, error: value.error },
     ])

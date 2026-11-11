@@ -454,12 +454,15 @@ import {deepDiveHtml,preserveDeepDives} from "./deep-dive.js";
     </div>`;
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
   let DATA = null;
+  let loadingView=false,queuedRefresh=false;
+  const currentView=()=>document.querySelector(".tab.active")?.dataset.tab||"today";
 
   document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
     document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
     document.querySelectorAll(".section").forEach(x => x.classList.remove("active"));
     btn.classList.add("active");
     $(btn.dataset.tab).classList.add("active");
+    load(true);
   }));
 
   function statusBadge(c){
@@ -1996,13 +1999,13 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     }
   }
 
-  async function fetchDashboardData(){
+  async function fetchDashboardData(view){
     let lastError=null;
     for(let attempt=1;attempt<=2;attempt++){
       const controller=new AbortController();
       const timer=setTimeout(()=>controller.abort(),20000);
       try{
-        const r=await fetch("/api/dashboard?sport=MLB&hours=36&t="+Date.now(),{
+        const r=await fetch("/api/dashboard?sport=MLB&hours=36&view="+encodeURIComponent(view)+"&t="+Date.now(),{
           cache:"no-store",
           signal:controller.signal
         });
@@ -2030,6 +2033,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
   }
 
   async function load(manual=false){
+    if(loadingView){queuedRefresh=true;return;}
+    loadingView=true;
+    const requestedView=currentView();
     if(refreshTimer){
       clearTimeout(refreshTimer);
       refreshTimer=null;
@@ -2038,8 +2044,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     $("refreshBtn").textContent="Loading…";
     try{
       const providerStatusPromise=fetchProviderStatusData().catch(()=>null);
-      const data=await fetchDashboardData();
-      render(data);
+      const data=await fetchDashboardData(requestedView);
+      if(requestedView===currentView())render(data);
+      else queuedRefresh=true;
       const providerStatus=await providerStatusPromise;
       if(providerStatus) renderProviderChain(providerStatus);
       else {
@@ -2063,7 +2070,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     }finally{
       $("refreshBtn").disabled=false;
       $("refreshBtn").textContent="Refresh";
-      scheduleNextRefresh(DATA?.refreshPolicy);
+      loadingView=false;
+      if(queuedRefresh){queuedRefresh=false;load(false);}
+      else scheduleNextRefresh(DATA?.refreshPolicy);
     }
   }
   $("refreshBtn").addEventListener("click",()=>load(true));
