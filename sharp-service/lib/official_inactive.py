@@ -43,13 +43,18 @@ def parse_inactive(text,day,teams):
                     depth-=1
                     if depth<0:raise ValueError('Unbalanced inactive reason')
                 elif char==',' and depth==0:
+                    # NBA gamebooks preserve commas in names such as Udeh, Jr.
+                    # A recognized terminal suffix belongs to the same player.
+                    if re.match(r'\s*(?:Jr\.?|Sr\.?|II|III|IV|V)(?=\s*(?:\(|,|$))',content[pos+1:],re.I):
+                        continue
                     tokens.append(content[start:pos].strip());start=pos+1
             if depth:raise ValueError('Unbalanced inactive reason')
             tokens.append(content[start:].strip())
             for token in tokens:
                 opening=token.find('(')
                 name=(token if opening<0 else token[:opening]).strip()
-                if not name or any(c in name for c in ':,()') or not all(c.isalpha() or c in " '-.\u2019" for c in name):raise ValueError('Invalid inactive name')
+                base=re.sub(r',\s*(?:Jr\.?|Sr\.?|II|III|IV|V)$','',name,flags=re.I)
+                if not base or re.fullmatch(r'(?:Jr\.?|Sr\.?|II|III|IV|V)',base,re.I) or any(c in base for c in ':,()') or not all(c.isalpha() or c in " '-.\u2019" for c in base):raise ValueError('Invalid inactive name')
                 if opening>=0 and (not token.endswith(')') or not token[opening+1:-1].strip()):raise ValueError('Unexpected inactive reason')
                 names.append(name)
         if len({norm(n) for n in names})!=len(names):raise ValueError('Duplicate inactive name')
