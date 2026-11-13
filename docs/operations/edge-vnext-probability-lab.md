@@ -9,6 +9,9 @@ approved model exists.
 Dashboard path, once deployed: \`/edge-vnext\`
 API endpoints: \`/api/edge-vnext\` (GET, read-only).
 
+The [November 13 clearance audit](2026-11-13-clearance-audit.md) documents the
+NBA market connection, expanded prop collection, and unresolved approval gaps.
+
 ## Features introduced
 - **Provenance-first model board.** \`GET /api/edge-vnext?mode=board\` makes no
   odds-provider requests. A deliberate user click issues
@@ -25,7 +28,8 @@ API endpoints: \`/api/edge-vnext\` (GET, read-only).
   independent of sportsbook odds. Requires 4 games per team and at least
   19 successful historic scoreboards out of 21; otherwise returns unavailable.
   This model is NOT calibrated, contains no injury or rotation adjustment,
-  has no sharp-price validation, and always labels outcomes AVOID.
+  can compare observed sharp prices when `quotes=1` is explicitly requested,
+  and still labels outcomes AVOID until model validation and injury adjustments pass.
   It does not write production predictions into Supabase.
 - **Discrete alternative thresholds.** Pure functions validate complete
   discrete probability mass, distinguish 5+, >5 and 5.5 thresholds, account

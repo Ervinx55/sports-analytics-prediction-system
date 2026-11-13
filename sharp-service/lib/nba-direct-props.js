@@ -1,9 +1,24 @@
-// Bounded fallback for the existing NBA quote contract when the web API is down.
+// Bounded quote collection. Exhaust the event cursor instead of dropping game nine.
+export const NBA_PROP_PAGE_SIZE=16;
+const MAX_PAGES=2;
 export async function directSgoProps({page,clock}){
  const now=clock(),patterns=['points','rebounds','assists'].flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`));
- const result=await page({leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:'draftkings',oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:'8'});
+ const params={leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:'draftkings',oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:String(NBA_PROP_PAGE_SIZE)};
+ const rawEvents=new Map(),timestamps=[],reasons=[],seenCursors=new Set();
+ let cursor=null,pagesFetched=0,eventsComplete=false;
+ for(let i=0;i<MAX_PAGES;i++){
+  let result;
+  try{result=await page({...params,...(cursor?{cursor}:{})});}
+  catch(error){if(!pagesFetched)throw error;reasons.push('PAGE_UNAVAILABLE');break;}
+  pagesFetched++;timestamps.push(result.observedAt);
+  for(const e of result.events)if(e?.eventID&&!rawEvents.has(e.eventID))rawEvents.set(e.eventID,e);
+  if(!result.nextCursor){eventsComplete=true;break;}
+  if(typeof result.nextCursor!=='string'||seenCursors.has(result.nextCursor)){reasons.push('INVALID_CURSOR');break;}
+  cursor=result.nextCursor;seenCursors.add(cursor);
+  if(i===MAX_PAGES-1)reasons.push('PAGE_LIMIT_REACHED');
+ }
  const events=[];
- for(const e of result.events){
+ for(const e of rawEvents.values()){
   if(e.leagueID!=='NBA'||e.type!=='match'||!e.eventID||e.status?.started||e.status?.live||e.status?.completed||e.status?.finalized||e.status?.cancelled||!(Date.parse(e.status?.startsAt)>Date.parse(now)))continue;
   const props=new Map();
   for(const o of Object.values(e.odds??{})){
@@ -23,5 +38,6 @@ export async function directSgoProps({page,clock}){
    return {prop,...(valid?{explanationBinding:{contract:'sgo-event-roster-v1',eventID:'sgo:'+e.eventID,playerID:prop.playerID,startsAt:e.status.startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}}:{})};
   })});
  }
- return {generatedAt:result.observedAt,events,partialCoverage:true,source:'DIRECT_SGO_BOUNDED_FALLBACK'};
+ const generatedAt=timestamps.sort((a,b)=>Date.parse(a)-Date.parse(b))[0];
+ return {generatedAt,events,partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,bookmakers:['draftkings'],markets:['points','rebounds','assists']},source:'DIRECT_SGO_BOUNDED_FALLBACK'};
 }

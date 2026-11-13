@@ -1,3 +1,4 @@
+import {attachNbaMarketEvidence} from './nba-market-evidence.js';
 // Independent, research-only NBA game winner baseline.
 // No sportsbook odds are an input. No injuries, rotations or pace adjustment
 // are inferred. Data gaps make the forecast unavailable, not a BUY.
@@ -65,7 +66,7 @@ export function fitNbaRatings({games,asOf,minGames=4,homeCourtPoints=2}) {
   eligibleGames:matches.length,teamCount:teams.size,minGames,
   homeCourtPoints,version:NBA_BASELINE_VERSION};
 }
-export function projectNbaGames({historicalGames,upcomingGames,asOf,historyComplete=false}) {
+export function projectNbaGames({historicalGames,upcomingGames,asOf,historyComplete=false,marketBoard=null}) {
  const fit=fitNbaRatings({games:historicalGames,asOf});
  if(!fit)return {status:"UNAVAILABLE",reason:"Invalid history"};
  const timestamp=Date.parse(asOf);
@@ -86,12 +87,13 @@ export function projectNbaGames({historicalGames,upcomingGames,asOf,historyCompl
    awayWinProbability:p===null?null:1-p,
    modelOrigin:"INDEPENDENT_UNCALIBRATED_NBA_MARGIN_BASELINE",
    calibrationState:"NOT_VALIDATED",decision:"AVOID",
-   reasons:eligible?["NO_INJURY_ROTATION_ADJUSTMENT","UNCALIBRATED","NO_BOOK_QUOTE"]:
+   reasons:eligible?["NO_INJURY_ROTATION_ADJUSTMENT","UNCALIBRATED","BOOK_QUOTES_NOT_REQUESTED"]:
      ["INSUFFICIENT_OR_INCOMPLETE_HISTORICAL_GAMES"]
   });
  }
- return {status:historyComplete?"RESEARCH_SHADOW":"SOURCE_INCOMPLETE",
+ const report={status:historyComplete?"RESEARCH_SHADOW":"SOURCE_INCOMPLETE",
    version:NBA_BASELINE_VERSION,generatedAt:asOf,
    eligibleHistoryGames:fit.eligibleGames,historyComplete,
    rows,productionEligible:false,automaticBuyEnabled:false};
+ return marketBoard===null?report:attachNbaMarketEvidence(report,marketBoard);
 }

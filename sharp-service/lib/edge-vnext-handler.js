@@ -46,11 +46,27 @@ async function fetchNbaScoreboard(date) {
     return parseEspnScoreboard(await r.json());
   } finally {clearTimeout(timeout);}
 }
+async function fetchNbaMarketBoard(target) {
+  // Explicit quote refresh only; reuse the existing protected/cached board service.
+  const url=cleanUrl(process.env.EDGE_LAB_VNEXT_BOARD_URL ||
+    "https://sports-analytics-prediction-system-tau.vercel.app/api/board");
+  if(!url)return {};
+  url.searchParams.set("leagues","NBA");
+  url.searchParams.set("limit","50");
+  url.searchParams.set("startsAfter",target+"T00:00:00Z");
+  url.searchParams.set("startsBefore",dateForOffset(target,2)+"T00:00:00Z");
+  try {
+    const response=await fetch(url,{signal:AbortSignal.timeout(12000),cache:"no-store",headers:{accept:"application/json"}});
+    if(!response.ok)return {};
+    const data=await response.json();
+    return Array.isArray(data?.events)&&data.events.length<=100?data:{};
+  } catch {return {};}
+}
 function dateForOffset(iso,days){
   const d=new Date(Date.parse(iso+"T12:00:00Z") + days*86400000);
   return d.toISOString().slice(0,10);
 }
-async function fetchNbaBaseline(target, audit=false) {
+async function fetchNbaBaseline(target, audit=false, quotes=false) {
   if(!/^\d{4}-\d{2}-\d{2}$/.test(target)||
      new Date(target+"T00:00:00Z").toISOString().slice(0,10)!==target)
     throw Error("Valid NBA slate date YYYY-MM-DD required");
@@ -67,14 +83,15 @@ async function fetchNbaBaseline(target, audit=false) {
       catch(e){results[i]={ok:false,error:String(e.message||e)};}
     }
   }
-  await Promise.all(Array.from({length:6},worker));
+  const [marketBoard]=await Promise.all([quotes?fetchNbaMarketBoard(target):Promise.resolve(null),
+    Promise.all(Array.from({length:6},worker))]);
   if(!results.at(-1)?.ok)throw Error("Upcoming NBA scoreboard unavailable");
   const history=results.slice(0,-1),successful=history.filter(x=>x.ok).length;
   const asOf=new Date().toISOString();
   const report=projectNbaGames({
     historicalGames:history.flatMap(x=>x.games||[]),
     upcomingGames:results.at(-1).games,asOf,
-    historyComplete:successful>=19
+    historyComplete:successful>=19,marketBoard
   });
   const validation = audit ? backtestNbaBaseline({games:history.flatMap(x=>x.games||[])}) : null;
   const auditSummary = validation ? (({records, ...summary}) => summary)(validation) : null;
@@ -132,7 +149,7 @@ export default async function handler(req,res) {
       return acc;
     },{});
     try {
-      const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)),String(req.query.audit||"0")==="1");
+      const report=await fetchNbaBaseline(String(req.query.date||(today.year+"-"+today.month+"-"+today.day)),String(req.query.audit||"0")==="1",String(req.query.quotes||"0")==="1");
       return respond(res,200,report);
     } catch(e) {
       return respond(res,200,{status:"UNAVAILABLE",productionEligible:false,

@@ -24,10 +24,15 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 <div id="status" class="small" aria-live="polite">No live request made</div>
 <div style="margin:14px 0;padding:12px;border:1px solid #2a4662;border-radius:9px">
   <div class="row" style="align-items:end"><div><h2>Independent NBA baseline (experimental)</h2>
-  <span class="small">Scores-based margin model, uncalibrated. No injuries, rotation adjustments, or verified odds. Manually fetches public daily scoreboards.</span></div>
-  <div><button id="refreshNba">Refresh NBA baseline</button></div></div>
+  <span class="small">Scores-based margin model, uncalibrated. Refresh compares current sharp prices and available retail quotes. Injury and rotation adjustments remain incomplete.</span></div>
+  <div><button id="refreshNba">Refresh NBA model and prices</button></div></div>
   <div id="nbaStatus" class="small" aria-live="polite">NBA baseline not requested</div>
+  <p id="nbaCoverage" class="small"></p>
+  <h3>Most likely winners · experimental</h3><p id="nbaWinners">No forecasts requested.</p>
   <div class="scroll"><table><thead><tr><th>Matchup</th><th>Home win %</th><th>Away win %</th><th>Projected margin</th><th>Status</th></tr></thead><tbody id="nbaRows"><tr><td colspan="5">Independent model has not been requested.</td></tr></tbody></table></div>
+  <h3>Price comparison ranking · shadow / $0</h3>
+  <p class="small">Sorted by the unvalidated model’s estimated return at each available quote. These are research comparisons, not cleared plays. A positive estimate does not establish an edge. Retail quotes are provider observations; access through your account is unverified.</p>
+  <div class="scroll"><table><thead><tr><th>Selection</th><th>Quote</th><th>Model %</th><th>Sharp fair %</th><th>Model return</th><th>Remaining checks</th></tr></thead><tbody id="nbaValueRows"><tr><td colspan="6">Refresh to compare prices.</td></tr></tbody></table></div>
 </div>
 <div id="modelSummary" class="row"></div>
 <div class="scroll"><table><thead><tr><th>Game / Market</th><th>Model %</th><th>Market fair %</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL shadow model. NBA independent baseline is available separately, but remains uncalibrated.</td></tr></tbody></table></div></article>
@@ -49,11 +54,16 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 </main><script>
 const $=id=>document.getElementById(id);
 $("refreshNba").onclick=async()=>{
- $("refreshNba").disabled=true;$("nbaStatus").textContent="Loading scoreboards and generating uncalibrated NBA forecasts…";
+ $("refreshNba").disabled=true;$("nbaStatus").textContent="Loading NBA forecasts and current prices…";
+ $("nbaWinners").textContent="Refreshing…";$("nbaCoverage").textContent="";$("nbaRows").innerHTML="";$("nbaValueRows").innerHTML="";
  try{
-  const d=await request({mode:"nba",live:1,audit:1});
+  const d=await request({mode:"nba",live:1,audit:1,quotes:1});
   $("nbaStatus").textContent=(d.status||"UNAVAILABLE")+" · "+(d.scoreboardCoverage?.daysAvailable??0)+"/"+(d.scoreboardCoverage?.daysRequested??0)+" historical dates loaded · Walk-forward: "+(d.backtest?.status||"not available")+", "+(d.backtest?.evaluatedGames??0)+" games · Brier "+(typeof d.backtest?.brier==="number"?d.backtest.brier.toFixed(3):"unavailable")+" · ECE "+(typeof d.backtest?.ece==="number"?d.backtest.ece.toFixed(3):"unavailable")+" · "+(d.reason||"No production BUY enabled");
-  $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">AVOID · uncalibrated</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
+  const coverage=d.evaluationSummary;
+  $("nbaCoverage").textContent=coverage?`${coverage.matchedGames}/${coverage.games} games matched to odds · ${coverage.gamesWithSharpPairs} with fresh sharp pairs · ${coverage.pricedSides} priced forecast sides. Remaining checks: ${Object.entries(coverage.reasonCounts||{}).map(([reason,count])=>reason+": "+count).join(" · ")}`:"Market comparison unavailable.";
+  $("nbaWinners").textContent=(d.rankings?.winners||[]).map((r,i)=>`${i+1}. ${r.team} ${pct(r.probability)}`).join(" · ")||"No usable independent forecasts.";
+  $("nbaValueRows").innerHTML=(d.rankings?.value||[]).length?d.rankings.value.map(r=>'<tr><td>'+esc(r.selection)+'</td><td>'+esc(r.book)+' '+esc(r.odds>0?"+"+r.odds:r.odds)+'</td><td>'+pct(r.modelProbability)+'</td><td>'+pct(r.marketFairProbability)+'</td><td>'+pct(r.modelExpectedReturn)+'</td><td class="warn">'+esc((r.reasons||[]).join(", "))+'</td></tr>').join(""):'<tr><td colspan="6">No current priced forecasts. See the missing checks above.</td></tr>';
+  $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">'+esc((r.reasons||[]).join(", "))+'</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
  }catch(e){$("nbaStatus").textContent="NBA baseline unavailable: "+e.message}
  finally{$("refreshNba").disabled=false;}
 };
