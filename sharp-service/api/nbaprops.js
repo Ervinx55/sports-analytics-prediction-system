@@ -1,6 +1,6 @@
 import {enrichQuoteExplanations,explanationSnapshot} from '../lib/nba-explanation-snapshot.js';
 import {protectedSportsGameOddsFetch} from '../lib/provider-protection.js';
-import {directSgoProps} from '../lib/nba-direct-props.js';
+import {directSgoProps,NBA_PROP_PAGE_SIZE} from '../lib/nba-direct-props.js';
 export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KEY||process.env.Sports_Game_Odds_API||'',fetchPage=protectedSportsGameOddsFetch}={}){
  const unavailable=()=>({status:503,body:{status:'UNAVAILABLE',reason:'NBA_QUOTE_PROVIDER_UNAVAILABLE',events:[],productionEligible:false,productionWeight:0}});
  if(!key)return unavailable();
@@ -11,11 +11,11 @@ export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KE
    params={...params,startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString()};
    const result=await fetchPage({url:'https://api.sportsgameodds.com/v2/events?'+new URLSearchParams(params),apiKey:key,consumer:'nba-prospective-quotes',priority:'critical',freshMs:60000,staleMs:600000,timeoutMs:8000});
    const checkedAt=now??Date.now();
-   if(result.payload?.success!==true||!Array.isArray(result.payload.data)||result.payload.data.length>8||!Number.isFinite(result.fetchedAt)||result.fetchedAt>checkedAt||checkedAt-result.fetchedAt>600000)throw Error('Invalid or stale quote feed');
+   if(result.payload?.success!==true||!Array.isArray(result.payload.data)||result.payload.data.length>NBA_PROP_PAGE_SIZE||!Number.isFinite(result.fetchedAt)||result.fetchedAt>checkedAt||checkedAt-result.fetchedAt>600000)throw Error('Invalid or stale quote feed');
    cache={status:result.cacheStatus,fetchedAt:new Date(result.fetchedAt).toISOString()};
-   return {events:result.payload.data,observedAt:cache.fetchedAt};
+   return {events:result.payload.data,observedAt:cache.fetchedAt,nextCursor:result.payload.nextCursor??null};
   }});
-  return {status:200,body:{...body,source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; first eight events within 48 hours',cache,productionEligible:false,productionWeight:0}};
+  return {status:200,body:{...body,source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0}};
  }catch{return unavailable();}
 }
 export default async function handler(req,res){
