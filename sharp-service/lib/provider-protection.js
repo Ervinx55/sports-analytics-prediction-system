@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { bookmakerIds } from './bookmakers.js';
 
 const DEFAULT_PROVIDER = "sportsgameodds";
 const DEFAULT_SUPABASE_URL = "https://yeoxroijaptomomshdii.supabase.co";
@@ -1109,6 +1110,12 @@ export async function protectedSportsGameOddsFetch({
   priority = "normal",
   objectPolicy = null
 }) {
+  // Canonicalize at the shared boundary, including callers outside /api/board.
+  const providerUrl = new URL(url);
+  if (providerUrl.hostname === 'api.sportsgameodds.com' && providerUrl.searchParams.has('bookmakerID')) {
+    providerUrl.searchParams.set('bookmakerID', bookmakerIds(providerUrl.searchParams.get('bookmakerID').split(',')).join(','));
+    url = providerUrl.toString();
+  }
   const key = cacheKey({ provider, url, freshMs, staleMs });
   const now = nowMs();
   const local = localEntry(key);
@@ -1661,11 +1668,15 @@ export async function protectedSportsGameOddsFetch({
         sharedEnabled: Boolean(config)
       };
     } catch (error) {
-      const localFailure = noteLocalFailure(provider, error);
+      // Invalid query parameters are request failures, not a provider outage.
+      // Preserve any existing outage state; do not mark a bad request as recovery.
+      const requestError = Number(error?.status) === 400;
+      const localFailure = requestError ? localCircuit(provider) : noteLocalFailure(provider, error);
+      if (requestError && recovering) releaseLocalProbe(provider);
 
       if (config) {
         await Promise.allSettled([
-          recordSharedFailure(config, provider, error),
+          requestError ? Promise.resolve() : recordSharedFailure(config, provider, error),
           leaseClaimed ? releaseSharedRefresh(config, key) : Promise.resolve(),
           recordProviderEvent(config, {
             provider,
@@ -1676,7 +1687,7 @@ export async function protectedSportsGameOddsFetch({
             retryAfterSeconds: error?.retryAfter ?? null,
             durationMs: Math.max(0, nowMs() - upstreamStartedAt)
           }),
-          recovering
+          recovering && !requestError
             ? recordProviderEvent(config, {
                 provider,
                 consumer,

@@ -1,3 +1,4 @@
+import { bookmakerQuery, boardBookCoverage } from '../lib/bookmakers.js';
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -434,7 +435,7 @@ export default async function handler(req, res) {
   const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES), {
     upper: true
   });
-  const books = unique(csv(req.query.books, []), { sort: true });
+  const books = bookmakerQuery(req.query.books);
   const now = Date.now();
   const windowAnchor =
     Math.floor(now / (6 * 60 * 60 * 1000)) *
@@ -765,6 +766,7 @@ export default async function handler(req, res) {
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",
+    bookCoverage: boardBookCoverage(events, books),
     providerPriority: priority,
     refreshPolicy,
     objectOptimization: {
