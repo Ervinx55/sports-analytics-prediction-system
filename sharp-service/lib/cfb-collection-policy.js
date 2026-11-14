@@ -1,7 +1,12 @@
+import {reviewedKickoffs} from './cfb-reviewed-identities.js';
 export function providerWindow(previous,now){
- if(previous?.cursor&&typeof previous.cursor==='string'&&previous.cursor.length<=2000&&Number.isFinite(Date.parse(previous.startsAfter))&&now-Date.parse(previous.startsAfter)<4*3600000&&now>=Date.parse(previous.startsAfter))return previous;
- const start=Math.floor(now/3600000)*3600000;
- return {startsAfter:new Date(start).toISOString(),startsBefore:new Date(start+48*3600000).toISOString(),cursor:null,pages:0};
+ const bucket=Math.floor(now/3600000)*3600000;
+ // Retain the earlier provider time only for an exact reviewed conflict while
+ // its verified schedule is still pregame. Normal windows remain unchanged.
+ const retained=reviewedKickoffs.filter(r=>Date.parse(r.providerStartsAt)<=now&&Date.parse(r.verifiedStartsAt)>now).map(r=>Date.parse(r.providerStartsAt)-1);
+ const start=Math.min(bucket,...retained);
+ if(previous?.cursor&&typeof previous.cursor==='string'&&previous.cursor.length<=2000&&Number.isFinite(Date.parse(previous.startsAfter))&&Date.parse(previous.startsAfter)<=start&&now-Date.parse(previous.startsAfter)<4*3600000&&now>=Date.parse(previous.startsAfter))return previous;
+ return {startsAfter:new Date(start).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString(),cursor:null,pages:0};
 }
 export function mergeCurrentForecasts(current,previous,modelVersion,now){
  const map=new Map((previous||[]).filter(f=>f.modelVersion===modelVersion&&Date.parse(f.startsAt)>now&&now-Date.parse(f.generatedAt)>=0&&now-Date.parse(f.generatedAt)<=30*60000).map(f=>[f.eventID,f]));
@@ -13,6 +18,10 @@ export function mergeSeasonSchedules(regular,postseason){
  return {...regular,games:[...regular.games,...postseason.games],postseasonComplete:true};
 }
 import {contentHash} from './cfb-evaluation.js';
+export function captureCandidate(f,event,observedAt,inputHash){
+ const blocked=f.quoteComparisonEligible===false;
+ return {event_id:f.eventID,model_version:f.modelVersion,starts_at:f.startsAt,input_hash:inputHash,forecast:{...f,entryQuotes:blocked?{}:event?.odds||{},entryQuoteObservedAt:observedAt,entryQuoteWithheldReason:blocked?'PROVIDER_KICKOFF_CONFLICT':null}};
+}
 export function outcomeRevision(prediction,final){
  if(!final||!Number.isFinite(Date.parse(final.fetchedAt)))return null;
  const rescheduled=Date.parse(final.startsAt)!==Date.parse(prediction.starts_at);

@@ -1,8 +1,8 @@
 import {timingSafeEqual,randomUUID} from 'node:crypto';
 import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from '../lib/provider-protection.js';
-import {normalizeSgoGame,reconcileGames,assembleHistory,validateSchedule} from '../lib/cfb-sources.js';
+import {normalizeSgoGame,reconcileUpcomingGames,assembleHistory,validateSchedule} from '../lib/cfb-sources.js';
 import {forecastGames} from '../lib/cfb-model.js';
-import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,outcomeRevision} from '../lib/cfb-collection-policy.js';
+import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,outcomeRevision,captureCandidate} from '../lib/cfb-collection-policy.js';
 import {contentHash,evaluateCandidates} from '../lib/cfb-evaluation.js';
 const sameSecret=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length>0&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const safeReport=r=>r?{status:r.status,modelVersion:r.modelVersion,config:r.config,development:r.development&&{n:r.development.n,brier:r.development.brier,logLoss:r.development.logLoss},holdout:r.holdout&&{n:r.holdout.n,brier:r.holdout.brier,logLoss:r.holdout.logLoss,accuracy:r.holdout.accuracy},marketComparison:r.marketComparison,limitations:r.limitations,productionEligible:false}:null;
@@ -72,18 +72,19 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    staging.refreshOffset=(offset+8)>=ids.length?0:offset+8;
    if(staging.refreshOffset===0){Object.assign(staging,assembleHistory(staging.schedules,staging.membership));if(staging.complete){Object.assign(source,staging);await save('source-current',source);}}
    await save('source-staging',staging);
-   const paired=reconcileGames(games.filter(g=>!g.completed&&!g.cancelled&&Date.parse(g.startsAt)>now()),source.games.filter(g=>g.season===season&&!g.completed&&!g.cancelled));
+   const paired=reconcileUpcomingGames(games,source.games.filter(g=>g.season===season),now());
    const eligible=paired.matched.filter(g=>{
     const teamSources=source.schedules.filter(s=>s.season===season&&[g.homeID,g.awayID].includes(s.teamID));
     return teamSources.length===2&&teamSources.every(s=>now()-Date.parse(s.fetchedAt)<=12*3600000)&&!source.conflicts.some(k=>k.endsWith(':'+g.id));
    });
    const forecastAt=new Date(now()).toISOString();
    const forecasts=source.complete?forecastGames(source.games,eligible,model.config,forecastAt):{forecasts:[],excluded:[{reasons:['SOURCE_RECONCILIATION_INCOMPLETE']}]};
-   const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:forecastAt,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!cursor,providerPagesThisRun:pages,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:forecastAt,historyCheckedAt:source.schedules.filter(s=>s.season===season&&s.games.some(g=>g.id===f.espnEventID)).map(s=>s.fetchedAt).sort()[0]||null})),productionEligible:false};
+   const matchedByID=new Map(eligible.map(g=>[g.sgoID,g]));
+   const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:forecastAt,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!cursor,providerPagesThisRun:pages,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:forecastAt,providerStartsAt:matchedByID.get(f.eventID)?.providerStartsAt,quoteComparisonEligible:matchedByID.get(f.eventID)?.quoteComparisonEligible,scheduleVerification:matchedByID.get(f.eventID)?.scheduleVerification,historyCheckedAt:source.schedules.filter(s=>s.season===season&&s.games.some(g=>g.id===f.espnEventID)).map(s=>s.fetchedAt).sort()[0]||null})),productionEligible:false};
    payload.contract='cfb-research-v1';
    const inputHash=contentHash(source.games);await save('input:'+inputHash,{games:source.games,membership:source.membership,recordedAt:forecastAt},true);
    const freshForecasts=payload.forecasts;
-   const candidates=freshForecasts.map(f=>({event_id:f.eventID,model_version:model.modelVersion,starts_at:f.startsAt,forecast:{...f,entryQuotes:raw.find(e=>e.eventID===f.eventID)?.odds||{},entryQuoteObservedAt:observedByID.get(f.eventID)},input_hash:inputHash}));
+   const candidates=freshForecasts.map(f=>captureCandidate(f,raw.find(e=>e.eventID===f.eventID),observedByID.get(f.eventID),inputHash));
    const inserted=candidates.length?await db('rpc/capture_cfb_forecasts',{method:'POST',body:JSON.stringify({p_rows:candidates})}):[];
    const settlement=await read('settlement-cursor')||{offset:0};
    const saved=await db('cfb_prospective_forecasts?select=event_id,model_version,starts_at,forecast&order=starts_at.asc,event_id.asc&limit=40&offset='+Math.max(0,Number(settlement.offset)||0));
