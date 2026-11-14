@@ -52,7 +52,7 @@ export function normalizeResearch(data, sport, now = Date.now()) {
 }
 export function filterResearch(rows,{query='',book='',market='',freshness=''}={}) {
  const needle=query.trim().toLowerCase();
- return rows.filter(r=>(!book||r.book===book)&&(!market||r.marketType===market)&&(!freshness||r.freshness===freshness)&&(!needle||[r.player,r.away,r.home,r.marketType,r.side,r.line,r.book].join(' ').replaceAll('_',' ').toLowerCase().includes(needle)));
+ return rows.filter(r=>(!book||r.book===book)&&(!market||r.marketType===market)&&(!freshness||r.freshness===freshness)&&(!needle||[r.player,r.away,r.home,r.cfbForecast?.homeName,r.cfbForecast?.awayName,r.marketType,r.side,r.line,r.book].join(' ').replaceAll('_',' ').toLowerCase().includes(needle)));
 }
 
 export function refreshResearchRow(row, now=Date.now()) {

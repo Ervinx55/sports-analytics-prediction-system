@@ -137,6 +137,9 @@ try{
  await page.locator('#cfb-summary').getByText(/60.0%/).waitFor();
  assert.match(await page.locator('#cfb-summary').innerText(),/558 games/);
  assert.match(await page.locator('#status').innerText(),/Independent CFB winner estimates/);
+ await page.locator('#cfb-summary').getByRole('button',{name:'Compare prices'}).click();
+ assert.equal(await page.locator('#cards .card').count(),4);
+ await page.getByLabel('Search',{exact:true}).fill('');
  assert.equal(await page.locator('#cards .card').count(),4);assert.equal(await page.locator('#modeled').innerText(),'4');
  assert.match(await page.locator('.card').first().innerText(),/College Away @ College Home/);
  assert.match(await page.locator('.comparison').first().innerText(),/50.0%/);
