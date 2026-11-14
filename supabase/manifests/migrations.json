@@ -433,6 +433,24 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261114161057",
+      "name": "cfb_observation_order_and_coverage",
+      "path": "supabase/migrations/20261114161057_cfb_observation_order_and_coverage.sql",
+      "sha256": "ddf29591062f68003f47ea091049937f4ba34bab31070cd490190801f2bf84a6",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261114161306",
+      "name": "schedule_cfb_research_collection",
+      "path": "supabase/migrations/20261114161306_schedule_cfb_research_collection.sql",
+      "sha256": "109e0b54f362b580e163d1e4b2580b8748d97ab2637ae3d81c2dd81c3cd0bd61",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",

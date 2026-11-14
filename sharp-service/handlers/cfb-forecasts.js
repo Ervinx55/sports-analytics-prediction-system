@@ -2,7 +2,7 @@ import {timingSafeEqual,randomUUID} from 'node:crypto';
 import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from '../lib/provider-protection.js';
 import {normalizeSgoGame,reconcileGames,assembleHistory,validateSchedule} from '../lib/cfb-sources.js';
 import {forecastGames} from '../lib/cfb-model.js';
-import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules} from '../lib/cfb-collection-policy.js';
+import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,outcomeRevision} from '../lib/cfb-collection-policy.js';
 import {contentHash,evaluateCandidates} from '../lib/cfb-evaluation.js';
 const sameSecret=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length>0&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const safeReport=r=>r?{status:r.status,modelVersion:r.modelVersion,config:r.config,development:r.development&&{n:r.development.n,brier:r.development.brier,logLoss:r.development.logLoss},holdout:r.holdout&&{n:r.holdout.n,brier:r.holdout.brier,logLoss:r.holdout.logLoss,accuracy:r.holdout.accuracy},marketComparison:r.marketComparison,limitations:r.limitations,productionEligible:false}:null;
@@ -67,7 +67,7 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    const season=2026,ids=source.membership[season],offset=Number(staging.refreshOffset||0)%ids.length;
    const selected=ids.slice(offset,offset+8);
    const fetchSchedule=async(id,type)=>{const r=await fetchImpl(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${id}/schedule?season=${season}&seasontype=${type}`,{signal:AbortSignal.timeout(6000)});if(!r.ok)throw Error('SCHEDULE_UNAVAILABLE');const p=await r.json();if(type===3&&p.events?.length&&(p.requestedSeason?.year!==season||p.requestedSeason?.type!==3))throw Error('POSTSEASON_COVERAGE_UNVERIFIED');return validateSchedule(p,id,season,new Date(now()).toISOString());};
-   const updates=[];for(let i=0;i<selected.length;i+=4)updates.push(...await Promise.allSettled(selected.slice(i,i+4).map(async id=>{const [regular,post]=await Promise.all([fetchSchedule(id,2),fetchSchedule(id,3)]);return mergeSeasonSchedules(regular,post);}))); 
+   const updates=[];for(let i=0;i<selected.length;i+=4)updates.push(...await Promise.allSettled(selected.slice(i,i+4).map(async id=>{const [regular,post]=await Promise.all([fetchSchedule(id,2),fetchSchedule(id,3)]);return mergeSeasonSchedules(regular,post);})));
    for(const result of updates)if(result.status==='fulfilled'){const s=result.value;staging.schedules=staging.schedules.filter(old=>old.season!==s.season||old.teamID!==s.teamID);staging.schedules.push(s);}
    staging.refreshOffset=(offset+8)>=ids.length?0:offset+8;
    if(staging.refreshOffset===0){Object.assign(staging,assembleHistory(staging.schedules,staging.membership));if(staging.complete){Object.assign(source,staging);await save('source-current',source);}}
@@ -88,16 +88,12 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    const settlement=await read('settlement-cursor')||{offset:0};
    const saved=await db('cfb_prospective_forecasts?select=event_id,model_version,starts_at,forecast&order=starts_at.asc,event_id.asc&limit=40&offset='+Math.max(0,Number(settlement.offset)||0));
    const historyByID=new Map(source.games.map(g=>[g.id,g]));const revisions=[];
-   for(const prediction of saved){const final=historyByID.get(prediction.forecast.espnEventID);if(!final)continue;const rescheduled=Date.parse(final.startsAt)!==Date.parse(prediction.starts_at);if(!final.completed&&!rescheduled&&!final.cancelled)continue;
-    const outcome={espnEventID:final.id,homeScore:final.homeScore,awayScore:final.awayScore,rescheduled,valid:final.completed&&!rescheduled&&!final.cancelled&&Number.isInteger(final.homeScore)&&Number.isInteger(final.awayScore)&&final.homeScore!==final.awayScore,source:'ESPN',fetchedAt:final.fetchedAt};
-    revisions.push({event_id:prediction.event_id,evidence_hash:contentHash({...outcome,fetchedAt:undefined}),outcome});
-   }
+   for(const prediction of saved){const revision=outcomeRevision(prediction,historyByID.get(prediction.forecast.espnEventID));if(revision)revisions.push(revision);}
    if(revisions.length)await db('cfb_outcome_revisions?on_conflict=event_id,evidence_hash',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(revisions)});
    await save('settlement-cursor',{offset:saved.length<40?0:(Number(settlement.offset)||0)+40});
+   await db('rpc/record_cfb_capture_scope',{method:'POST',body:JSON.stringify({p_model_version:model.modelVersion})});
    const metrics=await db('rpc/cfb_research_performance',{method:'POST',body:JSON.stringify({p_model_version:model.modelVersion})});
-   const scope=source.games.filter(g=>g.season===season&&!g.completed&&!g.cancelled&&Date.parse(g.startsAt)-now()>=30*60000&&Date.parse(g.startsAt)-now()<=24*3600000);
-   payload.coverage.eligibleScopeGames=scope.length;payload.coverage.gamesWithoutQualifyingCapture=scope.filter(g=>!metrics.capturedEspnIDs?.includes(g.id)).length;
-   const {capturedEspnIDs,...publicMetrics}=metrics;payload.prospective=publicMetrics;
+   const {capturedEspnIDs,coverage,...publicMetrics}=metrics;Object.assign(payload.coverage,coverage);payload.prospective=publicMetrics;
    const previous=await read('latest');payload.forecasts=mergeCurrentForecasts(freshForecasts,previous?.forecasts,model.modelVersion,now());
    await save('latest',payload);return res.status(200).json({...payload,captured:inserted?.length||0});
   }catch(error){const limited=error?.status===429;if(limited)res.setHeader('Retry-After',String(Math.max(1,Number(error.retryAfter)||60)));return res.status(limited?429:503).json({error:limited?'PROVIDER_RATE_LIMIT':'CFB_COLLECTION_UNAVAILABLE',forecasts:[],productionEligible:false});}

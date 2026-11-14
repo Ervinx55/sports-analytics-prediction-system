@@ -32,6 +32,7 @@ test('CFB refresh resumes pages, merges postseason, batches settlement and deleg
   if(u.hostname==='site.api.espn.com'){const id=u.pathname.split('/').at(-2),post=u.searchParams.get('seasontype')==='3';return json({team:{id},status:'success',requestedSeason:{year:2026,type:post?3:2},events:post?[]:events});}
   if(u.pathname.endsWith('/claim_cfb_collection'))return json(true);
   if(u.pathname.endsWith('/capture_cfb_forecasts')){assert.equal(body.p_rows.length,1);assert.equal(Object.hasOwn(body.p_rows[0],'captured_at'),false);assert.ok(Date.parse(starts)-clock<30*60000);return json([]);}
+  if(u.pathname.endsWith('/record_cfb_capture_scope'))return json(null);
   if(u.pathname.endsWith('/cfb_research_performance'))return json({captured:0,n:0,capturedEspnIDs:[]});
   if(u.pathname.endsWith('/cfb_prospective_forecasts')){assert.equal(u.searchParams.get('limit'),'40');assert.equal(u.searchParams.get('order'),'starts_at.asc,event_id.asc');return json([]);}
   if(options.method==='DELETE')return json(null,204);

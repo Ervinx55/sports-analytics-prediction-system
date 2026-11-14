@@ -70,6 +70,8 @@ function renderCfbSummary(state,rows){
  const unique=[...new Map(rows.filter(r=>r.cfbForecast&&r.model!==null).map(r=>[r.eventID,r.cfbForecast])).values()].sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)||Math.max(b.homeProbability,b.awayProbability)-Math.max(a.homeProbability,a.awayProbability));
  const evaluated=state.cfbSummary?.evaluation?.holdout;
  add(target,'p',`${unique.length} games with independent estimates · research only, not cleared plays. ${evaluated?`Historical holdout: ${evaluated.n} games, ${(evaluated.accuracy*100).toFixed(1)}% winner accuracy, Brier ${evaluated.brier.toFixed(3)}. This does not establish a sportsbook edge.`:''}`,'muted');
+ const tracked=state.cfbSummary?.prospective,coverage=state.cfbSummary?.coverage;
+ if(tracked)add(target,'p',`Prospective tracking: ${tracked.captured??0} saved pregame forecasts · ${tracked.n??0} final results · ${coverage?.missedClosedCaptureWindows??0} missed capture windows · ${coverage?.pendingScopeGames??0} games still awaiting capture. This tracks predictions, not placed bets.`,'muted');
  if(!unique.length){add(target,'p','No current verified CFB forecast matches this quote refresh. Book comparisons remain below.');return;}
  const grid=add(target,'div',undefined,'cards');for(const f of unique){const card=add(grid,'article',undefined,'card');add(card,'h3',`${f.awayName} @ ${f.homeName}`);add(card,'p',date(f.startsAt),'match');add(card,'strong',`${f.homeName}: ${pct(f.homeProbability)} · ${f.awayName}: ${pct(f.awayProbability)}`);add(card,'p','Forecast '+date(f.generatedAt)+' · NOT CLEARED','muted');button(card,'Compare prices',()=>{$('query').value=f.homeName;$('market').value='moneyline';shown=40;render();$('research-board').scrollIntoView({behavior:'smooth'});});}
 }
