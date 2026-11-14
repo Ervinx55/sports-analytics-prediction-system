@@ -5,7 +5,7 @@ test('NBA endpoint returns bounded native quotes and preserves cache timestamp',
  let request;const now=Date.parse('2026-11-10T08:00:00Z');
  const result=await propsResponse({now,key:'test',fetchPage:async r=>{request=r;return {payload:{success:true,data:[]},fetchedAt:now-120000,cacheStatus:'HIT'};}});
  assert.equal(result.status,200);assert.equal(result.body.generatedAt,'2026-11-10T07:58:00.000Z');assert.equal(result.body.partialCoverage,true);
- const url=new URL(request.url);assert.equal(url.searchParams.get('leagueID'),'NBA');assert.ok(Number(url.searchParams.get('limit'))>=15);assert.equal(url.searchParams.get('bookmakerID'),'draftkings');
+ const url=new URL(request.url);assert.equal(url.searchParams.get('leagueID'),'NBA');assert.ok(Number(url.searchParams.get('limit'))>=15);assert.equal(url.searchParams.get('bookmakerID'),'pinnacle,circa,bookmakereu,draftkings,prizepicks');
 });
 test('NBA endpoint fails closed on missing keys, malformed data and provider errors',async()=>{
  assert.equal((await propsResponse({key:''})).status,503);
