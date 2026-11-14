@@ -156,3 +156,10 @@ test('NFL quote research keeps strict provider identity and attaches estimates o
   const changed=structuredClone(body);Object.assign(changed.candidates[0],patch);assert.ok(normalizeResearch(changed,'NFL',now).every(r=>r.model===null));
  }
 });
+test('research avoids repeating diagnostic paragraphs on every quote while preserving computed readiness',async()=>{
+ const body=(await researchPropsResponse({now,key:'test',fetchPage:page([event()])})).body;
+ const quote=body.events[0].players[0].prop.over.books.draftkings;
+ assert.equal(quote.priceCheck,undefined);
+ assert.equal(body.bookCoverage.books.find(b=>b.id==='draftkings').comparablePriceSides,2);
+ assert.equal(normalizeResearch(body,'NBA',now).find(r=>r.book==='draftkings').market,.5);
+});

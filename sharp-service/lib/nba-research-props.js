@@ -81,5 +81,9 @@ export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODD
   price.priceCheck=assessPropQuote({book,quote:price,opposite:p.prop[side==='over'?'under':'over']?.books?.[book],generatedAt,now:evaluatedAt});quotes.push({book,price});
  }
  const configured=bookmakerIds([...books,...PROP_BOOKS,...quotes.map(q=>q.book)]);
- return {status:200,body:{...empty,events,generatedAt,source:'SportsGameOdds',scope:league+' all-book research; main lines only; 48-hour window. Frozen validation collection unchanged.',partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,providerEvents:raw.size,bookmakers:books.length?books:'account-entitled bookmakers',markets},bookCoverage:{...researchCoverage(books,quotes,evaluatedAt),configured,scope:'Returned research lines only. The displayed list includes monitored platforms and observed books; missing lines do not establish missing entitlement. DFS and exchange execution terms remain separate.'}}};
+ const coverage=researchCoverage(books,quotes,evaluatedAt);
+ // The browser derives the same checks from these original observations. Avoid
+ // repeating long diagnostic paragraphs for every book/side in large slates.
+ for(const {price} of quotes)delete price.priceCheck;
+ return {status:200,body:{...empty,events,generatedAt,source:'SportsGameOdds',scope:league+' all-book research; main lines only; 48-hour window. Frozen validation collection unchanged.',partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,providerEvents:raw.size,bookmakers:books.length?books:'account-entitled bookmakers',markets},bookCoverage:{...coverage,configured,scope:'Returned research lines only. The displayed list includes monitored platforms and observed books; missing lines do not establish missing entitlement. DFS and exchange execution terms remain separate.'}}};
 }
