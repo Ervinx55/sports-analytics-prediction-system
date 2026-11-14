@@ -38,6 +38,33 @@ try{
  await page.getByLabel('Entry amount ($)',{exact:true}).fill('12');
  assert.equal(await page.locator('.worksheet-result').innerText(),'');
  assert.equal(await page.locator('.worksheet-confirmation input').isChecked(),false);
+ await page.getByRole('button',{name:'Check entered payout'}).click();
+ assert.match(await page.locator('.worksheet-result').innerText(),/confirm the worksheet assumptions/);
+ await page.getByLabel('2 of 2 correct · return multiplier',{exact:true}).fill('');
+ await page.locator('.worksheet-confirmation input').check();
+ await page.getByRole('button',{name:'Check entered payout'}).click();
+ assert.match(await page.locator('.worksheet-result').innerText(),/complete cash-return schedule/);
+ await page.getByRole('combobox',{name:'Entry type',exact:true}).selectOption('flex');
+ await page.getByLabel('Entry amount ($)',{exact:true}).fill('10');
+ for(const [hits,multiplier] of [[0,'0'],[1,'0.5'],[2,'2']])await page.getByLabel(`${hits} of 2 correct · return multiplier`,{exact:true}).fill(multiplier);
+ await page.locator('.worksheet-confirmation input').check();
+ await page.getByRole('button',{name:'Check entered payout'}).click();
+ const flex=await page.locator('.worksheet-result').innerText();
+ assert.match(flex,/1 correct: −\$5.00 net loss/);
+ assert.match(flex,/2 correct: \+\$10.00 net return/);
+ assert.match(flex,/Flex expected profit is unavailable/);
+ assert.doesNotMatch(flex,/Joint all-picks-win break-even/);
+ for(const width of [320,390,768]){
+  await page.setViewportSize({width,height:844});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`page overflow at ${width}px`);
+  assert.ok(await page.locator('#detail').evaluate(e=>e.scrollWidth<=e.clientWidth),`worksheet overflow at ${width}px`);
+ }
+ await page.getByLabel('Number of picks (2–8)',{exact:true}).fill('8');
+ assert.equal(await page.getByRole('group',{name:'Actual total return by outcome'}).getByRole('spinbutton').count(),9);
+ assert.equal(await page.locator('.worksheet-result').innerText(),'');
+ assert.equal(await page.locator('.worksheet-confirmation input').isChecked(),false);
+ await page.getByLabel('Number of picks (2–8)',{exact:true}).fill('9');
+ assert.equal(await page.getByRole('group',{name:'Actual total return by outcome'}).getByRole('spinbutton').count(),0);
  await page.getByRole('button',{name:'Close quote details'}).click();
  assert.equal(await page.locator('#detail').evaluate(e=>e.open),false);
  await page.getByRole('button',{name:'Shortlist +'}).first().click();
@@ -46,7 +73,11 @@ try{
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
  assert.equal(await page.locator('.card').count(),0);
  await page.locator('[data-sport="NBA"]').click();await page.locator('.card').first().waitFor();
+ await page.locator('#book').selectOption('prizepicks');
+ await page.locator('#market').selectOption('points');
  await page.locator('#refresh').click();await page.locator('.card').first().waitFor();
+ assert.equal(await page.locator('#book').inputValue(),'prizepicks','refresh must preserve the selected platform');
+ assert.equal(await page.locator('#market').inputValue(),'points','refresh must preserve the selected market');
  assert.deepEqual(errors,[]);
  console.log('Sharp-book mobile research and worksheet flows passed');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}
