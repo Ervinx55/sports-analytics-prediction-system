@@ -60,3 +60,18 @@ test('market comparison expires when its older opposite side expires',()=>{
  const aged=refreshResearchRow(row,now+2*60_000);
  assert.equal(aged.freshness,'CURRENT');assert.equal(aged.market,null);
 });
+
+test('PrizePicks comparison lines are visible but never priced or modeled',()=>{
+ const data=structuredClone(nba);
+ data.comparisonLines=[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerID:'p',playerName:'Player',market:'points',side:'over',book:'prizepicks',line:22.5,updatedAt:nba.generatedAt,odds:-110,model:.9,marketProbability:.8}];
+ const row=normalizeResearch(data,'NBA',now).find(r=>r.book==='prizepicks');
+ assert.ok(row);assert.equal(row.status,'LINE ONLY');assert.equal(row.player,'Player');assert.equal(row.line,22.5);
+ assert.equal(row.odds,null);assert.equal(row.model,null);assert.equal(row.market,null);assert.equal(row.pricingEligible,false);
+ assert.match(row.reason,/entry payout/);assert.equal(filterResearch([row],{book:'prizepicks'}).length,1);
+ assert.equal(refreshResearchRow(row,now+11*60_000).market,null);
+});
+test('malformed unavailable and expired comparison lines are excluded',()=>{
+ const base={eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerID:'p',playerName:'Player',market:'points',side:'over',book:'prizepicks',line:22.5,updatedAt:nba.generatedAt};
+ for(const patch of [{line:null},{line:-1},{side:'home'},{market:'unsupported'},{book:'unknown'},{available:false},{eventID:''},{playerID:''},{startsAt:'2026-10-25T17:00:00Z'}])assert.equal(normalizeResearch({...nba,comparisonLines:[{...base,...patch}]},'NBA',now).length,3);
+ assert.equal(normalizeResearch({...nba,comparisonLines:[base,base]},'NBA',now).length,4);
+});
