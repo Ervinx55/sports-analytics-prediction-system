@@ -1,4 +1,4 @@
-import {protectedSportsGameOddsFetch} from './provider-protection.js';
+import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from './provider-protection.js';
 import {bookCoverage,bookmakerIds} from './bookmakers.js';
 import {PROP_BOOKS,platformType,assessPropQuote} from '../prop-price-checks.js';
 const MARKETS=['points','rebounds','assists'],PAGE_SIZE=16,MAX_PAGES=2;
@@ -42,21 +42,25 @@ function normalizeEvent(e,now,books){
  })};
 }
 
-export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODDS_API_KEY||process.env.Sports_Game_Odds_API||'',fetchPage=protectedSportsGameOddsFetch,requestedBooks=[]}={}){
+export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODDS_API_KEY||process.env.Sports_Game_Odds_API||'',fetchPage=protectedSportsGameOddsFetch,requestedBooks=[],optimize=optimizeSportsGameOddsObjectLimit}={}){
  const clock=()=>now??Date.now();
  const books=bookmakerIds(requestedBooks.length?requestedBooks:PROP_BOOKS),unsupported=books.filter(b=>!PROP_BOOKS.includes(b));
  const empty={contract:'nba-multibook-research-v1',events:[],productionEligible:false,productionWeight:0};
  if(unsupported.length)return {status:400,body:{...empty,error:'UNSUPPORTED_RESEARCH_BOOK',unsupportedRequested:unsupported}};
  const unavailable=()=>({status:503,body:{...empty,status:'UNAVAILABLE',reason:'NBA_RESEARCH_QUOTES_UNAVAILABLE',bookCoverage:{...bookCoverage({requestedBooks:books,now:clock()}),configured:books}}});
  if(!key)return unavailable();
+ let objectPolicy;
+ try{objectPolicy=await optimize({apiKey:key,requestedLimit:PAGE_SIZE,defaultLimit:PAGE_SIZE,priority:'background',fanout:MAX_PAGES});}catch{return unavailable();}
+ if(objectPolicy.blocked)return {status:429,body:{...empty,status:'UNAVAILABLE',reason:'NBA_RESEARCH_OBJECT_QUOTA_EXHAUSTED',providerFailures:[{objectBudgetBlocked:true}]}};
+ const pageSize=Math.max(1,Math.min(PAGE_SIZE,Math.floor(objectPolicy.effectiveLimit)||PAGE_SIZE));
  const bucket=Math.floor(clock()/3600000)*3600000;
- const params={leagueID:'NBA',type:'match',oddIDs:MARKETS.flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`)).join(','),bookmakerID:books.join(','),oddsAvailable:'true',finalized:'false',includeAltLines:'false',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString(),limit:String(PAGE_SIZE)};
+ const params={leagueID:'NBA',type:'match',oddIDs:MARKETS.flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`)).join(','),bookmakerID:books.join(','),oddsAvailable:'true',finalized:'false',includeAltLines:'false',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString(),limit:String(pageSize)};
  const raw=new Map(),times=[],reasons=[],seenCursors=new Set();let cursor=null,pagesFetched=0,eventsComplete=false;
  for(let i=0;i<MAX_PAGES;i++){
   try{
-   const result=await fetchPage({url:'https://api.sportsgameodds.com/v2/events?'+new URLSearchParams({...params,...(cursor?{cursor}:{})}),apiKey:key,consumer:'nba-research-quotes',priority:'background',freshMs:60000,staleMs:300000,timeoutMs:8000});
+   const result=await fetchPage({url:'https://api.sportsgameodds.com/v2/events?'+new URLSearchParams({...params,...(cursor?{cursor}:{})}),apiKey:key,consumer:'nba-research-quotes',priority:'background',freshMs:60000,staleMs:300000,timeoutMs:8000,objectPolicy});
    const checkedAt=clock();
-   if(result.payload?.success!==true||!Array.isArray(result.payload.data)||result.payload.data.length>PAGE_SIZE||!Number.isFinite(result.fetchedAt)||result.fetchedAt>checkedAt||checkedAt-result.fetchedAt>300000)throw Error('Invalid provider response');
+   if(result.payload?.success!==true||!Array.isArray(result.payload.data)||result.payload.data.length>pageSize||!Number.isFinite(result.fetchedAt)||result.fetchedAt>checkedAt||checkedAt-result.fetchedAt>300000)throw Error('Invalid provider response');
    pagesFetched++;times.push(result.fetchedAt);
    for(const e of result.payload.data)if(e?.eventID&&!raw.has(e.eventID))raw.set(e.eventID,e);
    const next=result.payload.nextCursor;

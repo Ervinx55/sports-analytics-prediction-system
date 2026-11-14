@@ -37,3 +37,11 @@ jobs:
           PYTHONPATH: .
         run: pytest -q
 
+
+      - name: Install browser regression dependencies
+        run: |
+          npm install --prefix tests/browser --ignore-scripts --no-audit --no-fund
+          cd tests/browser && npx playwright install --with-deps chromium
+
+      - name: Verify sharp-book research UI
+        run: node tests/browser/sharp-books.mjs

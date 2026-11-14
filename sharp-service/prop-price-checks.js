@@ -1,8 +1,8 @@
 // Research diagnostics only. Never authorizes a play or supplies a model probability.
 const num=v=>typeof v==='number'&&Number.isFinite(v)?v:null;
-export const PROP_BOOKS=['draftkings','bovada','prizepicks','underdog','kalshi'];
-export const bookLabel=id=>({draftkings:'DraftKings',bovada:'Bovada',prizepicks:'PrizePicks',underdog:'Underdog',kalshi:'Kalshi'}[id]||id);
-export const platformType=book=>['draftkings','bovada'].includes(book)?'sportsbook':['prizepicks','underdog'].includes(book)?'dfs':book==='kalshi'?'exchange':'unknown';
+export const PROP_BOOKS=['pinnacle','circa','bookmakereu','draftkings','bovada','prizepicks','underdog','kalshi'];
+export const bookLabel=id=>({pinnacle:'Pinnacle',circa:'Circa',bookmakereu:'BookMaker.eu',draftkings:'DraftKings',bovada:'Bovada',prizepicks:'PrizePicks',underdog:'Underdog',kalshi:'Kalshi'}[id]||id);
+export const platformType=book=>['pinnacle','circa','bookmakereu','draftkings','bovada'].includes(book)?'sportsbook':['prizepicks','underdog'].includes(book)?'dfs':book==='kalshi'?'exchange':'unknown';
 export function researchFreshness(stamp,generatedAt,now=Date.now()){
  const times=[stamp,generatedAt].map(v=>typeof v==='string'?Date.parse(v):NaN);
  if(times.some(t=>!Number.isFinite(t)||t>now))return 'UNKNOWN';

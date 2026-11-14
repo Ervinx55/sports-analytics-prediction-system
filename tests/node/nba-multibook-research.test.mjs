@@ -1,9 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {researchPropsResponse} from '../../sharp-service/lib/nba-research-props.js';
+import {researchPropsResponse as rawResearchPropsResponse} from '../../sharp-service/lib/nba-research-props.js';
 import {propsResponse} from '../../sharp-service/api/nbaprops.js';
 import {normalizeResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
 import {assessPropQuote,checkDfsPayout} from '../../sharp-service/prop-price-checks.js';
+const researchPropsResponse=options=>rawResearchPropsResponse({...options,optimize:async()=>({blocked:false,effectiveLimit:16})});
 const now=Date.parse('2026-11-14T15:00:00Z');
 const stamp=new Date(now-30000).toISOString();
 const playerID='PLAYER_ONE_1_NBA';
@@ -15,12 +16,12 @@ function event(id='g1'){
 }
 const page=events=>async()=>({payload:{success:true,data:events},fetchedAt:now,cacheStatus:'MISS'});
 
-test('research requests all five platforms without changing the default frozen request',async()=>{
+test('research requests all eight platforms without changing the default frozen request',async()=>{
  const urls=[];const fetchPage=async r=>{urls.push(new URL(r.url));return page([event()])();};
  const research=await researchPropsResponse({now,key:'test',fetchPage});
  const frozen=await propsResponse({now,key:'test',fetchPage});
  assert.equal(research.status,200);assert.equal(frozen.status,200);
- assert.deepEqual(urls[0].searchParams.get('bookmakerID').split(',').sort(),['bovada','draftkings','kalshi','prizepicks','underdog']);
+ assert.deepEqual(urls[0].searchParams.get('bookmakerID').split(',').sort(),['bookmakereu','bovada','circa','draftkings','kalshi','pinnacle','prizepicks','underdog']);
  assert.equal(urls[1].searchParams.get('bookmakerID'),'draftkings');
  assert.equal(research.body.productionWeight,0);assert.equal(research.body.productionEligible,false);
  const rows=normalizeResearch(research.body,'NBA',now);
@@ -116,4 +117,23 @@ test('coverage counts fresh DFS and exchange lines while keeping execution readi
  const books=Object.fromEntries(body.bookCoverage.books.map(row=>[row.id,row]));
  for(const id of ['prizepicks','underdog','kalshi']){assert.equal(books[id].availableQuoteSides,2);assert.equal(books[id].freshQuoteSides,2);assert.equal(books[id].comparablePriceSides,0);}
  assert.equal(books.bovada.comparablePriceSides,2);
+});
+
+
+test('sharp books use the existing strict research contract and exact opposing lines',async()=>{
+ const e=event();for(const side of ['over','under'])Object.assign(e.odds[`points-${playerID}-game-ou-${side}`].byBookmaker,{pinnacle:q(),circa:q(21.5),bookmakereu:q()});
+ const r=await researchPropsResponse({now,key:'test',fetchPage:page([e])});
+ const rows=normalizeResearch(r.body,'NBA',now);
+ for(const book of ['pinnacle','circa','bookmakereu']){
+  const subset=rows.filter(r=>r.book===book);assert.equal(subset.length,2);assert.ok(subset.every(r=>r.priceCheck.status==='COMPARABLE'&&r.market===.5&&r.model===null));
+ }
+ assert.equal(r.body.productionEligible,false);
+});
+test('research quota exhaustion makes no quote requests',async()=>{
+ let calls=0;const r=await rawResearchPropsResponse({key:'test',optimize:async()=>({blocked:true}),fetchPage:async()=>{calls++;}});
+ assert.equal(r.status,429);assert.equal(calls,0);assert.equal(r.body.productionWeight,0);
+});
+test('research quota optimizer bounds page size and includes two-page fanout',async()=>{
+ let policy,request;const r=await rawResearchPropsResponse({now,key:'test',optimize:async p=>{policy=p;return {blocked:false,effectiveLimit:2};},fetchPage:async p=>{request=p;return page([])();}});
+ assert.equal(r.status,200);assert.equal(policy.fanout,2);assert.equal(policy.priority,'background');assert.equal(new URL(request.url).searchParams.get('limit'),'2');assert.equal(request.objectPolicy.effectiveLimit,2);
 });
