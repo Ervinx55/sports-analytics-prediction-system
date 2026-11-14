@@ -44,7 +44,7 @@ try{
  await page.locator('.worksheet-confirmation input').check();
  await page.getByRole('button',{name:'Check entered payout'}).click();
  assert.match(await page.locator('.worksheet-result').innerText(),/complete cash-return schedule/);
- await page.getByLabel('Entry type',{exact:true}).selectOption('flex');
+ await page.getByRole('combobox',{name:'Entry type',exact:true}).selectOption('flex');
  await page.getByLabel('Entry amount ($)',{exact:true}).fill('10');
  for(const [hits,multiplier] of [[0,'0'],[1,'0.5'],[2,'2']])await page.getByLabel(`${hits} of 2 correct · return multiplier`,{exact:true}).fill(multiplier);
  await page.locator('.worksheet-confirmation input').check();
