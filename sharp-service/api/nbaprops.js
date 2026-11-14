@@ -15,7 +15,7 @@ export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KE
    cache={status:result.cacheStatus,fetchedAt:new Date(result.fetchedAt).toISOString()};
    return {events:result.payload.data,observedAt:cache.fetchedAt,nextCursor:result.payload.nextCursor??null};
   }});
-  return {status:200,body:{...body,source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0}};
+  return {status:200,body:{...body,source:'SportsGameOdds',scope:'NBA Pinnacle/Circa/BookMaker/DraftKings points/rebounds/assists; PrizePicks comparison lines only; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0}};
  }catch{return unavailable();}
 }
 export default async function handler(req,res){
