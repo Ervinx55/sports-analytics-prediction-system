@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {propsResponse} from '../../sharp-service/api/nbaprops.js';
+import {propsResponse as response} from '../../sharp-service/api/nbaprops.js';
+const propsResponse=options=>response({optimize:async()=>({effectiveLimit:16,blocked:false}),...options});
 test('NBA endpoint returns bounded native quotes and preserves cache timestamp',async()=>{
  let request;const now=Date.parse('2026-11-10T08:00:00Z');
  const result=await propsResponse({now,key:'test',fetchPage:async r=>{request=r;return {payload:{success:true,data:[]},fetchedAt:now-120000,cacheStatus:'HIT'};}});
