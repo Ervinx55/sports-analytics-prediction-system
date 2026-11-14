@@ -1,4 +1,5 @@
 import { bookmakerQuery, boardBookCoverage } from '../lib/bookmakers.js';
+import { providerLeague } from '../league-codes.js';
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -435,7 +436,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES), {
+  const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES).map(value => providerLeague(value.toUpperCase())), {
     upper: true
   });
   const books = bookmakerQuery(req.query.books);

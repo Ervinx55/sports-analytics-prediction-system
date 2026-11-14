@@ -30,6 +30,18 @@ async function invoke(handler, query) {
   return res;
 }
 
+test('CFB and NCAAF aliases use one college-football provider request', async () => {
+ const urls=[];
+ globalThis.fetch=async url=>{urls.push(new URL(url));return response({success:true,data:[]});};
+ for(const handler of [board,sharp]){
+  resetProviderProtectionForTests();
+  const result=await invoke(handler,{leagues:'cfb,NCAAF,CFB'});
+  assert.deepEqual(result.body.requestedLeagues,['NCAAF']);
+ }
+ assert.equal(urls.length,2);
+ assert.ok(urls.every(url=>url.searchParams.get('leagueID')==='NCAAF'));
+});
+
 test('board and sharp translate BookMaker aliases before requesting SGO', async () => {
   const urls = [];
   globalThis.fetch = async url => {

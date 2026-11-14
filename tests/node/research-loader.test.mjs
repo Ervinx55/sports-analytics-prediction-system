@@ -1,6 +1,18 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createResearchLoader} from '../../sharp-service/research-loader.js';
 const now=Date.parse('2026-10-25T18:00:00Z');
+test('CFB loads NCAAF games and a larger bounded slate without inventing forecasts',async()=>{
+ const stamp=new Date(now).toISOString(),price={odds:-110,line:null,available:true,updatedAt:stamp};
+ const data={source:'SportsGameOdds',providerObservations:[{league:'NCAAF',provider:'SportsGameOdds',fetchedAt:stamp,eventsComplete:false}],events:[{eventID:'college',league:'NCAAF',sport:'FOOTBALL',startsAt:new Date(now+3600000).toISOString(),status:{},matchup:{home:{id:'H',name:'College Home'},away:{id:'A',name:'College Away'}},markets:{moneyline:Object.fromEntries(['home','away'].map(s=>[s,{oddID:`points-${s}-game-ml-${s}`,books:{draftkings:price}}]))}}]};
+ for(const selection of ['CFB','NCAAF']){
+  let url;const loader=createResearchLoader({now:()=>now,fetchImpl:async u=>{url=new URL(u,'http://test');return {ok:true,json:async()=>structuredClone(data)};}});
+  await loader.load(selection,'games');
+  assert.equal(url.searchParams.get('leagues'),'NCAAF');assert.equal(url.searchParams.get('limit'),'100');
+  assert.equal(loader.state.sport,'NCAAF');assert.equal(loader.state.rows.length,2);
+  assert.ok(loader.state.rows.every(r=>r.sport==='NCAAF'&&r.model===null&&r.productionEligible===false&&r.market===.5));
+  assert.match(loader.state.message,/partial/i);assert.match(loader.state.message,/CFB model forecast is not connected/);
+ }
+});
 test('NBA research explicitly uses the multi-book view and retains missing platform coverage',async()=>{
  let url;const loader=createResearchLoader({fetchImpl:async target=>{url=target;return {ok:true,json:async()=>({events:[],bookCoverage:{configured:['draftkings','bovada','prizepicks','underdog','kalshi'],missingRequested:['bovada']},coverage:{eventsComplete:false,reasons:['PAGE_LIMIT_REACHED']}})};}});
  await loader.load('NBA');assert.equal(url,'/api/nbaprops?view=research');assert.ok(loader.state.bookCoverage.configured.includes('bovada'));assert.match(loader.state.message,/partial/i);
