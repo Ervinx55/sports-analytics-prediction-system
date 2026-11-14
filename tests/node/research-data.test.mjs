@@ -2,6 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {normalizeResearch,filterResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
 const now=Date.parse('2026-10-25T18:00:00Z');
+test('CFB summary comparison finds exact attached forecast names despite shorter provider names',()=>{
+ const rows=[{home:'Ohio State',away:'Northwestern',marketType:'moneyline',cfbForecast:{homeName:'Ohio State Buckeyes',awayName:'Northwestern Wildcats'}},{home:'Other',marketType:'moneyline'}];
+ assert.equal(filterResearch(rows,{query:'Ohio State Buckeyes',market:'moneyline'}).length,1);
+ assert.equal(filterResearch(rows,{query:'Northwestern Wildcats',market:'moneyline'}).length,1);
+});
 const nba={generatedAt:'2026-10-25T17:59:00Z',events:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',matchup:{home:{name:'Home'},away:{name:'Away'}},players:[{prop:{playerName:'Player',statID:'points',over:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'},B:{line:21.5,odds:100,updatedAt:'2026-10-25T17:59:00Z'}}},under:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'}}}}}]}]};
 test('NBA keeps exact book line and side identity without inventing predictions',()=>{const rows=normalizeResearch(nba,'NBA',now);assert.equal(rows.length,3);assert.equal(new Set(rows.map(r=>r.id)).size,3);assert.ok(rows.every(r=>r.model===null&&r.status==='QUOTE ONLY'));assert.equal(rows[0].player,'Player');});
 test('NFL uses independent probability in shadow, never promotes source PLAY',()=>{const rows=normalizeResearch({generatedAt:nba.generatedAt,candidates:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerName:'QB',statID:'yards',side:'OVER',line:200.5,bestBook:'A',bestOdds:-110,rawIndependentProbability:.6,modelProbability:.9,marketFairProbability:.52,status:'PLAY',updatedAt:nba.generatedAt}]},'NFL',now);assert.equal(rows[0].model,.6);assert.equal(rows[0].market,.52);assert.equal(rows[0].status,'SHADOW');});

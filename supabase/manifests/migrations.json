@@ -415,6 +415,42 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261114153407",
+      "name": "cfb_research_forecasts",
+      "path": "supabase/migrations/20261114153407_cfb_research_forecasts.sql",
+      "sha256": "52769dc4c9b25e9de9dbe667735a2e216a09b91cfbfabd0c3fb347af4ae6bf5d",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261114155924",
+      "name": "cfb_capture_clock_and_batches",
+      "path": "supabase/migrations/20261114155924_cfb_capture_clock_and_batches.sql",
+      "sha256": "2568c02d8a74877ff0bd9f39d98832300e424985e62961f86e08d3a82308d907",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261114161057",
+      "name": "cfb_observation_order_and_coverage",
+      "path": "supabase/migrations/20261114161057_cfb_observation_order_and_coverage.sql",
+      "sha256": "ddf29591062f68003f47ea091049937f4ba34bab31070cd490190801f2bf84a6",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261114161306",
+      "name": "schedule_cfb_research_collection",
+      "path": "supabase/migrations/20261114161306_schedule_cfb_research_collection.sql",
+      "sha256": "109e0b54f362b580e163d1e4b2580b8748d97ab2637ae3d81c2dd81c3cd0bd61",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",

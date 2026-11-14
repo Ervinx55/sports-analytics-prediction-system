@@ -5,12 +5,12 @@ test('CFB loads NCAAF games and a larger bounded slate without inventing forecas
  const stamp=new Date(now).toISOString(),price={odds:-110,line:null,available:true,updatedAt:stamp};
  const data={source:'SportsGameOdds',providerObservations:[{league:'NCAAF',provider:'SportsGameOdds',fetchedAt:stamp,eventsComplete:false}],events:[{eventID:'college',league:'NCAAF',sport:'FOOTBALL',startsAt:new Date(now+3600000).toISOString(),status:{},matchup:{home:{id:'H',name:'College Home'},away:{id:'A',name:'College Away'}},markets:{moneyline:Object.fromEntries(['home','away'].map(s=>[s,{oddID:`points-${s}-game-ml-${s}`,books:{draftkings:price}}]))}}]};
  for(const selection of ['CFB','NCAAF']){
-  let url;const loader=createResearchLoader({now:()=>now,fetchImpl:async u=>{url=new URL(u,'http://test');return {ok:true,json:async()=>structuredClone(data)};}});
+  let url;const loader=createResearchLoader({now:()=>now,fetchImpl:async u=>{if(u.includes('cfb=1'))return {ok:false,json:async()=>({error:'unavailable'})};url=new URL(u,'http://test');return {ok:true,json:async()=>structuredClone(data)};}});
   await loader.load(selection,'games');
   assert.equal(url.searchParams.get('leagues'),'NCAAF');assert.equal(url.searchParams.get('limit'),'100');
   assert.equal(loader.state.sport,'NCAAF');assert.equal(loader.state.rows.length,2);
   assert.ok(loader.state.rows.every(r=>r.sport==='NCAAF'&&r.model===null&&r.productionEligible===false&&r.market===.5));
-  assert.match(loader.state.message,/partial/i);assert.match(loader.state.message,/CFB model forecast is not connected/);
+  assert.match(loader.state.message,/partial/i);assert.match(loader.state.message,/CFB winner estimates are unavailable/);
  }
 });
 test('NBA research explicitly uses the multi-book view and retains missing platform coverage',async()=>{

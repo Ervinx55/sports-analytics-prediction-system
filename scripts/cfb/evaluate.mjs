@@ -1,0 +1,6 @@
+import fs from 'node:fs/promises';import path from 'node:path';import {CFB_MANIFEST,evaluateCandidates} from '../../sharp-service/lib/cfb-evaluation.js';
+const dir=process.argv[2];if(!dir)throw Error('Supply evidence directory');
+try{await fs.writeFile(path.join(dir,'frozen-manifest.json'),JSON.stringify(CFB_MANIFEST,null,2),{flag:'wx'});}catch(e){if(e.code!=='EEXIST')throw e;const old=JSON.parse(await fs.readFile(path.join(dir,'frozen-manifest.json'),'utf8'));if(JSON.stringify(old)!==JSON.stringify(CFB_MANIFEST))throw Error('FROZEN_MANIFEST_CHANGED');}
+const source=JSON.parse(await fs.readFile(path.join(dir,'espn-history/history.json'),'utf8'));
+const report=evaluateCandidates(source);await fs.writeFile(path.join(dir,'evaluation.json'),JSON.stringify(report,null,2));
+console.log(JSON.stringify({status:report.status,modelVersion:report.modelVersion,config:report.config,development:report.development&&{n:report.development.n,brier:report.development.brier,logLoss:report.development.logLoss},holdout:report.holdout&&{n:report.holdout.n,brier:report.holdout.brier,logLoss:report.holdout.logLoss,accuracy:report.holdout.accuracy},baseline:report.baselines?.developmentHomeRate,productionEligible:report.productionEligible}));
