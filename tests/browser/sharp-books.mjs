@@ -22,7 +22,8 @@ try{
  const nflData=structuredClone(data);nflData.contract='nfl-multibook-research-v1';nflData.candidates=[];
  for(const p of nflData.events[0].players)Object.assign(p.prop,{playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards'});
  const nflModel={oddsProvider:'SportsGameOdds',generatedAt:stamp,candidates:[{eventID:nflData.events[0].eventID,startsAt:future,playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards',side:'over',line:20.5,book:'pinnacle',odds:-110,rawIndependentProbability:.6}]};
- await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');return r.fulfill({json:url.pathname==='/api/board'?gameData:url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
+ let releaseNflModel;const nflModelReady=new Promise(resolve=>{releaseNflModel=resolve;});
+ await page.route('**/api/**',async r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');if(url.pathname==='/api/nflprops'&&url.searchParams.get('view')==='estimates')await nflModelReady;return r.fulfill({json:url.pathname==='/api/board'?gameData:url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
  await page.locator('#platform-coverage summary').click();
@@ -76,8 +77,17 @@ try{
  await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('.card').count(),1);
  await page.getByRole('button',{name:'Back to board'}).click();
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
- assert.equal(await page.locator('#modeled').innerText(),'1');
+ assert.equal(await page.locator('#modeled').innerText(),'0');
  await page.locator('#book').selectOption('pinnacle');
+ await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
+ assert.match(await page.locator('#detail-body').innerText(),/Model chance: Unavailable/);
+ await page.locator('#detail-body .source-details summary').click();
+ releaseNflModel();
+ await page.waitForFunction(()=>document.querySelector('#modeled').textContent==='1');
+ assert.match(await page.locator('#detail-body').innerText(),/Model chance: 60.0%/);
+ assert.equal(await page.locator('#detail').evaluate(e=>e.open),true);
+ assert.equal(await page.locator('#detail-body .source-details').evaluate(e=>e.open),true);
+ await page.getByRole('button',{name:'Close quote details'}).click();
  assert.match(await page.locator('.comparison').first().innerText(),/60.0%/);
  assert.match(await page.locator('.card').first().innerText(),/NOT CLEARED/);
  await page.locator('[data-sport="NBA"]').click();await page.locator('.card').first().waitFor();
