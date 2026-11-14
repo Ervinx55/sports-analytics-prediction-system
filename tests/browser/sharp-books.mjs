@@ -24,8 +24,9 @@ try{
  const nflModel={oddsProvider:'SportsGameOdds',generatedAt:stamp,candidates:[{eventID:nflData.events[0].eventID,startsAt:future,playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards',side:'over',line:20.5,book:'pinnacle',odds:-110,rawIndependentProbability:.6}]};
  const collegeData=structuredClone(gameData);collegeData.providerObservations[0].league='NCAAF';collegeData.events[0].league='NCAAF';collegeData.events[0].eventID='college-game';
  collegeData.events[0].matchup.home.name='College Home';collegeData.events[0].matchup.away.name='College Away';
+ const cfbData={contract:'cfb-research-v1',status:'RESEARCH_NOT_CLEARED',generatedAt:stamp,modelVersion:'cfb-test',evaluation:{holdout:{n:558,brier:.21,accuracy:.668}},forecasts:[{eventID:'college-game',homeID:collegeData.events[0].matchup.home.id,awayID:collegeData.events[0].matchup.away.id,homeName:'College Home',awayName:'College Away',startsAt:future,homeProbability:.6,awayProbability:.4,period:'game',marketType:'moneyline',modelVersion:'cfb-test',inputCutoff:stamp,generatedAt:stamp,homeRating:1550,awayRating:1500,homeAdvantage:35,neutralSite:false,homeCount:20,awayCount:20,latestResultAt:stamp,productionEligible:false}]};
  let releaseNflModel;const nflModelReady=new Promise(resolve=>{releaseNflModel=resolve;});
- await page.route('**/api/**',async r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');if(url.pathname==='/api/nflprops'&&url.searchParams.get('view')==='estimates')await nflModelReady;if(url.pathname==='/api/board'){assert.notEqual(url.searchParams.get('leagues'),'CFB');if(url.searchParams.get('leagues')==='NCAAF')assert.equal(url.searchParams.get('limit'),'100');}return r.fulfill({json:url.pathname==='/api/board'?(url.searchParams.get('leagues')==='NCAAF'?collegeData:gameData):url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
+ await page.route('**/api/**',async r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');if(url.pathname==='/api/nflprops'&&url.searchParams.get('view')==='estimates')await nflModelReady;if(url.pathname==='/api/board'){assert.notEqual(url.searchParams.get('leagues'),'CFB');if(url.searchParams.get('leagues')==='NCAAF')assert.equal(url.searchParams.get('limit'),'100');}return r.fulfill({json:url.pathname==='/api/dashboard'&&url.searchParams.get('cfb')==='1'?cfbData:url.pathname==='/api/board'?(url.searchParams.get('leagues')==='NCAAF'?collegeData:gameData):url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
  await page.locator('#platform-coverage summary').click();
@@ -76,7 +77,7 @@ try{
  await page.getByRole('button',{name:'Close quote details'}).click();
  assert.equal(await page.locator('#detail').evaluate(e=>e.open),false);
  await page.getByRole('button',{name:'Shortlist +'}).first().click();
- await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('.card').count(),1);
+ await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('#cards .card').count(),1);
  await page.getByRole('button',{name:'Back to board'}).click();
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
  assert.equal(await page.locator('#modeled').innerText(),'0');
@@ -133,12 +134,14 @@ try{
  await page.getByRole('button',{name:'CFB',exact:true}).click();
  await page.locator('.card').first().waitFor();
  assert.equal(await page.getByRole('button',{name:'CFB',exact:true}).getAttribute('aria-pressed'),'true');
- assert.match(await page.locator('#status').innerText(),/CFB model forecast is not connected/);
- assert.equal(await page.locator('.card').count(),4);assert.equal(await page.locator('#modeled').innerText(),'0');
+ await page.locator('#cfb-summary').getByText(/60.0%/).waitFor();
+ assert.match(await page.locator('#cfb-summary').innerText(),/558 games/);
+ assert.match(await page.locator('#status').innerText(),/Independent CFB winner estimates/);
+ assert.equal(await page.locator('#cards .card').count(),4);assert.equal(await page.locator('#modeled').innerText(),'4');
  assert.match(await page.locator('.card').first().innerText(),/College Away @ College Home/);
  assert.match(await page.locator('.comparison').first().innerText(),/50.0%/);
  await page.getByRole('button',{name:'Shortlist +'}).first().click();
- await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('.card').count(),1);
+ await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('#cards .card').count(),1);
  for(const width of [320,390,768]){await page.setViewportSize({width,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`CFB overflow at ${width}px`);}
  assert.deepEqual(errors,[]);
  console.log('Sharp-book mobile research and worksheet flows passed');

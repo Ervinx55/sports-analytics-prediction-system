@@ -2,6 +2,7 @@ import {normalizeResearch} from './research-data.js';
 import {normalizeGameResearch} from './research-comparison.js';
 import {researchFreshness} from './prop-price-checks.js';
 import {providerLeague} from './league-codes.js';
+import {attachCfbForecasts} from './cfb-research.js';
 export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.now}={}){
  let state={sport:'NBA',kind:'props',status:'idle',rows:[],message:''},sequence=0,controller;
  return {get state(){return state;},async load(sport,kind='props'){
@@ -17,10 +18,11 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    const gameParams=new URLSearchParams({view:'research',leagues:sport,limit:sport==='NCAAF'?'100':'16',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString()});
    const quoteRequest=get(kind==='games'?'/api/board?'+gameParams:`/api/${sport==='NBA'?'nba':'nfl'}props?view=research`);
    let modelRequest=Promise.resolve(null);
-   if(kind==='props'&&sport==='NFL'){
+   const cfb=kind==='games'&&sport==='NCAAF';let cfbPayload=null;
+   if(kind==='props'&&sport==='NFL'||cfb){
     estimateController=new AbortController();abortEstimate=()=>estimateController.abort();request.signal.addEventListener('abort',abortEstimate,{once:true});
-    estimateTimer=setTimeout(abortEstimate,40000);
-    modelRequest=get('/api/nflprops?view=estimates',estimateController.signal).catch(()=>null);
+    estimateTimer=setTimeout(abortEstimate,cfb?8000:40000);
+    modelRequest=get(cfb?'/api/dashboard?cfb=1':'/api/nflprops?view=estimates',estimateController.signal).catch(()=>null);
    }
    const quoteResult=await quoteRequest;
    if(current!==sequence)return;
@@ -31,13 +33,13 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    if(!response.ok||request.signal.aborted)throw Error('Unavailable');
    const identity=data.sourceHealth?.playerIdentity,count=v=>Number.isSafeInteger(v)&&v>=0?v:0;
    let message=identity?count(identity.matched)+' roster-matched market records; '+count(identity.excluded)+' withheld for roster mismatch or ambiguity; '+count(identity.unverified)+' unverified. ':'';
-   if(kind==='games'&&sport==='NCAAF')message+='CFB book comparisons only; a CFB model forecast is not connected. ';
    if(data.coverage?.eventsComplete===false||data.providerObservations?.some(p=>p.eventsComplete===false))message+='Partial provider coverage: some games could not be collected in this bounded refresh. ';
    if(kind==='games'&&data.unavailableLeagues?.some(p=>p.league===sport))throw Error('League unavailable');
    const ready=message=>{
-    const rows=kind==='games'?normalizeGameResearch(data,sport,now()):normalizeResearch(data,sport,now());
+    let rows=kind==='games'?normalizeGameResearch(data,sport,now()):normalizeResearch(data,sport,now());
+    if(cfb)rows=attachCfbForecasts(rows,cfbPayload,now());
     const bookCoverage=kind==='games'?{...data.bookCoverage,configured:[...new Set(rows.map(r=>r.book))].sort()}:data.bookCoverage??null;
-    state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message};
+    state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message,cfbSummary:cfbPayload?{evaluation:cfbPayload.evaluation,coverage:cfbPayload.coverage,prospective:cfbPayload.prospective}:null};
    };
    if(kind==='props'&&sport==='NFL'){
     data.candidates=[];
@@ -48,6 +50,13 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
     const usable=modelResult?.response.ok&&Array.isArray(model?.candidates)&&model.oddsProvider===data.source&&researchFreshness(model.generatedAt,model.generatedAt,now())==='CURRENT';
     data.candidates=usable?model.candidates:[];
     if(!usable)message+='Frozen model estimates are unavailable; current quotes can still be researched. ';
+   }
+   if(cfb){
+    ready(message+'Quotes loaded. CFB winner estimates are loading…');onChange(state);
+    const result=await modelRequest;if(current!==sequence)return;
+    if(result?.response.ok&&result.data?.contract==='cfb-research-v1')cfbPayload=result.data;
+    if(!cfbPayload||cfbPayload.status!=='RESEARCH_NOT_CLEARED')message+='CFB winner estimates are unavailable or stale; book comparisons remain available. ';
+    else message+='Independent CFB winner estimates are research only, not cleared plays. Historical holdout: '+(cfbPayload.evaluation?.holdout?.n??0)+' games. ';
    }
    ready(message);
   }catch{if(current!==sequence)return;state={sport,kind,status:'error',rows:[],message:'Research unavailable. The provider request failed or timed out. Refresh to retry.'};}

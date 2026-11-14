@@ -14,3 +14,7 @@ test('CFB admin rejects arbitrary provider URLs, unknown actions and invalid sea
  for(const body of [{action:'fetch',url:'https://evil.example'},{action:'history',season:1800}]){const r=response();await handler({method:'POST',headers:{authorization:'Bearer server-key'},body},r);assert.equal(r.code,400);}
  assert.equal(calls,0);
 });
+test('CFB successful minimal database inserts do not cause a JSON parsing 503',async()=>{
+ let providerCalls=0;const handler=createCfbHandler({env:{SUPABASE_SERVICE_ROLE_KEY:'server-key',SPORTS_ODDS_API_KEY:'provider-key'},now:()=>Date.parse('2026-11-14T16:00:00Z'),optimize:async()=>({blocked:false,effectiveLimit:100}),providerFetch:async({url})=>{providerCalls++;assert.match(url,/finalized=true/);assert.doesNotMatch(url,/oddsAvailable/);return {payload:{data:[],nextCursor:null},fetchedAt:Date.parse('2026-11-14T16:00:00Z'),ageMs:0};},fetchImpl:async(url,options)=>url.includes('/rpc/')?{ok:true,status:200,text:async()=>'true'}:{ok:true,status:options.method==='DELETE'?204:201,text:async()=>''}});
+ const r=response();await handler({method:'POST',headers:{authorization:'Bearer server-key'},body:{action:'history',season:2025}},r);assert.equal(r.code,200);assert.equal(r.data.status,'COLLECTED');assert.equal(providerCalls,1);
+});

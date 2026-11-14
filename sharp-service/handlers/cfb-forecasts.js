@@ -15,7 +15,7 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
   const action=body.action;
   if(req.method==='POST'&&(!['seed','history','refresh'].includes(action)||(action==='history'&&![2024,2025,2026].includes(body.season))))return res.status(400).json({error:'INVALID_CFB_ACTION'});
   const headers={'content-type':'application/json',apikey:key};if(key.startsWith('eyJ'))headers.authorization='Bearer '+key;
-  const db=async(path,options={})=>{const r=await fetchImpl((env.SUPABASE_URL||'https://yeoxroijaptomomshdii.supabase.co').replace(/\/$/,'')+'/rest/v1/'+path,{...options,headers:{...headers,...options.headers},signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('DATABASE_'+r.status);if(r.status===204)return null;return r.json();};
+  const db=async(path,options={})=>{const r=await fetchImpl((env.SUPABASE_URL||'https://yeoxroijaptomomshdii.supabase.co').replace(/\/$/,'')+'/rest/v1/'+path,{...options,headers:{...headers,...options.headers},signal:AbortSignal.timeout(8000)});if(!r.ok)throw Error('DATABASE_'+r.status);if(r.status===204)return null;if(typeof r.text==='function'){const text=await r.text();return text?JSON.parse(text):null;}return r.json();};
   const read=async name=>(await db('cfb_research_documents?doc_key=eq.'+encodeURIComponent(name)+'&select=body&limit=1'))?.[0]?.body??null;
   const save=async(name,value,immutable=false)=>db('cfb_research_documents?on_conflict=doc_key',{method:'POST',headers:{Prefer:immutable?'resolution=ignore-duplicates,return=minimal':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({doc_key:name,body:value,updated_at:new Date(now()).toISOString()})});
   let token;
@@ -29,6 +29,7 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    if(locked!==true){token=null;return res.status(409).json({error:'COLLECTION_IN_PROGRESS'});}
    const stamp=new Date(now()).toISOString();
    if(action==='seed'){
+    if(!body.source)body.source=await read('seed-source');
     if(!Array.isArray(body.source?.schedules)||body.source.schedules.length>500||![2024,2025,2026].every(s=>Array.isArray(body.source.membership?.[s])&&body.source.membership[s].every(id=>/^\d+$/.test(id))))return res.status(422).json({error:'SOURCE_EVIDENCE_REQUIRED'});
     const source={...body.source,...assembleHistory(body.source.schedules,body.source.membership),fetchedAt:stamp};
     if(!source.complete)return res.status(422).json({error:'SOURCE_COVERAGE_INCOMPLETE',missing:source.missing.length,conflicts:source.conflicts.length});
@@ -69,6 +70,7 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    });
    const forecasts=source.complete?forecastGames(source.games,eligible,model.config,stamp):{forecasts:[],excluded:[{reasons:['SOURCE_RECONCILIATION_INCOMPLETE']}]};
    const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:stamp,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!sgo.payload.nextCursor,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:stamp})),productionEligible:false};
+   payload.contract='cfb-research-v1';
    const inputHash=contentHash(source.games);await save('input:'+inputHash,{games:source.games,membership:source.membership,recordedAt:stamp},true);let captured=0;
    for(const f of payload.forecasts.filter(f=>prospectiveEligible(f,stamp))){
     const quote=raw.find(e=>e.eventID===f.eventID)?.odds||{};

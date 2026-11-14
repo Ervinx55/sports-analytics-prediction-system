@@ -58,6 +58,7 @@ export function normalizeGameResearch(data,league,now=Date.now()){
     const player=side==='home'?home.name:side==='away'?away.name:side==='draw'?'Draw':'Game total';
     const row={kind:'games',sport:league,sportID:event.sport,league,eventID:String(event.eventID),startsAt:event.startsAt,player,playerID:'',participant:side==='home'?home.id:side==='away'?away.id:side,away:away.name,home:home.name,marketType,period:q.period,outcomeStructure:shape.bet,side:side.toUpperCase(),line:q.line,book,platformType:type,odds:type==='sportsbook'?q.odds:null,indicativeOdds:type==='sportsbook'?null:q.odds,updatedAt:q.updatedAt,generatedAt:observation?.fetchedAt??null,provider:observation?.provider??data.source,priceQuote:q,outcomeQuotes,model:null,status:'QUOTE ONLY',reason:'Game quote comparison only. Use the cleared plays page for model decisions.',productionEligible:false};
     row.id=JSON.stringify(['games',league,row.eventID,marketType,row.period,row.side,row.line,book]);
+    row.homeID=home.id;row.awayID=away.id;
     row.priceCheck=assessGameQuote(row,now);row.market=row.priceCheck.marketProbability;row.freshness=row.priceCheck.freshness;rows.push(row);
    }
   }

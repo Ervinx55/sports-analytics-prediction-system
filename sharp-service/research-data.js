@@ -56,7 +56,7 @@ export function filterResearch(rows,{query='',book='',market='',freshness=''}={}
 }
 
 export function refreshResearchRow(row, now=Date.now()) {
- if(row.kind==='games'){const priceCheck=assessGameQuote(row,now);return {...row,priceCheck,freshness:priceCheck.freshness,market:priceCheck.marketProbability};}
+ if(row.kind==='games'){const priceCheck=assessGameQuote(row,now);const age=now-Date.parse(row.cfbForecast?.generatedAt);const expired=row.cfbForecast&&(!Number.isFinite(age)||age<0||age>30*60000);return {...row,...(expired?{model:null,cfbForecast:null,status:'QUOTE ONLY',reason:'CFB forecast expired; refresh the research board.'}:{}),priceCheck,freshness:priceCheck.freshness,market:priceCheck.marketProbability};}
  if(row.priceCheck){const priceCheck=assessPropQuote({book:row.book,quote:row.priceQuote,opposite:row.oppositeQuote,generatedAt:row.generatedAt,now});return {...row,priceCheck,freshness:priceCheck.freshness,market:priceCheck.marketProbability};}
  const freshness=quoteFreshness(row.updatedAt,row.generatedAt,now);
  return {...row,freshness,market:freshness==='CURRENT'&&quoteFreshness(row.oppositeUpdatedAt,row.generatedAt,now)==='CURRENT'?row.market:null};
