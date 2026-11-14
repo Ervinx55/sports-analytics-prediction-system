@@ -1,8 +1,11 @@
 // Source adapters retain uncertainty. Missing scores, venue and identities are never zero/defaults.
+import {reviewedTeams,reviewedKickoffs} from './cfb-reviewed-identities.js';
 const score=v=>{v=v?.value??v;return (typeof v==='number'||typeof v==='string'&&/^\d+$/.test(v))&&Number.isInteger(Number(v))&&Number(v)>=0&&Number(v)<=200?Number(v):null;};
 const iso=v=>Number.isFinite(Date.parse(v))?new Date(v).toISOString():null;
 const name=v=>String(v||'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const aliases=t=>[t?.displayName,t?.shortDisplayName,t?.location,t?.names?.long,t?.names?.medium,t?.names?.short].filter(Boolean);
+const sameTeam=(a,b,side)=>a[side+'Aliases']?.some(n=>b[side+'Aliases']?.some(m=>name(n)&&name(n)===name(m)))||reviewedTeams.some(r=>a.league==='NCAAF'&&a.season===r.season&&b.season===r.season&&a[side+'ID']===r.sgoTeamID&&b[side+'ID']===r.espnTeamID&&a[side+'Aliases']?.some(n=>r.sgoNames.some(m=>name(n)===name(m)))&&b[side+'Aliases']?.some(n=>r.espnNames.some(m=>name(n)===name(m))));
+const reviewedKickoff=(a,b)=>reviewedKickoffs.find(r=>a.league==='NCAAF'&&a.season===r.season&&b.season===r.season&&a.id===r.sgoEventID&&b.id===r.espnEventID&&a.homeID===r.sgoHomeID&&a.awayID===r.sgoAwayID&&b.homeID===r.espnHomeID&&b.awayID===r.espnAwayID&&Date.parse(a.startsAt)===Date.parse(r.providerStartsAt)&&Date.parse(b.startsAt)===Date.parse(r.verifiedStartsAt));
 export function normalizeEspnGame(event,fetchedAt){
  const c=event?.competitions?.[0],home=c?.competitors?.find(t=>t.homeAway==='home'),away=c?.competitors?.find(t=>t.homeAway==='away');
  const status=c?.status?.type??event?.status?.type??{};
@@ -15,13 +18,17 @@ export function normalizeSgoGame(event,fetchedAt){
 export function reconcileGames(sgo,espn){
  const matched=[],conflicts=[],unmatched=[],used=new Set();
  for(const a of sgo){
-  const choices=espn.filter(b=>Math.abs(Date.parse(a.startsAt)-Date.parse(b.startsAt))<=15*60000&&['home','away'].every(side=>a[side+'Aliases']?.some(n=>b[side+'Aliases']?.some(m=>name(n)&&name(n)===name(m)))));
+  const choices=espn.filter(b=>(Math.abs(Date.parse(a.startsAt)-Date.parse(b.startsAt))<=15*60000||reviewedKickoff(a,b))&&['home','away'].every(side=>sameTeam(a,b,side)));
   if(choices.length!==1||used.has(choices[0]?.id)){unmatched.push({eventID:a.id,reason:choices.length?'AMBIGUOUS_IDENTITY':'IDENTITY_UNMATCHED'});continue;}
   const b=choices[0];used.add(b.id);
   if(a.completed&&b.completed&&(a.homeScore===null||a.awayScore===null||a.homeScore!==b.homeScore||a.awayScore!==b.awayScore)){conflicts.push({eventID:a.id,espnID:b.id,reason:'FINAL_SCORE_CONFLICT'});continue;}
-  matched.push({...b,sgoID:a.id,sgoHomeID:a.homeID,sgoAwayID:a.awayID,sourcePair:[a.id,b.id],scoresReconciled:a.completed&&b.completed});
+  matched.push({...b,sgoID:a.id,sgoHomeID:a.homeID,sgoAwayID:a.awayID,sourcePair:[a.id,b.id],scoresReconciled:a.completed&&b.completed,providerStartsAt:a.startsAt,quoteComparisonEligible:Date.parse(a.startsAt)===Date.parse(b.startsAt),scheduleVerification:reviewedKickoff(a,b)||null});
  }
  return {matched,conflicts,unmatched};
+}
+export function reconcileUpcomingGames(sgo,espn,now){
+ // An incorrect earlier provider time cannot drop a verified pregame event.
+ return reconcileGames(sgo.filter(g=>!g.completed&&!g.cancelled),espn.filter(g=>!g.completed&&!g.cancelled&&Date.parse(g.startsAt)>now));
 }
 export function parseMembership(payload,season){
  if(!Array.isArray(payload?.items)||payload.pageCount!==1||payload.count!==payload.items.length||!payload.count)throw Error('FBS_INVENTORY_INCOMPLETE');

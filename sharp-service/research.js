@@ -1,3 +1,4 @@
+import {currentCfbForecasts} from './cfb-research.js';
 import {appendDeepDive,preserveDeepDives} from './deep-dive.js';
 import {filterResearch,refreshResearchRow} from './research-data.js';
 import {createResearchLoader} from './research-loader.js';
@@ -64,16 +65,24 @@ function render(){
  $('more').textContent=`Show more · ${Math.min(shown,rows.length)} of ${rows.length}`;
 }
 function openDetail(row){selected=row;drawDetail();$('detail').showModal();}
+function appendCfbExplanation(parent,f){
+ const detail=add(parent,'details');add(detail,'summary','Why this winner estimate');
+ const rating=n=>Number.isFinite(n)?n.toFixed(0):'unavailable';
+ add(detail,'p',`${f.homeName} rating ${rating(f.homeRating)} versus ${f.awayName} rating ${rating(f.awayRating)}. ${f.neutralSite?'Neutral site; no home-field adjustment.':`Verified home venue; ${f.homeAdvantage} rating points for home field.`}`);
+ add(detail,'p',`Ratings reflect past wins and opponent strength. Verified games in the last 18 months: home ${f.homeCount??'unavailable'}, away ${f.awayCount??'unavailable'}. Inputs through ${date(f.inputCutoff)}; latest included result ${date(f.latestResultAt)}.`);
+ add(detail,'p',`No quarterback, injury, weather or separate defensive-efficiency adjustment. Model ${f.modelVersion}. Prospective testing and review must earn PLAY approval.`);
+ return detail;
+}
 function renderCfbSummary(state,rows){
  const target=$('cfb-summary');target.replaceChildren();target.hidden=state.sport!=='NCAAF'||state.kind!=='games'||state.status!=='ready';if(target.hidden)return;
  add(target,'h2','CFB winner forecasts');
- const unique=[...new Map(rows.filter(r=>r.cfbForecast&&r.model!==null).map(r=>[r.eventID,r.cfbForecast])).values()].sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)||Math.max(b.homeProbability,b.awayProbability)-Math.max(a.homeProbability,a.awayProbability));
+ const unique=currentCfbForecasts(state.cfbSummary?.forecastPayload).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt)||Math.max(b.homeProbability,b.awayProbability)-Math.max(a.homeProbability,a.awayProbability));
  const evaluated=state.cfbSummary?.evaluation?.holdout;
  add(target,'p',`${unique.length} games with independent estimates · research only, not cleared plays. ${evaluated?`Historical holdout: ${evaluated.n} games, ${(evaluated.accuracy*100).toFixed(1)}% winner accuracy, Brier ${evaluated.brier.toFixed(3)}. This does not establish a sportsbook edge.`:''}`,'muted');
  const tracked=state.cfbSummary?.prospective,coverage=state.cfbSummary?.coverage;
  if(tracked)add(target,'p',`Prospective tracking: ${tracked.captured??0} saved pregame forecasts · ${tracked.n??0} final results · ${coverage?.missedClosedCaptureWindows??0} missed capture windows · ${coverage?.pendingScopeGames??0} games still awaiting capture. This tracks predictions, not placed bets.`,'muted');
  if(!unique.length){add(target,'p','No current verified CFB forecast matches this quote refresh. Book comparisons remain below.');return;}
- const grid=add(target,'div',undefined,'cards');for(const f of unique){const card=add(grid,'article',undefined,'card');add(card,'h3',`${f.awayName} @ ${f.homeName}`);add(card,'p',date(f.startsAt),'match');add(card,'strong',`${f.homeName}: ${pct(f.homeProbability)} · ${f.awayName}: ${pct(f.awayProbability)}`);add(card,'p','Forecast '+date(f.generatedAt)+' · NOT CLEARED','muted');button(card,'Compare prices',()=>{$('query').value=f.homeName;$('market').value='moneyline';shown=40;render();$('research-board').scrollIntoView({behavior:'smooth'});});}
+ const grid=add(target,'div',undefined,'cards');for(const f of unique){const card=add(grid,'article',undefined,'card');add(card,'h3',`${f.awayName} @ ${f.homeName}`);add(card,'p',date(f.startsAt),'match');add(card,'strong',`${f.homeName}: ${pct(f.homeProbability)} · ${f.awayName}: ${pct(f.awayProbability)}`);add(card,'p','Forecast '+date(f.generatedAt)+' · NOT CLEARED','muted');appendCfbExplanation(card,f);if(rows.some(r=>r.eventID===f.eventID&&r.cfbForecast&&r.model!==null))button(card,'Compare prices',()=>{$('query').value=f.homeName;$('market').value='moneyline';shown=40;render();$('research-board').scrollIntoView({behavior:'smooth'});});else add(card,'p','Book comparison unavailable: '+(f.quoteComparisonEligible===false?'the provider kickoff conflicts with the verified schedule.':'no exact matching quotes in this refresh.'),'muted');if(f.scheduleVerification){const detail=add(card,'details');add(detail,'summary','Verified schedule and price restriction');add(detail,'p',f.scheduleVerification.explanation);add(detail,'p','Provider kickoff: '+date(f.providerStartsAt)+'. Verified schedule: '+date(f.startsAt)+'. Reviewed: '+date(f.scheduleVerification.reviewedAt));for(const url of f.scheduleVerification.sources||[]){if(typeof url==='string'&&url.startsWith('https://')){const link=add(detail,'a',new URL(url).hostname);link.href=url;link.target='_blank';link.rel='noopener noreferrer';add(detail,'br');}}}}
 }
 function drawDetail(){
  if(!selected)return;
@@ -96,7 +105,7 @@ function drawDetail(){
  }else if(row.platformType==='exchange')section('Why the exchange cost is unverified','This provider record does not identify the exact contract and executable order book. Americanized indicative odds cannot substitute for an ask price, size, fees and settlement terms. No cost-based probability or expected profit is shown.');
  else section('What the percentages mean','Model chance: '+pct(row.model)+'. Book chance: '+pct(row.market)+'. A book percentage requires fresh opposing prices from the exact book and line. Integer lines can push, so their unconditional percentage is withheld. A gap does not prove an advantage.');
  if(row.freshness!=='CURRENT')section('Quotes need refreshing',row.freshness==='STALE'?'These quotes exceed the freshness limit. The market comparison is hidden until fresh prices arrive.':'We cannot verify when these quotes were updated. The market comparison is hidden.');
- if(row.cfbForecast){const f=row.cfbForecast;section('Why this winner estimate',`${f.homeName} rating ${f.homeRating.toFixed(0)} versus ${f.awayName} rating ${f.awayRating.toFixed(0)}. ${f.neutralSite?'Neutral site; no home-field adjustment.':`Verified home venue; ${f.homeAdvantage} rating points for home field.`} Ratings reflect past wins and opponent strength; they do not separately measure defensive efficiency.`);section('Evidence and limitations',`${f.homeCount} verified games for the home team and ${f.awayCount} for the away team in the last 18 months. Inputs through ${date(f.inputCutoff)}; latest included result ${date(f.latestResultAt)}. Forecast ${date(f.generatedAt)}. No quarterback, injury or weather adjustment. Model ${f.modelVersion}. Prospective tracking and review remain required before PLAY approval.`);}
+ if(row.cfbForecast)appendCfbExplanation(body,row.cfbForecast);
  if(row.kind==='games'){section('Game market rules','Compare only the same period, outcome structure and line. Regulation and full-game markets can settle differently. Provider prices do not confirm identical house rules, limits or account eligibility.');section('Sources and decision status','Source: '+(row.provider||'Unknown')+'. Quote updated '+date(row.updatedAt)+'. Provider fetched '+date(row.generatedAt)+(row.cfbForecast?'. Independent CFB research estimate attached; not approved for PLAY.':'. No game model is attached to these quotes; check the cleared team plays page for current decisions.'));section('Market reference','The reference excludes this book. It uses the median no-vig chance from at least two other sharp books, or at least three other sportsbooks. Books may share information; this is not a validated probability or a count of independent samples.');return;}
  const evidence=[];
  const fact=(title,value,explanation,feature)=>{

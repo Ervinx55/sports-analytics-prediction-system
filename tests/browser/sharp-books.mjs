@@ -26,6 +26,7 @@ try{
  collegeData.events[0].matchup.home.name='College Home';collegeData.events[0].matchup.away.name='College Away';
  const cfbData={contract:'cfb-research-v1',status:'RESEARCH_NOT_CLEARED',generatedAt:stamp,modelVersion:'cfb-test',evaluation:{holdout:{n:558,brier:.21,accuracy:.668}},forecasts:[{eventID:'college-game',homeID:collegeData.events[0].matchup.home.id,awayID:collegeData.events[0].matchup.away.id,homeName:'College Home',awayName:'College Away',startsAt:future,homeProbability:.6,awayProbability:.4,period:'game',marketType:'moneyline',modelVersion:'cfb-test',inputCutoff:stamp,generatedAt:stamp,homeRating:1550,awayRating:1500,homeAdvantage:35,neutralSite:false,homeCount:20,awayCount:20,latestResultAt:stamp,productionEligible:false}]};
  let releaseNflModel;const nflModelReady=new Promise(resolve=>{releaseNflModel=resolve;});
+ cfbData.forecasts.push({...cfbData.forecasts[0],eventID:'schedule-verified',homeID:'HAWAII_NCAAF',awayID:'NORTH_DAKOTA_STATE_NCAAF',homeName:'Hawaii',awayName:'North Dakota State',quoteComparisonEligible:false,providerStartsAt:new Date(Date.parse(future)-3600000).toISOString(),scheduleVerification:{explanation:'Official schedule verified; provider kickoff differs.',reviewedAt:stamp,sources:['https://hawaiiathletics.com/sports/football/schedule/2026']}});
  await page.route('**/api/**',async r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');if(url.pathname==='/api/nflprops'&&url.searchParams.get('view')==='estimates')await nflModelReady;if(url.pathname==='/api/board'){assert.notEqual(url.searchParams.get('leagues'),'CFB');if(url.searchParams.get('leagues')==='NCAAF')assert.equal(url.searchParams.get('limit'),'100');}return r.fulfill({json:url.pathname==='/api/dashboard'&&url.searchParams.get('cfb')==='1'?cfbData:url.pathname==='/api/board'?(url.searchParams.get('leagues')==='NCAAF'?collegeData:gameData):url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
@@ -136,6 +137,11 @@ try{
  assert.equal(await page.getByRole('button',{name:'CFB',exact:true}).getAttribute('aria-pressed'),'true');
  await page.locator('#cfb-summary').getByText(/60.0%/).waitFor();
  assert.match(await page.locator('#cfb-summary').innerText(),/558 games/);
+ assert.match(await page.locator('#cfb-summary').innerText(),/2 games with independent estimates/);
+ const scheduleCard=page.locator('#cfb-summary article').filter({hasText:'North Dakota State @ Hawaii'});
+ assert.match(await scheduleCard.innerText(),/provider kickoff conflicts/);assert.equal(await scheduleCard.getByRole('button',{name:'Compare prices'}).count(),0);
+ await scheduleCard.getByText('Verified schedule and price restriction',{exact:true}).click();assert.match(await scheduleCard.innerText(),/Official schedule verified/);
+ await scheduleCard.getByText('Why this winner estimate',{exact:true}).click();assert.match(await scheduleCard.innerText(),/Verified games in the last 18 months/);assert.match(await scheduleCard.innerText(),/No quarterback, injury, weather/);
  assert.match(await page.locator('#status').innerText(),/Independent CFB winner estimates/);
  await page.locator('#cfb-summary').getByRole('button',{name:'Compare prices'}).click();
  assert.equal(await page.locator('#cards .card').count(),4);

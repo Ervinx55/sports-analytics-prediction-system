@@ -39,7 +39,7 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
     let rows=kind==='games'?normalizeGameResearch(data,sport,now()):normalizeResearch(data,sport,now());
     if(cfb)rows=attachCfbForecasts(rows,cfbPayload,now());
     const bookCoverage=kind==='games'?{...data.bookCoverage,configured:[...new Set(rows.map(r=>r.book))].sort()}:data.bookCoverage??null;
-    state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message,cfbSummary:cfbPayload?{evaluation:cfbPayload.evaluation,coverage:cfbPayload.coverage,prospective:cfbPayload.prospective}:null};
+    state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message,cfbSummary:cfbPayload?{forecastPayload:cfbPayload,evaluation:cfbPayload.evaluation,coverage:cfbPayload.coverage,prospective:cfbPayload.prospective}:null};
    };
    if(kind==='props'&&sport==='NFL'){
     data.candidates=[];
