@@ -135,7 +135,7 @@ try{
  await page.getByRole('button',{name:'CFB',exact:true}).click();
  await page.locator('.card').first().waitFor();
  assert.equal(await page.getByRole('button',{name:'CFB',exact:true}).getAttribute('aria-pressed'),'true');
- await page.locator('#cfb-summary').getByText(/60.0%/).waitFor();
+ await page.locator('#cfb-summary').getByText('College Home: 60.0% · College Away: 40.0%',{exact:true}).waitFor();
  assert.match(await page.locator('#cfb-summary').innerText(),/558 games/);
  assert.match(await page.locator('#cfb-summary').innerText(),/2 games with independent estimates/);
  const scheduleCard=page.locator('#cfb-summary article').filter({hasText:'North Dakota State @ Hawaii'});
