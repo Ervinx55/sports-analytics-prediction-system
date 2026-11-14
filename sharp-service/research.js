@@ -3,6 +3,7 @@ import {filterResearch,refreshResearchRow} from './research-data.js';
 import {createResearchLoader} from './research-loader.js';
 import {bookLabel,platformType} from './prop-price-checks.js';
 import {appendDfsWorksheet} from './dfs-payout-worksheet.js';
+import {compareResearchPrices} from './research-comparison.js';
 const $=id=>document.getElementById(id);
 const add=(parent,tag,text,className)=>{const node=document.createElement(tag);if(text!==undefined)node.textContent=String(text);if(className)node.className=className;parent.append(node);return node;};
 const label=value=>String(value??'').replaceAll('_',' ');
@@ -15,32 +16,43 @@ const saved=new Map();let shortlist=false,shown=40,selected=null;
 const loader=createResearchLoader({onChange:state=>{if(state.status==='loading'){$('detail').close();selected=null;}else populate();render();}});
 function button(parent,text,handler){const node=add(parent,'button',text);node.type='button';node.onclick=handler;return node;}
 function current(row){return refreshResearchRow(row);}
-function sourceRows(){return (shortlist?[...saved.values()].filter(r=>r.sport===loader.state.sport):loader.state.rows).map(current).filter(r=>Date.parse(r.startsAt)>Date.now());}
+function sourceRows(){const live=new Map(loader.state.rows.map(r=>[r.id,r]));return (shortlist?[...saved.values()].filter(r=>r.sport===loader.state.sport&&(r.kind||'props')===loader.state.kind).map(r=>live.get(r.id)||r):loader.state.rows).map(current).filter(r=>Date.parse(r.startsAt)>Date.now());}
+function comparisonIndex(){const observations=new Map([...saved.values(),...loader.state.rows].map(r=>[r.id,r]));return compareResearchPrices([...observations.values()]);}
+function appendComparison(parent,row,comparison){
+ const block=add(parent,'div',undefined,'price-comparison');
+ if(!comparison||comparison.eligibleBooks<2){add(block,'strong',comparison?.eligibleBooks===1?'Only one comparable book':'Price comparison unavailable');add(block,'p','Needs fresh, complete sportsbook prices for this exact selection.');return;}
+ add(block,'strong',comparison.best?'BEST OBSERVED PRICE':'Compare the exact price');
+ add(block,'p',`${comparison.eligibleBooks} comparable books · best observed ${odds(comparison.bestOdds)}`);
+ add(block,'p',comparison.referenceProbability===null?'Market reference needs more other-book coverage.':`Market reference: ${pct(comparison.referenceProbability)} · ${comparison.referenceBooks.length} other ${comparison.referenceKind==='sharp'?'sharp ':''}books`);
+ add(block,'small','Verify your account access and current price. This is a market comparison, not a forecast or a cleared play.');
+}
 function populate(){for(const [id,key,title] of [['book','book','All platforms'],['market','marketType','All markets']]){const select=$(id),previous=select.value;select.replaceChildren();const first=add(select,'option',title);first.value='';const configured=id==='book'?(loader.state.bookCoverage?.configured??[]):[];for(const value of [...new Set([...sourceRows().map(r=>r[key]),...configured])].sort()){const opt=add(select,'option',id==='book'?bookLabel(value):label(value));opt.value=value;}if([...select.options].some(o=>o.value===previous))select.value=previous;}}
 function renderCoverage(state,rows){
- const target=$('platform-coverage');target.replaceChildren();
+ const target=$('platform-coverage'),expanded=target.querySelector('details')?.open||false;target.replaceChildren();
  const books=state.bookCoverage?.configured;if(!Array.isArray(books)||state.status!=='ready'){target.hidden=true;return;}target.hidden=false;
- add(target,'h2','Platform coverage & payout checks');add(target,'p','Current research lines only. A fresh line or complete price pair does not clear a play. Both validation models remain frozen.','muted');
- const grid=add(target,'div',undefined,'platform-grid');
- for(const book of books){const subset=rows.filter(r=>r.book===book),card=add(grid,'article',undefined,'platform-item');add(card,'h3',bookLabel(book));add(card,'strong',`${subset.length} quotes · ${subset.filter(r=>r.freshness==='CURRENT').length} fresh`);const type=platformType(book);add(card,'p',!subset.length?'No available NBA prop lines returned for this platform.':type==='dfs'?'Entry payout and pick rules still required.':type==='exchange'?'Contract identity, executable price, depth and fees still required.':`${subset.filter(r=>r.priceCheck?.status==='COMPARABLE').length} prices have a fresh matching opposite side.`);}
+ add(target,'h2','Platform coverage & payout checks');add(target,'p','All account-entitled books are requested. This bounded refresh may not contain every market. A fresh line or complete price pair does not clear a play. Both validation models remain frozen.','muted');
+ const details=add(target,'details');details.open=expanded;add(details,'summary',books.length+' monitored or observed platforms · view coverage');const grid=add(details,'div',undefined,'platform-grid');
+ for(const book of books){const subset=rows.filter(r=>r.book===book),card=add(grid,'article',undefined,'platform-item');add(card,'h3',bookLabel(book));add(card,'strong',`${subset.length} quotes · ${subset.filter(r=>r.freshness==='CURRENT').length} fresh`);const type=platformType(book);add(card,'p',!subset.length?'No available '+state.sport+' '+(state.kind==='games'?'game':'prop')+' lines returned for this platform.':type==='dfs'?'Entry payout and pick rules still required.':type==='exchange'?'Contract identity, executable price, depth and fees still required.':`${subset.filter(r=>r.priceCheck?.status==='COMPARABLE').length} prices have a fresh matching opposite side.`);}
 }
 function render(){
- const state=loader.state,all=sourceRows();const rows=filterResearch(all,{query:$('query').value,book:$('book').value,market:$('market').value,freshness:$('freshness').value});
+ const state=loader.state,all=sourceRows(),comparisons=comparisonIndex();const rows=filterResearch(all,{query:$('query').value,book:$('book').value,market:$('market').value,freshness:$('freshness').value}).filter(row=>!$('best-prices').checked||comparisons.get(row.id)?.best);
  $('refresh').disabled=state.status==='loading';$('count').textContent=state.status==='ready'?state.rows.length:'—';$('modeled').textContent=state.status==='ready'?state.rows.filter(r=>r.model!==null).length:'—';$('fresh').textContent=state.status==='ready'?state.rows.filter(r=>current(r).freshness==='CURRENT').length:'—';$('saved-count').textContent=saved.size;
  $('shortlist-toggle').textContent=shortlist?'Back to board':'View shortlist';$('shortlist-toggle').setAttribute('aria-pressed',String(shortlist));
- for(const tab of document.querySelectorAll('[data-sport]'))tab.setAttribute('aria-pressed',String(tab.dataset.sport===state.sport));
+ for(const tab of document.querySelectorAll('[data-sport]')){tab.setAttribute('aria-pressed',String(tab.dataset.sport===state.sport));tab.hidden=state.kind==='props'&&!['NBA','NFL'].includes(tab.dataset.sport);}
+ for(const tab of document.querySelectorAll('[data-kind]'))tab.setAttribute('aria-pressed',String(tab.dataset.kind===state.kind));$('other-league').hidden=state.kind!=='games';
  renderCoverage(state,state.rows.map(current).filter(r=>Date.parse(r.startsAt)>Date.now()));
  $('status').textContent=(state.message?`${state.message} `:'')+(state.status==='ready'||shortlist?`${rows.length} matching ${shortlist?'shortlisted':'research'} quotes · ${state.sport} · ${state.provider||'Provider unavailable'} · response ${date(state.generatedAt)}`:'');
  const target=$('cards');preserveDeepDives(target);target.replaceChildren();$('more').hidden=rows.length<=shown;
- if(!rows.length){add(target,'div',state.status==='loading'&&!shortlist?'Fetching quotes and research estimates…':state.status==='error'&&!shortlist?'Quotes could not be loaded. This does not mean every market is PASS.':shortlist?'No upcoming shortlisted quotes match these filters. Shortlists are kept only for this page session.':all.length?'No quotes match these filters.':'No upcoming prop quotes were returned. Coverage may be unavailable or outside the provider window.','empty');return;}
+ if(!rows.length){add(target,'div',state.status==='loading'&&!shortlist?'Fetching quotes and research estimates…':state.status==='error'&&!shortlist?'Quotes could not be loaded. This does not mean every market is PASS.':shortlist?'No upcoming shortlisted quotes match these filters. Shortlists are kept only for this page session.':all.length?'No quotes match these filters.':'No upcoming quotes were returned. Coverage may be unavailable or outside the provider window.','empty');return;}
  for(const row of rows.slice(0,shown)){
-  const card=add(target,'article',undefined,'card');const head=add(card,'div',undefined,'card-head');add(head,'h3',row.player);add(head,'span','NOT CLEARED','badge');add(card,'p',`${row.away||'Away unavailable'} @ ${row.home||'Home unavailable'} · ${date(row.startsAt)}`,'match');add(card,'small',label(row.marketType).toUpperCase());add(card,'p',`${row.side} ${row.line??'Line unavailable'}`,'selection');add(card,'p',`${bookLabel(row.book)} · ${priceLabel(row)}`,'quote');
+  const card=add(target,'article',undefined,'card');const head=add(card,'div',undefined,'card-head');add(head,'h3',row.player);add(head,'span','NOT CLEARED','badge');add(card,'p',`${row.away||'Away unavailable'} @ ${row.home||'Home unavailable'} · ${date(row.startsAt)}`,'match');add(card,'small',label(row.marketType).toUpperCase()+(row.period?' · '+(row.period==='reg'?'REGULATION':row.period==='game'?'FULL GAME':'PERIOD UNVERIFIED'):''));add(card,'p',`${row.side} ${row.kind==='games'&&row.line===null?'':row.line??'Line unavailable'}`,'selection');add(card,'p',`${bookLabel(row.book)} · ${priceLabel(row)}`,'quote');
   const platformSpecific=['dfs','exchange'].includes(row.platformType);
   const compare=add(card,'div',undefined,'comparison');for(const [name,value] of (platformSpecific?[['Model chance*',pct(row.model)],['Payout / cost','Unverified'],['Value check','Unavailable']]:[['Model chance*',pct(row.model)],['Book chance',pct(row.market)],['Gap (points)',difference(row).replace(' pp','')]])){const cell=add(compare,'div');add(cell,'small',name);add(cell,'strong',value);}
+  appendComparison(card,row,comparisons.get(row.id));
   if(row.priceCheck)add(card,'p',row.priceCheck.summary,'price-readiness');
   add(card,'p',`${row.freshness} timestamp · ${date(row.updatedAt)}`,'freshness '+(row.freshness==='CURRENT'?'current':''));
-  add(card,'p',row.status==='SHADOW'?'Research only. The model chance is experimental; it is not a betting recommendation.':'Research only. This line has no validated player prediction attached.','match');
-  appendDeepDive(card,row,{scope:'research',presentation:{title:'NOT CLEARED — research only',reason:'This estimate has not earned live approval.'}});
+  add(card,'p',row.status==='SHADOW'?'Research only. The model chance is experimental; it is not a betting recommendation.':'Research only. This line has no validated prediction attached.','match');
+  if(row.kind!=='games')appendDeepDive(card,row,{scope:'research',presentation:{title:'NOT CLEARED — research only',reason:'This estimate has not earned live approval.'}});
   const actions=add(card,'div',undefined,'actions');button(actions,'Why isn’t this cleared?',()=>openDetail(row));button(actions,saved.has(row.id)?'Remove saved':'Shortlist +',()=>{if(saved.has(row.id))saved.delete(row.id);else saved.set(row.id,structuredClone(row));render();});
  }
  $('more').textContent=`Show more · ${Math.min(shown,rows.length)} of ${rows.length}`;
@@ -55,17 +67,19 @@ function drawDetail(){
  const section=(heading,copy,className='detail-section')=>{const block=add(body,'section',undefined,className);add(block,'h3',heading);if(copy)add(block,'p',copy);return block;};
  const number=v=>typeof v==='number'&&Number.isFinite(v)?v.toFixed(1):null;
  const unit=label(row.marketType).replace('receiving receptions','receptions');
- add(body,'p',(row.side==='OVER'?'More than':'Less than')+' '+(row.line??'?')+' '+unit,'selection');
+ add(body,'p',row.kind==='games'?label(row.marketType)+' · '+row.side+' '+(row.line??'')+' · '+(row.period==='reg'?'Regulation':row.period==='game'?'Full game':'Period unverified'):(row.side==='OVER'?'More than':'Less than')+' '+(row.line??'?')+' '+unit,'selection');
  add(body,'p',bookLabel(row.book)+' · '+priceLabel(row)+' · '+date(row.startsAt),'muted');
  section('NOT CLEARED — research only',row.model===null?'This line has no validated prediction attached. Platform checks and player availability still matter.':'The model is still being tested. Its estimated chance has not earned approval for live plays.','decision-summary');
+ appendComparison(body,row,comparisonIndex().get(row.id));
  if(row.priceCheck){const block=section('Price and payout checks',row.priceCheck.summary);const list=add(block,'ul');for(const reason of row.priceCheck.reasons)add(list,'li',reason);}
  if(row.platformType==='dfs'){
-  section('Why there is no book percentage','The provider’s indicative odds are not the payout for a PrizePicks or Underdog entry. Check the actual lineup type, every payout tier, pick multipliers, promotions, correlations and settlement rules. No 50% probability is inferred from +100.');
+  section('Why there is no book percentage','The provider’s indicative odds are not the payout for this DFS entry. Check the actual lineup type, every payout tier, pick multipliers, promotions, correlations and settlement rules. No 50% probability is inferred from +100.');
   if(priorWorksheet?.dataset.quoteId===row.id&&priorWorksheet.dataset.observedAt===row.generatedAt)body.append(priorWorksheet);
   else {appendDfsWorksheet(body,row);const sheet=body.querySelector('.payout-worksheet');sheet.dataset.quoteId=row.id;sheet.dataset.observedAt=row.generatedAt;}
- }else if(row.platformType==='exchange')section('Why the Kalshi cost is unverified','This provider record does not identify the exact contract and executable order book. Americanized indicative odds cannot substitute for an ask price, size, fees and settlement terms. No cost-based probability or expected profit is shown.');
+ }else if(row.platformType==='exchange')section('Why the exchange cost is unverified','This provider record does not identify the exact contract and executable order book. Americanized indicative odds cannot substitute for an ask price, size, fees and settlement terms. No cost-based probability or expected profit is shown.');
  else section('What the percentages mean','Model chance: '+pct(row.model)+'. Book chance: '+pct(row.market)+'. A book percentage requires fresh opposing prices from the exact book and line. Integer lines can push, so their unconditional percentage is withheld. A gap does not prove an advantage.');
  if(row.freshness!=='CURRENT')section('Quotes need refreshing',row.freshness==='STALE'?'These quotes exceed the freshness limit. The market comparison is hidden until fresh prices arrive.':'We cannot verify when these quotes were updated. The market comparison is hidden.');
+ if(row.kind==='games'){section('Game market rules','Compare only the same period, outcome structure and line. Regulation and full-game markets can settle differently. Provider prices do not confirm identical house rules, limits or account eligibility.');section('Sources and decision status','Source: '+(row.provider||'Unknown')+'. Quote updated '+date(row.updatedAt)+'. Provider fetched '+date(row.generatedAt)+'. No game model is attached to these quotes; check the cleared team plays page for current decisions.');section('Market reference','The reference excludes this book. It uses the median no-vig chance from at least two other sharp books, or at least three other sportsbooks. Books may share information; this is not a validated probability or a count of independent samples.');return;}
  const evidence=[];
  const fact=(title,value,explanation,feature)=>{
   const block=add(body,'section',undefined,'context-fact');
@@ -103,7 +117,10 @@ function drawDetail(){
  add(details,'p','EPA means expected points added: estimated scoring value created by a play. Historical publication times are not verified. Context influence remains zero.');
  section('Saving this prop','Shortlist saves it only while this page stays open. It does not place a bet or record a model prediction.');
 }
-for(const tab of document.querySelectorAll('[data-sport]'))tab.onclick=()=>{shown=40;$('query').value='';$('book').value='';$('market').value='';loader.load(tab.dataset.sport);};
-for(const id of ['query','book','market','freshness'])$(id).addEventListener(id==='query'?'input':'change',()=>{shown=40;render();});
-$('refresh').onclick=()=>loader.load(loader.state.sport);$('more').onclick=()=>{shown+=40;render();};$('shortlist-toggle').onclick=()=>{shortlist=!shortlist;shown=40;populate();render();};$('close-detail').onclick=()=>{$('detail').close();selected=null;};$('detail').addEventListener('close',()=>{selected=null;});
+function changeView(sport,kind){shown=40;shortlist=false;for(const id of ['query','book','market'])$(id).value='';$('best-prices').checked=false;loader.load(sport,kind);}
+for(const tab of document.querySelectorAll('[data-sport]'))tab.onclick=()=>changeView(tab.dataset.sport,loader.state.kind);
+for(const tab of document.querySelectorAll('[data-kind]'))tab.onclick=()=>changeView(tab.dataset.kind==='props'&&!['NBA','NFL'].includes(loader.state.sport)?'NBA':loader.state.sport,tab.dataset.kind);
+$('league-form').onsubmit=e=>{e.preventDefault();const league=$('league-code').value.trim().toUpperCase();if(/^[A-Z0-9][A-Z0-9_-]{0,39}$/.test(league))changeView(league,'games');};
+for(const id of ['query','book','market','freshness','best-prices'])$(id).addEventListener(id==='query'?'input':'change',()=>{shown=40;render();});
+$('refresh').onclick=()=>loader.load(loader.state.sport,loader.state.kind);$('more').onclick=()=>{shown+=40;render();};$('shortlist-toggle').onclick=()=>{shortlist=!shortlist;shown=40;populate();render();};$('close-detail').onclick=()=>{$('detail').close();selected=null;};$('detail').addEventListener('close',()=>{selected=null;});
 setInterval(()=>{render();if($('detail').open)drawDetail();},60000);loader.load('NBA');

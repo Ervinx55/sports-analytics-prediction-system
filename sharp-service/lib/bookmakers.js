@@ -1,5 +1,6 @@
 // Provider identifiers, not the legacy sharp-source approval contract.
 // https://sportsgameodds.com/docs/data-types/bookmakers
+import {platformType} from '../book-catalog.js';
 export function canonicalBookmaker(book) {
   const id = String(book ?? '').trim().toLowerCase();
   return ['bookmaker', 'bookmaker.eu'].includes(id) ? 'bookmakereu' : id;
@@ -14,13 +15,8 @@ export function bookmakerQuery(value) {
   return bookmakerIds(String(text ?? '').split(',').slice(0, 20));
 }
 
-const DFS = new Set(['prizepicks', 'underdog', 'sleeper', 'parlayplay', 'hotstreak']);
-const EXCHANGES = new Set(['kalshi', 'polymarket', 'novig', 'betfairexchange', 'matchbook', 'sporttrade']);
-const SPORTSBOOKS = new Set(['pinnacle', 'circa', 'bookmakereu', 'bovada', 'draftkings', 'fanduel', 'betmgm', 'caesars', 'betonline', 'betrivers', 'bet365', 'fanatics']);
-
 export function bookmakerType(id) {
-  id = canonicalBookmaker(id);
-  return DFS.has(id) ? 'dfs' : EXCHANGES.has(id) ? 'exchange' : SPORTSBOOKS.has(id) ? 'sportsbook' : 'unknown';
+  return platformType(id);
 }
 
 // Counts individual returned quote sides. This does not assert paired prices,

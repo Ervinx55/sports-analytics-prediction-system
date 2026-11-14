@@ -16,12 +16,12 @@ function event(id='g1'){
 }
 const page=events=>async()=>({payload:{success:true,data:events},fetchedAt:now,cacheStatus:'MISS'});
 
-test('research requests all eight platforms without changing the default frozen request',async()=>{
+test('research omits book filters for all entitled platforms without changing the frozen request',async()=>{
  const urls=[];const fetchPage=async r=>{urls.push(new URL(r.url));return page([event()])();};
  const research=await researchPropsResponse({now,key:'test',fetchPage});
  const frozen=await propsResponse({now,key:'test',fetchPage});
  assert.equal(research.status,200);assert.equal(frozen.status,200);
- assert.deepEqual(urls[0].searchParams.get('bookmakerID').split(',').sort(),['bookmakereu','bovada','circa','draftkings','kalshi','pinnacle','prizepicks','underdog']);
+ assert.equal(urls[0].searchParams.get('bookmakerID'),null);
  assert.equal(urls[1].searchParams.get('bookmakerID'),'draftkings');
  assert.equal(research.body.productionWeight,0);assert.equal(research.body.productionEligible,false);
  const rows=normalizeResearch(research.body,'NBA',now);
@@ -63,7 +63,7 @@ test('research rejects bad player bindings, started events and unavailable offer
  e.odds[`points-${playerID}-game-ou-over`].byBookmaker.kalshi.available=false;
  const malformed=event('bad');malformed.players[playerID].teamID='OTHER_NBA';
  const started=event('started');started.status.started=true;
- const result=await researchPropsResponse({now,key:'test',fetchPage:page([e,malformed,started])});
+ const result=await researchPropsResponse({now,key:'test',requestedBooks:['draftkings','bovada','prizepicks','underdog','kalshi'],fetchPage:page([e,malformed,started])});
  assert.equal(result.body.events.length,1);
  assert.ok(result.body.bookCoverage.missingRequested.includes('bovada'));
  assert.ok(result.body.bookCoverage.missingRequested.includes('kalshi'));
@@ -136,4 +136,30 @@ test('research quota exhaustion makes no quote requests',async()=>{
 test('research quota optimizer bounds page size and includes two-page fanout',async()=>{
  let policy,request;const r=await rawResearchPropsResponse({now,key:'test',optimize:async p=>{policy=p;return {blocked:false,effectiveLimit:2};},fetchPage:async p=>{request=p;return page([])();}});
  assert.equal(r.status,200);assert.equal(policy.fanout,2);assert.equal(policy.priority,'background');assert.equal(new URL(request.url).searchParams.get('limit'),'2');assert.equal(request.objectPolicy.effectiveLimit,2);
+});
+test('all-book research includes documented new platforms and withholds probability for unknown types',async()=>{
+ const e=event();for(const odd of Object.values(e.odds))odd.byBookmaker={fanduel:q(),sleeper:q(),novig:q(),futurebook:q()};
+ const body=(await researchPropsResponse({now,key:'test',fetchPage:page([e])})).body;
+ const rows=normalizeResearch(body,'NBA',now);assert.equal(rows.length,8);
+ assert.equal(rows.find(r=>r.book==='fanduel').market,.5);
+ for(const r of rows.filter(r=>r.book!=='fanduel'))assert.equal(r.market,null);
+ let url;await researchPropsResponse({now,key:'test',requestedBooks:['fanduel'],fetchPage:async p=>{url=new URL(p.url);return page([e])();}});
+ assert.equal(url.searchParams.get('bookmakerID'),'fanduel');
+});
+test('NFL quote research keeps strict provider identity and attaches estimates only to an identical quote',async()=>{
+ const e=JSON.parse(JSON.stringify(event()).replaceAll('_NBA','_NFL').replaceAll('"NBA"','"NFL"').replaceAll('points','receiving_yards'));
+ const body=(await researchPropsResponse({now,key:'test',league:'NFL',fetchPage:page([e])})).body;
+ const row=normalizeResearch(body,'NFL',now).find(r=>r.book==='draftkings');
+ body.candidates=[{eventID:row.eventID,startsAt:row.startsAt,playerID:row.playerID,playerName:row.player,statID:row.marketType,side:row.side,line:row.line,bestBook:row.book,bestOdds:row.odds,rawIndependentProbability:.6}];
+ assert.equal(normalizeResearch(body,'NFL',now).filter(r=>r.model!==null).length,1);
+ for(const patch of [{line:row.line+1},{bestOdds:-120},{playerID:'WRONG_NFL'},{eventID:'other'},{bestBook:'fanduel'}]){
+  const changed=structuredClone(body);Object.assign(changed.candidates[0],patch);assert.ok(normalizeResearch(changed,'NFL',now).every(r=>r.model===null));
+ }
+});
+test('research avoids repeating diagnostic paragraphs on every quote while preserving computed readiness',async()=>{
+ const body=(await researchPropsResponse({now,key:'test',fetchPage:page([event()])})).body;
+ const quote=body.events[0].players[0].prop.over.books.draftkings;
+ assert.equal(quote.priceCheck,undefined);
+ assert.equal(body.bookCoverage.books.find(b=>b.id==='draftkings').comparablePriceSides,2);
+ assert.equal(normalizeResearch(body,'NBA',now).find(r=>r.book==='draftkings').market,.5);
 });
