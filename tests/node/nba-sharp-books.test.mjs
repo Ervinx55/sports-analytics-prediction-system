@@ -24,3 +24,13 @@ test('missing bookmakers are explicitly not observed, not claimed available',asy
  assert.deepEqual(body.coverage.observedBookmakers,[]);
  assert.equal(body.coverage.bookmakerCoverage.pinnacle.status,'NOT_OBSERVED');
 });
+
+import {propsResponse} from '../../sharp-service/api/nbaprops.js';
+test('object quota exhaustion prevents quote calls without changing eligibility',async()=>{
+ let calls=0;const r=await propsResponse({key:'test',optimize:async()=>({blocked:true,effectiveLimit:0}),fetchPage:async()=>{calls++;}});
+ assert.equal(calls,0);assert.equal(r.status,429);assert.equal(r.body.productionEligible,false);
+});
+test('object quota caps page size and accounts for both pages',async()=>{
+ let request,policy;const r=await propsResponse({now:Date.parse(now),key:'test',optimize:async p=>{policy=p;return {blocked:false,effectiveLimit:2,pressure:'HIGH'};},fetchPage:async p=>{request=p;return {payload:{success:true,data:[]},fetchedAt:Date.parse(now),cacheStatus:'HIT'};}});
+ assert.equal(r.status,200);assert.equal(policy.fanout,2);assert.equal(new URL(request.url).searchParams.get('limit'),'2');assert.equal(request.objectPolicy.pressure,'HIGH');
+});
