@@ -46,7 +46,7 @@ try{
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
  assert.equal(await page.locator('.card').count(),0);
  await page.locator('[data-sport="NBA"]').click();await page.locator('.card').first().waitFor();
- await page.getByRole('button',{name:'Refresh',exact:true}).click();await page.locator('.card').first().waitFor();
+ await page.locator('#refresh').click();await page.locator('.card').first().waitFor();
  assert.deepEqual(errors,[]);
  console.log('Sharp-book mobile research and worksheet flows passed');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}
