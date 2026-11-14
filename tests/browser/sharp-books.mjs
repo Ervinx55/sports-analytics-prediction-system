@@ -81,7 +81,8 @@ try{
  await page.locator('#book').selectOption('pinnacle');
  await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
  assert.match(await page.locator('#detail-body').innerText(),/Model chance: Unavailable/);
- await page.locator('#detail-body .source-details summary').click();
+ if(!await page.locator('#detail-body .source-details').evaluate(e=>e.open))await page.locator('#detail-body .source-details summary').click();
+ assert.equal(await page.locator('#detail-body .source-details').evaluate(e=>e.open),true);
  releaseNflModel();
  await page.waitForFunction(()=>document.querySelector('#modeled').textContent==='1');
  assert.match(await page.locator('#detail-body').innerText(),/Model chance: 60.0%/);
