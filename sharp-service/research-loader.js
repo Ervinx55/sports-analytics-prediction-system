@@ -1,9 +1,11 @@
 import {normalizeResearch} from './research-data.js';
 import {normalizeGameResearch} from './research-comparison.js';
 import {researchFreshness} from './prop-price-checks.js';
+import {providerLeague} from './league-codes.js';
 export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.now}={}){
  let state={sport:'NBA',kind:'props',status:'idle',rows:[],message:''},sequence=0,controller;
  return {get state(){return state;},async load(sport,kind='props'){
+  sport=providerLeague(sport);
   if(!['props','games'].includes(kind)||(kind==='props'?!['NBA','NFL'].includes(sport):!(/^[A-Z0-9][A-Z0-9_-]{0,39}$/).test(sport)))throw Error('Unsupported sport or view');
   const current=++sequence;controller?.abort();const request=new AbortController();controller=request;
   state={sport,kind,status:'loading',rows:[],message:'Loading current research…'};onChange(state);
@@ -12,7 +14,7 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
   let estimateController,estimateTimer,abortEstimate;
   try{
    const bucket=Math.floor(now()/3600000)*3600000;
-   const gameParams=new URLSearchParams({view:'research',leagues:sport,limit:'16',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString()});
+   const gameParams=new URLSearchParams({view:'research',leagues:sport,limit:sport==='NCAAF'?'100':'16',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString()});
    const quoteRequest=get(kind==='games'?'/api/board?'+gameParams:`/api/${sport==='NBA'?'nba':'nfl'}props?view=research`);
    let modelRequest=Promise.resolve(null);
    if(kind==='props'&&sport==='NFL'){
@@ -29,6 +31,7 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    if(!response.ok||request.signal.aborted)throw Error('Unavailable');
    const identity=data.sourceHealth?.playerIdentity,count=v=>Number.isSafeInteger(v)&&v>=0?v:0;
    let message=identity?count(identity.matched)+' roster-matched market records; '+count(identity.excluded)+' withheld for roster mismatch or ambiguity; '+count(identity.unverified)+' unverified. ':'';
+   if(kind==='games'&&sport==='NCAAF')message+='CFB book comparisons only; a CFB model forecast is not connected. ';
    if(data.coverage?.eventsComplete===false||data.providerObservations?.some(p=>p.eventsComplete===false))message+='Partial provider coverage: some games could not be collected in this bounded refresh. ';
    if(kind==='games'&&data.unavailableLeagues?.some(p=>p.league===sport))throw Error('League unavailable');
    const ready=message=>{
