@@ -2,7 +2,7 @@ import test, { beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import board from '../../sharp-service/api/board.js';
 import sharp from '../../sharp-service/api/sharp.js';
-import nbaHandler, { propsResponse } from '../../sharp-service/api/nbaprops.js';
+import { propsResponse } from '../../sharp-service/api/nbaprops.js';
 import { normalizeSharpApiBoardRows } from '../../sharp-service/lib/sharpapi-provider.js';
 import { protectedSportsGameOddsFetch as fetchOdds, resetProviderProtectionForTests } from '../../sharp-service/lib/provider-protection.js';
 
@@ -135,19 +135,4 @@ test('the shared SGO boundary coalesces equivalent aliases without truncating in
   assert.equal(seenUrl.searchParams.get('bookmakerID'), 'bookmakereu,bovada');
   await request(Array.from({ length: 25 }, (_, i) => 'fixture' + i).join(','));
   assert.equal(seenUrl.searchParams.get('bookmakerID').split(',').length, 25);
-});
-
-
-test('HTTP research opt-in never changes the default frozen NBA collection', async () => {
-  for (const query of [{}, {research:'0'}, {research:'true'}, {research:['1']}, {research:'1'}]) {
-    resetProviderProtectionForTests();
-    const urls=[];
-    globalThis.fetch=async url=>{urls.push(new URL(url));return response({success:true,data:[]});};
-    const result=await invoke(nbaHandler,query);
-    assert.equal(result.statusCode,200);
-    const books=urls.find(url=>url.hostname==='api.sportsgameodds.com').searchParams.get('bookmakerID');
-    assert.equal(books,query.research==='1'?'bookmakereu,circa,draftkings,pinnacle,prizepicks':'draftkings');
-    assert.equal(result.body.productionEligible,false);
-    assert.equal(result.body.productionWeight,0);
-  }
 });

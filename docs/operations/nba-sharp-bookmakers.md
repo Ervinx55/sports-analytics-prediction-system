@@ -1,57 +1,30 @@
-# NBA sharp bookmaker collection
+# Sharp books in NBA research
 
-The isolated NBA research feed (`/api/nbaprops?research=1`) requests the established sharp reference books
-Pinnacle (`pinnacle`), Circa (`circa`) and BookMaker (`bookmakereu`), plus DraftKings
-and PrizePicks. Provider IDs are documented at
-https://sportsgameodds.com/docs/data-types/bookmakers.
+This change extends the research collector shipped in PR #60. It does not install
+a second collector or endpoint. The research UI continues to use
+`/api/nbaprops?view=research`; default `/api/nbaprops` remains the frozen DraftKings
+validation feed. PR #59 provider aliases and circuit handling remain unchanged.
 
-- One combined bookmaker filter, not one request per bookmaker. Pagination stays
-  capped at two pages of 16 events, and cache/polling intervals are unchanged.
-- Matching event/player/market/line/side quotes retain each book's own price and
-  timestamp. Different lines never form a single artificial over/under pair.
-- PrizePicks is a DFS comparison target, not a sharp sportsbook. Its lines are
-  returned separately in `comparisonLines`, with `pricingEligible: false`, and displayed as comparison-only cards in the research UI.
-  No American price, fair probability or single-leg EV is fabricated for DFS.
-- `coverage.bookmakers` is the requested set; `observedBookmakers` and
-  `bookmakerCoverage` report what the response actually contained. `NOT_OBSERVED`
-  does not mean unsupported or absent from the subscription, only absent from
-  this bounded response. Page coverage and overall partial coverage remain explicit.
-- Missing/failing providers do not relax production eligibility, calibration,
-  freshness or automatic-BUY gates. The endpoint remains research-only.
+Research now requests Pinnacle (`pinnacle`), Circa (`circa`), and BookMaker.eu
+(`bookmakereu`) alongside DraftKings, Bovada, PrizePicks, Underdog and Kalshi.
+Sharp sportsbook quotes use the same strict roster, exact-line, availability and
+five-minute freshness checks as existing sportsbook research. Book chance requires
+fresh opposing prices at the same book and line; it is not a validated prediction.
+DFS payout worksheets, exchange limitations and all production/model gates remain
+unchanged. No line availability or price comparison clears a play.
 
-Game-level board routes already accept arbitrary provider bookmaker filters; this
-change adds a separate research collector. The default `/api/nbaprops` and `nba-direct-props.js` retain the frozen DraftKings-only validation contract from PR #59. The research UI explicitly opts in; enrolled forecast and validation callers do not. The query mode reuses the existing function to preserve the 14-function deployment budget.
-It does not add every sportsbook to the sharp consensus or alter reference weights.
+One combined filter is used, not one request per book. The shared object optimizer
+uses background priority and a two-page fanout. Each page remains capped at 16
+events, with smaller limits under quota pressure. Exhausted quota stops quote
+requests and the UI explains the quota blocker. No polling interval is increased.
 
-## Rollout verification
+Coverage reports returned research lines only. A book not observed is not proof
+of entitlement or lack of entitlement. Team-market coverage is not prop coverage.
+No live sharp player-prop coverage is claimed from synthetic tests.
 
-Before deployment, verify account coverage and quota using one bounded upcoming-NBA
-request. Record actual books returned and source timestamps rather than treating a
-provider announcement as entitlement evidence. A no-quote result is inconclusive
-when the slate/market is unavailable. Verify object quota remaining before raising
-collection frequency. This patch does not raise frequency and retains existing
-provider-protection request controls. The dedicated route now invokes the shared
-object-limit optimizer with a two-page fanout; exhausted quota prevents upstream
-quote requests and reduced page limits remain explicitly partial.
-
-Local fixture tests verify multi-book merging, distinct lines, missing-book reporting,
-DFS separation, two-page bounds, cache timestamps and unchanged production gates.
-Live account coverage is not established by those fixtures.
-
-## November 14 validation
-
-At 04:42 UTC, the deployed provider status reported Pro, 300 requests/minute,
-3,000,000 daily objects and 2,998,111 remaining (LOW pressure). Two bounded
-existing sharp-route probes, limits 1 then 4, returned only DraftKings game
-quotes across the available upcoming NBA events. They returned no Pinnacle,
-Circa, BookMaker or PrizePicks quotes; absence is not proof of no entitlement.
-Do not advertise these books as live until observed. No paid plan changes.
-
-Reconciliation with PR #59 preserves its provider ID aliases, HTTP 400 circuit handling,
-and team-market book coverage. Team-market observations are not player-prop coverage.
-The multi-book collector has its own consumer label; distinct bookmaker query filters
-keep its provider cache separate from the frozen DraftKings feed. Neither research
-quotes nor PrizePicks lines change production/model eligibility.
-
-Verification is recorded in the PR description for the current head. Earlier #58 CI
-passed before this reconciliation and must not be treated as testing this revision.
+Tests cover expanded requests, sharp exact-line price pairs, unchanged frozen feed,
+quota bounds and failure, plus the existing PR #60 platform/normalization checks.
+The mobile browser fixture covers sharp coverage/filtering, DFS probability absence,
+worksheet repeat/edit invalidation, modal close, shortlist, sport switching and
+refresh. Current-head CI status is recorded in PR #58. No merge/deploy is authorized
+by these checks alone.

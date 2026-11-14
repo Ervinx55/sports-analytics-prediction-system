@@ -1,58 +1,77 @@
-// Bounded quote collection. Exhaust the event cursor instead of dropping game nine.
-export const NBA_PROP_PAGE_SIZE=16;
-const MAX_PAGES=2;
-// Provider IDs: https://sportsgameodds.com/docs/data-types/bookmakers
-export const NBA_PROP_SHARP_BOOKS=Object.freeze(['pinnacle','circa','bookmakereu']);
-export const NBA_PROP_BOOKS=Object.freeze([...NBA_PROP_SHARP_BOOKS,'draftkings','prizepicks']);
-export async function directResearchProps({page,clock,pageSize=NBA_PROP_PAGE_SIZE}){
- const now=clock(),patterns=['points','rebounds','assists'].flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`));
- const params={leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:NBA_PROP_BOOKS.join(','),oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:String(Math.max(1,Math.min(NBA_PROP_PAGE_SIZE,Math.floor(pageSize)||NBA_PROP_PAGE_SIZE)))};
- const rawEvents=new Map(),timestamps=[],reasons=[],seenCursors=new Set();
- let cursor=null,pagesFetched=0,eventsComplete=false;
- for(let i=0;i<MAX_PAGES;i++){
-  let result;
-  try{result=await page({...params,...(cursor?{cursor}:{})});}
-  catch(error){if(!pagesFetched)throw error;reasons.push('PAGE_UNAVAILABLE');break;}
-  pagesFetched++;timestamps.push(result.observedAt);
-  for(const e of result.events)if(e?.eventID&&!rawEvents.has(e.eventID))rawEvents.set(e.eventID,e);
-  if(!result.nextCursor){eventsComplete=true;break;}
-  if(typeof result.nextCursor!=='string'||seenCursors.has(result.nextCursor)){reasons.push('INVALID_CURSOR');break;}
-  cursor=result.nextCursor;seenCursors.add(cursor);
-  if(i===MAX_PAGES-1)reasons.push('PAGE_LIMIT_REACHED');
- }
- const events=[],comparisonLines=[];
- const bookmakerCoverage=Object.fromEntries(NBA_PROP_BOOKS.map(book=>[book,{role:NBA_PROP_SHARP_BOOKS.includes(book)?'SHARP_REFERENCE':book==='prizepicks'?'DFS_COMPARISON':'EXECUTION',status:'NOT_OBSERVED',pricedQuotes:0,lineOnlyQuotes:0}]));
- for(const e of rawEvents.values()){
-  if(e.leagueID!=='NBA'||e.type!=='match'||!e.eventID||e.status?.started||e.status?.live||e.status?.completed||e.status?.finalized||e.status?.cancelled||!(Date.parse(e.status?.startsAt)>Date.parse(now)))continue;
-  const props=new Map();
-  for(const o of Object.values(e.odds??{})){
-   const playerID=o.playerID||o.statEntityID,side=o.sideID,market=o.statID;
-   if(!['points','rebounds','assists'].includes(market)||!['over','under'].includes(side)||o.periodID!=='game'||o.betTypeID!=='ou'||o.oddID!==`${market}-${playerID}-game-ou-${side}`||e.players?.[playerID]?.playerID!==playerID)continue;
-   for(const book of NBA_PROP_BOOKS){
-    const b=o.byBookmaker?.[book];
-    if(!b||b.available===false||b.overUnder==null||b.overUnder==='')continue;
-    const line=Number(b.overUnder);
-    if(!Number.isFinite(line)||line<0)continue;
-    // DFS payouts are not single-bet American odds. Keep them out of pricing.
-    if(book==='prizepicks'){
-     comparisonLines.push({eventID:'sgo:'+e.eventID,startsAt:e.status.startsAt,playerName:e.players[playerID].name||playerID,playerID,market,side,book,line,updatedAt:b.lastUpdatedAt??null,pricingEligible:false});
-     bookmakerCoverage[book].lineOnlyQuotes++;bookmakerCoverage[book].status='LINE_ONLY';continue;
-    }
-    const odds=Number(b.odds);
-    if(b.odds==null||b.odds===''||!Number.isFinite(odds)||Math.abs(odds)<100)continue;
-    const key=JSON.stringify([playerID,market,line]);
-    if(!props.has(key))props.set(key,{playerID,playerName:e.players[playerID].name||playerID,statID:market});
-    const prop=props.get(key);prop[side]??={books:{}};
-    prop[side].books[book]={line,odds,available:true,updatedAt:b.lastUpdatedAt??null};
-    bookmakerCoverage[book].pricedQuotes++;bookmakerCoverage[book].status='OBSERVED';
-   }
+import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from './provider-protection.js';
+import {bookCoverage,bookmakerIds} from './bookmakers.js';
+import {PROP_BOOKS,platformType,assessPropQuote} from '../prop-price-checks.js';
+const MARKETS=['points','rebounds','assists'],PAGE_SIZE=16,MAX_PAGES=2;
+const number=value=>{
+ if(typeof value==='number')return Number.isFinite(value)?value:null;
+ if(typeof value!=='string'||!/^[-+]?(?:\d+\.?\d*|\.\d+)$/.test(value.trim()))return null;
+ const n=Number(value);return Number.isFinite(n)?n:null;
+};
+function researchCoverage(books,quotes,now){
+ const coverage=bookCoverage({requestedBooks:books,quotes,now});
+ return {...coverage,books:coverage.books.map(row=>{
+  const lines=quotes.filter(q=>q.book===row.id&&q.price.available===true&&Number.isFinite(q.price.line));
+  return {...row,availableQuoteSides:lines.length,freshQuoteSides:lines.filter(q=>q.price.priceCheck.freshness==='CURRENT').length,comparablePriceSides:lines.filter(q=>q.price.priceCheck.status==='COMPARABLE').length};
+ }),availabilityBasis:'Provider line availability; comparablePriceSides is separate from line freshness.'};
+}
+
+function normalizeEvent(e,now,books){
+ const startsAt=e?.status?.startsAt;
+ if(e?.leagueID!=='NBA'||e.type!=='match'||!e.eventID||!(Date.parse(startsAt)>now)||['started','live','completed','finalized','cancelled','canceled','ended'].some(k=>e.status?.[k]))return null;
+ const teams=[e.teams?.home?.teamID,e.teams?.away?.teamID];
+ if(!teams.every(t=>typeof t==='string'&&t.endsWith('_NBA'))||teams[0]===teams[1])return null;
+ const props=new Map();
+ for(const o of Object.values(e.odds??{})){
+  if(!o)continue;
+  const playerID=o.playerID||o.statEntityID,side=o.sideID,market=o.statID,player=e.players?.[playerID];
+  if(typeof playerID!=='string'||!playerID.endsWith('_NBA')||player?.playerID!==playerID||!teams.includes(player.teamID)||!MARKETS.includes(market)||!['over','under'].includes(side)||o.periodID!=='game'||o.betTypeID!=='ou'||o.oddID!==`${market}-${playerID}-game-ou-${side}`)continue;
+  for(const book of books){
+   const b=o.byBookmaker?.[book],line=number(b?.overUnder);
+   if(!b||b.available!==true||line===null||line<0)continue;
+   const key=JSON.stringify([playerID,market,line]),type=platformType(book),nativeOdds=number(b.odds);
+   if(!props.has(key))props.set(key,{playerID,playerName:player.name||playerID,statID:market,identityStatus:'PROVIDER_ROSTER_MATCHED'});
+   const prop=props.get(key);prop[side]??={books:{}};
+   prop[side].books[book]={line,odds:type==='sportsbook'?nativeOdds:null,indicativeOdds:type==='sportsbook'?null:nativeOdds,available:true,updatedAt:b.lastUpdatedAt??null,platformType:type};
   }
-  events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,players:[...props.values()].map(prop=>{
-   const teamId=e.players[prop.playerID].teamID,teams=[e.teams?.home?.teamID,e.teams?.away?.teamID];
-   const valid=teams.every(t=>typeof t==='string'&&t.endsWith('_NBA'))&&teams[0]!==teams[1]&&teams.includes(teamId);
-   return {prop,...(valid?{explanationBinding:{contract:'sgo-event-roster-v1',eventID:'sgo:'+e.eventID,playerID:prop.playerID,startsAt:e.status.startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}}:{})};
-  })});
  }
- const generatedAt=timestamps.sort((a,b)=>Date.parse(a)-Date.parse(b))[0];
- return {generatedAt,events,comparisonLines,partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,bookmakers:[...NBA_PROP_BOOKS],observedBookmakers:NBA_PROP_BOOKS.filter(book=>bookmakerCoverage[book].status!=='NOT_OBSERVED'),bookmakerCoverage,markets:['points','rebounds','assists']},source:'DIRECT_SGO_BOUNDED_FALLBACK'};
+ if(!props.size)return null;
+ const eventID='sgo:'+e.eventID;
+ return {eventID,provider:'SportsGameOdds',startsAt,matchup:{home:{name:e.teams.home.names?.long??e.teams.home.names?.medium??null},away:{name:e.teams.away.names?.long??e.teams.away.names?.medium??null}},players:[...props.values()].map(prop=>{
+  const teamId=e.players[prop.playerID].teamID;
+  return {prop,explanationBinding:{contract:'sgo-event-roster-v1',eventID,playerID:prop.playerID,startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}};
+ })};
+}
+
+export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODDS_API_KEY||process.env.Sports_Game_Odds_API||'',fetchPage=protectedSportsGameOddsFetch,requestedBooks=[],optimize=optimizeSportsGameOddsObjectLimit}={}){
+ const clock=()=>now??Date.now();
+ const books=bookmakerIds(requestedBooks.length?requestedBooks:PROP_BOOKS),unsupported=books.filter(b=>!PROP_BOOKS.includes(b));
+ const empty={contract:'nba-multibook-research-v1',events:[],productionEligible:false,productionWeight:0};
+ if(unsupported.length)return {status:400,body:{...empty,error:'UNSUPPORTED_RESEARCH_BOOK',unsupportedRequested:unsupported}};
+ const unavailable=()=>({status:503,body:{...empty,status:'UNAVAILABLE',reason:'NBA_RESEARCH_QUOTES_UNAVAILABLE',bookCoverage:{...bookCoverage({requestedBooks:books,now:clock()}),configured:books}}});
+ if(!key)return unavailable();
+ let objectPolicy;
+ try{objectPolicy=await optimize({apiKey:key,requestedLimit:PAGE_SIZE,defaultLimit:PAGE_SIZE,priority:'background',fanout:MAX_PAGES});}catch{return unavailable();}
+ if(objectPolicy.blocked)return {status:429,body:{...empty,status:'UNAVAILABLE',reason:'NBA_RESEARCH_OBJECT_QUOTA_EXHAUSTED',providerFailures:[{objectBudgetBlocked:true}]}};
+ const pageSize=Math.max(1,Math.min(PAGE_SIZE,Math.floor(objectPolicy.effectiveLimit)||PAGE_SIZE));
+ const bucket=Math.floor(clock()/3600000)*3600000;
+ const params={leagueID:'NBA',type:'match',oddIDs:MARKETS.flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`)).join(','),bookmakerID:books.join(','),oddsAvailable:'true',finalized:'false',includeAltLines:'false',startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+48*3600000).toISOString(),limit:String(pageSize)};
+ const raw=new Map(),times=[],reasons=[],seenCursors=new Set();let cursor=null,pagesFetched=0,eventsComplete=false;
+ for(let i=0;i<MAX_PAGES;i++){
+  try{
+   const result=await fetchPage({url:'https://api.sportsgameodds.com/v2/events?'+new URLSearchParams({...params,...(cursor?{cursor}:{})}),apiKey:key,consumer:'nba-research-quotes',priority:'background',freshMs:60000,staleMs:300000,timeoutMs:8000,objectPolicy});
+   const checkedAt=clock();
+   if(result.payload?.success!==true||!Array.isArray(result.payload.data)||result.payload.data.length>pageSize||!Number.isFinite(result.fetchedAt)||result.fetchedAt>checkedAt||checkedAt-result.fetchedAt>300000)throw Error('Invalid provider response');
+   pagesFetched++;times.push(result.fetchedAt);
+   for(const e of result.payload.data)if(e?.eventID&&!raw.has(e.eventID))raw.set(e.eventID,e);
+   const next=result.payload.nextCursor;
+   if(!next){eventsComplete=true;break;}
+   if(typeof next!=='string'||seenCursors.has(next)){reasons.push('INVALID_CURSOR');break;}
+   seenCursors.add(next);cursor=next;if(i===MAX_PAGES-1)reasons.push('PAGE_LIMIT_REACHED');
+  }catch{if(!pagesFetched)return unavailable();reasons.push('PAGE_UNAVAILABLE');break;}
+ }
+ const evaluatedAt=clock(),generatedAt=new Date(Math.min(...times)).toISOString(),events=[...raw.values()].map(e=>normalizeEvent(e,evaluatedAt,books)).filter(Boolean),quotes=[];
+ for(const e of events)for(const p of e.players)for(const side of ['over','under'])for(const [book,price] of Object.entries(p.prop[side]?.books??{})){
+  price.priceCheck=assessPropQuote({book,quote:price,opposite:p.prop[side==='over'?'under':'over']?.books?.[book],generatedAt,now:evaluatedAt});quotes.push({book,price});
+ }
+ return {status:200,body:{...empty,events,generatedAt,source:'SportsGameOdds',scope:'NBA multi-book research: points, rebounds and assists; main lines only; 48-hour window. Frozen validation collection unchanged.',partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,providerEvents:raw.size,bookmakers:books,markets:MARKETS},bookCoverage:{...researchCoverage(books,quotes,evaluatedAt),configured:books,scope:'Returned research lines only; DFS indicative odds and exchange quotes do not establish executable payouts. Missing books are not proof of missing entitlement.'}}};
 }
