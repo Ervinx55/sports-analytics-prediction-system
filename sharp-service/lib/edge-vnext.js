@@ -1,7 +1,7 @@
 // Edge Lab vNext: deterministic probability, price and risk primitives.
 // Strictly analytical: never authorizes bets, assigns historical calibration,
 // or substitutes bookmaker probabilities for an independent model.
-export const VERSION = "edge-vnext-alt-lines-v1";
+export const VERSION = "edge-vnext-price-gate-v2";
 
 function number(x) {
   if (x === null || x === undefined || x === "") return null;
@@ -143,26 +143,50 @@ export function summarizePositions(positions) {
 
 // Decision gate: any missing pregame forecast, timestamp, validation or
 // independently observed quote means the model is NOT ready to call BUY.
+// modelProbability is unconditional win mass; marketFairProbability is
+// conditional on no push (as returned by removeVigTwoWay). Prices are for a
+// single sportsbook wager, not a PrizePicks entry or a Kalshi contract.
 export function decisionGate({ modelProbability, modelCapturedAt, quoteCapturedAt, startsAt,
   calibrated = false, independentForecast = false, sourceHealthy = false, approved = false,
-  minimumEdge = 0.03, marketFairProbability, now = new Date().toISOString() }) {
+  minimumEdge = 0.03, minimumExpectedROI = 0.03, offeredOdds,
+  pushProbability, marketFairProbability, sport = null, marketType = null,
+  now = new Date().toISOString() }) {
   const p = number(modelProbability), market = number(marketFairProbability);
+  const push = number(pushProbability);
+  const validPush = unit(p) && unit(push) && push < 1 && p + push <= 1 + 1e-9;
+  const conditionalP = validPush ? Math.min(1, p / (1 - push)) : null;
+  const pricing = validPush ? priceAmerican({winProbability:p, pushProbability:push, odds:offeredOdds}) : null;
+  const validThresholds = unit(minimumEdge) &&
+    Number.isFinite(minimumExpectedROI) && minimumExpectedROI >= 0;
   const times = [modelCapturedAt, quoteCapturedAt, startsAt, now].map(x => Date.parse(x));
   const validTimes = times.every(Number.isFinite);
   const reasons = [];
   if (!unit(p) || !unit(market)) reasons.push("MISSING_PROBABILITIES");
+  if (!validPush) reasons.push("INVALID_PUSH_PROBABILITY");
+  if (americanOddsToDecimal(offeredOdds) === null) reasons.push("MISSING_OR_INVALID_OFFERED_ODDS");
+  if (!validThresholds) reasons.push("INVALID_DECISION_THRESHOLDS");
+  if (pricing && pricing.expectedROI <= 0) reasons.push("NON_POSITIVE_EXPECTED_VALUE");
+  else if (pricing && validThresholds && pricing.expectedROI < minimumExpectedROI) reasons.push("EV_BELOW_THRESHOLD");
+  // No validated NHL prop model is connected. A high supplied probability or
+  // approval flag must not silently promote NHL research into a BUY review.
+  if (String(sport).toUpperCase() === "NHL" &&
+      !["moneyline", "spread", "total"].includes(String(marketType).toLowerCase())) {
+    reasons.push("NHL_PROP_MODEL_NOT_VALIDATED");
+  }
   if (!validTimes || times[0] > times[2] || times[1] > times[2] || times[0] > times[3] || times[1] > times[3]) reasons.push("INVALID_PREGAME_TIMESTAMPS");
   if (validTimes && times[2] <= times[3]) reasons.push("GAME_STARTED");
   if (validTimes && times[3] - times[0] > 10 * 60 * 1000) reasons.push("STALE_MODEL");
   if (validTimes && times[3] - times[1] > 5 * 60 * 1000) reasons.push("STALE_QUOTE");
-  if (!calibrated) reasons.push("UNCALIBRATED");
-  if (!independentForecast) reasons.push("MARKET_ANCHORED_OR_UNVERIFIED_MODEL");
-  if (!sourceHealthy) reasons.push("SOURCE_UNAVAILABLE");
-  if (!approved) reasons.push("MANUAL_APPROVAL_REQUIRED");
-  if (unit(p) && unit(market) && p - market < minimumEdge) reasons.push("EDGE_BELOW_THRESHOLD");
+  if (calibrated !== true) reasons.push("UNCALIBRATED");
+  if (independentForecast !== true) reasons.push("MARKET_ANCHORED_OR_UNVERIFIED_MODEL");
+  if (sourceHealthy !== true) reasons.push("SOURCE_UNAVAILABLE");
+  if (approved !== true) reasons.push("MANUAL_APPROVAL_REQUIRED");
+  if (unit(conditionalP) && unit(market) && validThresholds && conditionalP - market < minimumEdge) reasons.push("EDGE_BELOW_THRESHOLD");
   return {
     decision: reasons.length ? "AVOID" : "MANUAL_BUY_REVIEW",
-    edgePercentagePoints: unit(p) && unit(market) ? 100 * (p - market) : null,
+    edgePercentagePoints: unit(conditionalP) && unit(market) ? 100 * (conditionalP - market) : null,
+    expectedROI: pricing?.expectedROI ?? null,
+    breakEvenWinProbability: pricing?.breakEvenWinProbability ?? null,
     reasons,
     automaticBuyEnabled: false
   };
