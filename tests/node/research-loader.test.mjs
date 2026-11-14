@@ -1,6 +1,10 @@
 import test from 'node:test';import assert from 'node:assert/strict';
 import {createResearchLoader} from '../../sharp-service/research-loader.js';
 const now=Date.parse('2026-10-25T18:00:00Z');
+test('NBA research explicitly uses the multi-book view and retains missing platform coverage',async()=>{
+ let url;const loader=createResearchLoader({fetchImpl:async target=>{url=target;return {ok:true,json:async()=>({events:[],bookCoverage:{configured:['draftkings','bovada','prizepicks','underdog','kalshi'],missingRequested:['bovada']},coverage:{eventsComplete:false,reasons:['PAGE_LIMIT_REACHED']}})};}});
+ await loader.load('NBA');assert.equal(url,'/api/nbaprops?view=research');assert.ok(loader.state.bookCoverage.configured.includes('bovada'));assert.match(loader.state.message,/partial/i);
+});
 test('late sport response cannot replace the selected sport',async()=>{
  const pending=[];const loader=createResearchLoader({now:()=>now,fetchImpl:url=>new Promise(resolve=>pending.push({url,resolve}))});
  const a=loader.load('NBA');const b=loader.load('NFL');pending[1].resolve({ok:true,json:async()=>({generatedAt:'2026-10-25T18:00:00Z',candidates:[]})});await b;pending[0].resolve({ok:true,json:async()=>({events:[]})});await a;
