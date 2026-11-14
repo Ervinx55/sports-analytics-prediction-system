@@ -43,6 +43,15 @@ export function normalizeResearch(data, sport, now = Date.now()) {
  } else for(const row of data.candidates){if(!row||typeof row!=='object')continue;
   add({eventID:text(row.eventID),startsAt:row.startsAt,playerID:text(row.playerID),player:text(row.playerName)||'Player unavailable',marketType:text(row.statID)||text(row.marketType)||'Unknown market',side:text(row.side).toUpperCase(),line:numeric(row.line),book:text(row.bestBook)||text(row.book)||'Unavailable',odds:row.bestOdds??row.odds,updatedAt:row.updatedAt,away:text(row.away),home:text(row.home),provider:text(data.oddsProvider)||text(data.source),model:probability(row.rawIndependentProbability),market:probability(row.marketFairProbability),status:'SHADOW',reason:text(row.reason)||'Independent estimate is for research. Production influence has not been earned; live injury adjustments are unavailable.',quoteState:text(row.quoteState)});
  }
+ if(sport==='NBA'&&Array.isArray(data.comparisonLines)){
+  const seen=new Set();
+  for(const quote of data.comparisonLines){
+   if(!quote||quote.book!=='prizepicks'||quote.available===false||!text(quote.eventID)||!text(quote.playerID)||!['points','rebounds','assists'].includes(quote.market)||!['over','under'].includes(quote.side)||numeric(quote.line)===null||quote.line<0)continue;
+   const key=JSON.stringify([quote.eventID,quote.playerID,quote.market,quote.side,quote.line,quote.book]);
+   if(seen.has(key))continue;seen.add(key);
+   add({eventID:quote.eventID,startsAt:quote.startsAt,playerID:quote.playerID,player:text(quote.playerName)||'Player unavailable',marketType:quote.market,side:quote.side.toUpperCase(),line:quote.line,book:quote.book,odds:null,model:null,market:null,updatedAt:quote.updatedAt,oppositeUpdatedAt:null,away:'',home:'',provider:text(data.source),status:'LINE ONLY',pricingEligible:false,reason:'PrizePicks comparison line only. No single-leg sportsbook odds or probability is implied; an entry payout requires separate evaluation. Not cleared.'});
+  }
+ }
  return rows;
 }
 export function filterResearch(rows,{query='',book='',market='',freshness=''}={}) {
