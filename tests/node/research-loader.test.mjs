@@ -12,8 +12,29 @@ test('late sport response cannot replace the selected sport',async()=>{
 });
 test('NFL all-book quotes survive an unavailable frozen estimate endpoint',async()=>{
  const calls=[];const loader=createResearchLoader({fetchImpl:async url=>{calls.push(url);if(!url.includes('view=research'))throw Error('private');return {ok:true,json:async()=>({events:[],candidates:[]})};}});
- await loader.load('NFL');assert.deepEqual(calls,['/api/nflprops?view=research','/api/nflprops']);
+ await loader.load('NFL');assert.deepEqual(calls,['/api/nflprops?view=research','/api/nflprops?view=estimates']);
  assert.equal(loader.state.status,'ready');assert.match(loader.state.message,/estimates.*unavailable/i);
+});
+test('NFL quotes display before slow estimates finish and late estimates cannot replace a new view',async()=>{
+ let resolveModel;const states=[];
+ const loader=createResearchLoader({now:()=>now,onChange:s=>states.push(s),fetchImpl:async url=>{
+  if(url.includes('view=estimates'))return new Promise(resolve=>{resolveModel=resolve;});
+  return {ok:true,json:async()=>({source:'SportsGameOdds',generatedAt:new Date(now).toISOString(),events:[],candidates:[]})};
+ }});
+ const nfl=loader.load('NFL');await new Promise(resolve=>setImmediate(resolve));
+ assert.equal(loader.state.status,'ready');assert.match(loader.state.message,/estimates.*loading/i);
+ await loader.load('NBA');
+ resolveModel({ok:true,json:async()=>({oddsProvider:'SportsGameOdds',generatedAt:new Date(now).toISOString(),candidates:[]})});
+ await nfl;assert.equal(loader.state.sport,'NBA');assert.equal(states.at(-1).sport,'NBA');
+});
+test('NFL estimates join only fresh identical-provider quotes without clearing a play',async()=>{
+ const stamp=new Date(now).toISOString(),startsAt=new Date(now+3600000).toISOString();
+ const quote={line:30.5,odds:-110,available:true,updatedAt:stamp};
+ const quotes={contract:'nfl-multibook-research-v1',source:'SportsGameOdds',generatedAt:stamp,candidates:[],events:[{eventID:'e',startsAt,players:[{prop:{playerID:'p',playerName:'Receiver',statID:'receiving_yards',over:{books:{draftkings:quote}},under:{books:{draftkings:quote}}}}]}]};
+ const model={oddsProvider:'SportsGameOdds',generatedAt:stamp,candidates:[{eventID:'e',startsAt,playerID:'p',playerName:'Receiver',statID:'receiving_yards',side:'over',line:30.5,book:'draftkings',odds:-110,rawIndependentProbability:.6}]};
+ const load=async estimate=>{const loader=createResearchLoader({now:()=>now,fetchImpl:async url=>({ok:true,json:async()=>structuredClone(url.includes('view=research')?quotes:estimate)})});await loader.load('NFL');return loader.state;};
+ const ready=await load(model);assert.equal(ready.rows.find(r=>r.side==='OVER').model,.6);assert.equal(ready.rows.find(r=>r.side==='OVER').status,'SHADOW');assert.equal(ready.rows.find(r=>r.side==='UNDER').model,null);
+ for(const patch of [{oddsProvider:'SharpAPI'},{generatedAt:new Date(now-300001).toISOString()},{generatedAt:new Date(now+1).toISOString()}])assert.ok((await load({...model,...patch})).rows.every(r=>r.model===null));
 });
 test('game view is bounded to one league and never adds a bookmaker restriction',async()=>{
  let url;const loader=createResearchLoader({now:()=>now,fetchImpl:async u=>{url=new URL(u,'http://test');return {ok:true,json:async()=>({events:[],providerObservations:[{league:'NHL',eventsComplete:false}]})};}});
