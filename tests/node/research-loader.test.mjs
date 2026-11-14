@@ -20,3 +20,8 @@ test('withheld roster mismatches are disclosed without exposing source error det
  const loader=createResearchLoader({fetchImpl:async()=>({ok:true,json:async()=>({events:[],sourceHealth:{playerIdentity:{matched:12,excluded:3,unverified:0,error:'secret'}}})})});
  await loader.load('NBA');assert.match(loader.state.message,/3.*withheld/);assert.doesNotMatch(loader.state.message,/secret/);
 });
+
+test('book coverage is disclosed as observed rather than assumed entitlement',async()=>{
+ const loader=createResearchLoader({fetchImpl:async()=>({ok:true,json:async()=>({events:[],coverage:{bookmakerCoverage:{pinnacle:{status:'OBSERVED'},circa:{status:'NOT_OBSERVED'},bookmakereu:{status:'NOT_OBSERVED'},prizepicks:{status:'LINE_ONLY'}}}})})});
+ await loader.load('NBA');assert.match(loader.state.message,/Pinnacle: quotes observed/);assert.match(loader.state.message,/Circa: not observed/);assert.match(loader.state.message,/PrizePicks: comparison lines only/);assert.match(loader.state.message,/not proof of access/);
+});
