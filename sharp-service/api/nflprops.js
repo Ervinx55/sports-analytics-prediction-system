@@ -1,3 +1,5 @@
+import {researchPropsResponse} from '../lib/nba-research-props.js';
+import {bookmakerQuery} from '../lib/bookmakers.js';
 import {
   leagueBaselines,
   loadNflData,
@@ -451,6 +453,11 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "GET only" });
   }
 
+  if (req.query.view === 'research') {
+    const result = await researchPropsResponse({league:'NFL',requestedBooks:bookmakerQuery(req.query.books)});
+    res.setHeader('Cache-Control','no-store');
+    return res.status(result.status).json(result.body);
+  }
   const apiKey = process.env.SPORTS_ODDS_API_KEY;
   const sharpApiKey = process.env.SHARPAPI_KEY;
   const theOddsApiKey = process.env.THE_ODDS_API_KEY;

@@ -7,8 +7,19 @@ test('NBA research explicitly uses the multi-book view and retains missing platf
 });
 test('late sport response cannot replace the selected sport',async()=>{
  const pending=[];const loader=createResearchLoader({now:()=>now,fetchImpl:url=>new Promise(resolve=>pending.push({url,resolve}))});
- const a=loader.load('NBA');const b=loader.load('NFL');pending[1].resolve({ok:true,json:async()=>({generatedAt:'2026-10-25T18:00:00Z',candidates:[]})});await b;pending[0].resolve({ok:true,json:async()=>({events:[]})});await a;
+ const a=loader.load('NBA');const b=loader.load('NFL');pending[1].resolve({ok:true,json:async()=>({generatedAt:'2026-10-25T18:00:00Z',events:[],candidates:[]})});pending[2].resolve({ok:true,json:async()=>({candidates:[]})});await b;pending[0].resolve({ok:true,json:async()=>({events:[]})});await a;
  assert.equal(loader.state.sport,'NFL');assert.equal(loader.state.status,'ready');
+});
+test('NFL all-book quotes survive an unavailable frozen estimate endpoint',async()=>{
+ const calls=[];const loader=createResearchLoader({fetchImpl:async url=>{calls.push(url);if(!url.includes('view=research'))throw Error('private');return {ok:true,json:async()=>({events:[],candidates:[]})};}});
+ await loader.load('NFL');assert.deepEqual(calls,['/api/nflprops?view=research','/api/nflprops']);
+ assert.equal(loader.state.status,'ready');assert.match(loader.state.message,/estimates.*unavailable/i);
+});
+test('game view is bounded to one league and never adds a bookmaker restriction',async()=>{
+ let url;const loader=createResearchLoader({now:()=>now,fetchImpl:async u=>{url=new URL(u,'http://test');return {ok:true,json:async()=>({events:[],providerObservations:[{league:'NHL',eventsComplete:false}]})};}});
+ await loader.load('NHL','games');assert.equal(url.pathname,'/api/board');assert.equal(url.searchParams.get('leagues'),'NHL');
+ assert.equal(url.searchParams.has('books'),false);assert.equal(url.searchParams.get('view'),'research');assert.equal(loader.state.kind,'games');assert.match(loader.state.message,/partial/i);
+ await assert.rejects(loader.load('NBA,NFL','games'),/Unsupported/);
 });
 test('failure clears previous quote data and permits retry',async()=>{
  let fail=false;const loader=createResearchLoader({fetchImpl:async()=>{if(fail)throw Error('private upstream detail');return {ok:true,json:async()=>({events:[]})};}});

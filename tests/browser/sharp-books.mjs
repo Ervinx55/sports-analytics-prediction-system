@@ -1,12 +1,12 @@
 import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {resolve,extname} from 'node:path';
+import {resolve,extname,sep} from 'node:path';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 const require=createRequire(process.env.EDGE_LAB_BROWSER_PACKAGE||import.meta.url);
 const {chromium}=require('playwright');
 const root=resolve('sharp-service');
-const server=createServer(async(req,res)=>{try{const path=resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!path.startsWith(root+'/'))throw Error();res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css'})[extname(path)]||'text/plain');res.end(await readFile(path));}catch{res.writeHead(404);res.end();}});
+const server=createServer(async(req,res)=>{try{const path=resolve(root,'.'+new URL(req.url,'http://localhost').pathname);if(!path.startsWith(root+sep))throw Error();res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css'})[extname(path)]||'text/plain');res.end(await readFile(path));}catch{res.writeHead(404);res.end();}});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));
 let browser;
 try{
@@ -16,11 +16,13 @@ try{
  const {researchPropsResponse}=await import('../../sharp-service/lib/nba-research-props.js');
  const playerID='PLAYER_NBA',q={overUnder:'20.5',odds:'-110',available:true,lastUpdatedAt:stamp};
  const event={eventID:'fixture',leagueID:'NBA',type:'match',status:{startsAt:future},teams:{home:{teamID:'HOME_NBA'},away:{teamID:'AWAY_NBA'}},players:{[playerID]:{playerID,name:'Fixture Player',teamID:'HOME_NBA'}},odds:{}};
- for(const side of ['over','under'])event.odds[side]={oddID:`points-${playerID}-game-ou-${side}`,playerID,statID:'points',periodID:'game',betTypeID:'ou',sideID:side,byBookmaker:{pinnacle:q,bookmakereu:q,prizepicks:q}};
+ for(const side of ['over','under'])event.odds[side]={oddID:`points-${playerID}-game-ou-${side}`,playerID,statID:'points',periodID:'game',betTypeID:'ou',sideID:side,byBookmaker:{pinnacle:q,bookmakereu:q,prizepicks:q,fanduel:{...q,odds:'+110'}}};
  const {body:data}=await researchPropsResponse({now,key:'fixture',optimize:async()=>({blocked:false,effectiveLimit:16}),fetchPage:async()=>({payload:{success:true,data:[event]},fetchedAt:now})});
- await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');return r.fulfill({json:url.pathname.includes('nflprops')?{candidates:[],generatedAt:stamp}:data});});
+ const gameData={fetchedAt:stamp,source:'SportsGameOdds',providerObservations:[{league:'NBA',provider:'SportsGameOdds',fetchedAt:stamp}],events:[{eventID:'fixture-game',league:'NBA',startsAt:future,status:{},matchup:{home:{id:'HOME_NBA',name:'Home Team'},away:{id:'AWAY_NBA',name:'Away Team'}},markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:stamp},fanduel:{odds:110,line:null,available:true,updatedAt:stamp}}}]))}}]};
+ await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');return r.fulfill({json:url.pathname==='/api/board'?gameData:url.pathname.includes('nflprops')?{events:[],candidates:[],generatedAt:stamp}:data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
+ await page.locator('#platform-coverage summary').click();
  assert.match(await page.locator('#platform-coverage').innerText(),/BookMaker.eu/);
  assert.match(await page.locator('#platform-coverage').innerText(),/Circa[\s\S]*No available NBA prop lines/);
  await page.locator('#book').selectOption('pinnacle');assert.equal(await page.locator('.card').count(),2);
@@ -78,6 +80,36 @@ try{
  await page.locator('#refresh').click();await page.locator('.card').first().waitFor();
  assert.equal(await page.locator('#book').inputValue(),'prizepicks','refresh must preserve the selected platform');
  assert.equal(await page.locator('#market').inputValue(),'points','refresh must preserve the selected market');
+ await page.locator('#book').selectOption('fanduel');
+ await page.locator('#best-prices').check();
+ assert.equal(await page.locator('.card').count(),2);
+ assert.match(await page.locator('.price-comparison').first().innerText(),/BEST OBSERVED PRICE/);
+ assert.match(await page.locator('.price-comparison').first().innerText(),/50.0%.*2 other sharp books/);
+ await page.getByRole('button',{name:'Shortlist +'}).first().click();
+ for(const player of data.events[0].players)for(const side of ['over','under'])if(player.prop[side]?.books?.fanduel)player.prop[side].books.fanduel.odds=130;
+ await page.locator('#refresh').click();await page.locator('.card').first().waitFor();
+ assert.match(await page.locator('.price-comparison').first().innerText(),/best observed \+130/);
+ await page.getByRole('button',{name:'View shortlist'}).click();
+ assert.match(await page.locator('.quote').first().innerText(),/\+130/);
+ assert.match(await page.locator('.price-comparison').first().innerText(),/BEST OBSERVED PRICE/);
+ await page.getByRole('button',{name:'Games',exact:true}).click();
+ await page.locator('.card').first().waitFor();
+ assert.equal(await page.locator('.card').count(),4);
+ assert.equal(await page.locator('#book').inputValue(),'');
+ await page.locator('#best-prices').check();
+ assert.equal(await page.locator('.card').count(),2);
+ await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
+ assert.match(await page.locator('#detail-body').innerText(),/Game market rules/);
+ assert.doesNotMatch(await page.locator('#detail-body').innerText(),/Recent player average|Usual playing time/);
+ for(const width of [320,390,768]){
+  await page.setViewportSize({width,height:844});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`game page overflow at ${width}px`);
+  assert.ok(await page.locator('#detail').evaluate(e=>e.scrollWidth<=e.clientWidth),`game detail overflow at ${width}px`);
+ }
+ await page.getByRole('button',{name:'Close quote details'}).click();
+ await page.getByRole('button',{name:'Player props',exact:true}).click();
+ await page.locator('.card').first().waitFor();
+ assert.equal(await page.locator('#best-prices').isChecked(),false);
  assert.deepEqual(errors,[]);
  console.log('Sharp-book mobile research and worksheet flows passed');
 }finally{await browser?.close();await new Promise(r=>server.close(r));}

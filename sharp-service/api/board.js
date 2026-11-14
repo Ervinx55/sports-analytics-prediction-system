@@ -229,6 +229,8 @@ function summarizeEvent(event) {
       live: event.status?.live ?? false,
       completed: event.status?.completed ?? false,
       finalized: event.status?.finalized ?? false,
+      canceled: event.status?.canceled ?? event.status?.cancelled ?? false,
+      ended: event.status?.ended ?? false,
       display: event.status?.displayShort ?? null
     },
     matchup: {
@@ -274,7 +276,8 @@ function shouldUseSharpOverPrimary(primary, sharp) {
   return !isStaleProviderRow(sharp);
 }
 
-function boardPriority(live, startsBefore) {
+export function boardPriority(live, startsBefore, {research = false} = {}) {
+  if (research) return "background";
   if (live === "true") return "critical";
 
   const cutoff = Date.parse(String(startsBefore || ""));
@@ -453,7 +456,8 @@ export default async function handler(req, res) {
     : new Date(windowAnchor + 48 * 60 * 60 * 1000).toISOString();
   const priority = boardPriority(
     live,
-    req.query.startsBefore ? startsBefore : ""
+    req.query.startsBefore ? startsBefore : "",
+    {research: req.query.view === 'research'}
   );
   const objectPolicy = apiKey
     ? await optimizeSportsGameOddsObjectLimit({
@@ -763,6 +767,15 @@ export default async function handler(req, res) {
       "The Odds API"
     ],
     providersUsed,
+    // Preserve the actual upstream observation time for research price checks,
+    // even when this API response is generated from an older provider cache.
+    providerObservations: available.map(row => ({
+      league: row.league,
+      provider: row.provider,
+      fetchedAt: row.providerFetchedAt || null,
+      eventsComplete: !row.nextCursor,
+      cacheStatus: row.cache?.status || null
+    })),
     endpoint: "compact-board",
     requestedLeagues: leagues,
     books: books.length ? books : "account-entitled bookmakers",

@@ -1,8 +1,8 @@
 // Research diagnostics only. Never authorizes a play or supplies a model probability.
+import {bookLabel,platformType} from './book-catalog.js';
+export {bookLabel,platformType} from './book-catalog.js';
 const num=v=>typeof v==='number'&&Number.isFinite(v)?v:null;
 export const PROP_BOOKS=['pinnacle','circa','bookmakereu','draftkings','bovada','prizepicks','underdog','kalshi'];
-export const bookLabel=id=>({pinnacle:'Pinnacle',circa:'Circa',bookmakereu:'BookMaker.eu',draftkings:'DraftKings',bovada:'Bovada',prizepicks:'PrizePicks',underdog:'Underdog',kalshi:'Kalshi'}[id]||id);
-export const platformType=book=>['pinnacle','circa','bookmakereu','draftkings','bovada'].includes(book)?'sportsbook':['prizepicks','underdog'].includes(book)?'dfs':book==='kalshi'?'exchange':'unknown';
 export function researchFreshness(stamp,generatedAt,now=Date.now()){
  const times=[stamp,generatedAt].map(v=>typeof v==='string'?Date.parse(v):NaN);
  if(times.some(t=>!Number.isFinite(t)||t>now))return 'UNKNOWN';
@@ -19,7 +19,7 @@ export function assessPropQuote({book,quote,opposite,generatedAt,now=Date.now()}
   return {...result,status:'TERMS_MISSING',summary:'Line available for research; entry payout is not verified.'};
  }
  if(type==='exchange'){
-  reasons.push('Exact Kalshi contract ticker and outcome mapping are missing.','Executable ask, order-book depth and quantity are unverified.','Contract fees and settlement rules are unverified.');
+  reasons.push('Exact '+bookLabel(book)+' contract and outcome mapping are missing.','Executable ask, order-book depth and quantity are unverified.','Contract fees and settlement rules are unverified.');
   return {...result,status:'TERMS_MISSING',summary:'Indicative contract quote only; execution cost is not verified.'};
  }
  if(type!=='sportsbook')return {...result,summary:'Platform price format is unverified.'};
