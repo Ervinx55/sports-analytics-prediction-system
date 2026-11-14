@@ -1,7 +1,8 @@
 import {timingSafeEqual,randomUUID} from 'node:crypto';
 import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from '../lib/provider-protection.js';
 import {normalizeSgoGame,reconcileGames,assembleHistory,validateSchedule} from '../lib/cfb-sources.js';
-import {forecastGames,prospectiveEligible,scoreForecasts} from '../lib/cfb-model.js';
+import {forecastGames} from '../lib/cfb-model.js';
+import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules} from '../lib/cfb-collection-policy.js';
 import {contentHash,evaluateCandidates} from '../lib/cfb-evaluation.js';
 const sameSecret=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length>0&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const safeReport=r=>r?{status:r.status,modelVersion:r.modelVersion,config:r.config,development:r.development&&{n:r.development.n,brier:r.development.brier,logLoss:r.development.logLoss},holdout:r.holdout&&{n:r.holdout.n,brier:r.holdout.brier,logLoss:r.holdout.logLoss,accuracy:r.holdout.accuracy},marketComparison:r.marketComparison,limitations:r.limitations,productionEligible:false}:null;
@@ -23,7 +24,7 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    if(req.method==='GET'){
     const latest=await read('latest');if(!latest)return res.status(200).json({status:'AWAITING_COLLECTION',forecasts:[],productionEligible:false});
     const age=now()-Date.parse(latest.generatedAt),stale=!Number.isFinite(age)||age<0||age>30*60000;
-    return res.status(200).json({...latest,forecasts:stale?[]:latest.forecasts.filter(f=>Date.parse(f.startsAt)>now()),status:stale?'COLLECTION_STALE':latest.status,productionEligible:false});
+    return res.status(200).json({...latest,forecasts:stale?[]:latest.forecasts.filter(f=>Date.parse(f.startsAt)>now()&&now()-Date.parse(f.generatedAt)>=0&&now()-Date.parse(f.generatedAt)<=30*60000),status:stale?'COLLECTION_STALE':latest.status,productionEligible:false});
    }
    token=randomUUID();const locked=await db('rpc/claim_cfb_collection',{method:'POST',body:JSON.stringify({p_token:token})});
    if(locked!==true){token=null;return res.status(409).json({error:'COLLECTION_IN_PROGRESS'});}
@@ -40,49 +41,65 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
     return res.status(200).json({status:'SEEDED',games:source.games.length,evaluation:safeReport(report)});
    }
    const apiKey=env.SPORTS_ODDS_API_KEY||env.SPORTSGAMEODDS_API_KEY;if(!apiKey)return res.status(503).json({error:'CFB_PROVIDER_UNAVAILABLE'});
-   const policy=await optimize({apiKey,requestedLimit:100,priority:'background',fanout:1});
+   const policy=await optimize({apiKey,requestedLimit:100,priority:'background',fanout:action==='history'?1:2});
    if(policy.blocked){res.setHeader('Retry-After','60');return res.status(429).json({error:'PROVIDER_BUDGET_RESERVED'});}
+   const rotation=action==='refresh'?providerWindow(await read('provider-pagination'),now()):null;
    const params=new URLSearchParams({leagueID:'NCAAF',type:'match',limit:String(policy.effectiveLimit||100),oddIDs:'points-home-game-ml-home,points-away-game-ml-away',includeOpenCloseOdds:'true',includeAltLines:'false'});
    if(action==='history'){
     params.set('finalized','true');params.set('startsAfter',`${body.season}-08-01T00:00:00Z`);params.set('startsBefore',`${body.season+1}-02-01T00:00:00Z`);
     if(body.cursor){if(typeof body.cursor!=='string'||body.cursor.length>2000)return res.status(400).json({error:'INVALID_CURSOR'});params.set('cursor',body.cursor);}
-   }else{params.set('finalized','false');params.set('oddsAvailable','true');params.set('startsAfter',stamp);params.set('startsBefore',new Date(now()+48*3600000).toISOString());}
-   const sgo=await providerFetch({url:'https://api.sportsgameodds.com/v2/events?'+params,apiKey,freshMs:action==='history'?86400000:60000,staleMs:action==='history'?86400000:60000,timeoutMs:8000,consumer:'cfb-research',priority:'background',objectPolicy:policy});
-   if(sgo.upstreamError||sgo.ageMs>60000&&action!=='history'||!Array.isArray(sgo.payload?.data))throw Error('PROVIDER_STALE_OR_INVALID');
-   const raw=sgo.payload.data,games=raw.map(e=>normalizeSgoGame(e,new Date(sgo.fetchedAt).toISOString())).filter(g=>g.league==='NCAAF');
-   await save('sgo:'+contentHash({params:String(params),data:raw}),{parameters:String(params),fetchedAt:new Date(sgo.fetchedAt).toISOString(),events:raw,nextCursor:sgo.payload.nextCursor||null},true);
-   if(action==='history')return res.status(200).json({status:'COLLECTED',season:body.season,eventCount:games.length,nextCursor:sgo.payload.nextCursor||null,sample:games.slice(0,2)});
+   }else{params.set('finalized','false');params.set('oddsAvailable','true');params.set('startsAfter',rotation.startsAfter);params.set('startsBefore',rotation.startsBefore);if(rotation.cursor)params.set('cursor',rotation.cursor);}
+   let sgo,cursor=null,pages=0;const raw=[],observedByID=new Map(),seenCursors=new Set([params.get('cursor')].filter(Boolean));
+   for(let page=0;page<(action==='history'?1:2);page++){
+    sgo=await providerFetch({url:'https://api.sportsgameodds.com/v2/events?'+params,apiKey,freshMs:action==='history'?86400000:60000,staleMs:action==='history'?86400000:60000,timeoutMs:6000,consumer:'cfb-research',priority:'background',objectPolicy:policy});
+    if(sgo.upstreamError||sgo.ageMs>60000&&action!=='history'||!Array.isArray(sgo.payload?.data))throw Error('PROVIDER_STALE_OR_INVALID');
+    raw.push(...sgo.payload.data);for(const e of sgo.payload.data)observedByID.set(e.eventID,new Date(sgo.fetchedAt).toISOString());pages++;cursor=sgo.payload.nextCursor||null;
+    if(!cursor)break;if(seenCursors.has(cursor))throw Error('PROVIDER_CURSOR_REPEATED');seenCursors.add(cursor);params.set('cursor',cursor);
+   }
+   const games=raw.map(e=>normalizeSgoGame(e,observedByID.get(e.eventID))).filter(g=>g.league==='NCAAF');
+   await save('sgo:'+contentHash({params:String(params),data:raw}),{parameters:String(params),fetchedAt:new Date(sgo.fetchedAt).toISOString(),events:raw,nextCursor:cursor},true);
+   if(action==='history')return res.status(200).json({status:'COLLECTED',season:body.season,eventCount:games.length,nextCursor:cursor,sample:games.slice(0,2)});
+   await save('provider-pagination',{...rotation,cursor,pages:rotation.pages+pages});
    const [source,model]=await Promise.all([read('source-current'),read('frozen-model')]);
    if(!source||!model)return res.status(409).json({error:'HISTORY_AND_FROZEN_MODEL_REQUIRED'});
    // Stage a whole rotation before replacing the coherent last-good history.
    const staging=await read('source-staging')||structuredClone(source);
    const season=2026,ids=source.membership[season],offset=Number(staging.refreshOffset||0)%ids.length;
    const selected=ids.slice(offset,offset+8);
-   const updates=await Promise.allSettled(selected.map(async id=>{const r=await fetchImpl(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${id}/schedule?season=${season}`,{signal:AbortSignal.timeout(6000)});if(!r.ok)throw Error('SCHEDULE_UNAVAILABLE');return validateSchedule(await r.json(),id,season,stamp);}));
+   const fetchSchedule=async(id,type)=>{const r=await fetchImpl(`https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams/${id}/schedule?season=${season}&seasontype=${type}`,{signal:AbortSignal.timeout(6000)});if(!r.ok)throw Error('SCHEDULE_UNAVAILABLE');const p=await r.json();if(type===3&&p.events?.length&&(p.requestedSeason?.year!==season||p.requestedSeason?.type!==3))throw Error('POSTSEASON_COVERAGE_UNVERIFIED');return validateSchedule(p,id,season,new Date(now()).toISOString());};
+   const updates=[];for(let i=0;i<selected.length;i+=4)updates.push(...await Promise.allSettled(selected.slice(i,i+4).map(async id=>{const [regular,post]=await Promise.all([fetchSchedule(id,2),fetchSchedule(id,3)]);return mergeSeasonSchedules(regular,post);}))); 
    for(const result of updates)if(result.status==='fulfilled'){const s=result.value;staging.schedules=staging.schedules.filter(old=>old.season!==s.season||old.teamID!==s.teamID);staging.schedules.push(s);}
    staging.refreshOffset=(offset+8)>=ids.length?0:offset+8;
    if(staging.refreshOffset===0){Object.assign(staging,assembleHistory(staging.schedules,staging.membership));if(staging.complete){Object.assign(source,staging);await save('source-current',source);}}
    await save('source-staging',staging);
-   const paired=reconcileGames(games,source.games.filter(g=>g.season===season&&!g.completed&&!g.cancelled));
+   const paired=reconcileGames(games.filter(g=>!g.completed&&!g.cancelled&&Date.parse(g.startsAt)>now()),source.games.filter(g=>g.season===season&&!g.completed&&!g.cancelled));
    const eligible=paired.matched.filter(g=>{
     const teamSources=source.schedules.filter(s=>s.season===season&&[g.homeID,g.awayID].includes(s.teamID));
     return teamSources.length===2&&teamSources.every(s=>now()-Date.parse(s.fetchedAt)<=12*3600000)&&!source.conflicts.some(k=>k.endsWith(':'+g.id));
    });
-   const forecasts=source.complete?forecastGames(source.games,eligible,model.config,stamp):{forecasts:[],excluded:[{reasons:['SOURCE_RECONCILIATION_INCOMPLETE']}]};
-   const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:stamp,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!sgo.payload.nextCursor,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:stamp})),productionEligible:false};
+   const forecastAt=new Date(now()).toISOString();
+   const forecasts=source.complete?forecastGames(source.games,eligible,model.config,forecastAt):{forecasts:[],excluded:[{reasons:['SOURCE_RECONCILIATION_INCOMPLETE']}]};
+   const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:forecastAt,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!cursor,providerPagesThisRun:pages,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:forecastAt,historyCheckedAt:source.schedules.filter(s=>s.season===season&&s.games.some(g=>g.id===f.espnEventID)).map(s=>s.fetchedAt).sort()[0]||null})),productionEligible:false};
    payload.contract='cfb-research-v1';
-   const inputHash=contentHash(source.games);await save('input:'+inputHash,{games:source.games,membership:source.membership,recordedAt:stamp},true);let captured=0;
-   for(const f of payload.forecasts.filter(f=>prospectiveEligible(f,stamp))){
-    const quote=raw.find(e=>e.eventID===f.eventID)?.odds||{};
-    const rows=await db('cfb_prospective_forecasts?on_conflict=event_id,model_version',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=representation'},body:JSON.stringify({event_id:f.eventID,model_version:model.modelVersion,captured_at:stamp,starts_at:f.startsAt,forecast:{...f,entryQuotes:quote},input_hash:inputHash})});captured+=rows?.length||0;
+   const inputHash=contentHash(source.games);await save('input:'+inputHash,{games:source.games,membership:source.membership,recordedAt:forecastAt},true);
+   const freshForecasts=payload.forecasts;
+   const candidates=freshForecasts.map(f=>({event_id:f.eventID,model_version:model.modelVersion,starts_at:f.startsAt,forecast:{...f,entryQuotes:raw.find(e=>e.eventID===f.eventID)?.odds||{},entryQuoteObservedAt:observedByID.get(f.eventID)},input_hash:inputHash}));
+   const inserted=candidates.length?await db('rpc/capture_cfb_forecasts',{method:'POST',body:JSON.stringify({p_rows:candidates})}):[];
+   const settlement=await read('settlement-cursor')||{offset:0};
+   const saved=await db('cfb_prospective_forecasts?select=event_id,model_version,starts_at,forecast&order=starts_at.asc,event_id.asc&limit=40&offset='+Math.max(0,Number(settlement.offset)||0));
+   const historyByID=new Map(source.games.map(g=>[g.id,g]));const revisions=[];
+   for(const prediction of saved){const final=historyByID.get(prediction.forecast.espnEventID);if(!final)continue;const rescheduled=Date.parse(final.startsAt)!==Date.parse(prediction.starts_at);if(!final.completed&&!rescheduled&&!final.cancelled)continue;
+    const outcome={espnEventID:final.id,homeScore:final.homeScore,awayScore:final.awayScore,rescheduled,valid:final.completed&&!rescheduled&&!final.cancelled&&Number.isInteger(final.homeScore)&&Number.isInteger(final.awayScore)&&final.homeScore!==final.awayScore,source:'ESPN',fetchedAt:final.fetchedAt};
+    revisions.push({event_id:prediction.event_id,evidence_hash:contentHash({...outcome,fetchedAt:undefined}),outcome});
    }
-   const saved=await db('cfb_prospective_forecasts?select=event_id,model_version,starts_at,forecast&limit=1000');
-   const scored=[];for(const prediction of saved){const final=source.games.find(g=>g.id===prediction.forecast.espnEventID);if(!final?.completed)continue;const rescheduled=Date.parse(final.startsAt)!==Date.parse(prediction.starts_at);const outcome={espnEventID:final.id,homeScore:final.homeScore,awayScore:final.awayScore,rescheduled,valid:!rescheduled&&!final.cancelled&&Number.isInteger(final.homeScore)&&Number.isInteger(final.awayScore)&&final.homeScore!==final.awayScore,source:'ESPN',fetchedAt:final.fetchedAt};
-    await db('cfb_outcome_revisions?on_conflict=event_id,evidence_hash',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({event_id:prediction.event_id,evidence_hash:contentHash({...outcome,fetchedAt:undefined}),outcome})});
-    if(outcome.valid)scored.push({probability:prediction.forecast.homeProbability,outcome:final.homeScore>final.awayScore?1:0});
-   }
-   payload.prospective={captured:saved.length,...scoreForecasts(scored)};await save('latest',payload);
-   return res.status(200).json({...payload,captured});
+   if(revisions.length)await db('cfb_outcome_revisions?on_conflict=event_id,evidence_hash',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(revisions)});
+   await save('settlement-cursor',{offset:saved.length<40?0:(Number(settlement.offset)||0)+40});
+   const metrics=await db('rpc/cfb_research_performance',{method:'POST',body:JSON.stringify({p_model_version:model.modelVersion})});
+   const scope=source.games.filter(g=>g.season===season&&!g.completed&&!g.cancelled&&Date.parse(g.startsAt)-now()>=30*60000&&Date.parse(g.startsAt)-now()<=24*3600000);
+   payload.coverage.eligibleScopeGames=scope.length;payload.coverage.gamesWithoutQualifyingCapture=scope.filter(g=>!metrics.capturedEspnIDs?.includes(g.id)).length;
+   const {capturedEspnIDs,...publicMetrics}=metrics;payload.prospective=publicMetrics;
+   const previous=await read('latest');payload.forecasts=mergeCurrentForecasts(freshForecasts,previous?.forecasts,model.modelVersion,now());
+   await save('latest',payload);return res.status(200).json({...payload,captured:inserted?.length||0});
   }catch(error){const limited=error?.status===429;if(limited)res.setHeader('Retry-After',String(Math.max(1,Number(error.retryAfter)||60)));return res.status(limited?429:503).json({error:limited?'PROVIDER_RATE_LIMIT':'CFB_COLLECTION_UNAVAILABLE',forecasts:[],productionEligible:false});}
   finally{if(token)try{await db('cfb_research_documents?doc_key=eq._collection_lease&body->>token=eq.'+token,{method:'DELETE'});}catch{}}
  };

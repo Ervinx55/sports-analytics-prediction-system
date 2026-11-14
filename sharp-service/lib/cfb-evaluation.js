@@ -1,7 +1,8 @@
 import {createHash} from 'node:crypto';
 import {forecastGames,scoreForecasts,MODEL_FAMILY} from './cfb-model.js';
 export const CFB_MANIFEST=Object.freeze({family:MODEL_FAMILY,warmupSeason:2024,developmentSeason:2025,holdoutSeason:2026,holdoutEndExclusive:'2026-11-14T06:00:00.000Z',availabilityRule:'next UTC midnight after kickoff plus 12 hours',minimumGames:8,historyMonths:18,snapshotRule:'first valid 24h to 30m pregame',grid:[16,24,32].flatMap(k=>[0,35,65].flatMap(homeAdvantage=>[0.5,0.75].map(carry=>({k,homeAdvantage,carry}))))});
-export const contentHash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
+const canonical=value=>Array.isArray(value)?value.map(canonical):value&&typeof value==='object'?Object.fromEntries(Object.keys(value).sort().map(k=>[k,canonical(value[k])])):value;
+export const contentHash=value=>createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
 export function evaluateCandidates(source){
  const common={manifest:CFB_MANIFEST,productionEligible:false,mode:'RESEARCH',marketComparison:{n:0,status:'MISSING_TIMESTAMPED_HISTORICAL_PRICES'},roi:null};
  if(source.complete!==true||![2024,2025,2026].every(s=>source.membership?.[s]?.length&&source.games?.some(g=>g.season===s)))return {...common,status:'BLOCKED',reasons:['INCOMPLETE_HISTORY_COVERAGE']};
