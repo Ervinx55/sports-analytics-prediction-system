@@ -12,7 +12,7 @@ const odds=value=>value===null?'Odds unavailable':`${value>0?'+':''}${value}`;
 const priceLabel=row=>row.platformType==='dfs'?'Entry payout required':row.platformType==='exchange'?'Executable contract price unverified':odds(row.odds);
 const difference=row=>row.model===null||row.market===null?'Unavailable':`${((row.model-row.market)*100).toFixed(1)} pp`;
 const saved=new Map();let shortlist=false,shown=40,selected=null;
-const loader=createResearchLoader({onChange:state=>{if(state.status==='loading'){$('detail').close();selected=null;}populate();render();}});
+const loader=createResearchLoader({onChange:state=>{if(state.status==='loading'){$('detail').close();selected=null;}else populate();render();}});
 function button(parent,text,handler){const node=add(parent,'button',text);node.type='button';node.onclick=handler;return node;}
 function current(row){return refreshResearchRow(row);}
 function sourceRows(){return (shortlist?[...saved.values()].filter(r=>r.sport===loader.state.sport):loader.state.rows).map(current).filter(r=>Date.parse(r.startsAt)>Date.now());}
