@@ -1,3 +1,4 @@
+import { bookmakerQuery } from '../lib/bookmakers.js';
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -183,7 +184,7 @@ export default async function handler(req, res) {
   const leagues = unique(csv(req.query.leagues, DEFAULT_LEAGUES), {
     upper: true
   });
-  const books = unique(csv(req.query.books, []), { sort: true });
+  const books = bookmakerQuery(req.query.books);
   const includeAltLines = String(req.query.alts || "0") === "1";
   const now = Date.now();
   const windowAnchor =

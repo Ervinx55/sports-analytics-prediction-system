@@ -14,7 +14,7 @@ try{
  const page=await browser.newPage({viewport:{width:390,height:844}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const now=new Date().toISOString(),future=new Date(Date.now()+3600000).toISOString();
  const data={generatedAt:now,source:'Synthetic fixture',events:[],comparisonLines:[{eventID:'fixture',playerID:'player',playerName:'Fixture Player',startsAt:future,market:'points',side:'over',book:'prizepicks',line:20.5,updatedAt:now}],coverage:{bookmakerCoverage:{pinnacle:{status:'NOT_OBSERVED'},circa:{status:'NOT_OBSERVED'},prizepicks:{status:'LINE_ONLY'}}}};
- await page.route('**/api/**',r=>r.fulfill({json:r.request().url().includes('nflprops')?{candidates:[],generatedAt:now}:data}));
+ await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('research'),'1');return r.fulfill({json:url.pathname.includes('nflprops')?{candidates:[],generatedAt:now}:data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.getByRole('heading',{name:'Fixture Player',exact:true}).waitFor();
  assert.match(await page.locator('#status').innerText(),/Pinnacle: not observed/);

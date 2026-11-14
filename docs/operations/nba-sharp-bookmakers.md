@@ -1,6 +1,6 @@
 # NBA sharp bookmaker collection
 
-The bounded NBA quote endpoint requests the established sharp reference books
+The isolated NBA research feed (`/api/nbaprops?research=1`) requests the established sharp reference books
 Pinnacle (`pinnacle`), Circa (`circa`) and BookMaker (`bookmakereu`), plus DraftKings
 and PrizePicks. Provider IDs are documented at
 https://sportsgameodds.com/docs/data-types/bookmakers.
@@ -20,7 +20,7 @@ https://sportsgameodds.com/docs/data-types/bookmakers.
   freshness or automatic-BUY gates. The endpoint remains research-only.
 
 Game-level board routes already accept arbitrary provider bookmaker filters; this
-change fixes the dedicated NBA prop route, which previously discarded other books.
+change adds a separate research collector. The default `/api/nbaprops` and `nba-direct-props.js` retain the frozen DraftKings-only validation contract from PR #59. The research UI explicitly opts in; enrolled forecast and validation callers do not. The query mode reuses the existing function to preserve the 14-function deployment budget.
 It does not add every sportsbook to the sharp consensus or alter reference weights.
 
 ## Rollout verification
@@ -47,7 +47,11 @@ quotes across the available upcoming NBA events. They returned no Pinnacle,
 Circa, BookMaker or PrizePicks quotes; absence is not proof of no entitlement.
 Do not advertise these books as live until observed. No paid plan changes.
 
-Local tests: 212 Node and 78 Python passing; secret scan and diff checks passed.
-Browser fixture: tests/browser/sharp-books.mjs. Execution was blocked before
-assertions because Chromium could not create a socket in this runtime. Browser
-verification remains outstanding, so this is not a verified production release.
+Reconciliation with PR #59 preserves its provider ID aliases, HTTP 400 circuit handling,
+and team-market book coverage. Team-market observations are not player-prop coverage.
+The multi-book collector has its own consumer label; distinct bookmaker query filters
+keep its provider cache separate from the frozen DraftKings feed. Neither research
+quotes nor PrizePicks lines change production/model eligibility.
+
+Verification is recorded in the PR description for the current head. Earlier #58 CI
+passed before this reconciliation and must not be treated as testing this revision.

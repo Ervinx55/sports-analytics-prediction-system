@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {propsResponse as response} from '../../sharp-service/api/nbaprops.js';
-const propsResponse=options=>response({optimize:async()=>({effectiveLimit:16,blocked:false}),...options});
+import {propsResponse} from '../../sharp-service/api/nbaprops.js';
 const now=Date.parse('2026-11-13T12:00:00Z');
 const event=i=>({eventID:`event-${i}`,leagueID:'NBA',type:'match',status:{startsAt:'2026-11-14T01:00:00Z'},teams:{home:{teamID:'A_NBA'},away:{teamID:'B_NBA'}},players:{p:{playerID:'p',name:'Player',teamID:'A_NBA'}},odds:{x:{playerID:'p',sideID:'over',statID:'points',periodID:'game',betTypeID:'ou',oddID:'points-p-game-ou-over',byBookmaker:{draftkings:{overUnder:20.5,odds:-110,lastUpdatedAt:'2026-11-13T11:59:00Z'}}}}});
 // Reproduces the omitted ninth game when the provider honors the requested limit.

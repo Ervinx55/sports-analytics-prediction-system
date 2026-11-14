@@ -1,3 +1,4 @@
+import { canonicalBookmaker, bookmakerIds } from './bookmakers.js';
 const SHARPAPI_BASE = "https://api.sharpapi.io/api/v1";
 const DEFAULT_FRESH_MS = 60_000;
 const DEFAULT_STALE_MS = 5 * 60_000;
@@ -149,14 +150,14 @@ export function normalizeSharpApiBoardRows(rows, {
   now = Date.now()
 } = {}) {
   const wantedBooks = new Set(
-    (books || []).map((book) => String(book).toLowerCase())
+    bookmakerIds(books || [])
   );
   const afterMs = Date.parse(startsAfter || "");
   const beforeMs = Date.parse(startsBefore || "");
   const grouped = new Map();
 
   for (const row of rows || []) {
-    const book = String(row?.sportsbook || "").toLowerCase();
+    const book = canonicalBookmaker(row?.sportsbook);
     if (wantedBooks.size && !wantedBooks.has(book)) continue;
 
     const startsAt = row?.event_start_time || null;
@@ -343,7 +344,7 @@ export function normalizeSharpApiPropRows(rows, {
   now = Date.now()
 } = {}) {
   const wantedBooks = new Set(
-    (books || []).map((book) => String(book).toLowerCase())
+    bookmakerIds(books || [])
   );
   const afterMs = Date.parse(startsAfter || "");
   const beforeMs = Date.parse(startsBefore || "");
@@ -356,7 +357,7 @@ export function normalizeSharpApiPropRows(rows, {
     const side = String(row?.selection_type || "").toLowerCase();
     if (!["over", "under"].includes(side)) continue;
 
-    const book = String(row?.sportsbook || "").toLowerCase();
+    const book = canonicalBookmaker(row?.sportsbook);
     if (wantedBooks.size && !wantedBooks.has(book)) continue;
 
     const startsAt = row?.event_start_time || null;

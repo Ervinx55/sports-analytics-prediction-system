@@ -6,7 +6,7 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
   const current=++sequence;controller?.abort();const request=new AbortController();controller=request;
   state={sport,status:'loading',rows:[],message:'Loading current research…'};onChange(state);
   const timer=setTimeout(()=>request.abort(),45000);
-  try{const response=await fetchImpl(`/api/${sport==='NBA'?'nbaprops':'nflprops'}`,{signal:request.signal,cache:'no-store'});const data=await response.json();
+  try{const response=await fetchImpl(`/api/${sport==='NBA'?'nbaprops?research=1':'nflprops'}`,{signal:request.signal,cache:'no-store'});const data=await response.json();
    if(current!==sequence)return;
    if(!response.ok && response.status===429 && Array.isArray(data?.providerFailures) && data.providerFailures.some(f=>f?.objectBudgetBlocked===true)){
     state={sport,status:'error',rows:[],message:'Provider quota is exhausted. Live prop quotes are unavailable until quota resets or another configured provider supplies data. Repeated refreshes will not restore the exhausted quota.'};return;
