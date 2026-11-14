@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createEventOpportunityProjector } from '../../sharp-service/lib/nfl-event-projections.js';
+import { createEventOpportunityProjector, loadEventWeatherContexts } from '../../sharp-service/lib/nfl-event-projections.js';
 
 test('repeated player markets reuse a projection only within the same event context', () => {
   let calls = 0;
@@ -19,4 +19,16 @@ test('repeated player markets reuse a projection only within the same event cont
   assert.equal(calls, 6);
   assert.equal(first.event, common.event);
   assert.equal(first.weatherContext, common.weatherContext);
+});
+test('event weather loads in bounded parallel batches and stays bound to its event',async()=>{
+ const events=Array.from({length:9},(_,i)=>({eventID:String(i),matchup:{home:{name:'Green Bay Packers'}}}));
+ let active=0,maxActive=0;
+ const contexts=await loadEventWeatherContexts(events,{schedule:[],season:2026},async({event,homeTeam})=>{
+  active++;maxActive=Math.max(maxActive,active);
+  await new Promise(resolve=>setImmediate(resolve));active--;
+  assert.equal(homeTeam,'GB');
+  return {available:true,windMph:Number(event.eventID)};
+ });
+ assert.equal(maxActive,4);
+ assert.deepEqual(events.map(e=>contexts.get(e)),events.map((e,i)=>({available:true,windMph:i})));
 });

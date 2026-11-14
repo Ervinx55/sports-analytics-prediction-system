@@ -3,18 +3,17 @@ import {bookmakerQuery} from '../lib/bookmakers.js';
 import {
   leagueBaselines,
   loadNflData,
-  loadWeatherContext,
   normalizeTeam,
   seasonForDate,
   teamSnapshot
 } from "../lib/nfl-model.js";
 import {
   PLAYER_PROP_VERSION,
-  findPlayerIdentity,
+  createProjectionInputIndex,
   gradePropMarket,
   loadNflPlayerData
 } from "../lib/nfl-player-props.js";
-import { createEventOpportunityProjector } from "../lib/nfl-event-projections.js";
+import { createEventOpportunityProjector, loadEventWeatherContexts } from "../lib/nfl-event-projections.js";
 import {
   optimizeSportsGameOddsObjectLimit,
   protectedSportsGameOddsFetch
@@ -567,19 +566,19 @@ export default async function handler(req, res) {
 
     const eventResults = [];
     const candidates = [];
+    const projectionInputIndex = createProjectionInputIndex({
+      schedule: nflData.schedule,
+      playerStats: playerData.playerStats,
+      snapCounts: playerData.snapCounts,
+      ngs: playerData.ngs,
+      depthCharts: nflData.depthCharts
+    });
 
+    const weatherContexts = await loadEventWeatherContexts(events, {
+      schedule: nflData.schedule, season
+    });
     for (const event of events) {
-      const homeTeam = normalizeTeam(
-        event?.matchup?.home?.name || event?.matchup?.home?.short
-      );
-      const weatherContext = homeTeam
-        ? await loadWeatherContext({
-            event,
-            schedule: nflData.schedule,
-            season,
-            homeTeam
-          })
-        : null;
+      const weatherContext = weatherContexts.get(event);
 
       const playerResults = [];
       const projectOpportunity = createEventOpportunityProjector({
@@ -590,6 +589,7 @@ export default async function handler(req, res) {
         snapCounts: playerData.snapCounts,
         ngs: playerData.ngs,
         depthCharts: nflData.depthCharts,
+        projectionInputIndex,
         weatherContext
       });
       for (const prop of event.props) {
@@ -601,8 +601,7 @@ export default async function handler(req, res) {
             event?.matchup?.away?.name || event?.matchup?.away?.short
           )
         ].filter(Boolean);
-        const identity = findPlayerIdentity(
-          playerData.playerStats,
+        const identity = projectionInputIndex.identity(
           prop.playerName,
           eventTeams
         );
@@ -695,7 +694,7 @@ export default async function handler(req, res) {
     );
     res.setHeader("X-Odds-Provider", provider.source);
 
-    return res.status(200).json({
+    const body = {
       version: PLAYER_PROP_VERSION,
       generatedAt: new Date().toISOString(),
       sport: "FOOTBALL",
@@ -790,7 +789,14 @@ export default async function handler(req, res) {
             : 0,
         activeProvider: provider.source
       }
-    });
+    };
+    if (req.query.view === 'estimates') {
+      // Same frozen calculations and exact quote candidates; omit the repeated
+      // per-event/player analysis that the comparison workspace does not use.
+      const {events, shadowPlays, methodology, leagueBaseline, ...estimates} = body;
+      return res.status(200).json(estimates);
+    }
+    return res.status(200).json(body);
   } catch (error) {
     return res.status(Number(error?.status || 500)).json({
       error: error instanceof Error ? error.message : String(error),

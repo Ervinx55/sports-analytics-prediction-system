@@ -773,6 +773,64 @@ function findPlayerIdentity(playerStats, playerNameValue, eventTeams = []) {
   };
 }
 
+// Request-local lookup only: preserve source order, all matching historical
+// identities (including trades), and the original projection's PIT filtering.
+// No means, distributions, coefficients or grading rules are changed here.
+export function createProjectionInputIndex(context) {
+  const group = (rows = [], key) => {
+    const map = new Map();
+    rows.forEach((row, i) => {
+      const value = key(row);
+      if (!map.has(value)) map.set(value, []);
+      map.get(value).push(i);
+    });
+    return map;
+  };
+  const personIndex = (rows = []) => ({
+    rows,
+    names: group(rows, row => normalizePlayerName(playerName(row))),
+    ids: group(rows, row => rowPlayerId(row))
+  });
+  const select = (index, ...groups) => [...new Set(groups.flat())]
+    .sort((a, b) => a - b).map(i => index.rows[i]);
+  const players = personIndex(context.playerStats);
+  const playerKeys = group(players.rows, row => rowPlayerId(row) || normalizePlayerName(playerName(row)));
+  const teams = group(players.rows, rowTeam);
+  const snaps = personIndex(context.snapCounts);
+  const ngs = Object.fromEntries(['passing', 'receiving', 'rushing'].map(type => [type, personIndex(context.ngs?.[type])]));
+  const depth = context.depthCharts || [];
+  const depthPositions = group(depth, row => JSON.stringify([rowTeam(row), rowPosition(row)]));
+  const schedule = indexSchedule(context.schedule || []);
+  const identity = (name, eventTeams = []) => findPlayerIdentity(
+    select(players, players.names.get(normalizePlayerName(name)) || []), name, eventTeams
+  );
+  return {
+    identity,
+    forPlayer({ event, playerName: name, preferredTeam, preferredPosition }) {
+      const eventTeams = [event?.matchup?.home, event?.matchup?.away]
+        .map(side => normalizeTeam(side?.name || side?.short)).filter(Boolean);
+      const player = identity(name, eventTeams);
+      if (preferredTeam && eventTeams.includes(normalizeTeam(preferredTeam))) player.team = normalizeTeam(preferredTeam);
+      if (!player.position && preferredPosition) player.position = String(preferredPosition).toUpperCase();
+      const personRows = index => select(index,
+        player.id ? index.ids.get(player.id) || [] : [],
+        index.names.get(player.normalized) || []
+      );
+      return {
+        schedule,
+        playerStats: select(players,
+          players.names.get(normalizePlayerName(name)) || [],
+          playerKeys.get(player.key) || [],
+          teams.get(player.team) || []
+        ),
+        snapCounts: personRows(snaps),
+        ngs: Object.fromEntries(Object.entries(ngs).map(([type, index]) => [type, personRows(index)])),
+        depthCharts: (depthPositions.get(JSON.stringify([player.team, player.position])) || []).map(i => depth[i])
+      };
+    }
+  };
+}
+
 function projectPlayerOpportunity({
   playerName: playerNameValue,
   preferredTeam = null,

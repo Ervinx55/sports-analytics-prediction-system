@@ -397,6 +397,7 @@ test("schedule lookup preserves first-match dates and refreshes after schedule c
   assert.deepEqual(pointInTimeRows([{ game_id: "missing" }], options), []);
 });
 import { createEventOpportunityProjector } from '../../sharp-service/lib/nfl-event-projections.js';
+import {resetProviderProtectionForTests} from '../../sharp-service/lib/provider-protection.js';
 
 test('event projection reuse preserves real projections and every sportsbook candidate', () => {
   const context = { event, schedule, season: 2026, playerStats, snapCounts, ngs, depthCharts, weatherContext: { controlledEnvironment: true } };
@@ -417,4 +418,58 @@ test('event projection reuse preserves real projections and every sportsbook can
     assert.ok(candidates.every(row => row.productionWeight === 0 && row.status === 'PASS'));
   }
   assert.deepEqual(actual, original);
+});
+test('event projections do not rescan unrelated depth history for each player',()=>{
+ let unrelatedReads=0;
+ const unrelated=Array.from({length:100},()=>({team:'SF',position:'QB',get dt(){unrelatedReads++;return '2026-09-01T00:00:00Z';},pos_rank:1}));
+ const context={event,schedule,season:2026,playerStats,snapCounts,ngs,depthCharts:[...depthCharts,...unrelated]};
+ const calculate=createEventOpportunityProjector(context);
+ calculate({playerName:'Jordan Love',preferredTeam:'GB',preferredPosition:'QB'});
+ calculate({playerName:'Jayden Reed',preferredTeam:'GB',preferredPosition:'WR'});
+ assert.equal(unrelatedReads,0,'unrelated team/position timestamps must not be scanned by each projection');
+});
+test('indexed projections preserve the frozen outputs across players, cutoffs and corrected inputs',()=>{
+ const base={event,schedule,season:2026,playerStats,snapCounts,ngs,depthCharts,weatherContext:{windMph:20,totalAdjustmentPoints:-2}};
+ for(const startsAt of ['2026-09-18T20:00:00Z','2026-10-11T20:00:00Z']){
+  const context={...base,event:{...event,startsAt}};
+  const calculate=createEventOpportunityProjector(context);
+  for(const [playerName,preferredTeam,preferredPosition] of [['Jordan Love','GB','QB'],['Jayden Reed','GB','WR'],['Missing Player','GB','TE']]){
+   const args={playerName,preferredTeam,preferredPosition,opponentSnapshot:{defYppAllowed:5.8}};
+   const actual=calculate(args),expected=projectPlayerOpportunity({...context,...args});
+   assert.deepEqual(actual,expected);
+   for(const statID of ['passing_yards','passing_touchdowns','rushing_yards','receiving_receptions','receiving_yards']){
+    const prop={playerName,statID,over:{books:{draftkings:{odds:-110,line:20.5,available:true}}},under:{books:{draftkings:{odds:-110,line:20.5,available:true}}}};
+    assert.deepEqual(gradePropMarket(prop,actual),gradePropMarket(prop,expected));
+   }
+  }
+ }
+ const corrected=structuredClone(base);corrected.playerStats[0].passing_yards='100';
+ const args={playerName:'Jordan Love',preferredTeam:'GB'};
+ assert.deepEqual(createEventOpportunityProjector(corrected)(args),projectPlayerOpportunity({...corrected,...args}));
+});
+test('compact NFL estimate response preserves identical frozen candidates and omits duplicated analyses',async()=>{
+ const originalFetch=globalThis.fetch,keys=['SPORTS_ODDS_API_KEY','SPORTS_ODDS_OBJECT_OPTIMIZATION','SHARPAPI_KEY','THE_ODDS_API_KEY','SUPABASE_URL'];
+ const env=Object.fromEntries(keys.map(k=>[k,process.env[k]]));
+ const asCsv=rows=>{const names=[...new Set(rows.flatMap(r=>Object.keys(r)))];return [names.join(','),...rows.map(r=>names.map(k=>r[k]??'').join(','))].join('\n');};
+ const id='JAYDEN_REED_1_NFL',odd=side=>({playerID:id,statID:'receiving_yards',sideID:side,periodID:'game',betTypeID:'ou',byBookmaker:{draftkings:{odds:'-110',overUnder:'70.5',available:true,lastUpdatedAt:new Date().toISOString()}}});
+ const providerEvent={eventID:'fixture',leagueID:'NFL',status:{startsAt:event.startsAt},teams:{home:{teamID:'GB_NFL',names:{long:'Green Bay Packers'}},away:{teamID:'ATL_NFL',names:{long:'Atlanta Falcons'}}},players:{[id]:{name:'Jayden Reed',teamID:'GB_NFL',position:'WR'}},odds:{over:odd('over'),under:odd('under')}};
+ const invoke=async query=>{const res={status(code){this.code=code;return this;},setHeader(){},json(body){this.body=body;return this;}};await nflPropsHandler({method:'GET',query},res);return res;};
+ try{
+  keys.forEach(k=>delete process.env[k]);process.env.SPORTS_ODDS_API_KEY='fixture';process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION='0';
+  resetProviderProtectionForTests();globalThis.__edgeLabNflDataCache=new Map();globalThis.__edgeLabNflPlayerCache=new Map();
+  globalThis.fetch=async url=>{
+   const u=String(url);
+   if(u.includes('api.sportsgameodds.com'))return new Response(JSON.stringify({success:true,data:[providerEvent]}));
+   const rows=u.includes('games.csv')?schedule:u.includes('stats_player')?playerStats:u.includes('snap_counts')?snapCounts:u.includes('depth_charts')?depthCharts:u.includes('ngs_passing')?ngs.passing:u.includes('ngs_receiving')?ngs.receiving:u.includes('ngs_rushing')?ngs.rushing:[];
+   return new Response(asCsv(rows));
+  };
+  const full=await invoke({season:'2026'}),compact=await invoke({season:'2026',view:'estimates'});
+  assert.equal(full.code,200);assert.equal(compact.code,200);assert.ok(full.body.candidates.length>0);
+  assert.deepEqual(compact.body.candidates,full.body.candidates);
+  assert.equal(compact.body.events,undefined);assert.equal(compact.body.shadowPlays,undefined);
+  assert.equal(compact.body.productionWeight,0);assert.equal(compact.body.productionEligible,false);
+ }finally{
+  globalThis.fetch=originalFetch;resetProviderProtectionForTests();globalThis.__edgeLabNflDataCache=new Map();globalThis.__edgeLabNflPlayerCache=new Map();
+  for(const [k,v] of Object.entries(env)){if(v===undefined)delete process.env[k];else process.env[k]=v;}
+ }
 });

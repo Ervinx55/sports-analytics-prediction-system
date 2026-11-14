@@ -17,10 +17,10 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    let modelRequest=Promise.resolve(null);
    if(kind==='props'&&sport==='NFL'){
     estimateController=new AbortController();abortEstimate=()=>estimateController.abort();request.signal.addEventListener('abort',abortEstimate,{once:true});
-    estimateTimer=setTimeout(abortEstimate,12000);
-    modelRequest=get('/api/nflprops',estimateController.signal).catch(()=>null);
+    estimateTimer=setTimeout(abortEstimate,40000);
+    modelRequest=get('/api/nflprops?view=estimates',estimateController.signal).catch(()=>null);
    }
-   const [quoteResult,modelResult]=await Promise.all([quoteRequest,modelRequest]);
+   const quoteResult=await quoteRequest;
    if(current!==sequence)return;
    const {response,data}=quoteResult;
    if(!response.ok&&response.status===429&&Array.isArray(data?.providerFailures)&&data.providerFailures.some(f=>f?.objectBudgetBlocked===true)){
@@ -31,15 +31,22 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    let message=identity?count(identity.matched)+' roster-matched market records; '+count(identity.excluded)+' withheld for roster mismatch or ambiguity; '+count(identity.unverified)+' unverified. ':'';
    if(data.coverage?.eventsComplete===false||data.providerObservations?.some(p=>p.eventsComplete===false))message+='Partial provider coverage: some games could not be collected in this bounded refresh. ';
    if(kind==='games'&&data.unavailableLeagues?.some(p=>p.league===sport))throw Error('League unavailable');
+   const ready=message=>{
+    const rows=kind==='games'?normalizeGameResearch(data,sport,now()):normalizeResearch(data,sport,now());
+    const bookCoverage=kind==='games'?{...data.bookCoverage,configured:[...new Set(rows.map(r=>r.book))].sort()}:data.bookCoverage??null;
+    state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message};
+   };
    if(kind==='props'&&sport==='NFL'){
+    data.candidates=[];
+    ready(message+'Quotes loaded. Frozen NFL estimates are loading… ');onChange(state);
+    const modelResult=await modelRequest;
+    if(current!==sequence)return;
     const model=modelResult?.data;
     const usable=modelResult?.response.ok&&Array.isArray(model?.candidates)&&model.oddsProvider===data.source&&researchFreshness(model.generatedAt,model.generatedAt,now())==='CURRENT';
     data.candidates=usable?model.candidates:[];
     if(!usable)message+='Frozen model estimates are unavailable; current quotes can still be researched. ';
    }
-   const rows=kind==='games'?normalizeGameResearch(data,sport,now()):normalizeResearch(data,sport,now());
-   const bookCoverage=kind==='games'?{...data.bookCoverage,configured:[...new Set(rows.map(r=>r.book))].sort()}:data.bookCoverage??null;
-   state={sport,kind,status:'ready',rows,generatedAt:data.generatedAt||data.fetchedAt,provider:data.oddsProvider||data.source,bookCoverage,message};
+   ready(message);
   }catch{if(current!==sequence)return;state={sport,kind,status:'error',rows:[],message:'Research unavailable. The provider request failed or timed out. Refresh to retry.'};}
   finally{clearTimeout(timer);clearTimeout(estimateTimer);if(abortEstimate)request.signal.removeEventListener('abort',abortEstimate);estimateController?.abort();if(current===sequence)onChange(state);}
  }};

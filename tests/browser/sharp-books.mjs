@@ -19,7 +19,10 @@ try{
  for(const side of ['over','under'])event.odds[side]={oddID:`points-${playerID}-game-ou-${side}`,playerID,statID:'points',periodID:'game',betTypeID:'ou',sideID:side,byBookmaker:{pinnacle:q,bookmakereu:q,prizepicks:q,fanduel:{...q,odds:'+110'}}};
  const {body:data}=await researchPropsResponse({now,key:'fixture',optimize:async()=>({blocked:false,effectiveLimit:16}),fetchPage:async()=>({payload:{success:true,data:[event]},fetchedAt:now})});
  const gameData={fetchedAt:stamp,source:'SportsGameOdds',providerObservations:[{league:'NBA',provider:'SportsGameOdds',fetchedAt:stamp}],events:[{eventID:'fixture-game',league:'NBA',startsAt:future,status:{},matchup:{home:{id:'HOME_NBA',name:'Home Team'},away:{id:'AWAY_NBA',name:'Away Team'}},markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:stamp},fanduel:{odds:110,line:null,available:true,updatedAt:stamp}}}]))}}]};
- await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');return r.fulfill({json:url.pathname==='/api/board'?gameData:url.pathname.includes('nflprops')?{events:[],candidates:[],generatedAt:stamp}:data});});
+ const nflData=structuredClone(data);nflData.contract='nfl-multibook-research-v1';nflData.candidates=[];
+ for(const p of nflData.events[0].players)Object.assign(p.prop,{playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards'});
+ const nflModel={oddsProvider:'SportsGameOdds',generatedAt:stamp,candidates:[{eventID:nflData.events[0].eventID,startsAt:future,playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards',side:'over',line:20.5,book:'pinnacle',odds:-110,rawIndependentProbability:.6}]};
+ await page.route('**/api/**',r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');return r.fulfill({json:url.pathname==='/api/board'?gameData:url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
  await page.locator('#platform-coverage summary').click();
@@ -73,7 +76,10 @@ try{
  await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('.card').count(),1);
  await page.getByRole('button',{name:'Back to board'}).click();
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
- assert.equal(await page.locator('.card').count(),0);
+ assert.equal(await page.locator('#modeled').innerText(),'1');
+ await page.locator('#book').selectOption('pinnacle');
+ assert.match(await page.locator('.comparison').first().innerText(),/60.0%/);
+ assert.match(await page.locator('.card').first().innerText(),/NOT CLEARED/);
  await page.locator('[data-sport="NBA"]').click();await page.locator('.card').first().waitFor();
  await page.locator('#book').selectOption('prizepicks');
  await page.locator('#market').selectOption('points');
