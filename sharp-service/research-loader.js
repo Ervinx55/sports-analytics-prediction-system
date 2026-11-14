@@ -15,7 +15,12 @@ export function createResearchLoader({fetchImpl=fetch,onChange=()=>{},now=Date.n
    const identity=data.sourceHealth?.playerIdentity;
    const count=v=>Number.isSafeInteger(v)&&v>=0?v:0;
    const identityMessage=identity?count(identity.matched)+' roster-matched market records; '+count(identity.excluded)+' withheld for roster mismatch or ambiguity; '+count(identity.unverified)+' unverified. ':'';
-   state={sport,status:'ready',rows:normalizeResearch(data,sport,now()),generatedAt:data.generatedAt,provider:data.oddsProvider||data.source,message:identityMessage};
+   const names={pinnacle:'Pinnacle',circa:'Circa',bookmakereu:'BookMaker',draftkings:'DraftKings',prizepicks:'PrizePicks'};
+   const statuses={OBSERVED:'quotes observed',NOT_OBSERVED:'not observed',LINE_ONLY:'comparison lines only'};
+   const coverage=data.coverage?.bookmakerCoverage;
+   const summary=coverage&&typeof coverage==='object'?Object.entries(names).filter(([book])=>coverage[book]).map(([book,name])=>name+': '+(statuses[coverage[book].status]||'unknown')).join('; '):'';
+   const coverageMessage=summary?'Book coverage: '+summary+'. Not observed is not proof of access or lack of access. ':'';
+   state={sport,status:'ready',rows:normalizeResearch(data,sport,now()),generatedAt:data.generatedAt,provider:data.oddsProvider||data.source,message:identityMessage+coverageMessage};
   }catch{if(current!==sequence)return;state={sport,status:'error',rows:[],message:'Research unavailable. The provider request failed or timed out. Refresh to retry.'};}
   finally{clearTimeout(timer);if(current===sequence)onChange(state);}
  }};
