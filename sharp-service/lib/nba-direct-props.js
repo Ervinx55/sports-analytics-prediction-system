@@ -4,9 +4,9 @@ const MAX_PAGES=2;
 // Provider IDs: https://sportsgameodds.com/docs/data-types/bookmakers
 export const NBA_PROP_SHARP_BOOKS=Object.freeze(['pinnacle','circa','bookmakereu']);
 export const NBA_PROP_BOOKS=Object.freeze([...NBA_PROP_SHARP_BOOKS,'draftkings','prizepicks']);
-export async function directSgoProps({page,clock}){
+export async function directSgoProps({page,clock,pageSize=NBA_PROP_PAGE_SIZE}){
  const now=clock(),patterns=['points','rebounds','assists'].flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`));
- const params={leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:NBA_PROP_BOOKS.join(','),oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:String(NBA_PROP_PAGE_SIZE)};
+ const params={leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:NBA_PROP_BOOKS.join(','),oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:String(Math.max(1,Math.min(NBA_PROP_PAGE_SIZE,Math.floor(pageSize)||NBA_PROP_PAGE_SIZE)))};
  const rawEvents=new Map(),timestamps=[],reasons=[],seenCursors=new Set();
  let cursor=null,pagesFetched=0,eventsComplete=false;
  for(let i=0;i<MAX_PAGES;i++){
@@ -35,7 +35,7 @@ export async function directSgoProps({page,clock}){
     if(!Number.isFinite(line)||line<0)continue;
     // DFS payouts are not single-bet American odds. Keep them out of pricing.
     if(book==='prizepicks'){
-     comparisonLines.push({eventID:'sgo:'+e.eventID,playerID,market,side,book,line,updatedAt:b.lastUpdatedAt??null,pricingEligible:false});
+     comparisonLines.push({eventID:'sgo:'+e.eventID,startsAt:e.status.startsAt,playerName:e.players[playerID].name||playerID,playerID,market,side,book,line,updatedAt:b.lastUpdatedAt??null,pricingEligible:false});
      bookmakerCoverage[book].lineOnlyQuotes++;bookmakerCoverage[book].status='LINE_ONLY';continue;
     }
     const odds=Number(b.odds);
