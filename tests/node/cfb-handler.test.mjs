@@ -43,3 +43,38 @@ test('CFB refresh resumes pages, merges postseason, batches settlement and deleg
  assert.equal(r.code,200);assert.equal(r.data.captured,0);assert.equal(r.data.forecasts.length,1);assert.match(urls[1],/cursor=page-two/);assert.equal(docs.get('provider-pagination').cursor,'page-three');assert.equal(calls.filter(c=>c.url.includes('seasontype=3')).length,2);
  assert.equal(calls.filter(c=>c.url.includes('/cfb_outcome_revisions')).length,0);
 });
+
+test('CFB refresh settles agreed finals during a partial rotation and excludes an unrelated score conflict',async()=>{
+ const stamp='2026-11-15T05:00:00.000Z',ids=Array.from({length:10},(_,i)=>String(i+1));
+ const game=(id,homeID,awayID,homeScore=20)=>({id,source:'ESPN',season:2026,startsAt:'2026-11-14T17:00:00.000Z',homeID,awayID,homeName:'Home '+homeID,awayName:'Away '+awayID,homeScore,awayScore:10,completed:true,cancelled:false,neutralSite:false,fetchedAt:stamp});
+ const good=game('agreed','1','2'),bad=game('conflict','3','4');
+ const schedules=ids.map(teamID=>({teamID,season:2026,fetchedAt:stamp,games:teamID==='1'||teamID==='2'?[good]:teamID==='3'?[bad]:teamID==='4'?[{...bad,homeScore:24}]:[]}));
+ const source={membership:{2026:ids},schedules:schedules.map(s=>({...s,games:s.games.map(g=>({...g,completed:false,homeScore:null,awayScore:null}))})),games:[good,bad].map(g=>({...g,completed:false,homeScore:null,awayScore:null})),complete:true,conflicts:[]};
+ const original=JSON.stringify(source),frozen={modelVersion:'frozen',config:{k:24,homeAdvantage:35,carry:.75}};
+ const docs=new Map([['source-current',structuredClone(source)],['source-staging',{...structuredClone(source),schedules,refreshOffset:0}],['frozen-model',frozen]]),writes=[];
+ const json=(body,status=200)=>({ok:true,status,text:async()=>body===null?'':JSON.stringify(body),json:async()=>body});
+ const handler=createCfbHandler({env:{SUPABASE_SERVICE_ROLE_KEY:'key',SPORTS_ODDS_API_KEY:'provider'},now:()=>Date.parse(stamp),optimize:async()=>({effectiveLimit:100}),providerFetch:async()=>({payload:{data:[]},fetchedAt:Date.parse(stamp),ageMs:0}),fetchImpl:async(url,options)=>{
+  const u=new URL(url),body=options.body?JSON.parse(options.body):null;
+  if(u.hostname==='site.api.espn.com'){
+   const teamID=u.pathname.split('/').at(-2),post=u.searchParams.get('seasontype')==='3';
+   const events=post?[]:schedules.find(s=>s.teamID===teamID).games.map(g=>({id:g.id,date:g.startsAt,season:{year:2026},competitions:[{neutralSite:false,status:{type:{completed:true}},competitors:[{homeAway:'home',team:{id:g.homeID,displayName:g.homeName},score:String(g.homeScore)},{homeAway:'away',team:{id:g.awayID,displayName:g.awayName},score:String(g.awayScore)}]}]}));
+   return json({team:{id:teamID},status:'success',requestedSeason:{year:2026,type:post?3:2},events});
+  }
+  if(u.pathname.endsWith('/claim_cfb_collection'))return json(true);
+  if(u.pathname.endsWith('/cfb_prospective_forecasts'))return json([good,bad].map(g=>({event_id:'sgo-'+g.id,starts_at:g.startsAt,forecast:{espnEventID:g.id}})));
+  if(u.pathname.endsWith('/cfb_outcome_revisions')){writes.push(...body);return json(null,201);}
+  if(u.pathname.endsWith('/record_cfb_capture_scope'))return json(null);
+  if(u.pathname.endsWith('/cfb_research_performance'))return json({captured:2,n:1,capturedEspnIDs:[]});
+  if(options.method==='DELETE')return json(null,204);
+  if(options.method==='POST'){docs.set(body.doc_key,body.body);return json(null,201);}
+  const key=u.searchParams.get('doc_key')?.slice(3);return json(docs.has(key)?[{body:docs.get(key)}]:[]);
+ }});
+ const r=response();await handler({method:'POST',headers:{authorization:'Bearer key'},body:{action:'refresh'}},r);
+ assert.equal(r.code,200);assert.equal(writes.find(x=>x.event_id==='sgo-agreed')?.outcome.valid,true);
+ assert.equal(writes.find(x=>x.event_id==='sgo-agreed').outcome.homeScore,20);
+ assert.equal(writes.find(x=>x.event_id==='sgo-conflict')?.outcome.valid,false);
+ assert.equal(writes.find(x=>x.event_id==='sgo-conflict').outcome.reason,'SCHEDULE_OBSERVATIONS_CONFLICT');
+ assert.equal(r.data.coverage.outcomeSourceConflicts,1);
+ assert.equal(JSON.stringify(docs.get('source-current')),original);assert.deepEqual(docs.get('frozen-model'),frozen);
+ assert.equal(docs.get('source-staging').refreshOffset,8);
+});
