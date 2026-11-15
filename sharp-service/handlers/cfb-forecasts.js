@@ -2,7 +2,7 @@ import {timingSafeEqual,randomUUID} from 'node:crypto';
 import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from '../lib/provider-protection.js';
 import {normalizeSgoGame,reconcileUpcomingGames,assembleHistory,validateSchedule} from '../lib/cfb-sources.js';
 import {forecastGames} from '../lib/cfb-model.js';
-import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,outcomeRevision,captureCandidate} from '../lib/cfb-collection-policy.js';
+import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,collectOutcomeRevisions,captureCandidate} from '../lib/cfb-collection-policy.js';
 import {contentHash,evaluateCandidates} from '../lib/cfb-evaluation.js';
 const sameSecret=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length>0&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const safeReport=r=>r?{status:r.status,modelVersion:r.modelVersion,config:r.config,development:r.development&&{n:r.development.n,brier:r.development.brier,logLoss:r.development.logLoss},holdout:r.holdout&&{n:r.holdout.n,brier:r.holdout.brier,logLoss:r.holdout.logLoss,accuracy:r.holdout.accuracy},marketComparison:r.marketComparison,limitations:r.limitations,productionEligible:false}:null;
@@ -88,8 +88,8 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    const inserted=candidates.length?await db('rpc/capture_cfb_forecasts',{method:'POST',body:JSON.stringify({p_rows:candidates})}):[];
    const settlement=await read('settlement-cursor')||{offset:0};
    const saved=await db('cfb_prospective_forecasts?select=event_id,model_version,starts_at,forecast&order=starts_at.asc,event_id.asc&limit=40&offset='+Math.max(0,Number(settlement.offset)||0));
-   const historyByID=new Map(source.games.map(g=>[g.id,g]));const revisions=[];
-   for(const prediction of saved){const revision=outcomeRevision(prediction,historyByID.get(prediction.forecast.espnEventID));if(revision)revisions.push(revision);}
+   const {revisions,sourceConflicts}=collectOutcomeRevisions(saved,staging);
+   Object.assign(payload.coverage,{outcomeSourceConflicts:sourceConflicts,outcomeRowsChecked:saved.length,outcomeRevisionsThisRun:revisions.length});
    if(revisions.length)await db('cfb_outcome_revisions?on_conflict=event_id,evidence_hash',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify(revisions)});
    await save('settlement-cursor',{offset:saved.length<40?0:(Number(settlement.offset)||0)+40});
    await db('rpc/record_cfb_capture_scope',{method:'POST',body:JSON.stringify({p_model_version:model.modelVersion})});

@@ -18,6 +18,7 @@ export function mergeSeasonSchedules(regular,postseason){
  return {...regular,games:[...regular.games,...postseason.games],postseasonComplete:true};
 }
 import {contentHash} from './cfb-evaluation.js';
+import {assembleHistory} from './cfb-sources.js';
 export function captureCandidate(f,event,observedAt,inputHash){
  const blocked=f.quoteComparisonEligible===false;
  return {event_id:f.eventID,model_version:f.modelVersion,starts_at:f.startsAt,input_hash:inputHash,forecast:{...f,entryQuotes:blocked?{}:event?.odds||{},entryQuoteObservedAt:observedAt,entryQuoteWithheldReason:blocked?'PROVIDER_KICKOFF_CONFLICT':null}};
@@ -28,4 +29,25 @@ export function outcomeRevision(prediction,final){
  if(!final.completed&&!rescheduled&&!final.cancelled)return null;
  const outcome={espnEventID:final.id,homeScore:final.homeScore,awayScore:final.awayScore,rescheduled,valid:final.completed&&!rescheduled&&!final.cancelled&&Number.isInteger(final.homeScore)&&Number.isInteger(final.awayScore)&&final.homeScore!==final.awayScore,source:'ESPN',fetchedAt:final.fetchedAt};
  return {event_id:prediction.event_id,evidence_hash:contentHash(outcome),outcome};
+}
+export function collectOutcomeRevisions(predictions,source){
+ // Settle each agreed game independently; forecast history still requires a
+ // complete rotation. Never fall back to an older final when new evidence conflicts.
+ const reconciled=assembleHistory(source.schedules,source.membership);
+ const games=new Map(reconciled.games.map(g=>[g.id,g]));
+ const conflicts=new Set(reconciled.conflicts.map(key=>key.split(':')[1]));
+ const revisions=[];
+ for(const prediction of predictions){
+  const id=prediction.forecast.espnEventID;
+  if(conflicts.has(id)){
+   const seen=source.schedules.flatMap(s=>s.games.filter(g=>g.id===id));
+   const teams=new Set(seen.flatMap(g=>[`${g.season}:${g.homeID}`,`${g.season}:${g.awayID}`]));
+   const observations=source.schedules.filter(s=>teams.has(`${s.season}:${s.teamID}`)).map(s=>({teamID:s.teamID,season:s.season,fetchedAt:s.fetchedAt,game:s.games.find(g=>g.id===id)||null})).sort((a,b)=>a.teamID.localeCompare(b.teamID));
+   const latest=Math.max(...observations.map(g=>Date.parse(g.fetchedAt)));
+   if(!Number.isFinite(latest))continue;
+   const outcome={espnEventID:id,valid:false,reason:'SCHEDULE_OBSERVATIONS_CONFLICT',source:'ESPN',fetchedAt:new Date(latest).toISOString(),observations};
+   revisions.push({event_id:prediction.event_id,evidence_hash:contentHash(outcome),outcome});
+  }else{const revision=outcomeRevision(prediction,games.get(id));if(revision)revisions.push(revision);}
+ }
+ return {revisions,sourceConflicts:reconciled.conflicts.length};
 }
