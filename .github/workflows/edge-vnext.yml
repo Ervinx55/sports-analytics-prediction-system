@@ -11,6 +11,7 @@ on:
       - "sharp-service/api/dashboard.js"
       - "sharp-service/vercel.json"
       - "tests/node/edge-vnext.test.mjs"
+      - "tests/node/prop-price-validation.test.mjs"
       - "tests/node/nba-vnext-baseline.test.mjs"
       - "tests/node/nba-vnext-daily.test.mjs"
       - ".github/workflows/edge-vnext.yml"
@@ -20,6 +21,7 @@ on:
       - "sharp-service/lib/edge-vnext-handler.js"
       - "sharp-service/edge-vnext.html"
       - "tests/node/edge-vnext.test.mjs"
+      - "tests/node/prop-price-validation.test.mjs"
       - ".github/workflows/edge-vnext.yml"
   workflow_dispatch:
 
@@ -44,4 +46,4 @@ jobs:
           node --check sharp-service/lib/nba-vnext-backtest.js
           node --check scripts/edge-lab/daily-nba-vnext.mjs
       - name: Run probability, pricing, and safety tests without paid APIs
-        run: node --test tests/node/edge-vnext.test.mjs tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs tests/node/vercel-config.test.mjs
+        run: node --test tests/node/edge-vnext.test.mjs tests/node/prop-price-validation.test.mjs tests/node/nba-vnext-baseline.test.mjs tests/node/nba-vnext-daily.test.mjs tests/node/vercel-config.test.mjs

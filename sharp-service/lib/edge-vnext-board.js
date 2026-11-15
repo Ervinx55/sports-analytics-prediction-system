@@ -16,7 +16,11 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
     const fair = probability(m.marketFairProbability) ? m.marketFairProbability : null;
     const gate = decisionGate({
       modelProbability:p, marketFairProbability:fair,
-      modelCapturedAt:nflGenerated, quoteCapturedAt:nflGenerated,
+      offeredOdds:m.bestOdds, sport:"NFL", marketType:m.marketType,
+      // The source does not currently expose unconditional win/push mass.
+      // Withhold price EV rather than treating integer markets as push-free.
+      pushProbability:m.pushProbability ?? null,
+      modelCapturedAt:nflGenerated, quoteCapturedAt:m.quoteCapturedAt ?? null,
       startsAt:m.startsAt, now, sourceHealthy:nflSourceOk,
       independentForecast:false, calibrated:false, approved:false
     });
@@ -47,6 +51,8 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
       NFL:{state:nflSourceOk?"MARKET_ANCHORED_SHADOW":"UNAVAILABLE",
         generatedAt:nflGenerated, upcomingMarkets:rows.length,
         reason:nflSourceOk?"Model exists but its ML/spread prices are market-anchored; no independent promotion.":"NFL source unavailable or failed."},
+      NHL:{state:"NO_VERIFIED_NHL_PROP_MODEL", generatedAt:null, upcomingMarkets:0,
+        reason:"NHL props remain research-only until per-market forecasts, role data and out-of-sample validation are connected."},
       NBA:{state:nbaHasIndependent?"INTEGRATION_REVIEW_REQUIRED":"NO_VERIFIED_INDEPENDENT_MODEL",
         generatedAt:nbaResponse?.generatedAt ?? null, upcomingMarkets:0,
         reason:"No independently calibrated NBA forecasts connected; sportsbook odds are not substitute model predictions."}
@@ -55,6 +61,7 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
     sourceWarnings: [
       "NFL quotes are at most as fresh as the source response and are not separately timestamp-verified.",
       "Missing NBA model cannot be ranked; never substitute book implied probabilities.",
+      "NHL prop averages and recent hit rates are not calibrated forecasts.",
       "All model outcomes require calibration and independent holdout evidence before BUY."
     ]
   };
