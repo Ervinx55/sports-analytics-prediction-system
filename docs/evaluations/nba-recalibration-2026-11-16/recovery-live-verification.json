@@ -1,0 +1,31 @@
+{
+  "checkedAt": "2026-11-16T17:01:42.950508+00:00",
+  "inserted230": {
+    "wins": 65,
+    "total": 230,
+    "losses": 65,
+    "inactiveNotGraded": 100,
+    "recoveryContracts": [
+      "nba-reviewed-outcome-recovery-v1"
+    ]
+  },
+  "original111": {
+    "wins": 41,
+    "total": 111,
+    "losses": 38,
+    "pushes": 0,
+    "inactiveNotGraded": 32
+  },
+  "modelApprovals": 0,
+  "nflPriceObservations": 782,
+  "remainingTargetQuotes": 0,
+  "remaining": {
+    "missing_started": 0,
+    "awaiting_future_games": 186,
+    "earliest_awaiting_game": "2026-11-17T00:00:00.000Z"
+  },
+  "reviewedManifestSha256": "24ddbeea0efc24f5d810256540a1f5a79b0469bc11d0e69841200bab78e385bb",
+  "executedSqlSha256": "0fb47026c51bf9c7fa287155477086be387fcaa8e47e4fda94e469c4d042245d",
+  "modelsChanged": false,
+  "existingOutcomesOverwritten": false
+}

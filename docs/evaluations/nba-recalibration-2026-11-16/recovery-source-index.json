@@ -1,0 +1,322 @@
+{
+  "contract": "nba-completed-outcome-source-index-v1",
+  "workspaceRelativePaths": true,
+  "evidenceAsOf": "2026-11-16T16:58:42Z",
+  "reviewedManifest": {
+    "path": "outputs/nba-outcome-recovery-2026-11-16/reviewed-outcome-manifest.json",
+    "sha256": "24ddbeea0efc24f5d810256540a1f5a79b0469bc11d0e69841200bab78e385bb",
+    "bytes": 2469899
+  },
+  "sql": {
+    "path": "outputs/nba-outcome-recovery-2026-11-16/reviewed-outcome-inserts.sql",
+    "sha256": "0fb47026c51bf9c7fa287155477086be387fcaa8e47e4fda94e469c4d042245d",
+    "bytes": 1658280
+  },
+  "inputs": {
+    "audit": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-evidence-audit.json",
+      "sha256": "a72bd46b8f77b37d9ede9c3820851f0426b7bdc1ba05d0868688bd936dd88d30"
+    },
+    "observations": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/missing-observations.json",
+      "sha256": "6a1f6df2469eba21af9d650a68b4bbec421adc961bc828b5a8dccbf99249ceae"
+    },
+    "provider": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/current-sgo-outcome-sources.json",
+      "sha256": "7dbc95df027e2987199d9040a3ffc566459f7b959a459d345392098ba0e32eb7"
+    },
+    "identityReview": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/identity-review.json",
+      "sha256": "43fb0306aa042f80cca339af96f0c1808d1c5c566c0cca3d06dbb3f871e901ea"
+    },
+    "pending": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/all-target-pending-observations.json",
+      "sha256": "3ad7f07d258b88c0661c7a973d929e310092df03ecccfddd85846063a0698d5d"
+    },
+    "existing": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/automatically-recovered.json",
+      "sha256": "12a65fa9d7480bb2b832e7c6b3c5d5fef5c19ce7ba39cdc235223815fe8e90e9"
+    }
+  },
+  "rawAndSupportingSources": [
+    {
+      "path": "outputs/all-book-comparison-2026-11-14/allbook-games.json",
+      "sha256": "66deef537e2c120a44c6cd2b0ddf4f83bfc6a0b586367b12723b7fdeda1da8f7"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/all-target-pending-observations.json",
+      "sha256": "3ad7f07d258b88c0661c7a973d929e310092df03ecccfddd85846063a0698d5d"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/automatically-recovered.json",
+      "sha256": "12a65fa9d7480bb2b832e7c6b3c5d5fef5c19ce7ba39cdc235223815fe8e90e9"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/current-sgo-outcome-sources.json",
+      "sha256": "7dbc95df027e2987199d9040a3ffc566459f7b959a459d345392098ba0e32eb7"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/identity-review.json",
+      "sha256": "43fb0306aa042f80cca339af96f0c1808d1c5c566c0cca3d06dbb3f871e901ea"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/missing-before.json",
+      "sha256": "1a3bda09a40180028e66c730d29db99b4963cf52529085bbde1920e88b8a7d22"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/missing-observations.json",
+      "sha256": "6a1f6df2469eba21af9d650a68b4bbec421adc961bc828b5a8dccbf99249ceae"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-evidence-audit.json",
+      "sha256": "a72bd46b8f77b37d9ede9c3820851f0426b7bdc1ba05d0868688bd936dd88d30"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/1610612739-cavaliers-roster.html",
+      "sha256": "a1f1256e059a5a4ec2ed8edad0ad1fd11959ac07d4c6629e535e3b8580eb7607",
+      "url": "https://www.nba.com/team/1610612739/cavaliers/roster"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/1610612742-mavericks-roster.html",
+      "sha256": "92c4142d9d4eff8a4f7ccf46946126c2b99e8e3911f78a1f10617446e205dee2",
+      "url": "https://www.nba.com/team/1610612742/mavericks/roster"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/1610612748-heat-roster.html",
+      "sha256": "9934d5408d4ee6f2c732dc8d3591e4677e84c4df99b4041ee393f7bf452df4e0",
+      "url": "https://www.nba.com/team/1610612748/heat/roster"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/1610612760-thunder-roster.html",
+      "sha256": "3bb972e7bf82c1a63318b9638e10f996ea80cc3b6d0abb2e811d3388f37ef77d",
+      "url": "https://www.nba.com/team/1610612760/thunder/roster"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261113_CLEMIA_book.pdf",
+      "sha256": "a121964d19d92a69b7fc417875211d498fc6cf8bbafeddae0cba72351d2b1c65",
+      "url": "https://statsdmz.nba.com/pdfs/20261113/20261113_CLEMIA_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261113_OKCLAC_book.pdf",
+      "sha256": "6153435e79bcdeffcdd99a473e86099056ff70b3953d58457407e8b0a4fe3e31",
+      "url": "https://statsdmz.nba.com/pdfs/20261113/20261113_OKCLAC_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261114_BKNMEM_book.pdf",
+      "sha256": "7b40568dd32b15e961587cd9d6dc9338d0909876db19c5170c41651901838071",
+      "url": "https://statsdmz.nba.com/pdfs/20261114/20261114_BKNMEM_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261114_DALCLE_book.pdf",
+      "sha256": "9fe8f84f3551fe57e754858d300d38fd955798045cb09099c24ce2cf5d318a5b",
+      "url": "https://statsdmz.nba.com/pdfs/20261114/20261114_DALCLE_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261114_DETMIA_book.pdf",
+      "sha256": "6a4504403793bc1f84eb343f8006e899e24366e95d1e5e42f2571bad2801397e",
+      "url": "https://statsdmz.nba.com/pdfs/20261114/20261114_DETMIA_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261115_DALBOS_book.pdf",
+      "sha256": "b2ef180eab16a94c814f48cf7037ab297a645b87ec113bf01723a2d7e3555812",
+      "url": "https://statsdmz.nba.com/pdfs/20261115/20261115_DALBOS_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/20261115_OKCSAC_book.pdf",
+      "sha256": "f6f8d142c36539d035d5f45169cfba0a57432624366ba6a090dbdfb5872f296d",
+      "url": "https://statsdmz.nba.com/pdfs/20261115/20261115_OKCSAC_book.pdf"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/bkn-vs-mem-0022600234.html",
+      "sha256": "438e3eeb89ab84f153f0ecce701ff6cb90d3abe941ae585ba813e5087728a883",
+      "url": "https://www.nba.com/game/bkn-vs-mem-0022600234/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/cle-vs-mia-0022600036.html",
+      "sha256": "fb7815aa66930b3f397afd4724f3b4c4aebb79f6a869fec4cc26fc62cabdde0d",
+      "url": "https://www.nba.com/game/cle-vs-mia-0022600036/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/dal-vs-bos-0022600240.html",
+      "sha256": "1d4ee735f316a964fa35c40143cd617aa35cb4de3ede9bd444fc14fb4513396a",
+      "url": "https://www.nba.com/game/dal-vs-bos-0022600240/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/dal-vs-cle-0022600232.html",
+      "sha256": "85a18f476f793ef8e331ac7e3b8e00490ecd74945b706ab4ed2a6ea8a026f25b",
+      "url": "https://www.nba.com/game/dal-vs-cle-0022600232/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/det-vs-mia-0022600233.html",
+      "sha256": "cf8ebadef00a51667e6651808fe40abfbc1d532659cedbae33d54d173d47f6d8",
+      "url": "https://www.nba.com/game/det-vs-mia-0022600233/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/games-2026-11-13.html",
+      "sha256": "d8a15b155002429c7905ff465e574b0c7b56c88dd6e04d19867991557082944c",
+      "url": "https://www.nba.com/games?date=2026-11-13"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/games-2026-11-14.html",
+      "sha256": "909add7c29cddabcef4b3206864d494808bc5fa163ca2fbf75a7a65be59040f2",
+      "url": "https://www.nba.com/games?date=2026-11-14"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/games-2026-11-15.html",
+      "sha256": "d318b9ca353c25c0a539fbf033f0ba6565b2289db674af5735b574cb9b11bf1d",
+      "url": "https://www.nba.com/games?date=2026-11-15"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/manifest.json",
+      "sha256": "7f7fce58f4b8feaeb3463890b56861eee9ca6f438feb8b497b7716d74f49879b"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/okc-vs-lac-0022600042.html",
+      "sha256": "1996429c4f40233542d6e86627f64ae8243a90eb82a27c253647ff2ee74af80c",
+      "url": "https://www.nba.com/game/okc-vs-lac-0022600042/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/okc-vs-sac-0022600244.html",
+      "sha256": "35faae7231a1dcdbf04df8fd505a5911236f8e2ad70e3fe18d5834070296a1e3",
+      "url": "https://www.nba.com/game/okc-vs-sac-0022600244/box-score"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/pdf-manifest.json",
+      "sha256": "011d86c7b30ca5e4326bdacb77ac010fc5cbc12218b207effe50cba5870ab726"
+    },
+    {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/official-raw/roster-manifest.json",
+      "sha256": "5f5bf19aa94125857e9f7ad3a14564d542072eee19f78f75ba34cd58717d7d8f"
+    },
+    {
+      "path": "outputs/today-all-board-2026-11-13.json",
+      "sha256": "027d58a9795e2b6f85d43fd84a727ede93afb9ce7739dbed62e85dcae722ad13"
+    }
+  ],
+  "providerReceipts": [
+    {
+      "eventID": "BDgz9hcfzcEGwQDlPcLM",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=BDgz9hcfzcEGwQDlPcLM&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "BDgz9hcfzcEGwQDlPcLM"
+      ],
+      "receivedAt": "2026-11-16T16:49:41.196Z",
+      "rawSha256": "ec01f37c17c11a82bb390ab6b3d079e0e02caa1f73798eea152ca415550cc4ee",
+      "rawBytes": 44861,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "Vr1VbRYZaiOVKjBTTK6W",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=Vr1VbRYZaiOVKjBTTK6W&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "Vr1VbRYZaiOVKjBTTK6W"
+      ],
+      "receivedAt": "2026-11-16T16:50:16.034Z",
+      "rawSha256": "9d2aeec93ca6f31894efa7b456977acb0a7cef299f6fb132254046d2f50172d0",
+      "rawBytes": 44898,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "lifymi4jrXCpckkBVDDC",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=lifymi4jrXCpckkBVDDC&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "lifymi4jrXCpckkBVDDC"
+      ],
+      "receivedAt": "2026-11-16T16:50:15.988Z",
+      "rawSha256": "17bc03e30853583c1ae3b0ca5f53168a0e0012887718e967739abc2fce56a617",
+      "rawBytes": 44150,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "eZJHrEb25QaGPXmVUaF0",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=eZJHrEb25QaGPXmVUaF0&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "eZJHrEb25QaGPXmVUaF0"
+      ],
+      "receivedAt": "2026-11-16T16:50:16.004Z",
+      "rawSha256": "2da6dabdee27751ba533e78a2b7059c690676e38361d215b8eabef5188994f9d",
+      "rawBytes": 48461,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "OeymLe7wQY2zwKedvCrU",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=OeymLe7wQY2zwKedvCrU&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "OeymLe7wQY2zwKedvCrU"
+      ],
+      "receivedAt": "2026-11-16T16:50:15.975Z",
+      "rawSha256": "f1c3b8340fb058c8d49d6d6dba9b9c912bdf5f2dacf6dd9ab8a9f974991bc841",
+      "rawBytes": 49839,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "P85upZIi5P758SI7lZPk",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=P85upZIi5P758SI7lZPk&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "P85upZIi5P758SI7lZPk"
+      ],
+      "receivedAt": "2026-11-16T16:50:15.970Z",
+      "rawSha256": "a24d79566c395a76cd76be568ae9a9cc34f35cb1eaf2aacd80f61f21a47b0936",
+      "rawBytes": 49200,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    },
+    {
+      "eventID": "ViYMGlG1xRWQ2J4jAhph",
+      "provider": "SportsGameOdds",
+      "url": "https://api.sportsgameodds.com/v2/events?eventIDs=ViYMGlG1xRWQ2J4jAhph&expandResults=true&limit=1&leagueID=NBA&type=match&oddID=points-home-game-ml-home",
+      "requestedEventIDs": [
+        "ViYMGlG1xRWQ2J4jAhph"
+      ],
+      "receivedAt": "2026-11-16T16:50:15.961Z",
+      "rawSha256": "0bd9805a8bf5057890d5e006bedce4dba94c91eba429be64a94cd3986cae3439",
+      "rawBytes": 47049,
+      "eventCount": 1,
+      "missingEventIDs": [],
+      "paginationCursorPresent": true
+    }
+  ],
+  "notes": [
+    "Raw provider receipt hashes identify original responses; the saved sanitized provider snapshot has its own independently verified file hash.",
+    "Raw HTML/PDF, full outcome manifest and SQL remain in the workspace evidence archive; they are not copied into this compact repository record."
+  ],
+  "frozenHostedFiles": [
+    {
+      "path": "docs/evaluations/nba-role-minutes-2026-11-10/candidate.json",
+      "sha256": "f7ecc87ce9786a7ebadc361da86719ef73258463f1b0f92c130b4932557bae55"
+    },
+    {
+      "path": "docs/evaluations/nba-minutes-prospective-2026-11-10/protocol.json",
+      "sha256": "a032f9b87cb9f3e59ebdd0d226e5793b410a6ae566f8c8ea82c44da941d6a3a8"
+    },
+    {
+      "path": "docs/evaluations/nba-bilateral-2026-11-09/protocol.json",
+      "sha256": "1eb44b8b365aff17ecf929bccaaa3ee0775e907278d8bb6bd2742f7b9101b74a"
+    },
+    {
+      "path": "docs/evaluations/nba-probability-2026-11-09/probability-model.json",
+      "sha256": "3f05667d0f824e9b4793e6fcfbf46c812bcf1b76bee0e8ef130b85249509b7f4"
+    },
+    {
+      "path": "docs/evaluations/nba-defense-fit-2026-11-04/models.json",
+      "sha256": "116d47f4b7310f71065b107d341cd7d8c66fd66022e11e68dd9d3636fd4b6b50"
+    }
+  ]
+}

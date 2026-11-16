@@ -1,0 +1,402 @@
+{
+  "protocolId": "nba-minutes-paired-2026-11-10-v1",
+  "modelHash": "880a76673cae94f50329671aaeb84254346348edaa6f4e7312a1f9910e442308",
+  "asOf": "2026-11-16T17:03:00.142138+00",
+  "status": "COLLECTING",
+  "registeredQuoteForecasts": 4598,
+  "selectedPlayerMarkets": 1546,
+  "scoredPlayerMarkets": 1278,
+  "unresolvedPlayerMarkets": 186,
+  "inactivePlayerMarkets": 82,
+  "invalidOrNonparticipatingPlayerMarkets": 0,
+  "pushPlayerMarkets": 0,
+  "markets": {
+    "assists": {
+      "games": 41,
+      "playerMarkets": 350,
+      "baseline": {
+        "projectionMAE": 1.7229292731884196,
+        "brier": 0.251428404435303,
+        "logLoss": 0.6979002660352163
+      },
+      "candidate": {
+        "projectionMAE": 1.7350486965240697,
+        "brier": 0.25298729396768505,
+        "logLoss": 0.7018029897395296
+      }
+    },
+    "points": {
+      "games": 42,
+      "playerMarkets": 480,
+      "baseline": {
+        "projectionMAE": 5.256547793618871,
+        "brier": 0.2680451233361304,
+        "logLoss": 0.7397882512749895
+      },
+      "candidate": {
+        "projectionMAE": 5.241613077398826,
+        "brier": 0.2684381073148894,
+        "logLoss": 0.7397079024944896
+      }
+    },
+    "rebounds": {
+      "games": 42,
+      "playerMarkets": 448,
+      "baseline": {
+        "projectionMAE": 2.1069095409836707,
+        "brier": 0.2568613272239488,
+        "logLoss": 0.7164576495208211
+      },
+      "candidate": {
+        "projectionMAE": 2.0953445762509175,
+        "brier": 0.25427603767300305,
+        "logLoss": 0.7083638571796188
+      }
+    }
+  },
+  "minutes": {
+    "games": 42,
+    "playerGames": 481,
+    "mae": {
+      "baseline": 4.756832816892027,
+      "candidate": 4.776817842708299
+    }
+  },
+  "reliabilityBins": {
+    "assists": {
+      "baseline": [
+        {
+          "n": 1,
+          "sumProbability": 0.004975124378109453,
+          "wins": 0
+        },
+        {
+          "n": 8,
+          "sumProbability": 1.3781094527363185,
+          "wins": 5
+        },
+        {
+          "n": 14,
+          "sumProbability": 3.6119402985074633,
+          "wins": 5
+        },
+        {
+          "n": 57,
+          "sumProbability": 20.223880597014922,
+          "wins": 24
+        },
+        {
+          "n": 104,
+          "sumProbability": 46.61194029850746,
+          "wins": 47
+        },
+        {
+          "n": 94,
+          "sumProbability": 50.99004975124376,
+          "wins": 57
+        },
+        {
+          "n": 55,
+          "sumProbability": 35.10447761194032,
+          "wins": 28
+        },
+        {
+          "n": 15,
+          "sumProbability": 11.119402985074625,
+          "wins": 11
+        },
+        {
+          "n": 2,
+          "sumProbability": 1.6218905472636815,
+          "wins": 2
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ],
+      "candidate": [
+        {
+          "n": 1,
+          "sumProbability": 0.009950248756218905,
+          "wins": 0
+        },
+        {
+          "n": 7,
+          "sumProbability": 1.1641791044776117,
+          "wins": 6
+        },
+        {
+          "n": 19,
+          "sumProbability": 5.159203980099503,
+          "wins": 7
+        },
+        {
+          "n": 55,
+          "sumProbability": 19.537313432835816,
+          "wins": 22
+        },
+        {
+          "n": 113,
+          "sumProbability": 51.11940298507466,
+          "wins": 57
+        },
+        {
+          "n": 95,
+          "sumProbability": 52.293532338308474,
+          "wins": 50
+        },
+        {
+          "n": 42,
+          "sumProbability": 26.766169154228866,
+          "wins": 24
+        },
+        {
+          "n": 18,
+          "sumProbability": 13.343283582089553,
+          "wins": 13
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ]
+    },
+    "points": {
+      "baseline": [
+        {
+          "n": 3,
+          "sumProbability": 0.11940298507462685,
+          "wins": 3
+        },
+        {
+          "n": 12,
+          "sumProbability": 2.0049751243781095,
+          "wins": 6
+        },
+        {
+          "n": 28,
+          "sumProbability": 7.4726368159203975,
+          "wins": 19
+        },
+        {
+          "n": 73,
+          "sumProbability": 26.283582089552223,
+          "wins": 33
+        },
+        {
+          "n": 188,
+          "sumProbability": 85.3532338308457,
+          "wins": 88
+        },
+        {
+          "n": 142,
+          "sumProbability": 77.50746268656724,
+          "wins": 71
+        },
+        {
+          "n": 33,
+          "sumProbability": 20.79104477611941,
+          "wins": 19
+        },
+        {
+          "n": 1,
+          "sumProbability": 0.736318407960199,
+          "wins": 1
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ],
+      "candidate": [
+        {
+          "n": 4,
+          "sumProbability": 0.1990049751243781,
+          "wins": 3
+        },
+        {
+          "n": 10,
+          "sumProbability": 1.6865671641791045,
+          "wins": 5
+        },
+        {
+          "n": 25,
+          "sumProbability": 6.691542288557214,
+          "wins": 18
+        },
+        {
+          "n": 87,
+          "sumProbability": 31.134328358208922,
+          "wins": 38
+        },
+        {
+          "n": 174,
+          "sumProbability": 79.30348258706462,
+          "wins": 88
+        },
+        {
+          "n": 154,
+          "sumProbability": 83.62686567164184,
+          "wins": 74
+        },
+        {
+          "n": 25,
+          "sumProbability": 15.786069651741297,
+          "wins": 13
+        },
+        {
+          "n": 1,
+          "sumProbability": 0.7562189054726368,
+          "wins": 1
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ]
+    },
+    "rebounds": {
+      "baseline": [
+        {
+          "n": 4,
+          "sumProbability": 0.15422885572139305,
+          "wins": 3
+        },
+        {
+          "n": 3,
+          "sumProbability": 0.527363184079602,
+          "wins": 2
+        },
+        {
+          "n": 34,
+          "sumProbability": 8.855721393034823,
+          "wins": 18
+        },
+        {
+          "n": 70,
+          "sumProbability": 24.741293532338286,
+          "wins": 32
+        },
+        {
+          "n": 144,
+          "sumProbability": 65.45771144278605,
+          "wins": 55
+        },
+        {
+          "n": 118,
+          "sumProbability": 64.95522388059702,
+          "wins": 58
+        },
+        {
+          "n": 66,
+          "sumProbability": 42.179104477611936,
+          "wins": 38
+        },
+        {
+          "n": 7,
+          "sumProbability": 5.079601990049751,
+          "wins": 2
+        },
+        {
+          "n": 2,
+          "sumProbability": 1.6318407960199004,
+          "wins": 1
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ],
+      "candidate": [
+        {
+          "n": 4,
+          "sumProbability": 0.22388059701492538,
+          "wins": 3
+        },
+        {
+          "n": 3,
+          "sumProbability": 0.472636815920398,
+          "wins": 1
+        },
+        {
+          "n": 31,
+          "sumProbability": 8.223880597014922,
+          "wins": 19
+        },
+        {
+          "n": 77,
+          "sumProbability": 27.348258706467636,
+          "wins": 31
+        },
+        {
+          "n": 143,
+          "sumProbability": 64.6865671641791,
+          "wins": 56
+        },
+        {
+          "n": 111,
+          "sumProbability": 60.66169154228861,
+          "wins": 57
+        },
+        {
+          "n": 71,
+          "sumProbability": 45.12935323383084,
+          "wins": 37
+        },
+        {
+          "n": 8,
+          "sumProbability": 5.721393034825871,
+          "wins": 5
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        },
+        {
+          "n": 0,
+          "sumProbability": 0.0,
+          "wins": 0
+        }
+      ]
+    }
+  },
+  "reliabilityWeighting": "ONE_SELECTED_PLAYER_MARKET; descriptive, game-cluster uncertainty needed at final review",
+  "metricWeighting": "EQUAL_GAME",
+  "productionWeight": 0,
+  "productionEligible": false,
+  "audit": {
+    "asOf": "2026-11-16T17:03:00.142138+00",
+    "source": "Fresh read-only Supabase export after reviewed outcome inserts",
+    "exportedForecasts": 4598,
+    "protocolSha256": "a032f9b87cb9f3e59ebdd0d226e5793b410a6ae566f8c8ea82c44da941d6a3a8",
+    "evaluatorSha256": "9f51603cff0db9151c9f3288a32bc43c884ef6ca420618c2c01afeaff2836ad1",
+    "frozenModelHash": "880a76673cae94f50329671aaeb84254346348edaa6f4e7312a1f9910e442308",
+    "minimumGames": 100,
+    "minimumPlayerGames": 500,
+    "protocolEndsAt": "2026-12-01T00:00:00Z",
+    "modelsChanged": false,
+    "newRecalibrationCandidatesProspectivelyRegistered": false
+  }
+}

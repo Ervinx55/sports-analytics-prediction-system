@@ -1,0 +1,528 @@
+{
+  "task": "NFL exact-price collection continuity; read-only verification",
+  "projectId": "yeoxroijaptomomshdii",
+  "checkedAt": "2026-11-16T16:52:09.863023+00:00",
+  "repositoryHead": "792d6a776596956a9a1e5fadb9099e70039fa356",
+  "conclusion": "Collection is continuing automatically. New candidate validation is not yet registered or wired.",
+  "remoteWritesPerformed": false,
+  "manualCollectionTriggered": false,
+  "deployedFunction": {
+    "slug": "collect-nfl-prices",
+    "version": 1,
+    "status": "ACTIVE",
+    "verifyJwt": true
+  },
+  "schedule": {
+    "jobid": 69,
+    "active": true,
+    "jobname": "nfl-exact-price-collection-30min",
+    "schedule": "12,42 * * * *",
+    "stopBeforeDate": "2027-02-15",
+    "timeout150s": true,
+    "hasGatewayBearer": true,
+    "expiryGuardPresent": true
+  },
+  "runs": [
+    {
+      "id": "fbc6fea3-8616-48a7-a091-36cc8dc2fd12",
+      "payload": {
+        "ok": true,
+        "runId": "fbc6fea3-8616-48a7-a091-36cc8dc2fd12",
+        "records": 261,
+        "inserted": 261,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T16:42:00.913Z",
+        "receivedAt": "2026-11-16T16:42:24.343Z",
+        "completedAt": "2026-11-16T16:42:25.187Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+        "productionEligible": false
+      },
+      "created_at": "2026-11-16T16:42:25.226851+00:00"
+    },
+    {
+      "id": "af13436d-3e87-48a8-8662-5f9317b4bb64",
+      "payload": {
+        "ok": true,
+        "runId": "af13436d-3e87-48a8-8662-5f9317b4bb64",
+        "records": 260,
+        "inserted": 260,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "INVALID_PRICE_OR_LINE": 1,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T16:12:01.129Z",
+        "receivedAt": "2026-11-16T16:12:25.543Z",
+        "completedAt": "2026-11-16T16:12:26.829Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "bccab6fb148bc7180d9be37a11d23f1706a4d554f00dfeea1e024e749ccea83f",
+        "productionEligible": false
+      },
+      "created_at": "2026-11-16T16:12:26.858464+00:00"
+    },
+    {
+      "id": "1cb85b99-99c8-49a0-882e-cf7a83308be0",
+      "payload": {
+        "ok": true,
+        "runId": "1cb85b99-99c8-49a0-882e-cf7a83308be0",
+        "records": 261,
+        "inserted": 261,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T15:58:11.772Z",
+        "receivedAt": "2026-11-16T15:58:28.447Z",
+        "completedAt": "2026-11-16T15:58:29.372Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "04717fcbd27ea42d2a6324dfc4061a407042e590d52bfb8975b99837c2aa771f",
+        "productionEligible": false
+      },
+      "created_at": "2026-11-16T15:58:29.386751+00:00"
+    }
+  ],
+  "cronRuns": [
+    {
+      "runid": 363785,
+      "status": "succeeded",
+      "end_time": "2026-11-16T16:42:00.315605+00:00",
+      "start_time": "2026-11-16T16:42:00.199809+00:00",
+      "return_message": "1 row"
+    },
+    {
+      "runid": 363632,
+      "status": "succeeded",
+      "end_time": "2026-11-16T16:12:00.16109+00:00",
+      "start_time": "2026-11-16T16:12:00.134098+00:00",
+      "return_message": "1 row"
+    }
+  ],
+  "httpResponses": [
+    {
+      "id": 3050,
+      "report": {
+        "ok": true,
+        "runId": "fbc6fea3-8616-48a7-a091-36cc8dc2fd12",
+        "records": 261,
+        "inserted": 261,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T16:42:00.913Z",
+        "receivedAt": "2026-11-16T16:42:24.343Z",
+        "completedAt": "2026-11-16T16:42:25.187Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+        "productionEligible": false
+      },
+      "created": "2026-11-16T16:42:00.313321+00:00",
+      "error_msg": null,
+      "timed_out": false,
+      "status_code": 200
+    },
+    {
+      "id": 3032,
+      "report": {
+        "ok": true,
+        "runId": "af13436d-3e87-48a8-8662-5f9317b4bb64",
+        "records": 260,
+        "inserted": 260,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "INVALID_PRICE_OR_LINE": 1,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T16:12:01.129Z",
+        "receivedAt": "2026-11-16T16:12:25.543Z",
+        "completedAt": "2026-11-16T16:12:26.829Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "bccab6fb148bc7180d9be37a11d23f1706a4d554f00dfeea1e024e749ccea83f",
+        "productionEligible": false
+      },
+      "created": "2026-11-16T16:12:00.161465+00:00",
+      "error_msg": null,
+      "timed_out": false,
+      "status_code": 200
+    },
+    {
+      "id": 3024,
+      "report": {
+        "ok": true,
+        "runId": "1cb85b99-99c8-49a0-882e-cf7a83308be0",
+        "records": 261,
+        "inserted": 261,
+        "rejected": {
+          "UNAVAILABLE_QUOTE": 2,
+          "MISSING_OPPOSITE_SIDE": 3,
+          "STALE_OR_UNDATED_SIDE": 70
+        },
+        "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+        "startedAt": "2026-11-16T15:58:11.772Z",
+        "receivedAt": "2026-11-16T15:58:28.447Z",
+        "completedAt": "2026-11-16T15:58:29.372Z",
+        "productionWeight": 0,
+        "rawResponseSha256": "04717fcbd27ea42d2a6324dfc4061a407042e590d52bfb8975b99837c2aa771f",
+        "productionEligible": false
+      },
+      "created": "2026-11-16T15:58:11.62665+00:00",
+      "error_msg": null,
+      "timed_out": false,
+      "status_code": 200
+    }
+  ],
+  "edgeLogWindow": {
+    "from": "2026-11-16T15:55:00Z",
+    "through": "2026-11-16T16:53:00Z",
+    "requests": [
+      {
+        "error_code": "UNAUTHORIZED_LEGACY_JWT",
+        "execution_time_ms": "87",
+        "method": "POST",
+        "path": "/functions/v1/collect-nfl-prices",
+        "response_date": "Mon, 16 Nov 2026 16:09:15 GMT",
+        "status_code": "401",
+        "version": "1"
+      },
+      {
+        "error_code": "",
+        "execution_time_ms": "26696",
+        "method": "POST",
+        "path": "/functions/v1/collect-nfl-prices",
+        "response_date": "Mon, 16 Nov 2026 16:12:26 GMT",
+        "status_code": "200",
+        "version": "1"
+      },
+      {
+        "error_code": "UNAUTHORIZED_NO_AUTH_HEADER",
+        "execution_time_ms": "158",
+        "method": "POST",
+        "path": "/functions/v1/collect-nfl-prices",
+        "response_date": "Mon, 16 Nov 2026 15:58:03 GMT",
+        "status_code": "401",
+        "version": "1"
+      },
+      {
+        "error_code": "",
+        "execution_time_ms": "17765",
+        "method": "POST",
+        "path": "/functions/v1/collect-nfl-prices",
+        "response_date": "Mon, 16 Nov 2026 15:58:29 GMT",
+        "status_code": "200",
+        "version": "1"
+      },
+      {
+        "error_code": "",
+        "execution_time_ms": "24898",
+        "method": "POST",
+        "path": "/functions/v1/collect-nfl-prices",
+        "response_date": "Mon, 16 Nov 2026 16:42:25 GMT",
+        "status_code": "200",
+        "version": "1"
+      }
+    ],
+    "interpretation": "Three collector executions were HTTP 200. Two off-schedule requests were authentication rejections (missing auth header, invalid JWT). No 5xx or timeout observed for NFL."
+  },
+  "coverage": {
+    "rows": 782,
+    "books": 6,
+    "events": 2,
+    "markets": 5,
+    "players": 27,
+    "uniqueIds": 782,
+    "notPregame": 0,
+    "sourceHashes": 3,
+    "staleAtReceipt": 0,
+    "missingRawSource": 0,
+    "modelHashPresent": 0,
+    "noVigSumMismatch": 0,
+    "uniqueIdentities": 782,
+    "maxSideAgeSeconds": 284.447,
+    "productionEligible": 0,
+    "validationEligible": 0,
+    "futureQuoteAtReceipt": 0,
+    "nonzeroProductionWeight": 0,
+    "uniqueEventPlayerMarkets": 64,
+    "baselineOverProbabilityPresent": 746,
+    "uniqueEventPlayerMarketBookLines": 285
+  },
+  "byBook": [
+    {
+      "book": "betmgm",
+      "rows": 105,
+      "baseline_available": 105
+    },
+    {
+      "book": "bovada",
+      "rows": 125,
+      "baseline_available": 116
+    },
+    {
+      "book": "caesars",
+      "rows": 48,
+      "baseline_available": 42
+    },
+    {
+      "book": "draftkings",
+      "rows": 192,
+      "baseline_available": 183
+    },
+    {
+      "book": "fanduel",
+      "rows": 192,
+      "baseline_available": 183
+    },
+    {
+      "book": "pinnacle",
+      "rows": 120,
+      "baseline_available": 117
+    }
+  ],
+  "byMarket": [
+    {
+      "rows": 42,
+      "market": "passing_touchdowns",
+      "baseline_available": 42
+    },
+    {
+      "rows": 48,
+      "market": "passing_yards",
+      "baseline_available": 48
+    },
+    {
+      "rows": 258,
+      "market": "receiving_receptions",
+      "baseline_available": 246
+    },
+    {
+      "rows": 281,
+      "market": "receiving_yards",
+      "baseline_available": 269
+    },
+    {
+      "rows": 153,
+      "market": "rushing_yards",
+      "baseline_available": 141
+    }
+  ],
+  "bySource": [
+    {
+      "id": "04717fcbd27ea42d2a6324dfc4061a407042e590d52bfb8975b99837c2aa771f",
+      "events": 12,
+      "received_at": "2026-11-16T15:58:28.447+00:00",
+      "generated_at": "2026-11-16T15:58:28.365Z",
+      "served_stale": "false",
+      "model_version": "NFL Player Props v2.1-shadow",
+      "observation_rows": 261,
+      "source_model_hash": null,
+      "top_level_candidates": 636
+    },
+    {
+      "id": "bccab6fb148bc7180d9be37a11d23f1706a4d554f00dfeea1e024e749ccea83f",
+      "events": 12,
+      "received_at": "2026-11-16T16:12:25.543+00:00",
+      "generated_at": "2026-11-16T16:12:25.473Z",
+      "served_stale": "false",
+      "model_version": "NFL Player Props v2.1-shadow",
+      "observation_rows": 260,
+      "source_model_hash": null,
+      "top_level_candidates": 634
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "events": 12,
+      "received_at": "2026-11-16T16:42:24.343+00:00",
+      "generated_at": "2026-11-16T16:42:24.277Z",
+      "served_stale": "false",
+      "model_version": "NFL Player Props v2.1-shadow",
+      "observation_rows": 261,
+      "source_model_hash": null,
+      "top_level_candidates": 636
+    }
+  ],
+  "latestSourceEventCoverage": [
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "11Axnn7DOibA4F5G47GU",
+      "starts_at": "2026-11-17T01:15:00.000Z",
+      "accepted_pairs": 205,
+      "player_markets": 46
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "YlZBEbhTgV80ZeTIIyqm",
+      "starts_at": "2026-11-20T01:15:00.000Z",
+      "accepted_pairs": 56,
+      "player_markets": 25
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "6Gfje0CU0lNBNJInVzHW",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 3
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "Dm300hoqVZu3fZiQV0qK",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 3
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "ENpY3uFolXG37Gstwzpt",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 6
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "Z6YQV980wVl0tPjqtZAx",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 6
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "dcHwwEJ3MLYlesm8G28L",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 3
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "hoTXQFf2aajg6cKhdlbt",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 4
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "kYxLDF2mh2q5Vo0mgVNo",
+      "starts_at": "2026-11-22T18:00:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 4
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "gzc9rMaCWJPKhSCN2mTz",
+      "starts_at": "2026-11-22T21:25:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 2
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "kYt26vF1J3Rg4RKPcseO",
+      "starts_at": "2026-11-22T21:25:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 39
+    },
+    {
+      "id": "dfd838b75dc13ae782871f8f4480cd9374c11e1091398b4f26030be10fbdb902",
+      "event_id": "5qVWLlWGJim0fOVwUm2T",
+      "starts_at": "2026-11-23T01:20:00.000Z",
+      "accepted_pairs": 0,
+      "player_markets": 5
+    }
+  ],
+  "missingBaselineGroups": [
+    {
+      "rows": 12,
+      "market": "receiving_receptions",
+      "event_id": "11Axnn7DOibA4F5G47GU",
+      "player_id": "MATTHEW_HIBNER_1_NFL"
+    },
+    {
+      "rows": 12,
+      "market": "receiving_yards",
+      "event_id": "11Axnn7DOibA4F5G47GU",
+      "player_id": "MATTHEW_HIBNER_1_NFL"
+    },
+    {
+      "rows": 12,
+      "market": "rushing_yards",
+      "event_id": "11Axnn7DOibA4F5G47GU",
+      "player_id": "ZAY_FLOWERS_1_NFL"
+    }
+  ],
+  "missingBaselineExplanation": [
+    {
+      "playerId": "MATTHEW_HIBNER_1_NFL",
+      "markets": [
+        "receiving_receptions",
+        "receiving_yards"
+      ],
+      "rows": 24,
+      "reason": "Current source has no candidates or projections: player could not be matched to current NFL team/position."
+    },
+    {
+      "playerId": "ZAY_FLOWERS_1_NFL",
+      "markets": [
+        "rushing_yards"
+      ],
+      "rows": 12,
+      "reason": "Current source has no rushing projection or candidate; receiving projections exist."
+    }
+  ],
+  "qualification": {
+    "duplicateExactIdentities": 0,
+    "independentGameCount": 2,
+    "warning": "782 rows are repeated quote observations, not independent validation samples; 64 unique event/player/market groups and 2 events. The third run added 261 observations but no new independent games.",
+    "freshnessMeaning": "The five-minute limit is enforced at receipt. Thirty-minute scheduling does not guarantee a currently executable quote between collections.",
+    "sourceScope": "Latest source reports 12 events; acceptable paired prices still cover only 2."
+  },
+  "frozenCandidate": {
+    "version": "nfl-props-recalibration-2026-11-16-v1",
+    "modelHash": "498b99ebb5d0c72ca676dd58903baa6eb5606deaec547e6719103f9898806e68",
+    "hashVerified": true,
+    "allThreeBaselineSourceHashesMatchArtifact": true,
+    "liveSourceModelVersion": "NFL Player Props v2.1-shadow",
+    "liveSourceModelHash": null,
+    "productionEligible": false,
+    "productionWeight": 0
+  },
+  "candidateValidationRemaining": [
+    "Register a new prospective protocol with exact candidate, baseline source/config hashes, a future start boundary, prespecified eligibility, sampling, metrics, and promotion gates.",
+    "Persist timestamped pregame baseline and candidate probabilities at the exact captured line; candidateProbability currently runs in the offline development runner, not this hosted collector.",
+    "Persist/join authoritative completed-game player outcomes, participation and push rules to immutable forecasts and price evidence.",
+    "Apply event/game grouping so repeated quotes and books do not inflate independent validation sample size.",
+    "Keep quotes without usable model probabilities excluded from probability comparison; price evidence alone remains useful.",
+    "Do not retroactively mark these existing unregistered observations validation eligible."
+  ],
+  "tests": {
+    "command": "node --test tests/node/nfl-price-capture.test.mjs tests/node/nfl-hosted-price-collector.test.mjs",
+    "passed": 13,
+    "failed": 0
+  },
+  "referencePaths": [
+    "scripts/nfl/price-capture-lib.mjs",
+    "scripts/nfl/hosted-price-collector.mjs",
+    "scripts/nfl/recalibration-lib.mjs",
+    "scripts/nfl/recalibrate-props.mjs",
+    "supabase/migrations/20261116155905_schedule_nfl_exact_price_collection.sql"
+  ],
+  "continuityUpdate": {
+    "previousCheckedAt": "2026-11-16T16:33:11.64459+00:00",
+    "previousRows": 521,
+    "currentRows": 782,
+    "newRows": 261,
+    "previousEvents": 2,
+    "currentEvents": 2,
+    "independentGamesAdded": 0
+  }
+}
