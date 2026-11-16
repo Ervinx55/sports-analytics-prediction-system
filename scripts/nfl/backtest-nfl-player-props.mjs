@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import {pathToFileURL} from 'node:url';
 
 import {
   loadNflData,
@@ -346,7 +347,7 @@ function residualCalibration(rows, {
   };
 }
 
-async function backtestSeason(season, minWeek) {
+export async function backtestSeason(season, minWeek, {eventBuilder = eventFromGame} = {}) {
   const [nflData, playerData] = await Promise.all([
     loadNflData(season),
     loadNflPlayerData(season)
@@ -413,7 +414,7 @@ async function backtestSeason(season, minWeek) {
       continue;
     }
 
-    const event = eventFromGame(game);
+    const event = eventBuilder(game);
     const opponent =
       game.home_team === team ? game.away_team : game.home_team;
     const normalizedPlayer = normalizePlayerName(playerName(target));
@@ -487,11 +488,14 @@ async function backtestSeason(season, minWeek) {
         week,
         gameId: game.game_id,
         player: playerName(target),
+        playerID: playerId(target),
         position: rowPosition(target),
         team,
         opponent,
         dataQuality: opportunity.dataQuality,
         prediction,
+        incumbentPrediction: num(projection?.mean),
+        incumbentSd: num(projection?.sd),
         actual,
         baseline
       });
@@ -656,4 +660,4 @@ async function main() {
   );
 }
 
-await main();
+if(process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main();
