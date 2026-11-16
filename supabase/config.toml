@@ -167,3 +167,6 @@ verify_jwt = true
 
 [functions.collect-nfl-prices]
 verify_jwt = true
+
+[functions.audit-nba-outcome-sources]
+verify_jwt = true

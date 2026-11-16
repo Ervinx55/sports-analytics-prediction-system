@@ -918,6 +918,36 @@
         "localSourceParityVerified": true,
         "bundle_sha256": "4ecfd4c4cf12608eba07085f6b2994def891f82587c948a2edf6e1443ab06064"
       }
+    },
+    {
+      "slug": "audit-nba-outcome-sources",
+      "version": 3,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "appliedToProduction": true,
+      "bundle_sha256": "29f69081bf21d942d4eb76203c5b2ef0f0cf0172ba6d18c67f0204de7855479a",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/audit-nba-outcome-sources/index.ts",
+          "name": "supabase/functions/audit-nba-outcome-sources/index.ts",
+          "sha256": "eafc38543d96a37dfcfe1cabcf2eebde4f62e59baf55216863eda8fd337dc19a"
+        },
+        {
+          "path": "scripts/nba/outcome-source-audit.mjs",
+          "name": "scripts/nba/outcome-source-audit.mjs",
+          "sha256": "0b8af8677461a50ef4ffb31856de71215c66b84319d58bec16ba7efe3913bffc"
+        }
+      ],
+      "deployed_at": "2026-11-16",
+      "deploymentObservation": {
+        "status": "ACTIVE",
+        "version": 3,
+        "verify_jwt": true,
+        "observedOn": "2026-11-16",
+        "localSourceParityVerified": true,
+        "bundle_sha256": "29f69081bf21d942d4eb76203c5b2ef0f0cf0172ba6d18c67f0204de7855479a"
+      }
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",
