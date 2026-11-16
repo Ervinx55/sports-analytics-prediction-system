@@ -24,7 +24,7 @@ def test_repository_inventory_builds_drift_expectations():
     root = Path(__file__).resolve().parents[2]
     items = json.loads((root / 'supabase/manifests/edge-functions.json').read_text())['items']
     expected = expected_function_inventory(items)
-    assert len(expected) == 54
+    assert len(expected) == 55
     for item in items:
         actual = next(x for x in expected if x['slug'] == item['slug'])
         source = item.get('deploymentObservation', item)

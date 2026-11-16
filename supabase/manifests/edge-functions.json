@@ -883,6 +883,41 @@
         "observedOn": "2026-11-10",
         "localSourceParityVerified": false
       }
+    },
+    {
+      "slug": "collect-nfl-prices",
+      "version": 1,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "appliedToProduction": true,
+      "bundle_sha256": "4ecfd4c4cf12608eba07085f6b2994def891f82587c948a2edf6e1443ab06064",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/collect-nfl-prices/index.ts",
+          "name": "supabase/functions/collect-nfl-prices/index.ts",
+          "sha256": "2111333866fc0ce77aa9512426f834a0a9596fc034dd98aed29cb1d61b19d589"
+        },
+        {
+          "path": "scripts/nfl/hosted-price-collector.mjs",
+          "name": "scripts/nfl/hosted-price-collector.mjs",
+          "sha256": "03b54e0b96816d6259b46d3787513742f4b149b86aa5f3d901bb9a186818a9b9"
+        },
+        {
+          "path": "scripts/nfl/price-capture-lib.mjs",
+          "name": "scripts/nfl/price-capture-lib.mjs",
+          "sha256": "e58af5a865ffc9dd6c5b74062122aba9fd2f91a746f6b29bb42c4c81ae198b75"
+        }
+      ],
+      "deployed_at": "2026-11-16",
+      "deploymentObservation": {
+        "status": "ACTIVE",
+        "version": 1,
+        "verify_jwt": true,
+        "observedOn": "2026-11-16",
+        "localSourceParityVerified": true,
+        "bundle_sha256": "4ecfd4c4cf12608eba07085f6b2994def891f82587c948a2edf6e1443ab06064"
+      }
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

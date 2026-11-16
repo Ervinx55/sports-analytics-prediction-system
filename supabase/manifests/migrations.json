@@ -451,6 +451,24 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261116155528",
+      "name": "nfl_exact_price_evidence",
+      "path": "supabase/migrations/20261116155528_nfl_exact_price_evidence.sql",
+      "sha256": "eed746db4df9c92347c5293843dc08773ff607f4a7b57f03d1026e286c128390",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261116155905",
+      "name": "schedule_nfl_exact_price_collection",
+      "path": "supabase/migrations/20261116155905_schedule_nfl_exact_price_collection.sql",
+      "sha256": "17b2b62ab79bed13e950510d615527a7b0475877dece1febc0190b171c2a40ed",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
