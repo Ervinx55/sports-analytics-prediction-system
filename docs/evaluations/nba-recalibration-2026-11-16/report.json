@@ -1,0 +1,3108 @@
+{
+  "policy": {
+    "version": "nba-minutes-distribution-recalibration-2026-11-16-v1",
+    "phase": "DEVELOPMENT_ONLY",
+    "productionWeight": 0,
+    "productionEligible": false,
+    "fitBefore": "2025-01-01T00:00:00Z",
+    "selectBefore": "2025-02-01T00:00:00Z",
+    "season": 2024,
+    "minimumPriorGames": 5,
+    "historyWindow": 10,
+    "historyPublicationProxyHours": 8,
+    "minutesHalfLifeGames": 3,
+    "minutesCap": 48,
+    "minutesBands": [
+      20,
+      30
+    ],
+    "residualGridSize": 201,
+    "minimumBandGames": 50,
+    "minimumBandRows": 200,
+    "variants": {
+      "pooled": 0,
+      "half": 0.5,
+      "full": 1
+    },
+    "selection": "January equal-game Brier, gain >=0.0005 and non-worse log loss versus pooled; ties prefer simpler",
+    "primaryThresholds": "Unique nonnegative half-point lines at floor(last-ten mean)+0.5 plus fixed offsets",
+    "nearOffsets": {
+      "points": [
+        -5,
+        0,
+        5
+      ],
+      "rebounds": [
+        -2,
+        0,
+        2
+      ],
+      "assists": [
+        -1,
+        0,
+        1
+      ]
+    },
+    "secondaryThresholds": {
+      "points": [
+        5.5,
+        10.5,
+        15.5,
+        20.5,
+        25.5
+      ],
+      "rebounds": [
+        2.5,
+        4.5,
+        6.5,
+        8.5
+      ],
+      "assists": [
+        1.5,
+        3.5,
+        5.5,
+        7.5
+      ]
+    },
+    "minimumSplitGames": 100,
+    "bootstrapDraws": 2000,
+    "bootstrapSeed": 20261116,
+    "condition": "POSITIVE_MINUTE_PARTICIPATION",
+    "inputHashes": {
+      "games.json": "d6f710ae1f196d7010506fb5205a5940a00577b606c8da40e7906d5a860c2a0a",
+      "player-stats.json": "6b1aefaa4721c6f7eb3f04d80f3783f0af8f1b1492a0154b445186c1d7c6fa54"
+    },
+    "archiveManifestHash": "442ecf57d1a305a8d5fa9f53529be073c95aedfec1970997336d971cc2dc3976",
+    "codeSha256": "d185fcf771af0c61286737e99f5efecddb06dc5806580ac4c2783e484ea6fd62",
+    "createdAt": "2026-11-16T16:04:17.963094+00:00"
+  },
+  "markets": {
+    "points": {
+      "trainingGames": 408,
+      "trainingPlayerMarkets": 7887,
+      "selected": "pooled",
+      "selection": {
+        "pooled": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.19125003573601457,
+          "logLoss": 0.5669387366049682,
+          "ece": 0.02032080272937425,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 11.773253308393453,
+              "meanProbability": 0.05553767378657754,
+              "observedRate": 0.09453579634615891
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 27.65410927734646,
+              "meanProbability": 0.156845386144047,
+              "observedRate": 0.16487502099504048
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 32.21253401130489,
+              "meanProbability": 0.2487670247571591,
+              "observedRate": 0.22585096299889362
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 9.422902374684384,
+              "meanProbability": 0.3507971580414058,
+              "observedRate": 0.2900811927386623
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 52.719261108917024,
+              "meanProbability": 0.4584429753157778,
+              "observedRate": 0.4434194390426181
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 17.528609442220596,
+              "meanProbability": 0.5287238997651529,
+              "observedRate": 0.5323925302907225
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 12.632381332948318,
+              "meanProbability": 0.6635934235554296,
+              "observedRate": 0.6509701770407246
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 27.034811148043413,
+              "meanProbability": 0.75219943635625,
+              "observedRate": 0.7321686618244149
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 29.821902382638978,
+              "meanProbability": 0.8447019281036364,
+              "observedRate": 0.8159648900507531
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 3.200235613502987,
+              "meanProbability": 0.9123189587853733,
+              "observedRate": 0.8666820481151092
+            }
+          ]
+        },
+        "half": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.19111871138724904,
+          "logLoss": 0.5663302904759949,
+          "ece": 0.01854582808606055,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 9.619069832147757,
+              "meanProbability": 0.05761115575101607,
+              "observedRate": 0.09467946897567374
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 28.36882551292384,
+              "meanProbability": 0.15775794813524688,
+              "observedRate": 0.1605017680634337
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 35.1385095769427,
+              "meanProbability": 0.24484680537781114,
+              "observedRate": 0.22182796717223227
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 7.585716463116743,
+              "meanProbability": 0.3570181088322247,
+              "observedRate": 0.30321260815776196
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 52.51706818720627,
+              "meanProbability": 0.45706047608666844,
+              "observedRate": 0.4423044993374894
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 18.289348703449594,
+              "meanProbability": 0.5269457115153284,
+              "observedRate": 0.5293666043839114
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 12.212725043403294,
+              "meanProbability": 0.6648529854890703,
+              "observedRate": 0.6527988338759149
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 28.511915326434647,
+              "meanProbability": 0.7531773579173451,
+              "observedRate": 0.7316846415242979
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 27.661988118964707,
+              "meanProbability": 0.8455469952405257,
+              "observedRate": 0.8197725515139328
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 4.094833235411147,
+              "meanProbability": 0.9146590442674475,
+              "observedRate": 0.8632135270508366
+            }
+          ]
+        },
+        "full": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.1911338913541411,
+          "logLoss": 0.5663679945859109,
+          "ece": 0.01681231345628593,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 7.6317543239287975,
+              "meanProbability": 0.0578171145691111,
+              "observedRate": 0.0860042150770877
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 30.3228069616461,
+              "meanProbability": 0.16019443298486574,
+              "observedRate": 0.16024026386021803
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 35.68619683267819,
+              "meanProbability": 0.2423384193331286,
+              "observedRate": 0.21562044821380993
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 7.079318159825182,
+              "meanProbability": 0.36231980260582985,
+              "observedRate": 0.3395300834896787
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 53.12263177391307,
+              "meanProbability": 0.4567337378314995,
+              "observedRate": 0.44799862507465066
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 17.932035131403207,
+              "meanProbability": 0.5280583208287313,
+              "observedRate": 0.5110856300665703
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 11.550055879589396,
+              "meanProbability": 0.6656554436072084,
+              "observedRate": 0.6489752752060952
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 28.91837958264079,
+              "meanProbability": 0.7518436028875722,
+              "observedRate": 0.7341444629742189
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 26.48910335275023,
+              "meanProbability": 0.8431920860939317,
+              "observedRate": 0.8212279986666213
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 5.267718001625652,
+              "meanProbability": 0.9183540829993638,
+              "observedRate": 0.8462223463420075
+            }
+          ]
+        }
+      },
+      "laterDevelopment": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.1962699343992831,
+          "logLoss": 0.5811084639605818,
+          "ece": 0.02067697486191855,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 24.619632145350355,
+              "meanProbability": 0.057801274718772416,
+              "observedRate": 0.15486760469110553
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 65.33451771964256,
+              "meanProbability": 0.15954404962827445,
+              "observedRate": 0.19715402369278978
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 77.87499419894124,
+              "meanProbability": 0.24785765302236767,
+              "observedRate": 0.23217413654544453
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 21.69573050932661,
+              "meanProbability": 0.34963315446244375,
+              "observedRate": 0.31343559108152047
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 123.72713704655446,
+              "meanProbability": 0.45873750738506974,
+              "observedRate": 0.46745913976831976
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 39.589966139907034,
+              "meanProbability": 0.5296867421106195,
+              "observedRate": 0.5397149918358009
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 29.86036279175866,
+              "meanProbability": 0.6633999910244712,
+              "observedRate": 0.657592038358416
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 66.31647288440233,
+              "meanProbability": 0.7512053889072702,
+              "observedRate": 0.7417432604783117
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 68.28721584950735,
+              "meanProbability": 0.8439207486308083,
+              "observedRate": 0.8201646330254746
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 8.693970714610982,
+              "meanProbability": 0.9153495089685484,
+              "observedRate": 0.9011841329166932
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.19608709386494474,
+          "logLoss": 0.5798708749501417,
+          "ece": 0.019055485536850044,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 19.294072488102415,
+              "meanProbability": 0.05873107772018017,
+              "observedRate": 0.15788952355046595
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 63.865555499505234,
+              "meanProbability": 0.15820342120389622,
+              "observedRate": 0.1926936864157262
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 87.56666294410573,
+              "meanProbability": 0.24323967886168688,
+              "observedRate": 0.22814966403382136
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 17.895393053292388,
+              "meanProbability": 0.35362129537559284,
+              "observedRate": 0.32641596546645163
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 122.87834339351886,
+              "meanProbability": 0.4580068729622712,
+              "observedRate": 0.46733874572102657
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 42.033219788330875,
+              "meanProbability": 0.5281438172284313,
+              "observedRate": 0.5371630420821626
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 28.498756344656833,
+              "meanProbability": 0.6643071427068015,
+              "observedRate": 0.652714139980146
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 70.45805359279208,
+              "meanProbability": 0.7524090739520222,
+              "observedRate": 0.744675187812376
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 62.75040955848152,
+              "meanProbability": 0.8449116723696661,
+              "observedRate": 0.8248869932463329
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 10.759533337215993,
+              "meanProbability": 0.9181700145793842,
+              "observedRate": 0.8771465603685519
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.1960460356771084,
+          "logLoss": 0.5793610300670213,
+          "ece": 0.017904541295420594,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 15.834435212126394,
+              "meanProbability": 0.06122924340323211,
+              "observedRate": 0.15005521711799735
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 66.68643872341711,
+              "meanProbability": 0.16155092548281585,
+              "observedRate": 0.19348021833341797
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 89.6412591125707,
+              "meanProbability": 0.24194602320314118,
+              "observedRate": 0.22776425910388942
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 16.365301738493486,
+              "meanProbability": 0.35919457200129706,
+              "observedRate": 0.3328179576559255
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 122.80318777860909,
+              "meanProbability": 0.4579061889947139,
+              "observedRate": 0.466770713918963
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 42.6588900122132,
+              "meanProbability": 0.52822093105831,
+              "observedRate": 0.5389975495664456
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 27.02018493919071,
+              "meanProbability": 0.663981371621872,
+              "observedRate": 0.6480469924946444
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 71.54341933495373,
+              "meanProbability": 0.7511758688124276,
+              "observedRate": 0.7456077836777458
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 59.639226789000794,
+              "meanProbability": 0.8420713198259495,
+              "observedRate": 0.8235426025741369
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 13.80765635942631,
+              "meanProbability": 0.9210845003635645,
+              "observedRate": 0.8706170126244209
+            }
+          ]
+        }
+      },
+      "lastTenReferenceLater": {
+        "games": 526,
+        "playerMarkets": 10505,
+        "brier": 0.1978213228317467,
+        "logLoss": 0.5849782133230436,
+        "ece": 0.024465732776766762,
+        "reliability": [
+          {
+            "range": [
+              0.0,
+              0.1
+            ],
+            "gameWeight": 21.24518425298129,
+            "meanProbability": 0.05920454189010949,
+            "observedRate": 0.17485971174864937
+          },
+          {
+            "range": [
+              0.1,
+              0.2
+            ],
+            "gameWeight": 66.27851821798426,
+            "meanProbability": 0.15736269154273907,
+            "observedRate": 0.2094224865284263
+          },
+          {
+            "range": [
+              0.2,
+              0.3
+            ],
+            "gameWeight": 84.30283704541814,
+            "meanProbability": 0.24546715360628266,
+            "observedRate": 0.21578262623735772
+          },
+          {
+            "range": [
+              0.3,
+              0.4
+            ],
+            "gameWeight": 5.3006045771265295,
+            "meanProbability": 0.3173796583399476,
+            "observedRate": 0.24796344543939222
+          },
+          {
+            "range": [
+              0.4,
+              0.5
+            ],
+            "gameWeight": 165.1933310239881,
+            "meanProbability": 0.46917324148813305,
+            "observedRate": 0.472768306706756
+          },
+          {
+            "range": [
+              0.5,
+              0.6
+            ],
+            "gameWeight": 11.596333479434717,
+            "meanProbability": 0.5195814896977367,
+            "observedRate": 0.5578167393250927
+          },
+          {
+            "range": [
+              0.6,
+              0.7
+            ],
+            "gameWeight": 24.897880419087954,
+            "meanProbability": 0.672181963123606,
+            "observedRate": 0.6523555669003968
+          },
+          {
+            "range": [
+              0.7,
+              0.8
+            ],
+            "gameWeight": 68.99655690490059,
+            "meanProbability": 0.7524294681222238,
+            "observedRate": 0.7439870890772144
+          },
+          {
+            "range": [
+              0.8,
+              0.9
+            ],
+            "gameWeight": 72.11523935919081,
+            "meanProbability": 0.8413595851412141,
+            "observedRate": 0.8185944733055563
+          },
+          {
+            "range": [
+              0.9,
+              1.0
+            ],
+            "gameWeight": 6.073514719888718,
+            "meanProbability": 0.9067382389061138,
+            "observedRate": 0.8514383176538556
+          }
+        ]
+      },
+      "secondaryFixedThresholds": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.11900723327322767,
+          "logLoss": 0.38607485184488677,
+          "ece": 0.012298059550255057,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 208.35905929461327,
+              "meanProbability": 0.026490568729425765,
+              "observedRate": 0.040214818818959226
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 55.886284058099946,
+              "meanProbability": 0.14717269680779402,
+              "observedRate": 0.15764423603555053
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 37.011731991970954,
+              "meanProbability": 0.25181525726905,
+              "observedRate": 0.2588927542595277
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 35.023999146081316,
+              "meanProbability": 0.35000896316646357,
+              "observedRate": 0.36133888832738825
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 31.61421481244336,
+              "meanProbability": 0.44899103480298563,
+              "observedRate": 0.4519968319496571
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 28.337986784385365,
+              "meanProbability": 0.5472475249225426,
+              "observedRate": 0.5494338144375198
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 27.637975518690798,
+              "meanProbability": 0.6472505295863958,
+              "observedRate": 0.6702484817324366
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 25.85311480766599,
+              "meanProbability": 0.7482338932640782,
+              "observedRate": 0.7444486189313311
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 28.05739697011746,
+              "meanProbability": 0.8495545033729903,
+              "observedRate": 0.8301673212195501
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 48.21823661593115,
+              "meanProbability": 0.9657257199764885,
+              "observedRate": 0.9464216220322178
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.11881936131235131,
+          "logLoss": 0.37854687907873924,
+          "ece": 0.010557823171132592,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 205.4586523362236,
+              "meanProbability": 0.027161546318871622,
+              "observedRate": 0.03906808356630429
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 56.628388550188994,
+              "meanProbability": 0.14476287128144388,
+              "observedRate": 0.15342528920704535
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 38.66828847077186,
+              "meanProbability": 0.24924153167485946,
+              "observedRate": 0.2535509549414156
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 34.776737643471265,
+              "meanProbability": 0.34820837857807974,
+              "observedRate": 0.3624053018972462
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 31.731653092352435,
+              "meanProbability": 0.44786278504573057,
+              "observedRate": 0.45088970939491557
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 29.047043109473478,
+              "meanProbability": 0.54744282900516,
+              "observedRate": 0.5463239923160685
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 27.41912246776681,
+              "meanProbability": 0.6479036682209116,
+              "observedRate": 0.6714594478480195
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 27.17906035039743,
+              "meanProbability": 0.7498459771221814,
+              "observedRate": 0.7453978840981502
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 28.930917455719126,
+              "meanProbability": 0.8506507121285944,
+              "observedRate": 0.8373706865715734
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 46.16013652363408,
+              "meanProbability": 0.9632857879973041,
+              "observedRate": 0.9486261889333525
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.11874482543070844,
+          "logLoss": 0.3775402993248558,
+          "ece": 0.008683384454491539,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 204.19114224678881,
+              "meanProbability": 0.027962315014441706,
+              "observedRate": 0.03790966154282225
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 57.76473265760559,
+              "meanProbability": 0.14629073554297894,
+              "observedRate": 0.15373096353662177
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 39.32369231959402,
+              "meanProbability": 0.25113849103947794,
+              "observedRate": 0.25888791540942974
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 33.96311755223342,
+              "meanProbability": 0.3491469568737126,
+              "observedRate": 0.36031193349756246
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 32.03432357149965,
+              "meanProbability": 0.4487331296592088,
+              "observedRate": 0.45019331294085463
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 28.610109154033974,
+              "meanProbability": 0.5478367084206838,
+              "observedRate": 0.5466814336577515
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 27.63982548104802,
+              "meanProbability": 0.6476795553233964,
+              "observedRate": 0.667764891360797
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 27.411225005806543,
+              "meanProbability": 0.7492887073606463,
+              "observedRate": 0.7457034970717092
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 30.42572816278285,
+              "meanProbability": 0.8484996710687791,
+              "observedRate": 0.8412634777180936
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 44.63610384860681,
+              "meanProbability": 0.9601756401691939,
+              "observedRate": 0.9496648922043116
+            }
+          ]
+        }
+      },
+      "selectedBrierDeltaVsMinutesPooled": 0.0,
+      "descriptive95PercentGameBootstrap": [
+        0.0,
+        0.0
+      ]
+    },
+    "rebounds": {
+      "trainingGames": 408,
+      "trainingPlayerMarkets": 7887,
+      "selected": "pooled",
+      "selection": {
+        "pooled": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.1890112233019729,
+          "logLoss": 0.5599079264532432,
+          "ece": 0.016674269993976597,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 11.17586230997618,
+              "meanProbability": 0.07271053432823557,
+              "observedRate": 0.10255237900756022
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 30.992319182249332,
+              "meanProbability": 0.15807157745338302,
+              "observedRate": 0.1511415858699761
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 31.51430120385304,
+              "meanProbability": 0.24574823678364802,
+              "observedRate": 0.233429832229102
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 17.497563969987805,
+              "meanProbability": 0.35873802386254855,
+              "observedRate": 0.35802294054124645
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 38.51173143402213,
+              "meanProbability": 0.4513672173814739,
+              "observedRate": 0.42827456376729095
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 22.22118998800736,
+              "meanProbability": 0.5380208202746385,
+              "observedRate": 0.5225695067368458
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 14.348772709694199,
+              "meanProbability": 0.6564123956523987,
+              "observedRate": 0.6270152481409135
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 29.987783580800357,
+              "meanProbability": 0.7530078559000247,
+              "observedRate": 0.7197011648996807
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 23.94519860410267,
+              "meanProbability": 0.8451527939600186,
+              "observedRate": 0.8423837909052282
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 3.805277017307235,
+              "meanProbability": 0.9120520073501731,
+              "observedRate": 0.9295113636828429
+            }
+          ]
+        },
+        "half": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.18883131223425345,
+          "logLoss": 0.5593585026751603,
+          "ece": 0.013712552902745504,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 8.33567563655921,
+              "meanProbability": 0.07739001833630685,
+              "observedRate": 0.0935614561554384
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 34.166757094349556,
+              "meanProbability": 0.15556383042121671,
+              "observedRate": 0.14925323301704724
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 31.359495976334344,
+              "meanProbability": 0.24254188725703163,
+              "observedRate": 0.2342422478622995
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 17.787776589720085,
+              "meanProbability": 0.3583673946633047,
+              "observedRate": 0.35266102017872797
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 38.42179695364267,
+              "meanProbability": 0.44921751869893356,
+              "observedRate": 0.42910465004373244
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 22.31476362482291,
+              "meanProbability": 0.5372020600322135,
+              "observedRate": 0.5280504930756251
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 14.489250274336525,
+              "meanProbability": 0.657308865873837,
+              "observedRate": 0.6279075329623269
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 30.016102677569666,
+              "meanProbability": 0.7540365905611492,
+              "observedRate": 0.7247361344104442
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 23.973967232420588,
+              "meanProbability": 0.8460376033876297,
+              "observedRate": 0.8467579686357534
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 3.1344139402448055,
+              "meanProbability": 0.913804840838673,
+              "observedRate": 0.9328440381586809
+            }
+          ]
+        },
+        "full": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.18879949725084047,
+          "logLoss": 0.5593249590456413,
+          "ece": 0.01304776316606633,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 6.936439682068845,
+              "meanProbability": 0.08392116264044136,
+              "observedRate": 0.09539734309807195
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 36.782987860666005,
+              "meanProbability": 0.15652908204247,
+              "observedRate": 0.15303519457414494
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 30.74305237868141,
+              "meanProbability": 0.2423474331741367,
+              "observedRate": 0.23047226718532737
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 19.036440703853184,
+              "meanProbability": 0.36206408567575005,
+              "observedRate": 0.3567538954372653
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 39.079288598166286,
+              "meanProbability": 0.4512233820138605,
+              "observedRate": 0.4330191596684997
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 19.91958027153551,
+              "meanProbability": 0.5402574057212937,
+              "observedRate": 0.5381145583244821
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 14.783628620585581,
+              "meanProbability": 0.6562865517910883,
+              "observedRate": 0.6249871725367141
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 29.214539876300556,
+              "meanProbability": 0.7530448830441218,
+              "observedRate": 0.72462056912075
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 24.636794984167103,
+              "meanProbability": 0.8443489741107557,
+              "observedRate": 0.8519076900051157
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 2.8672470239760584,
+              "meanProbability": 0.914904520483087,
+              "observedRate": 0.9201278789133
+            }
+          ]
+        }
+      },
+      "laterDevelopment": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.19501080479692348,
+          "logLoss": 0.5757336325727598,
+          "ece": 0.015418133130599533,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 22.82684016263884,
+              "meanProbability": 0.07304541027907688,
+              "observedRate": 0.15126642512090918
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 74.86462689398368,
+              "meanProbability": 0.15834054451833485,
+              "observedRate": 0.17933038096981968
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 75.11146866955312,
+              "meanProbability": 0.24479451535411398,
+              "observedRate": 0.24121084706089274
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 40.90684112577189,
+              "meanProbability": 0.3599251182662281,
+              "observedRate": 0.3727720223130782
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 90.96634068156504,
+              "meanProbability": 0.45131336758632296,
+              "observedRate": 0.4452843632611236
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 49.94526491338613,
+              "meanProbability": 0.5392731004850103,
+              "observedRate": 0.5429196050164079
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 33.264276963385754,
+              "meanProbability": 0.6584647772135565,
+              "observedRate": 0.6350411846661008
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 72.84685987808135,
+              "meanProbability": 0.7521248725467352,
+              "observedRate": 0.7279020856489092
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 56.15794520425338,
+              "meanProbability": 0.8440281034625309,
+              "observedRate": 0.8325426620495963
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 9.109535507384253,
+              "meanProbability": 0.9124066640587972,
+              "observedRate": 0.9166899317111036
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.19480497442512898,
+          "logLoss": 0.5747586047015025,
+          "ece": 0.013561380845006224,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 17.690270061818783,
+              "meanProbability": 0.07768999927444603,
+              "observedRate": 0.1485677310707766
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 79.9770533672923,
+              "meanProbability": 0.15641097664679404,
+              "observedRate": 0.1756822012004527
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 74.71881770585352,
+              "meanProbability": 0.2409441868029524,
+              "observedRate": 0.2413123300342834
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 42.148840513366295,
+              "meanProbability": 0.3585407934034248,
+              "observedRate": 0.3760870168747508
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 90.18471772085798,
+              "meanProbability": 0.44900960544134283,
+              "observedRate": 0.4449159761119808
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 50.88922818444997,
+              "meanProbability": 0.5389073612337516,
+              "observedRate": 0.5456629928259642
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 33.83848103902682,
+              "meanProbability": 0.6595839906589364,
+              "observedRate": 0.635001235735808
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 72.19262153718668,
+              "meanProbability": 0.7527024476047016,
+              "observedRate": 0.7288963526104781
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 56.53386292120804,
+              "meanProbability": 0.8440617791241093,
+              "observedRate": 0.8389455901929247
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 7.82610694894311,
+              "meanProbability": 0.9134224816151455,
+              "observedRate": 0.9110653643335443
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.19473909011777482,
+          "logLoss": 0.574333210841714,
+          "ece": 0.0129844883462399,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 14.787676779034449,
+              "meanProbability": 0.08299896561457343,
+              "observedRate": 0.13425257007404062
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 86.48649453936119,
+              "meanProbability": 0.15758019271212387,
+              "observedRate": 0.17405502339380735
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 71.86771093244356,
+              "meanProbability": 0.2412546889482458,
+              "observedRate": 0.24795481095129418
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 45.60487168789558,
+              "meanProbability": 0.3615402026791631,
+              "observedRate": 0.37973512439878454
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 89.3318047971123,
+              "meanProbability": 0.45010041894450376,
+              "observedRate": 0.44975239202092854
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 47.8241758447561,
+              "meanProbability": 0.541317066248662,
+              "observedRate": 0.5528348450630582
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 34.162714146145845,
+              "meanProbability": 0.6583326135671991,
+              "observedRate": 0.6327569966242603
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 70.0622746386598,
+              "meanProbability": 0.7509636361551418,
+              "observedRate": 0.7281927855025987
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 58.9397103767867,
+              "meanProbability": 0.8421518137054032,
+              "observedRate": 0.838196222715978
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 6.932566257807526,
+              "meanProbability": 0.9147886663908407,
+              "observedRate": 0.9073455849356691
+            }
+          ]
+        }
+      },
+      "lastTenReferenceLater": {
+        "games": 526,
+        "playerMarkets": 10505,
+        "brier": 0.19666689868220208,
+        "logLoss": 0.5797973332038182,
+        "ece": 0.019193994704726117,
+        "reliability": [
+          {
+            "range": [
+              0.0,
+              0.1
+            ],
+            "gameWeight": 19.68828659643214,
+            "meanProbability": 0.07681916824924037,
+            "observedRate": 0.17274713258168967
+          },
+          {
+            "range": [
+              0.1,
+              0.2
+            ],
+            "gameWeight": 77.15155837267888,
+            "meanProbability": 0.16085084862979915,
+            "observedRate": 0.18449632709249625
+          },
+          {
+            "range": [
+              0.2,
+              0.3
+            ],
+            "gameWeight": 76.92249656952421,
+            "meanProbability": 0.24420576742190772,
+            "observedRate": 0.22984485168316035
+          },
+          {
+            "range": [
+              0.3,
+              0.4
+            ],
+            "gameWeight": 25.040762050156523,
+            "meanProbability": 0.35863490323380787,
+            "observedRate": 0.38958110010969493
+          },
+          {
+            "range": [
+              0.4,
+              0.5
+            ],
+            "gameWeight": 108.93663953290041,
+            "meanProbability": 0.44984019308838863,
+            "observedRate": 0.441861313418172
+          },
+          {
+            "range": [
+              0.5,
+              0.6
+            ],
+            "gameWeight": 48.90683088005981,
+            "meanProbability": 0.5286847963627054,
+            "observedRate": 0.5351264050990069
+          },
+          {
+            "range": [
+              0.6,
+              0.7
+            ],
+            "gameWeight": 27.217160973699272,
+            "meanProbability": 0.6613525076590234,
+            "observedRate": 0.6367134804409489
+          },
+          {
+            "range": [
+              0.7,
+              0.8
+            ],
+            "gameWeight": 79.83259282205255,
+            "meanProbability": 0.7523378510685164,
+            "observedRate": 0.7236619128428093
+          },
+          {
+            "range": [
+              0.8,
+              0.9
+            ],
+            "gameWeight": 54.71297730384812,
+            "meanProbability": 0.8425978329109554,
+            "observedRate": 0.8364588389718813
+          },
+          {
+            "range": [
+              0.9,
+              1.0
+            ],
+            "gameWeight": 7.590694898650303,
+            "meanProbability": 0.9029657157521744,
+            "observedRate": 0.9060632043151681
+          }
+        ]
+      },
+      "secondaryFixedThresholds": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.13919315812154198,
+          "logLoss": 0.4375375219992995,
+          "ece": 0.020502458692933347,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 175.63573638428454,
+              "meanProbability": 0.03395840987720321,
+              "observedRate": 0.05311229911837452
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 64.30535935699977,
+              "meanProbability": 0.14822686370433089,
+              "observedRate": 0.16544126392669486
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 48.770883405003424,
+              "meanProbability": 0.25020391611721876,
+              "observedRate": 0.25670214135971053
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 38.164817652656104,
+              "meanProbability": 0.34971471823289363,
+              "observedRate": 0.3588372787866803
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 34.96378463774855,
+              "meanProbability": 0.4502417714590032,
+              "observedRate": 0.43328331772955797
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 32.90624133004651,
+              "meanProbability": 0.5521951709372444,
+              "observedRate": 0.5279327786657467
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 31.74795245160835,
+              "meanProbability": 0.6495985855233813,
+              "observedRate": 0.6292953925791723
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 31.57629045758782,
+              "meanProbability": 0.7488334214609239,
+              "observedRate": 0.728668297170726
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 26.538326150111182,
+              "meanProbability": 0.8476882229783086,
+              "observedRate": 0.7970431313016317
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 41.39060817394181,
+              "meanProbability": 0.9621209679861955,
+              "observedRate": 0.9227051145159604
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.1389968070593013,
+          "logLoss": 0.4330972349387875,
+          "ece": 0.020173148483620184,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 173.87761002974838,
+              "meanProbability": 0.03466361732662027,
+              "observedRate": 0.05170164224014158
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 65.12025083470581,
+              "meanProbability": 0.14634568276542811,
+              "observedRate": 0.16247779636837964
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 49.29351136855927,
+              "meanProbability": 0.24834827618356833,
+              "observedRate": 0.25988152781716234
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 38.88153685555899,
+              "meanProbability": 0.3470832803727595,
+              "observedRate": 0.3593506967651379
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 34.43190874601419,
+              "meanProbability": 0.4481240902677841,
+              "observedRate": 0.42814836080869806
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 33.68955743382435,
+              "meanProbability": 0.5521920649448552,
+              "observedRate": 0.5311545066960331
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 31.690459691443316,
+              "meanProbability": 0.651355768483187,
+              "observedRate": 0.6306809825094947
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 30.814591771604483,
+              "meanProbability": 0.7501507915478536,
+              "observedRate": 0.7266886522025795
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 27.520688757083537,
+              "meanProbability": 0.8482157984292004,
+              "observedRate": 0.8011177638454623
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 40.67988451144626,
+              "meanProbability": 0.9611658684831271,
+              "observedRate": 0.9247439680274732
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.13891932059164025,
+          "logLoss": 0.43266134122838745,
+          "ece": 0.01953236170700029,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 174.59219644327968,
+              "meanProbability": 0.03570203872864369,
+              "observedRate": 0.05036710673806031
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 64.79789891261166,
+              "meanProbability": 0.14811519845190013,
+              "observedRate": 0.16387947898078006
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 50.2665504259998,
+              "meanProbability": 0.2502443808922927,
+              "observedRate": 0.26626416769069505
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 39.42495424793102,
+              "meanProbability": 0.34902881343799275,
+              "observedRate": 0.36201171980165564
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 33.556323818582094,
+              "meanProbability": 0.44999094480022334,
+              "observedRate": 0.43347056847865134
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 32.042220082275385,
+              "meanProbability": 0.5526854498898616,
+              "observedRate": 0.5318531114067463
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 32.06471140048368,
+              "meanProbability": 0.6505283431744503,
+              "observedRate": 0.6308366120516739
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 30.14005747687332,
+              "meanProbability": 0.74924875045905,
+              "observedRate": 0.7230360673975418
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 28.91986139669871,
+              "meanProbability": 0.8473655135408221,
+              "observedRate": 0.8006435459440202
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 40.195225795253435,
+              "meanProbability": 0.9599053690347622,
+              "observedRate": 0.9255609442727243
+            }
+          ]
+        }
+      },
+      "selectedBrierDeltaVsMinutesPooled": 0.0,
+      "descriptive95PercentGameBootstrap": [
+        0.0,
+        0.0
+      ]
+    },
+    "assists": {
+      "trainingGames": 408,
+      "trainingPlayerMarkets": 7887,
+      "selected": "pooled",
+      "selection": {
+        "pooled": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.20893467110048694,
+          "logLoss": 0.6053639045528464,
+          "ece": 0.023349138630201407,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 0.7909121408596437,
+              "meanProbability": 0.0942878684794832,
+              "observedRate": 0.1247522219366541
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 27.198722702053143,
+              "meanProbability": 0.1559468981819078,
+              "observedRate": 0.14036980053837977
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 39.41622670080332,
+              "meanProbability": 0.25383317104496683,
+              "observedRate": 0.26386608058625843
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 39.037636856661685,
+              "meanProbability": 0.35027888126765017,
+              "observedRate": 0.31758645554377585
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 32.271624563631086,
+              "meanProbability": 0.4493431150719549,
+              "observedRate": 0.432248730689537
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 31.7670684201183,
+              "meanProbability": 0.5494670164214842,
+              "observedRate": 0.5265030907556588
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 25.458509162599242,
+              "meanProbability": 0.6474605374472275,
+              "observedRate": 0.6067129650638217
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 20.769693368336046,
+              "meanProbability": 0.7437039189472828,
+              "observedRate": 0.7116048989806505
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 7.2896060849382245,
+              "meanProbability": 0.8235099906776928,
+              "observedRate": 0.8062907630134986
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.0,
+              "meanProbability": null,
+              "observedRate": null
+            }
+          ]
+        },
+        "half": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.20886261219301824,
+          "logLoss": 0.6052693318842195,
+          "ece": 0.021296381251830913,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 0.9903359107220099,
+              "meanProbability": 0.09491603738341092,
+              "observedRate": 0.1500695999977371
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 28.093880831299533,
+              "meanProbability": 0.1552894346509043,
+              "observedRate": 0.13929662516236055
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 38.47650497534307,
+              "meanProbability": 0.2531762344512059,
+              "observedRate": 0.2627567313633974
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 38.6160318193655,
+              "meanProbability": 0.3490488650680137,
+              "observedRate": 0.3206035909354432
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 32.167314226565345,
+              "meanProbability": 0.44742583935996794,
+              "observedRate": 0.4299072240372415
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 32.83932096403852,
+              "meanProbability": 0.5483469244639768,
+              "observedRate": 0.5312354592067384
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 26.254860576354208,
+              "meanProbability": 0.6487751669228343,
+              "observedRate": 0.6119053536863174
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 20.55752721076977,
+              "meanProbability": 0.7465672689771458,
+              "observedRate": 0.7203832134712663
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 5.989071970391119,
+              "meanProbability": 0.8252705904414748,
+              "observedRate": 0.7975289705591043
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.015151515151515152,
+              "meanProbability": 0.900497512437811,
+              "observedRate": 1.0
+            }
+          ]
+        },
+        "full": {
+          "games": 224,
+          "playerMarkets": 4661,
+          "brier": 0.2088931008493809,
+          "logLoss": 0.6054378684222967,
+          "ece": 0.01995954916495133,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 1.2808287632012225,
+              "meanProbability": 0.09485541426315348,
+              "observedRate": 0.157367242403479
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 29.255439872350877,
+              "meanProbability": 0.1550115225026506,
+              "observedRate": 0.1455165905388413
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 37.39417477480815,
+              "meanProbability": 0.2531587943464965,
+              "observedRate": 0.2646597041055232
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 39.88383566920775,
+              "meanProbability": 0.3499513722216994,
+              "observedRate": 0.32117383021303936
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 31.515824605731513,
+              "meanProbability": 0.4513948015881837,
+              "observedRate": 0.4341259605131919
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 32.40801347022977,
+              "meanProbability": 0.5493897367227217,
+              "observedRate": 0.5338504531676522
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 26.036963480355087,
+              "meanProbability": 0.6470092018993445,
+              "observedRate": 0.6159432254643883
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 20.568585638166187,
+              "meanProbability": 0.7439604515796908,
+              "observedRate": 0.7205702355958563
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 5.57002279050872,
+              "meanProbability": 0.8268797414069362,
+              "observedRate": 0.7924264381553214
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.08631093544137024,
+              "meanProbability": 0.9098888096534575,
+              "observedRate": 0.845519767974355
+            }
+          ]
+        }
+      },
+      "laterDevelopment": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.2142048918932325,
+          "logLoss": 0.6179248959071558,
+          "ece": 0.017324619324313336,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 2.8155425128723466,
+              "meanProbability": 0.09284190451567047,
+              "observedRate": 0.09888364255743767
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 58.5244143169031,
+              "meanProbability": 0.15711657523566797,
+              "observedRate": 0.1809113850285827
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 95.55707633539183,
+              "meanProbability": 0.2531082090493732,
+              "observedRate": 0.2553974408004419
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 89.90807563022759,
+              "meanProbability": 0.3511769185964924,
+              "observedRate": 0.35512431016483165
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 76.27446384541271,
+              "meanProbability": 0.45060136203623646,
+              "observedRate": 0.4323323577101812
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 75.42896088717714,
+              "meanProbability": 0.5488197940320336,
+              "observedRate": 0.5344173345372076
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 60.24527685512478,
+              "meanProbability": 0.6478707718572663,
+              "observedRate": 0.6092740173497562
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 49.4512594457222,
+              "meanProbability": 0.7447626284804885,
+              "observedRate": 0.7077477712898352
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 17.650873565009178,
+              "meanProbability": 0.8250421588679087,
+              "observedRate": 0.7971843691776275
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.14405660616186933,
+              "meanProbability": 0.9105674097537295,
+              "observedRate": 0.8948224898864399
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.21422800449538218,
+          "logLoss": 0.6180404946629153,
+          "ece": 0.016521160176275907,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 3.1238826014600005,
+              "meanProbability": 0.09314841080089523,
+              "observedRate": 0.10426667881403004
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 60.45249437796272,
+              "meanProbability": 0.15612125643763528,
+              "observedRate": 0.18129676591924965
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 93.94914843549847,
+              "meanProbability": 0.25222311962004923,
+              "observedRate": 0.25519231819518684
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 88.53668377031023,
+              "meanProbability": 0.34982946783627844,
+              "observedRate": 0.35580445321605253
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 76.25134226200495,
+              "meanProbability": 0.44869924164597025,
+              "observedRate": 0.43062491037335926
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 78.17411568419143,
+              "meanProbability": 0.5476824939728592,
+              "observedRate": 0.5366567439338262
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 62.32254249352951,
+              "meanProbability": 0.6494605874129121,
+              "observedRate": 0.6154253856922689
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 48.14226224741784,
+              "meanProbability": 0.7475923976385108,
+              "observedRate": 0.7172965748841869
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 14.690222290825215,
+              "meanProbability": 0.8258658140629437,
+              "observedRate": 0.7932722245492843
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.35730583680240424,
+              "meanProbability": 0.9140883722495939,
+              "observedRate": 0.8387479553584952
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.21435369252125797,
+          "logLoss": 0.6184322335756937,
+          "ece": 0.016687932068308237,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 3.9048773202073326,
+              "meanProbability": 0.09374567283895673,
+              "observedRate": 0.11493735712035495
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 63.22556525131486,
+              "meanProbability": 0.15615723935666614,
+              "observedRate": 0.18456945635891178
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 90.50599848253627,
+              "meanProbability": 0.25162431000973906,
+              "observedRate": 0.2576288802784988
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 91.26425571236803,
+              "meanProbability": 0.34961776896566304,
+              "observedRate": 0.3559573389356169
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 76.01714843009447,
+              "meanProbability": 0.4520792073576881,
+              "observedRate": 0.43589712497732663
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 77.19591456601704,
+              "meanProbability": 0.5487745357258041,
+              "observedRate": 0.5334636700437638
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 61.348193425935804,
+              "meanProbability": 0.647481111670189,
+              "observedRate": 0.6232672201975099
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 48.38247977699712,
+              "meanProbability": 0.7445089355730234,
+              "observedRate": 0.7260881202011024
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 13.465706930879989,
+              "meanProbability": 0.8272837667069055,
+              "observedRate": 0.7564018125951023
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 0.6898601036520003,
+              "meanProbability": 0.9195356962366884,
+              "observedRate": 0.8710530908877775
+            }
+          ]
+        }
+      },
+      "lastTenReferenceLater": {
+        "games": 526,
+        "playerMarkets": 10505,
+        "brier": 0.21540232001303594,
+        "logLoss": 0.6206440964177378,
+        "ece": 0.01918148951607949,
+        "reliability": [
+          {
+            "range": [
+              0.0,
+              0.1
+            ],
+            "gameWeight": 0.0,
+            "meanProbability": null,
+            "observedRate": null
+          },
+          {
+            "range": [
+              0.1,
+              0.2
+            ],
+            "gameWeight": 62.220314182446074,
+            "meanProbability": 0.16225105167497236,
+            "observedRate": 0.18229210720913103
+          },
+          {
+            "range": [
+              0.2,
+              0.3
+            ],
+            "gameWeight": 90.26140088497463,
+            "meanProbability": 0.254647799093506,
+            "observedRate": 0.25898825701489514
+          },
+          {
+            "range": [
+              0.3,
+              0.4
+            ],
+            "gameWeight": 90.23738463227774,
+            "meanProbability": 0.34913319846938995,
+            "observedRate": 0.35202750061155175
+          },
+          {
+            "range": [
+              0.4,
+              0.5
+            ],
+            "gameWeight": 81.69619805914817,
+            "meanProbability": 0.45299524882589676,
+            "observedRate": 0.4260736197335127
+          },
+          {
+            "range": [
+              0.5,
+              0.6
+            ],
+            "gameWeight": 68.37242756847502,
+            "meanProbability": 0.5480794193797616,
+            "observedRate": 0.5349086191010932
+          },
+          {
+            "range": [
+              0.6,
+              0.7
+            ],
+            "gameWeight": 71.35210698943682,
+            "meanProbability": 0.6469831024084541,
+            "observedRate": 0.6046097999789783
+          },
+          {
+            "range": [
+              0.7,
+              0.8
+            ],
+            "gameWeight": 46.94111089725783,
+            "meanProbability": 0.7490327668827442,
+            "observedRate": 0.7160774461563227
+          },
+          {
+            "range": [
+              0.8,
+              0.9
+            ],
+            "gameWeight": 14.91905678598661,
+            "meanProbability": 0.8237811709080093,
+            "observedRate": 0.788976387394122
+          },
+          {
+            "range": [
+              0.9,
+              1.0
+            ],
+            "gameWeight": 0.0,
+            "meanProbability": null,
+            "observedRate": null
+          }
+        ]
+      },
+      "secondaryFixedThresholds": {
+        "pooled": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.1067883926945518,
+          "logLoss": 0.33746109353712994,
+          "ece": 0.014811717175615635,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 247.69577891291422,
+              "meanProbability": 0.02282122907161702,
+              "observedRate": 0.029728873955598114
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 57.56691832210086,
+              "meanProbability": 0.1484346227784286,
+              "observedRate": 0.1477207374230981
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 40.93191811812015,
+              "meanProbability": 0.24804038669571304,
+              "observedRate": 0.24548574938003018
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 31.780375874994633,
+              "meanProbability": 0.35130246849095575,
+              "observedRate": 0.3773548512980718
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 26.430228366837824,
+              "meanProbability": 0.45054743856488727,
+              "observedRate": 0.413104343635514
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 24.653772841450035,
+              "meanProbability": 0.5490433803024207,
+              "observedRate": 0.5325149062598803
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 20.439093579550327,
+              "meanProbability": 0.6488470857661954,
+              "observedRate": 0.5992685516770835
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 21.036692451444296,
+              "meanProbability": 0.7492201370262095,
+              "observedRate": 0.6966231478805401
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 17.99167631404426,
+              "meanProbability": 0.8456266841067513,
+              "observedRate": 0.8245525667041226
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 37.47354521851986,
+              "meanProbability": 0.9653787028718882,
+              "observedRate": 0.9330821222181035
+            }
+          ]
+        },
+        "half": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.10670173815668042,
+          "logLoss": 0.3365919260783073,
+          "ece": 0.013551960065471031,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 248.266147500376,
+              "meanProbability": 0.02338664805522729,
+              "observedRate": 0.029882802530465057
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 57.67834785203033,
+              "meanProbability": 0.1476521862627702,
+              "observedRate": 0.14947094983100032
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 40.51848447833215,
+              "meanProbability": 0.2472574911000854,
+              "observedRate": 0.24375520752473667
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 31.20388384369958,
+              "meanProbability": 0.3501875918077984,
+              "observedRate": 0.38081052753298644
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 26.343378806601365,
+              "meanProbability": 0.44890096909431676,
+              "observedRate": 0.4125640133979931
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 25.776588069080596,
+              "meanProbability": 0.5478707657358058,
+              "observedRate": 0.5312196026948858
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 21.4848839866276,
+              "meanProbability": 0.6503956351426496,
+              "observedRate": 0.6040339743932354
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 21.49576366557654,
+              "meanProbability": 0.7508121546577391,
+              "observedRate": 0.7117905323357908
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 19.04969758722149,
+              "meanProbability": 0.8490998063363772,
+              "observedRate": 0.8314092633756676
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 34.18282421043068,
+              "meanProbability": 0.9635584500112493,
+              "observedRate": 0.9414751842087746
+            }
+          ]
+        },
+        "full": {
+          "games": 526,
+          "playerMarkets": 10505,
+          "brier": 0.10668536523947161,
+          "logLoss": 0.33755015881221845,
+          "ece": 0.012111334721910505,
+          "reliability": [
+            {
+              "range": [
+                0.0,
+                0.1
+              ],
+              "gameWeight": 250.4948370701914,
+              "meanProbability": 0.024429070997906147,
+              "observedRate": 0.030662093487795247
+            },
+            {
+              "range": [
+                0.1,
+                0.2
+              ],
+              "gameWeight": 56.841059717602846,
+              "meanProbability": 0.1487910853553951,
+              "observedRate": 0.15142093146943192
+            },
+            {
+              "range": [
+                0.2,
+                0.3
+              ],
+              "gameWeight": 39.311053776627325,
+              "meanProbability": 0.24714001423597956,
+              "observedRate": 0.24992211138599657
+            },
+            {
+              "range": [
+                0.3,
+                0.4
+              ],
+              "gameWeight": 31.584525520971912,
+              "meanProbability": 0.3498249539588813,
+              "observedRate": 0.37957871412240834
+            },
+            {
+              "range": [
+                0.4,
+                0.5
+              ],
+              "gameWeight": 26.466459332627892,
+              "meanProbability": 0.45165755250435996,
+              "observedRate": 0.41521804030676207
+            },
+            {
+              "range": [
+                0.5,
+                0.6
+              ],
+              "gameWeight": 25.726294604966792,
+              "meanProbability": 0.5488684547298377,
+              "observedRate": 0.5255780012468828
+            },
+            {
+              "range": [
+                0.6,
+                0.7
+              ],
+              "gameWeight": 21.622609540959274,
+              "meanProbability": 0.6489721418723657,
+              "observedRate": 0.6146022317642834
+            },
+            {
+              "range": [
+                0.7,
+                0.8
+              ],
+              "gameWeight": 22.2840854741068,
+              "meanProbability": 0.7478300631738339,
+              "observedRate": 0.7181499255824951
+            },
+            {
+              "range": [
+                0.8,
+                0.9
+              ],
+              "gameWeight": 20.360892071633117,
+              "meanProbability": 0.8480442215976409,
+              "observedRate": 0.8459371911278571
+            },
+            {
+              "range": [
+                0.9,
+                1.0
+              ],
+              "gameWeight": 31.30818289028795,
+              "meanProbability": 0.9623851819761893,
+              "observedRate": 0.9432352849604627
+            }
+          ]
+        }
+      },
+      "selectedBrierDeltaVsMinutesPooled": 0.0,
+      "descriptive95PercentGameBootstrap": [
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "limitations": [
+    "All data are previously inspected 2024-season development data; no untouched validation claim.",
+    "Synthetic lines are independent of target outcomes but are not saved bookmaker lines; no ROI or market-edge claim.",
+    "Retrospectively retrieved positive-minute universe excludes inactive players; historical availability publication times unknown.",
+    "Equal game weighting and descriptive game-bootstrap intervals do not correct model-search multiplicity or season dependencies.",
+    "Baseline references are refitted on a common historical cohort, not replays of the frozen November live artifacts.",
+    "Separate offline artifact only. Requires a new frozen prospective protocol before deployment or approval."
+  ],
+  "candidateSha256": "a10f369ddfd79c2f12bafe81d1190951672a60c6038e940fd47ba76e8b80db24"
+}
