@@ -599,30 +599,92 @@ function latestDepthChartQb(depthCharts, team) {
   return qb1?.player_name || qb1?.full_name || null;
 }
 
+// Input freshness policy for the daily feed, not a calibrated model weight.
+// Historical replays retain their original availability-disabled semantics.
+const QB_DEPTH_CHART_MAX_AGE_HOURS = 48;
+
+function currentDepthChartQb(depthCharts, team, startsAt, asOf) {
+  const startMs = Date.parse(startsAt);
+  const asOfMs = Date.parse(asOf);
+  const missing = (reason) => ({
+    available: false, name: null, observedAt: null, ageHours: null, reason
+  });
+  if (!Number.isFinite(startMs) || !Number.isFinite(asOfMs)) {
+    return missing("A valid event time and forecast timestamp are required for QB evidence.");
+  }
+  const cutoff = Math.min(startMs, asOfMs);
+  const rows = (depthCharts || []).filter((row) => {
+    const timestamp = Date.parse(row.dt);
+    const position = String(row.pos_abb || row.pos_name || row.position || "").toUpperCase();
+    return normalizeTeam(row.team) === team && position === "QB" &&
+      Number.isFinite(timestamp) && timestamp <= cutoff;
+  }).sort((a, b) => Date.parse(b.dt) - Date.parse(a.dt));
+  if (!rows.length) {
+    return missing("No dated QB depth-chart evidence at or before the forecast/kickoff cutoff.");
+  }
+  const observedMs = Date.parse(rows[0].dt);
+  const latestRows = rows.filter((row) => Date.parse(row.dt) === observedMs);
+  const names = [...new Map(latestRows
+    .filter((row) => number(row.pos_rank) === 1)
+    .map((row) => String(row.player_name || row.full_name || "").trim())
+    .filter(Boolean)
+    .map((name) => [normalizePlayerName(name), name])).values()];
+  const ageHours = (cutoff - observedMs) / (60 * 60 * 1000);
+  const reason = ageHours > QB_DEPTH_CHART_MAX_AGE_HOURS
+    ? `QB depth-chart evidence exceeds the ${QB_DEPTH_CHART_MAX_AGE_HOURS}-hour freshness limit.`
+    : names.length !== 1
+      ? "The latest depth chart does not identify one unambiguous QB1."
+      : null;
+  return {
+    available: reason === null,
+    name: names.length === 1 ? names[0] : null,
+    observedAt: new Date(observedMs).toISOString(),
+    ageHours,
+    reason
+  };
+}
+
 function qbAvailabilityContext({
   schedule,
   depthCharts,
   season,
   team,
   game,
-  side
+  side,
+  startsAt,
+  asOf = new Date(Date.now()).toISOString(),
+  historicalReplay = false
 }) {
   const listed = side === "home"
     ? game?.home_qb_name || null
     : game?.away_qb_name || null;
-  const depthChart = latestDepthChartQb(depthCharts, team);
+  const depthEvidence = historicalReplay
+    ? null
+    : currentDepthChartQb(depthCharts, team, startsAt, asOf);
+  const depthChart = historicalReplay
+    ? latestDepthChartQb(depthCharts, team)
+    : depthEvidence.name;
   const prior = latestPriorQb(schedule, season, team, game);
-  const expected = listed || depthChart || null;
-
-  const changedFromPrior = Boolean(
-    expected &&
-    prior &&
-    normalizePlayerName(expected) !== normalizePlayerName(prior)
-  );
   const depthChartDisagreement = Boolean(
     listed &&
     depthChart &&
     normalizePlayerName(listed) !== normalizePlayerName(depthChart)
+  );
+  const reasons = historicalReplay ? [] : [
+    !listed ? "The schedule does not identify a quarterback." : null,
+    depthEvidence.reason,
+    depthChartDisagreement
+      ? `Schedule QB ${listed} conflicts with depth-chart QB1 ${depthChart}.`
+      : null
+  ].filter(Boolean);
+  const resolved = historicalReplay ? Boolean(listed || depthChart) : reasons.length === 0;
+  const expected = historicalReplay
+    ? listed || depthChart || null
+    : resolved ? listed : null;
+  const changedFromPrior = Boolean(
+    expected &&
+    prior &&
+    normalizePlayerName(expected) !== normalizePlayerName(prior)
   );
 
   let adjustmentPoints = 0;
@@ -646,10 +708,17 @@ function qbAvailabilityContext({
     depthChartDisagreement,
     adjustmentPoints,
     confidence,
+    resolved,
+    reasons,
+    depthChartObservedAt: depthEvidence?.observedAt ?? null,
+    depthChartAgeHours: depthEvidence?.ageHours ?? null,
     source: {
       schedule: Boolean(listed),
       depthChart: Boolean(depthChart),
-      injuryReport: false
+      injuryReport: false,
+      scheduleGameId: game?.game_id || null,
+      scheduleSource: "nflverse_schedule",
+      depthChartSource: "nflverse_daily_depth_charts"
     }
   };
 }
@@ -842,7 +911,7 @@ async function loadWeatherContext({
   }
 }
 
-function currentScheduleGame(schedule, event, season, away, home) {
+function legacyScheduleGame(schedule, event, season, away, home) {
   const startsAt = event?.startsAt ? new Date(event.startsAt) : null;
   const date = startsAt && !Number.isNaN(startsAt.valueOf())
     ? startsAt.toISOString().slice(0, 10)
@@ -858,6 +927,27 @@ function currentScheduleGame(schedule, event, season, away, home) {
     game.away_team === away &&
     game.home_team === home
   ) || null;
+}
+
+function currentScheduleGame(schedule, event, season, away, home, historicalReplay = false) {
+  if (historicalReplay) {
+    return legacyScheduleGame(schedule, event, season, away, home);
+  }
+  const startMs = Date.parse(event?.startsAt);
+  if (!Number.isFinite(startMs)) return null;
+  // nflverse gameday is the Eastern source date, including games whose UTC
+  // kickoff falls on the next day. Never fall back to another meeting.
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(new Date(startMs)).map(({ type, value }) => [type, value]));
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  const matches = schedule.filter((game) =>
+    number(game.season) === season &&
+    game.away_team === away &&
+    game.home_team === home &&
+    game.gameday === date
+  );
+  return matches.length === 1 ? matches[0] : null;
 }
 
 function exactLineBest(market, line = null) {
@@ -1131,6 +1221,7 @@ function projectEvent({
   weatherContext = null,
   sourceHealth = null,
   disableAvailabilityAdjustments = false,
+  asOf = new Date(Date.now()).toISOString(),
   simulationIterations = 20000
 }) {
   const away = normalizeTeam(
@@ -1139,25 +1230,44 @@ function projectEvent({
   const home = normalizeTeam(
     event?.matchup?.home?.name || event?.matchup?.home?.short
   );
+  const matchup = {
+    away: { ...event?.matchup?.away, nflverse: away },
+    home: { ...event?.matchup?.home, nflverse: home }
+  };
+  const readinessBase = {
+    scope: "quarterback_source_agreement",
+    asOf,
+    historicalReplay: disableAvailabilityAdjustments,
+    maxDepthChartAgeHours: QB_DEPTH_CHART_MAX_AGE_HOURS
+  };
+  const unavailable = (reasons, gameContext = null) => ({
+    eventID: event?.eventID ?? null,
+    available: false,
+    startsAt: event?.startsAt ?? null,
+    matchup,
+    reason: reasons.join(" "),
+    forecastReadiness: { ...readinessBase, available: false, reasons },
+    gameContext,
+    markets: []
+  });
   if (!away || !home) {
-    return {
-      eventID: event?.eventID ?? null,
-      available: false,
-      reason: "Unable to map one or both NFL teams to nflverse."
-    };
+    return unavailable(["Unable to map one or both NFL teams to nflverse."]);
   }
 
   const awaySnapshot = snapshots.get(away);
   const homeSnapshot = snapshots.get(home);
   if (!awaySnapshot || !homeSnapshot) {
-    return {
-      eventID: event?.eventID ?? null,
-      available: false,
-      reason: "Historical NFL feature data is unavailable for one or both teams."
-    };
+    return unavailable(["Historical NFL feature data is unavailable for one or both teams."]);
   }
 
-  const game = currentScheduleGame(schedule, event, season, away, home);
+  const game = currentScheduleGame(
+    schedule, event, season, away, home, disableAvailabilityAdjustments
+  );
+  if (!game && !disableAvailabilityAdjustments) {
+    return unavailable([
+      "Cannot bind a unique NFL schedule game to the event's teams, season and America/New_York source date."
+    ]);
+  }
   const awayPower = teamPower(awaySnapshot, baseline);
   const homePower = teamPower(homeSnapshot, baseline);
   const neutral = String(game?.location || "").toLowerCase() === "neutral";
@@ -1175,7 +1285,10 @@ function projectEvent({
       season,
       team: away,
       game,
-      side: "away"
+      side: "away",
+      startsAt: event.startsAt,
+      asOf,
+      historicalReplay: disableAvailabilityAdjustments
     }),
     home: qbAvailabilityContext({
       schedule,
@@ -1183,9 +1296,34 @@ function projectEvent({
       season,
       team: home,
       game,
-      side: "home"
+      side: "home",
+      startsAt: event.startsAt,
+      asOf,
+      historicalReplay: disableAvailabilityAdjustments
     })
   };
+  const gameContext = {
+    season,
+    week: number(game?.week),
+    neutralSite: neutral,
+    awayRest: number(game?.away_rest),
+    homeRest: number(game?.home_rest),
+    awayQB: disableAvailabilityAdjustments ? game?.away_qb_name || null : availability.away.expected,
+    homeQB: disableAvailabilityAdjustments ? game?.home_qb_name || null : availability.home.expected,
+    roof: game?.roof || null,
+    surface: game?.surface || null,
+    stadium: game?.stadium || null,
+    availability,
+    weather: weatherContext,
+    sourceHealth
+  };
+  const readinessReasons = Object.entries(availability).flatMap(([side, context]) =>
+    context.reasons.map((reason) => `${side === "home" ? home : away}: ${reason}`)
+  );
+  if (!disableAvailabilityAdjustments && readinessReasons.length) {
+    return unavailable(readinessReasons, gameContext);
+  }
+  const forecastReadiness = { ...readinessBase, available: true, reasons: [] };
   const qbAdjustment = disableAvailabilityAdjustments
     ? 0
     : (
@@ -1418,25 +1556,9 @@ function projectEvent({
     eventID: event.eventID,
     available: true,
     startsAt: event.startsAt,
-    matchup: {
-      away: { ...event.matchup.away, nflverse: away },
-      home: { ...event.matchup.home, nflverse: home }
-    },
-    gameContext: {
-      season,
-      week: number(game?.week),
-      neutralSite: neutral,
-      awayRest: number(game?.away_rest),
-      homeRest: number(game?.home_rest),
-      awayQB: game?.away_qb_name || null,
-      homeQB: game?.home_qb_name || null,
-      roof: game?.roof || null,
-      surface: game?.surface || null,
-      stadium: game?.stadium || null,
-      availability,
-      weather: weatherContext,
-      sourceHealth
-    },
+    matchup,
+    forecastReadiness,
+    gameContext,
     model: {
       version: "NFL Team Markets v3-shadow",
       productionEligible: false,
@@ -1471,7 +1593,15 @@ function projectEvent({
         power: homePower
       }
     },
-    markets: markets.sort((a, b) =>
+    markets: markets.map((market) => {
+      const independentContributionWeight = independentWeight * NFL_MARKET_SHRINKAGE[market.marketType];
+      return {
+        ...market,
+        probabilitySource: independentContributionWeight > 0 ? "market_blend" : "market_only",
+        independentContributionWeight,
+        calibrationVersion: NFL_CALIBRATION_VERSION
+      };
+    }).sort((a, b) =>
       (b.evPct ?? -999) - (a.evPct ?? -999)
     )
   };

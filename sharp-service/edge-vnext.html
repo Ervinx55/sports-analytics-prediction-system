@@ -35,7 +35,7 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
   <div class="scroll"><table><thead><tr><th>Selection</th><th>Quote</th><th>Model %</th><th>Sharp fair %</th><th>Model return</th><th>Remaining checks</th></tr></thead><tbody id="nbaValueRows"><tr><td colspan="6">Refresh to compare prices.</td></tr></tbody></table></div>
 </div>
 <div id="modelSummary" class="row"></div>
-<div class="scroll"><table><thead><tr><th>Game / Market</th><th>Model %</th><th>Market fair %</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL shadow model. NBA independent baseline is available separately, but remains uncalibrated.</td></tr></tbody></table></div></article>
+<div class="scroll"><table><thead><tr><th>Game / Market</th><th>Forecast / source</th><th>Market-implied % (no vig)</th><th>Gap</th><th>Decision</th></tr></thead><tbody id="models"><tr><td colspan="5">Click refresh to view existing NFL research. NBA independent baseline is available separately, but remains uncalibrated.</td></tr></tbody></table></div></article>
 <article class="card"><h2>Alternative count threshold</h2>
 <p class="small">Exploratory Poisson distribution for count data only, using an explicitly entered mean. This is not a forecast for NBA rebounds, rushing yards or game margins.</p>
 <div class="row"><div><label for="mean">Assumed expected count</label><input id="mean" type="number" value="4.5" min="0" max="200" step=".1"></div><div><label for="threshold">Threshold</label><input id="threshold" type="number" value="6" min="0" max="1000"></div></div>
@@ -82,7 +82,7 @@ $("refresh").onclick=async()=>{
  const d=await request({mode:"board",live:1});
  $("status").textContent=d.sourceError?"Model unavailable: "+d.sourceError:"Model snapshot "+d.generatedAt;
  $("modelSummary").innerHTML=Object.entries(d.sports||{}).map(([sport,v])=>'<div><strong>'+esc(sport)+'</strong><div class="small">'+esc(v.state)+'</div></div>').join("");
- $("models").innerHTML=(d.rows||[]).length ? d.rows.slice(0,40).map(r=>'<tr><td>'+esc(r.matchup||r.eventId)+' · '+esc(r.label)+' '+esc(r.marketType)+' '+esc(r.line??"")+'</td><td>'+pct(r.modelProbability)+'</td><td>'+pct(r.marketFairProbability)+'</td><td>'+ (typeof r.edgePercentagePoints==="number"?r.edgePercentagePoints.toFixed(1)+" pp":"—")+'</td><td class="warn">'+esc(r.decision)+' (shadow)</td></tr>').join(""):'<tr><td colspan="5">No current validated model rows. Check availability, game window or model service.</td></tr>';
+ $("models").innerHTML=(d.rows||[]).length ? d.rows.slice(0,40).map(r=>'<tr><td>'+esc(r.matchup||r.eventId)+' · '+esc(r.label)+' '+esc(r.marketType)+' '+esc(r.line??"")+'</td><td>'+pct(r.modelProbability)+'<div class="small">'+esc(r.probabilitySource==='market_only'?'Market reference only':r.probabilitySource==='market_blend'?'Market + model blend':'Source unverified')+'</div><div class="small">'+esc(r.note)+'</div></td><td>'+pct(r.marketFairProbability)+'</td><td>'+ (typeof r.edgePercentagePoints==="number"?r.edgePercentagePoints.toFixed(1)+" pp":"—")+'</td><td class="warn">'+esc(r.decision)+' (shadow)</td></tr>').join(""):'<tr><td colspan="5">No current validated model rows. Check availability, game window or model service.</td></tr>';
  }catch(e){$("status").textContent=e.message;}finally{$("refresh").disabled=false;}
 };
 $("calculate").onclick=async()=>{

@@ -144,6 +144,7 @@ export default async function handler(req, res) {
           startsAt: projection.startsAt,
           away: projection.matchup.away.name,
           home: projection.matchup.home.name,
+          forecastReadiness: projection.forecastReadiness,
           ...market
         }))
       )
@@ -196,6 +197,8 @@ export default async function handler(req, res) {
         ],
         injuryPolicy:
           "No current nflverse injury adjustment is applied because the feed ended after 2024.",
+        quarterbackReadinessPolicy:
+          "Current forecasts require one schedule game matching both teams, season and the America/New_York source date, with the schedule QB and one unambiguous daily depth-chart QB1 agreeing. Dated depth evidence must be at or before both forecast time and kickoff, and no more than 48 hours old at that cutoff. Missing, stale, ambiguous or conflicting evidence blocks the forecast; source agreement does not confirm final actives.",
         calibration:
           "2024 selected market-specific shrinkage; 2025 was untouched. Moneyline/spread are market-only, totals use 25% of the dynamic independent contribution."
       },

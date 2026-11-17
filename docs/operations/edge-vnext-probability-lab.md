@@ -25,8 +25,9 @@ NBA market connection, expanded prop collection, and unresolved approval gaps.
   capture October 29). New `/api/edge-vnext?mode=nba&live=1` explicitly
   requests up to 22 public ESPN scoreboard dates, builds schedule-adjusted
   margin ratings from prior completed games, and estimates win probabilities
-  independent of sportsbook odds. Requires 4 games per team and at least
-  19 successful historic scoreboards out of 21; otherwise returns unavailable.
+  independent of sportsbook odds. Requires 4 games per team and successful
+  fetches for all 21 requested historical scoreboards; a missing
+  date withholds winner probabilities and returns `SOURCE_INCOMPLETE`.
   This model is NOT calibrated, contains no injury or rotation adjustment,
   can compare observed sharp prices when `quotes=1` is explicitly requested,
   and still labels outcomes AVOID until model validation and injury adjustments pass.
@@ -92,6 +93,22 @@ available quota.
    reliability buckets, cost-adjusted ROI and walk-forward CLV. Validate
    source provenance, licensing, sharp market matching and drift before
    a manual production review. Never auto-enable BUY.
+
+## Remaining NBA live explanation gap (November 17, 2026)
+
+The reviewed live-decision read RPC removes the full `evidence` object from its
+public response (`20261111122519_nba_live_read_narrow_selection.sql`). The deep
+dive renderer can display recorded availability and projected minutes only when
+that evidence is present. Consequently those fields currently display as not
+supplied, or fall back to explicitly historical minutes. The browser fixture
+that includes full evidence is not proof that the deployed RPC exposes it.
+
+A future change should define a narrow public summary of the approved decision's
+availability status, official source timestamp, and recorded minutes projection,
+with an integration test through the RPC response. Do not expose the complete raw
+evidence or substitute historical usage/minutes for a current projection. This
+correction does not change the RPC, frozen models, model coefficients, approvals,
+or historical decisions.
 
 ## Cost policy
 This change adds **no paid subscriptions** or scheduled provider calls.

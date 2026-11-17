@@ -91,7 +91,7 @@ async function fetchNbaBaseline(target, audit=false, quotes=false) {
   const report=projectNbaGames({
     historicalGames:history.flatMap(x=>x.games||[]),
     upcomingGames:results.at(-1).games,asOf,
-    historyComplete:successful>=19,marketBoard
+    historyComplete:successful===history.length,marketBoard
   });
   const validation = audit ? backtestNbaBaseline({games:history.flatMap(x=>x.games||[])}) : null;
   const auditSummary = validation ? (({records, ...summary}) => summary)(validation) : null;
