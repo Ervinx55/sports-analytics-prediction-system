@@ -25,12 +25,13 @@ export async function directSgoProps({page,clock}){
    const playerID=o.playerID||o.statEntityID,side=o.sideID,market=o.statID;
    if(!['points','rebounds','assists'].includes(market)||!['over','under'].includes(side)||o.periodID!=='game'||o.betTypeID!=='ou'||o.oddID!==`${market}-${playerID}-game-ou-${side}`||e.players?.[playerID]?.playerID!==playerID)continue;
    const b=o.byBookmaker?.draftkings;
-   if(!b||b.available===false||b.overUnder==null||b.overUnder===''||b.odds==null||b.odds==='')continue;
+   if(!b||b.overUnder==null||b.overUnder===''||b.odds==null||b.odds==='')continue;
    const line=Number(b.overUnder),odds=Number(b.odds);
    if(!Number.isFinite(line)||line<0||!Number.isFinite(odds)||Math.abs(odds)<100)continue;
    const key=JSON.stringify([playerID,market,line]);
    if(!props.has(key))props.set(key,{playerID,playerName:e.players[playerID].name||playerID,statID:market});
-   props.get(key)[side]={books:{draftkings:{line,odds,available:true,updatedAt:b.lastUpdatedAt??null}}};
+   // Keep suspended sides for diagnostics; consumers still reject unavailable prices.
+   props.get(key)[side]={books:{draftkings:{line,odds,available:b.available!==false,updatedAt:b.lastUpdatedAt??null}}};
   }
   events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,players:[...props.values()].map(prop=>{
    const teamId=e.players[prop.playerID].teamID,teams=[e.teams?.home?.teamID,e.teams?.away?.teamID];

@@ -1,0 +1,158 @@
+[
+  {
+    "eventID": "lifymi4jrXCpckkBVDDC",
+    "startsAt": "2026-11-15T00:30:00.000Z",
+    "bdlGameID": 21718105,
+    "officialGameID": "0022600232",
+    "sourceFingerprint": "6bdddbeb4079d51ea0300a0ccab3f5f8eadc9bf35b2a56b211b7b444631e2caa",
+    "backupFingerprint": "8ba354d29485c2bf07c9313f4b9b86a0a60071dee0f832a091911f58d326666b",
+    "home": "CLEVELAND_CAVALIERS_NBA",
+    "away": "DALLAS_MAVERICKS_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261114/20261114_DALCLE_book.pdf",
+      "retrievedAt": "2026-11-17T16:32:56.873Z",
+      "sha256": "fbaffbde3b25b849e8ace9def044026fe4ba666ccda0d8407d37097208f17289"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600232/box-score",
+      "retrievedAt": "2026-11-17T16:32:57.223Z",
+      "sha256": "0dca4d77c1f371af28efc7557875eac38bbf77da4476258d99ef219d41e434b5"
+    },
+    "crosswalk": [
+      {
+        "side": "away",
+        "name": "P.J. Washington",
+        "officialPlayerID": 1629023,
+        "bdlPlayerID": 666950,
+        "sgoPlayerID": "PJ_WASHINGTON_JR_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "fields": {
+          "rebounds": [
+            40,
+            39
+          ],
+          "fieldGoalsAttempted": [
+            94,
+            93
+          ],
+          "offensiveRebounds": [
+            14,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "playerID": "PJ_WASHINGTON_JR_1_NBA",
+        "fields": {
+          "rebounds": [
+            4,
+            3
+          ],
+          "fieldGoalsAttempted": [
+            10,
+            9
+          ],
+          "offensiveRebounds": [
+            2,
+            1
+          ],
+          "twoPointersAttempted": [
+            6,
+            5
+          ],
+          "points+rebounds": [
+            14,
+            13
+          ],
+          "rebounds+assists": [
+            5,
+            4
+          ],
+          "points+rebounds+assists": [
+            15,
+            14
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "eventID": "vF7mrlCAIjmb7rtvfi4s",
+    "startsAt": "2026-11-03T00:30:00.000Z",
+    "bdlGameID": 21718016,
+    "officialGameID": "0022600162",
+    "sourceFingerprint": "630540b3a1861735a4bb11c3ab80635b14a139b19bd29d57a2b01cf75e6c1d38",
+    "backupFingerprint": "8b5bbe06a61fcdbfcb4f837f42fad15ffb2f9b469a3805db1dee88baa6e430cd",
+    "home": "ORLANDO_MAGIC_NBA",
+    "away": "WASHINGTON_WIZARDS_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261102/20261102_WASORL_book.pdf",
+      "retrievedAt": "2026-11-17T16:33:00.295Z",
+      "sha256": "7ed7437a69692b7e998db64cca86db943f0aab3d6d8055db7977cdfebd4fc6c9"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600162/box-score",
+      "retrievedAt": "2026-11-17T16:33:01.781Z",
+      "sha256": "ed4aa518d56197422d92afd681fb07c3918237bc43086c3c189b773e0dc8067d"
+    },
+    "crosswalk": [
+      {
+        "side": "away",
+        "name": "Anthony Davis",
+        "officialPlayerID": 203076,
+        "bdlPlayerID": 117,
+        "sgoPlayerID": "ANTHONY_DAVIS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Bilal Coulibaly",
+        "officialPlayerID": 1641731,
+        "bdlPlayerID": 56677844,
+        "sgoPlayerID": "BILAL_COULIBALY_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "playerID": "ANTHONY_DAVIS_1_NBA",
+        "fields": {
+          "steals": [
+            3,
+            4
+          ],
+          "blocks+steals": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "playerID": "BILAL_COULIBALY_1_NBA",
+        "fields": {
+          "steals": [
+            2,
+            1
+          ],
+          "blocks+steals": [
+            5,
+            4
+          ]
+        }
+      }
+    ]
+  }
+]
