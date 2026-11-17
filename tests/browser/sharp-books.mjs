@@ -18,7 +18,7 @@ try{
  const event={eventID:'fixture',leagueID:'NBA',type:'match',status:{startsAt:future},teams:{home:{teamID:'HOME_NBA'},away:{teamID:'AWAY_NBA'}},players:{[playerID]:{playerID,name:'Fixture Player',teamID:'HOME_NBA'}},odds:{}};
  for(const side of ['over','under'])event.odds[side]={oddID:`points-${playerID}-game-ou-${side}`,playerID,statID:'points',periodID:'game',betTypeID:'ou',sideID:side,byBookmaker:{pinnacle:q,bookmakereu:q,prizepicks:q,fanduel:{...q,odds:'+110'}}};
  const {body:data}=await researchPropsResponse({now,key:'fixture',optimize:async()=>({blocked:false,effectiveLimit:16}),fetchPage:async()=>({payload:{success:true,data:[event]},fetchedAt:now})});
- const gameData={fetchedAt:stamp,source:'SportsGameOdds',providerObservations:[{league:'NBA',provider:'SportsGameOdds',fetchedAt:stamp}],events:[{eventID:'fixture-game',league:'NBA',startsAt:future,status:{},matchup:{home:{id:'HOME_NBA',name:'Home Team'},away:{id:'AWAY_NBA',name:'Away Team'}},markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:stamp},fanduel:{odds:110,line:null,available:true,updatedAt:stamp}}}]))}}]};
+ const gameData={fetchedAt:stamp,source:'SportsGameOdds',providerObservations:[{league:'NBA',provider:'SportsGameOdds',fetchedAt:stamp}],events:[{eventID:'fixture',league:'NBA',startsAt:future,status:{},matchup:{home:{id:'HOME_NBA',name:'Home Team'},away:{id:'AWAY_NBA',name:'Away Team'}},markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:stamp},fanduel:{odds:110,line:null,available:true,updatedAt:stamp}}}]))}}]};
  const nflData=structuredClone(data);nflData.contract='nfl-multibook-research-v1';nflData.candidates=[];
  for(const p of nflData.events[0].players)Object.assign(p.prop,{playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards'});
  const nflModel={oddsProvider:'SportsGameOdds',generatedAt:stamp,candidates:[{eventID:nflData.events[0].eventID,startsAt:future,playerID:'RECEIVER_NFL',playerName:'NFL Receiver',statID:'receiving_yards',side:'over',line:20.5,book:'pinnacle',odds:-110,rawIndependentProbability:.6}]};
@@ -28,6 +28,11 @@ try{
  let releaseNflModel;const nflModelReady=new Promise(resolve=>{releaseNflModel=resolve;});
  cfbData.forecasts.push({...cfbData.forecasts[0],eventID:'schedule-verified',homeID:'HAWAII_NCAAF',awayID:'NORTH_DAKOTA_STATE_NCAAF',homeName:'Hawaii',awayName:'North Dakota State',quoteComparisonEligible:false,providerStartsAt:new Date(Date.parse(future)-3600000).toISOString(),scheduleVerification:{explanation:'Official schedule verified; provider kickoff differs.',reviewedAt:stamp,sources:['https://hawaiiathletics.com/sports/football/schedule/2026']}});
  await page.route('**/api/**',async r=>{const url=new URL(r.request().url());if(url.pathname==='/api/nbaprops')assert.equal(url.searchParams.get('view'),'research');if(url.pathname==='/api/nflprops'&&url.searchParams.get('view')==='estimates')await nflModelReady;if(url.pathname==='/api/board'){assert.notEqual(url.searchParams.get('leagues'),'CFB');if(url.searchParams.get('leagues')==='NCAAF')assert.equal(url.searchParams.get('limit'),'100');}return r.fulfill({json:url.pathname==='/api/dashboard'&&url.searchParams.get('cfb')==='1'?cfbData:url.pathname==='/api/board'?(url.searchParams.get('leagues')==='NCAAF'?collegeData:gameData):url.pathname.includes('nflprops')?(url.searchParams.get('view')==='research'?nflData:nflModel):data});});
+ if(process.env.EDGE_LAB_BROWSER_OFFLINE==='1')await page.route(/^http:\/\/127\.0\.0\.1:\d+\//,async route=>{
+  const pathname=new URL(route.request().url()).pathname;if(pathname.startsWith('/api/'))return route.fallback();
+  const path=resolve(root,'.'+pathname);if(!path.startsWith(root+sep))return route.fulfill({status:404});
+  try{await route.fulfill({contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css'})[extname(path)]||'text/plain',body:await readFile(path)});}catch{await route.fulfill({status:404});}
+ });
  await page.goto(`http://127.0.0.1:${server.address().port}/research.html`);
  await page.locator('.card').first().waitFor();
  await page.locator('#platform-coverage summary').click();
@@ -35,6 +40,7 @@ try{
  assert.match(await page.locator('#platform-coverage').innerText(),/Circa[\s\S]*No available NBA prop lines/);
  await page.locator('#book').selectOption('pinnacle');assert.equal(await page.locator('.card').count(),2);
  assert.match(await page.locator('.comparison').first().innerText(),/50.0%/);
+ assert.match(await page.locator('.comparison').first().innerText(),/Market-implied chance/);
  await page.locator('#book').selectOption('prizepicks');
  assert.doesNotMatch(await page.locator('.comparison').first().innerText(),/\d+\.\d+%/);
  await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
@@ -78,9 +84,14 @@ try{
  await page.getByRole('button',{name:'Close quote details'}).click();
  assert.equal(await page.locator('#detail').evaluate(e=>e.open),false);
  await page.getByRole('button',{name:'Shortlist +'}).first().click();
+ assert.equal(await page.locator('#shortlist-review').count(),1);
+ assert.match(await page.locator('#shortlist-review').innerText(),/1 selection.*1 game/);
+ assert.match(await page.locator('#shortlist-review').innerText(),/current page shortlist only/i);
+ assert.match(await page.locator('#shortlist-review').innerText(),/not linked tickets or accounts/i);
  await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('#cards .card').count(),1);
  await page.getByRole('button',{name:'Back to board'}).click();
  await page.locator('[data-sport="NFL"]').click();await page.waitForFunction(()=>document.querySelector('#status').textContent.includes('NFL'));
+ assert.match(await page.locator('#shortlist-review').innerText(),/1 selection.*1 game/);
  assert.equal(await page.locator('#modeled').innerText(),'0');
  await page.locator('#book').selectOption('pinnacle');
  await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
@@ -111,6 +122,9 @@ try{
  await page.locator('#refresh').click();await page.locator('.card').first().waitFor();
  assert.match(await page.locator('.price-comparison').first().innerText(),/best observed \+130/);
  await page.getByRole('button',{name:'View shortlist'}).click();
+ assert.equal(await page.locator('#shortlist-review .duplicate-selection').count(),1);
+ assert.equal(await page.locator('#shortlist-review .shared-game').count(),0);
+ assert.match(await page.locator('#shortlist-review').innerText(),/2 platforms/);
  assert.match(await page.locator('.quote').first().innerText(),/\+130/);
  assert.match(await page.locator('.price-comparison').first().innerText(),/BEST OBSERVED PRICE/);
  await page.getByRole('button',{name:'Games',exact:true}).click();
@@ -119,6 +133,17 @@ try{
  assert.equal(await page.locator('#book').inputValue(),'');
  await page.locator('#best-prices').check();
  assert.equal(await page.locator('.card').count(),2);
+ assert.match(await page.locator('#play-readiness').innerText(),/Game quotes/);
+ await page.getByRole('button',{name:'Shortlist +'}).first().click();
+ assert.equal(await page.locator('#shortlist-review .shared-game').count(),1);
+ assert.match(await page.locator('#shortlist-review .shared-game').innerText(),/2 selections/);
+ await page.locator('#query').fill('No fixture matches this filter');
+ assert.equal(await page.locator('#cards .card').count(),0);
+ assert.equal(await page.locator('#shortlist-review .shared-game').count(),1);
+ await page.locator('#query').fill('');
+ await page.getByRole('button',{name:'Remove saved'}).first().click();
+ assert.equal(await page.locator('#shortlist-review .shared-game').count(),0);
+ assert.equal(await page.locator('#shortlist-review .duplicate-selection').count(),1);
  await page.getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
  assert.match(await page.locator('#detail-body').innerText(),/Game market rules/);
  assert.doesNotMatch(await page.locator('#detail-body').innerText(),/Recent player average|Usual playing time/);
