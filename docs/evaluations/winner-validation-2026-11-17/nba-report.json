@@ -1,0 +1,1238 @@
+{
+  "protocolId": "nba-winner-rest-defense-development-2026-11-17-v1",
+  "evaluationStatus": "REUSED_DEVELOPMENT_NOT_UNTOUCHED_HOLDOUT",
+  "productionEligible": false,
+  "productionWeight": 0,
+  "automaticBuyEnabled": false,
+  "coverage": {
+    "archiveGames": 1230,
+    "archivePlayerRows": 26306,
+    "eligibleGames": 1168,
+    "exclusions": 62,
+    "exclusionCounts": {
+      "INSUFFICIENT_PRIOR_HISTORY": 62
+    },
+    "historicalTimestampedLineups": 0,
+    "lineupAblation": "NOT_EVALUABLE",
+    "historicalMatchedPricePairs": 0,
+    "marketRelativeValidation": "NOT_EVALUABLE",
+    "untouchedConfirmationGames": 0
+  },
+  "fitted": {
+    "trainingGames": 422,
+    "trainThrough": "2024-12-31",
+    "fit": {
+      "family": "logistic_offset",
+      "intercept": false,
+      "penalty": "0.5 * lambda * sum(beta^2)",
+      "lambda": 0.05,
+      "learningRate": 0.05,
+      "iterations": 2000,
+      "initialCoefficients": 0,
+      "objective": "mean Bernoulli log loss plus L2 penalty",
+      "tuning": false
+    },
+    "models": {
+      "rest": {
+        "featureIndices": [
+          0,
+          1,
+          2
+        ],
+        "coefficients": [
+          0.09356306290136342,
+          0.17360655972733374,
+          -0.018720950601774915
+        ],
+        "finalIterationMaxGradient": 7.970793399589347e-06
+      },
+      "defense": {
+        "featureIndices": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "coefficients": [
+          0.032367892304505645,
+          -0.09531119559173704,
+          -0.12340127056812711,
+          0.13102553455449967
+        ],
+        "finalIterationMaxGradient": 2.0240766079739883e-05
+      },
+      "both": {
+        "featureIndices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "coefficients": [
+          0.08987219092787796,
+          0.1702942678104537,
+          -0.022996526768492148,
+          0.03773097484480647,
+          -0.09560949122681911,
+          -0.11818689984498111,
+          0.12399340942429958
+        ],
+        "finalIterationMaxGradient": 2.0260748575250668e-05
+      }
+    }
+  },
+  "coefficientsSha256": "7e3394400f69696d34732736b30c59047d80406a5282bd5dbb9d3d4c48f404d7",
+  "training": {
+    "games": 422,
+    "days": 58,
+    "firstDay": "2024-10-30",
+    "lastDay": "2024-12-31",
+    "metrics": {
+      "baseline": {
+        "n": 422,
+        "brier": 0.21265024914834216,
+        "logloss": 0.6130481938821503,
+        "accuracy": 0.6658767772511849,
+        "expectedCalibrationError": 0.027378991447581547,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 7,
+            "mean": 0.16507456320378214,
+            "observed": 0.14285714285714285
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 19,
+            "mean": 0.25310583266821246,
+            "observed": 0.3157894736842105
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 62,
+            "mean": 0.3548343187653528,
+            "observed": 0.3225806451612903
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 70,
+            "mean": 0.4544929553127187,
+            "observed": 0.4142857142857143
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 82,
+            "mean": 0.5549338644899522,
+            "observed": 0.5609756097560976
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 80,
+            "mean": 0.6579351816450486,
+            "observed": 0.6375
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 74,
+            "mean": 0.7463053707535476,
+            "observed": 0.7837837837837838
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 28,
+            "mean": 0.8396589847806607,
+            "observed": 0.8571428571428571
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          }
+        ]
+      },
+      "rest": {
+        "n": 422,
+        "brier": 0.21126576389996507,
+        "logloss": 0.6100072306667124,
+        "accuracy": 0.6635071090047393,
+        "expectedCalibrationError": 0.022502550974026113,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 8,
+            "mean": 0.1670656428188554,
+            "observed": 0.125
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 19,
+            "mean": 0.2554348701073971,
+            "observed": 0.3157894736842105
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 60,
+            "mean": 0.35688285840879774,
+            "observed": 0.3
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 68,
+            "mean": 0.4520146387958399,
+            "observed": 0.4411764705882353
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 80,
+            "mean": 0.55260856183229,
+            "observed": 0.5375
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 84,
+            "mean": 0.651259616846814,
+            "observed": 0.6547619047619048
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 72,
+            "mean": 0.7447276249366324,
+            "observed": 0.7638888888888888
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 31,
+            "mean": 0.8393432638106307,
+            "observed": 0.8709677419354839
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          }
+        ]
+      },
+      "defense": {
+        "n": 422,
+        "brier": 0.21154146014058534,
+        "logloss": 0.610424440968801,
+        "accuracy": 0.6635071090047393,
+        "expectedCalibrationError": 0.050351690671073916,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 8,
+            "mean": 0.1662989151364929,
+            "observed": 0.125
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 20,
+            "mean": 0.25593609688332547,
+            "observed": 0.3
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 64,
+            "mean": 0.3533156104473196,
+            "observed": 0.328125
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 71,
+            "mean": 0.4507848589560636,
+            "observed": 0.43661971830985913
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 69,
+            "mean": 0.5508908747184228,
+            "observed": 0.5942028985507246
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 87,
+            "mean": 0.6545775936337558,
+            "observed": 0.5632183908045977
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 73,
+            "mean": 0.7493146977171375,
+            "observed": 0.8356164383561644
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 30,
+            "mean": 0.8394004222681416,
+            "observed": 0.8333333333333334
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          }
+        ]
+      },
+      "both": {
+        "n": 422,
+        "brier": 0.21025150081265778,
+        "logloss": 0.6075939948338015,
+        "accuracy": 0.6658767772511849,
+        "expectedCalibrationError": 0.02994949888916361,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 9,
+            "mean": 0.16736360674373818,
+            "observed": 0.1111111111111111
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 19,
+            "mean": 0.2552473286012503,
+            "observed": 0.3157894736842105
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 63,
+            "mean": 0.3540619474606406,
+            "observed": 0.30158730158730157
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 73,
+            "mean": 0.4517319075620041,
+            "observed": 0.4520547945205479
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 68,
+            "mean": 0.5537213308046304,
+            "observed": 0.5588235294117647
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 86,
+            "mean": 0.6521957690762293,
+            "observed": 0.6162790697674418
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 71,
+            "mean": 0.7474723747005813,
+            "observed": 0.8028169014084507
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 33,
+            "mean": 0.8397759141253485,
+            "observed": 0.8484848484848485
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          }
+        ]
+      }
+    },
+    "paired": {
+      "rest": {
+        "n": 422,
+        "blocks": 58,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.001384485248376963,
+          "lower": -0.0035616038029684083,
+          "upper": 0.000546027857484359
+        },
+        "logloss": {
+          "delta": -0.0030409632154383415,
+          "lower": -0.007670296393173042,
+          "upper": 0.001153947842422058
+        }
+      },
+      "defense": {
+        "n": 422,
+        "blocks": 58,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.0011087890077568717,
+          "lower": -0.0023038515678019777,
+          "upper": -3.9823271621239127e-05
+        },
+        "logloss": {
+          "delta": -0.002623752913349265,
+          "lower": -0.005176026890550174,
+          "upper": -0.00036744672190987867
+        }
+      },
+      "both": {
+        "n": 422,
+        "blocks": 58,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.0023987483356843345,
+          "lower": -0.004932199626311854,
+          "upper": -9.654491840540403e-05
+        },
+        "logloss": {
+          "delta": -0.00545419904834936,
+          "lower": -0.010956172588223179,
+          "upper": -0.0006126499834181696
+        }
+      }
+    }
+  },
+  "januaryDiagnostics": {
+    "games": 227,
+    "days": 31,
+    "firstDay": "2025-01-01",
+    "lastDay": "2025-01-31",
+    "metrics": {
+      "baseline": {
+        "n": 227,
+        "brier": 0.23657580047754465,
+        "logloss": 0.6642657194839673,
+        "accuracy": 0.5991189427312775,
+        "expectedCalibrationError": 0.06515754725657764,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 3,
+            "mean": 0.1687689487983203,
+            "observed": 0.6666666666666666
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 15,
+            "mean": 0.2726621112544824,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 30,
+            "mean": 0.35696879675556364,
+            "observed": 0.43333333333333335
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 32,
+            "mean": 0.44673050153361066,
+            "observed": 0.40625
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 52,
+            "mean": 0.5522729746462504,
+            "observed": 0.5384615384615384
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 42,
+            "mean": 0.6441836294145222,
+            "observed": 0.5238095238095238
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 36,
+            "mean": 0.7383241143184548,
+            "observed": 0.6666666666666666
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 13,
+            "mean": 0.837477137369789,
+            "observed": 0.8461538461538461
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 4,
+            "mean": 0.9164207126563451,
+            "observed": 1
+          }
+        ]
+      },
+      "rest": {
+        "n": 227,
+        "brier": 0.235880098475157,
+        "logloss": 0.6628452874131301,
+        "accuracy": 0.6079295154185022,
+        "expectedCalibrationError": 0.07738646165089537,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 3,
+            "mean": 0.1730175579893186,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 12,
+            "mean": 0.2625703471569963,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 34,
+            "mean": 0.3554229043558099,
+            "observed": 0.5
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 33,
+            "mean": 0.4464562519604441,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 49,
+            "mean": 0.551038806743696,
+            "observed": 0.5510204081632653
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 45,
+            "mean": 0.6471365367710862,
+            "observed": 0.5111111111111111
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 33,
+            "mean": 0.7395092320617349,
+            "observed": 0.7272727272727273
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 14,
+            "mean": 0.8374792823962337,
+            "observed": 0.7857142857142857
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 4,
+            "mean": 0.9156535571791171,
+            "observed": 1
+          }
+        ]
+      },
+      "defense": {
+        "n": 227,
+        "brier": 0.23742786970730412,
+        "logloss": 0.6661871567873798,
+        "accuracy": 0.6167400881057269,
+        "expectedCalibrationError": 0.07724953289662381,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 3,
+            "mean": 0.1653086754179144,
+            "observed": 0.6666666666666666
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 15,
+            "mean": 0.2692047334813372,
+            "observed": 0.26666666666666666
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 29,
+            "mean": 0.3493885251473097,
+            "observed": 0.41379310344827586
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 39,
+            "mean": 0.45368223480988273,
+            "observed": 0.41025641025641024
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 49,
+            "mean": 0.5572150361004242,
+            "observed": 0.6122448979591837
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 39,
+            "mean": 0.6462515711678389,
+            "observed": 0.5128205128205128
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 35,
+            "mean": 0.7411803605861347,
+            "observed": 0.6285714285714286
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 15,
+            "mean": 0.8421862140351646,
+            "observed": 0.8666666666666667
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 3,
+            "mean": 0.9255449511194457,
+            "observed": 1
+          }
+        ]
+      },
+      "both": {
+        "n": 227,
+        "brier": 0.23671052590191913,
+        "logloss": 0.6647202940701584,
+        "accuracy": 0.6211453744493393,
+        "expectedCalibrationError": 0.0773755498878852,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 0,
+            "mean": null,
+            "observed": null
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 3,
+            "mean": 0.16795830691402328,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 16,
+            "mean": 0.26871862923792245,
+            "observed": 0.3125
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 30,
+            "mean": 0.3572199367666821,
+            "observed": 0.43333333333333335
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 38,
+            "mean": 0.4531200756170388,
+            "observed": 0.39473684210526316
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 47,
+            "mean": 0.5550783658796519,
+            "observed": 0.6170212765957447
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 45,
+            "mean": 0.6520723201601003,
+            "observed": 0.5111111111111111
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 29,
+            "mean": 0.7477461862282389,
+            "observed": 0.6896551724137931
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 15,
+            "mean": 0.8394951696199703,
+            "observed": 0.8
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 4,
+            "mean": 0.9164950282818994,
+            "observed": 1
+          }
+        ]
+      }
+    },
+    "paired": {
+      "rest": {
+        "n": 227,
+        "blocks": 31,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.0006957020023875606,
+          "lower": -0.004348835827339933,
+          "upper": 0.002658975182406773
+        },
+        "logloss": {
+          "delta": -0.001420432070837916,
+          "lower": -0.009464687138871731,
+          "upper": 0.00590934510453681
+        }
+      },
+      "defense": {
+        "n": 227,
+        "blocks": 31,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": 0.0008520692297595043,
+          "lower": -0.0009771764015824524,
+          "upper": 0.002621581023961802
+        },
+        "logloss": {
+          "delta": 0.001921437303411605,
+          "lower": -0.002102447983091275,
+          "upper": 0.005913392220589947
+        }
+      },
+      "both": {
+        "n": 227,
+        "blocks": 31,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": 0.00013472542437446114,
+          "lower": -0.003563369218963205,
+          "upper": 0.0038933689357009377
+        },
+        "logloss": {
+          "delta": 0.0004545745861912121,
+          "lower": -0.008051320843258132,
+          "upper": 0.008895130695607198
+        }
+      }
+    }
+  },
+  "laterDevelopment": {
+    "games": 519,
+    "days": 66,
+    "firstDay": "2025-02-01",
+    "lastDay": "2025-04-13",
+    "metrics": {
+      "baseline": {
+        "n": 519,
+        "brier": 0.21130684393081015,
+        "logloss": 0.6130341915713065,
+        "accuracy": 0.6801541425818882,
+        "expectedCalibrationError": 0.036096488449585594,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 2,
+            "mean": 0.09250264306615273,
+            "observed": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 9,
+            "mean": 0.16940302374137306,
+            "observed": 0.3333333333333333
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 27,
+            "mean": 0.25475527732545555,
+            "observed": 0.14814814814814814
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 56,
+            "mean": 0.3539027319391031,
+            "observed": 0.21428571428571427
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 95,
+            "mean": 0.45083243445927995,
+            "observed": 0.42105263157894735
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 102,
+            "mean": 0.5519559135522256,
+            "observed": 0.5686274509803921
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 100,
+            "mean": 0.6510781041287627,
+            "observed": 0.65
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 78,
+            "mean": 0.743711704254961,
+            "observed": 0.7435897435897436
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 41,
+            "mean": 0.8420714066460275,
+            "observed": 0.8536585365853658
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 9,
+            "mean": 0.9171977992130249,
+            "observed": 0.7777777777777778
+          }
+        ]
+      },
+      "rest": {
+        "n": 519,
+        "brier": 0.2096145752433588,
+        "logloss": 0.6090949626123974,
+        "accuracy": 0.6840077071290944,
+        "expectedCalibrationError": 0.044775652384736096,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 2,
+            "mean": 0.09211058205535451,
+            "observed": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 11,
+            "mean": 0.17080301653969407,
+            "observed": 0.2727272727272727
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 27,
+            "mean": 0.2592502615002939,
+            "observed": 0.07407407407407407
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 54,
+            "mean": 0.3568353826461934,
+            "observed": 0.2222222222222222
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 93,
+            "mean": 0.450077702446801,
+            "observed": 0.43010752688172044
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 102,
+            "mean": 0.5497697002978386,
+            "observed": 0.5588235294117647
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 104,
+            "mean": 0.6489902369636368,
+            "observed": 0.6826923076923077
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 75,
+            "mean": 0.746880647987868,
+            "observed": 0.72
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 40,
+            "mean": 0.8425762093375283,
+            "observed": 0.85
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 11,
+            "mean": 0.9150523094143519,
+            "observed": 0.8181818181818182
+          }
+        ]
+      },
+      "defense": {
+        "n": 519,
+        "brier": 0.2116152762423856,
+        "logloss": 0.6137046565140771,
+        "accuracy": 0.6782273603082851,
+        "expectedCalibrationError": 0.0426172145251466,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 2,
+            "mean": 0.09173119681386904,
+            "observed": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 10,
+            "mean": 0.16883610280927072,
+            "observed": 0.2
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 29,
+            "mean": 0.2582589662795146,
+            "observed": 0.1724137931034483
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 52,
+            "mean": 0.3519879673301468,
+            "observed": 0.23076923076923078
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 99,
+            "mean": 0.45400441361200305,
+            "observed": 0.42424242424242425
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 99,
+            "mean": 0.554077751316901,
+            "observed": 0.5555555555555556
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 100,
+            "mean": 0.6501717913481105,
+            "observed": 0.7
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 82,
+            "mean": 0.7465641271766257,
+            "observed": 0.7073170731707317
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 36,
+            "mean": 0.8441676186655648,
+            "observed": 0.8333333333333334
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 10,
+            "mean": 0.9146495516894811,
+            "observed": 0.8
+          }
+        ]
+      },
+      "both": {
+        "n": 519,
+        "brier": 0.20989107820290237,
+        "logloss": 0.6097458992107062,
+        "accuracy": 0.6840077071290944,
+        "expectedCalibrationError": 0.04686997674600956,
+        "calibration": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "n": 2,
+            "mean": 0.09078717632686274,
+            "observed": 0
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "n": 10,
+            "mean": 0.1639674777393808,
+            "observed": 0.3
+          },
+          {
+            "lower": 0.2,
+            "upper": 0.3,
+            "n": 29,
+            "mean": 0.25604381753463795,
+            "observed": 0.06896551724137931
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.4,
+            "n": 54,
+            "mean": 0.3557504750540904,
+            "observed": 0.2222222222222222
+          },
+          {
+            "lower": 0.4,
+            "upper": 0.5,
+            "n": 94,
+            "mean": 0.45311238985904645,
+            "observed": 0.43617021276595747
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.6,
+            "n": 101,
+            "mean": 0.5509072184501493,
+            "observed": 0.5643564356435643
+          },
+          {
+            "lower": 0.6,
+            "upper": 0.7,
+            "n": 102,
+            "mean": 0.6492962542985904,
+            "observed": 0.6862745098039216
+          },
+          {
+            "lower": 0.7,
+            "upper": 0.8,
+            "n": 78,
+            "mean": 0.7473112150044802,
+            "observed": 0.717948717948718
+          },
+          {
+            "lower": 0.8,
+            "upper": 0.9,
+            "n": 38,
+            "mean": 0.8439926525995081,
+            "observed": 0.8421052631578947
+          },
+          {
+            "lower": 0.9,
+            "upper": 1,
+            "n": 11,
+            "mean": 0.9148280709576224,
+            "observed": 0.8181818181818182
+          }
+        ]
+      }
+    },
+    "paired": {
+      "rest": {
+        "n": 519,
+        "blocks": 66,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.0016922686874512435,
+          "lower": -0.0032694367982981885,
+          "upper": -7.294130348342431e-05
+        },
+        "logloss": {
+          "delta": -0.003939228958909885,
+          "lower": -0.007398434199392505,
+          "upper": -0.0003481510095738073
+        }
+      },
+      "defense": {
+        "n": 519,
+        "blocks": 66,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": 0.0003084323115756357,
+          "lower": -0.0008509915270454468,
+          "upper": 0.00142990048025823
+        },
+        "logloss": {
+          "delta": 0.0006704649427702779,
+          "lower": -0.0019442133354458102,
+          "upper": 0.003159556618912761
+        }
+      },
+      "both": {
+        "n": 519,
+        "blocks": 66,
+        "iterations": 2000,
+        "seed": 20261117,
+        "confidence": 0.95,
+        "brier": {
+          "delta": -0.0014157657279079078,
+          "lower": -0.003098486028520305,
+          "upper": 0.0002304839790617939
+        },
+        "logloss": {
+          "delta": -0.003288292360600101,
+          "lower": -0.0068923216539981515,
+          "upper": 0.00019171886146508726
+        }
+      }
+    }
+  },
+  "limitations": [
+    "Both chronological portions are previously inspected development. Neither is an untouched confirmation cohort.",
+    "Final boxscores were downloaded retrospectively and have no result-publication timestamps. Previous Eastern slates are a conservative replay proxy, not proof of contemporaneous receipt.",
+    "Player-summed boxes omit unassigned team rebounds and team-only turnovers. These are box-derived team matchup proxies, not exact official team rates or player-position defense claims.",
+    "Historical injury publication, final active lists and starting lineups are unavailable. Target-game participants never supply features.",
+    "No historical same-time two-sided market prices are supplied: no market-edge, ROI or wager-clearance conclusion.",
+    "Day-block bootstrap does not fully model dependence from overlapping team histories. Intervals are descriptive."
+  ],
+  "provenance": {
+    "sourceHashes": {
+      "games.json": "d6f710ae1f196d7010506fb5205a5940a00577b606c8da40e7906d5a860c2a0a",
+      "player-stats.json": "6b1aefaa4721c6f7eb3f04d80f3783f0af8f1b1492a0154b445186c1d7c6fa54"
+    },
+    "implementationSha256": "7facc2c681eca87351d43c64bbf50e0df2387db5239c303bf66f4d91e4b2d573",
+    "metricsSha256": "d4cae28a2493a0d2f1b853d8811761a345fc545691e7c82d1b9ec078ca5088f2",
+    "baselineSha256": "7cfb863955d99c655146214fa53acb8972d70948d1c8eafd8195eff99257077b",
+    "predeclaredProtocolSha256": "336bc085c8bb6ea578f97e75969bd4c9a91440de61a29f0ef9f57c72b7a147db"
+  },
+  "fullLocalArtifactSha256": "2e6a900c5447488865bd72303b34f588a1d42bd9f764061b7571709f6a22abe3"
+}
