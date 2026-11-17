@@ -217,6 +217,13 @@
       "jobname": "ucl-market-baseline-daily",
       "schedule": "25 13 * * *",
       "command_sha256": "76a3c9bc78f3dcc1ff2e4bd581319da1d488ee8bfba9d43e487e3b9ad834e4e3"
+    },
+    {
+      "active": true,
+      "jobname": "nfl-exact-price-collection-30min",
+      "schedule": "12,42 * * * *",
+      "command_sha256": "835dce9e9cfde2eb99077c31079d78b4b8bd81c75f701f72ef6261b21f2fe891",
+      "observedOn": "2026-11-16"
     }
   ],
   "final_verified_at": "2026-09-23T23:25:32Z",

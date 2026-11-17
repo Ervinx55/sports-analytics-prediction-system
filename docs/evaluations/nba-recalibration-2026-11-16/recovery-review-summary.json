@@ -1,0 +1,158 @@
+{
+  "contract": "nba-completed-outcome-recovery-summary-v1",
+  "evidenceAsOf": "2026-11-16T16:58:42Z",
+  "applicationVerification": {
+    "verifiedAt": "2026-11-16T17:01:42Z",
+    "projectRef": "yeoxroijaptomomshdii",
+    "table": "public.nba_prop_outcomes_v1",
+    "insertedQuoteOutcomes": 230,
+    "remainingTargetQuotes": 0,
+    "approvedModels": 0
+  },
+  "selectedCohort": {
+    "observations": 111,
+    "playerGames": 41,
+    "providerEvents": 7,
+    "positiveMinutePlayerGames": 30,
+    "nonparticipatingPlayerGames": 11,
+    "automaticExistingPreserved": 33,
+    "manualSelectedInserts": 78,
+    "outcomes": {
+      "WIN": 41,
+      "LOSS": 38,
+      "INACTIVE": 32,
+      "PUSH": 0
+    }
+  },
+  "transaction": {
+    "quoteIdentities": 230,
+    "selectedIdentities": 78,
+    "additionalQuoteIdentities": 152,
+    "outcomes": {
+      "WIN": 65,
+      "LOSS": 65,
+      "INACTIVE": 100,
+      "PUSH": 0
+    },
+    "sourceFile": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/reviewed-outcome-inserts.sql",
+      "sha256": "0fb47026c51bf9c7fa287155477086be387fcaa8e47e4fda94e469c4d042245d",
+      "bytes": 1658280
+    }
+  },
+  "manifestReview": {
+    "status": "PASS",
+    "summary": {
+      "quoteRowsVerified": 230,
+      "selectedRowsVerified": 78,
+      "additionalQuotesVerified": 152,
+      "automaticRowsPreserved": 33,
+      "mismatches": 0,
+      "quoteOutcomes": {
+        "INACTIVE": 100,
+        "WIN": 65,
+        "LOSS": 65
+      },
+      "selectedOutcomes": {
+        "INACTIVE": 32,
+        "LOSS": 19,
+        "WIN": 27
+      }
+    },
+    "checks": [
+      "All 230 observations exactly equal pending input; all values independently derived from official evidence and frozen quote lines/sides.",
+      "All current provider names, teams, official NBA IDs and three explicit aliases verified; no orientation changes.",
+      "All 100 quote-level nonparticipation outcomes retain explicit official evidence and ungraded semantics.",
+      "All 33 already recovered outcomes are preserved exactly; none is in insert candidates.",
+      "All pinned source/input hashes verified."
+    ],
+    "fullReport": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/manifest-independent-review.json",
+      "sha256": "b352ba5ea27fe7577918faf8e145c2c263180551d267dd8b51381a91c364afeb",
+      "bytes": 42755
+    }
+  },
+  "sqlReview": {
+    "contract": "nba-reviewed-sql-independent-review-v1",
+    "status": "PASS",
+    "manifestSha256": "24ddbeea0efc24f5d810256540a1f5a79b0469bc11d0e69841200bab78e385bb",
+    "sqlSha256": "0fb47026c51bf9c7fa287155477086be387fcaa8e47e4fda94e469c4d042245d",
+    "insertRows": 230,
+    "preservedExistingRows": 33,
+    "embeddedPayloadsExactlyMatchReviewedManifest": true,
+    "insertOnlyTarget": "public.nba_prop_outcomes_v1",
+    "guards": [
+      "Table locks before checks and inserts",
+      "Exact original observation payload and starts_at match",
+      "All 33 existing outcome payloads preserved",
+      "Abort duplicate outcome identities",
+      "Abort participation conflicts",
+      "Abort existing statistic or minute conflicts",
+      "Abort insert row-count mismatch"
+    ],
+    "mutatesForecastsOrModels": false,
+    "executedByReviewer": false,
+    "fullReport": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/sql-independent-review.json",
+      "sha256": "0950dbef7b6d1595ab4d23bbd4835f52e82e8ef53af3aad8488df7433dff772a",
+      "bytes": 845
+    }
+  },
+  "automaticReview": {
+    "summary": {
+      "originalSelected": 111,
+      "automaticVerified": 33,
+      "remainingSelected": 78,
+      "overlap": 0,
+      "mismatches": 0,
+      "remainingParticipation": {
+        "EXPLICIT_NONPARTICIPATION_ROW": 17,
+        "EXPLICIT_INACTIVE_LIST": 15,
+        "POSITIVE_MINUTES": 46
+      }
+    },
+    "fullReport": {
+      "path": "outputs/nba-outcome-recovery-2026-11-16/automatically-recovered-review.json",
+      "sha256": "4303cf481d1c6913a67c953c89d9b22b3faf0f0beb095903bbad1cf9d0fdda6a",
+      "bytes": 14330
+    }
+  },
+  "verification": {
+    "pythonTestsPassed": 97,
+    "nodeDiagnosticTestsPassed": 4,
+    "frozenForecastsRewritten": false,
+    "modelFitsOrPromotions": false,
+    "pairedEvaluation": {
+      "path": "recovery-paired-evaluation.json",
+      "sha256": "6541b171384db2bd18f5c3d6b7e6dfdc7535ee963e44ddf9a8a6b10bd5ae3b93",
+      "asOf": "2026-11-16T17:03:00.142138+00",
+      "protocolId": "nba-minutes-paired-2026-11-10-v1",
+      "registeredQuoteForecasts": 4598,
+      "selectedPlayerMarkets": 1546,
+      "scoredPlayerMarkets": 1278,
+      "inactivePlayerMarkets": 82,
+      "invalidPlayerMarkets": 0,
+      "unresolvedFuturePlayerMarkets": 186,
+      "missingStartedPlayerMarkets": 0,
+      "distinctGames": 42,
+      "playerGames": 481,
+      "gameFloor": 100,
+      "playerGameFloor": 500,
+      "registeredEnd": "2026-12-01T00:00:00Z",
+      "approval": "NOT_APPROVED",
+      "scope": "Existing frozen minutes protocol only; new offline recalibration candidates require a separately predeclared prospective protocol."
+    },
+    "nodeTestsPassed": 324,
+    "browserMobileResearchAndWorksheets": "PASS",
+    "postImportIndependentReview": {
+      "status": "PASS",
+      "insertedPayloadsExact": 230,
+      "existingPayloadsUnchanged": 33,
+      "observationPayloadsUnchanged": 263,
+      "mismatches": 0,
+      "path": "outputs/nba-outcome-recovery-2026-11-16/post-import-review.json",
+      "sha256": "c468f424479e470b6892e7ec647f4446532dce3c06697360110811ce6de190f4"
+    }
+  },
+  "inactiveSemantics": "Explicit official DNP/DND/NWT or inactive evidence; research INACTIVE, actual null, actualMinutes 0, RESEARCH_INACTIVE_NOT_GRADED. These are not under wins or sportsbook settlement."
+}

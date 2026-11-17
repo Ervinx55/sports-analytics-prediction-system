@@ -1,0 +1,77 @@
+{
+  "version": "nba-minutes-distribution-recalibration-2026-11-16-v1",
+  "phase": "DEVELOPMENT_ONLY",
+  "productionWeight": 0,
+  "productionEligible": false,
+  "fitBefore": "2025-01-01T00:00:00Z",
+  "selectBefore": "2025-02-01T00:00:00Z",
+  "season": 2024,
+  "minimumPriorGames": 5,
+  "historyWindow": 10,
+  "historyPublicationProxyHours": 8,
+  "minutesHalfLifeGames": 3,
+  "minutesCap": 48,
+  "minutesBands": [
+    20,
+    30
+  ],
+  "residualGridSize": 201,
+  "minimumBandGames": 50,
+  "minimumBandRows": 200,
+  "variants": {
+    "pooled": 0,
+    "half": 0.5,
+    "full": 1
+  },
+  "selection": "January equal-game Brier, gain >=0.0005 and non-worse log loss versus pooled; ties prefer simpler",
+  "primaryThresholds": "Unique nonnegative half-point lines at floor(last-ten mean)+0.5 plus fixed offsets",
+  "nearOffsets": {
+    "points": [
+      -5,
+      0,
+      5
+    ],
+    "rebounds": [
+      -2,
+      0,
+      2
+    ],
+    "assists": [
+      -1,
+      0,
+      1
+    ]
+  },
+  "secondaryThresholds": {
+    "points": [
+      5.5,
+      10.5,
+      15.5,
+      20.5,
+      25.5
+    ],
+    "rebounds": [
+      2.5,
+      4.5,
+      6.5,
+      8.5
+    ],
+    "assists": [
+      1.5,
+      3.5,
+      5.5,
+      7.5
+    ]
+  },
+  "minimumSplitGames": 100,
+  "bootstrapDraws": 2000,
+  "bootstrapSeed": 20261116,
+  "condition": "POSITIVE_MINUTE_PARTICIPATION",
+  "inputHashes": {
+    "games.json": "d6f710ae1f196d7010506fb5205a5940a00577b606c8da40e7906d5a860c2a0a",
+    "player-stats.json": "6b1aefaa4721c6f7eb3f04d80f3783f0af8f1b1492a0154b445186c1d7c6fa54"
+  },
+  "archiveManifestHash": "442ecf57d1a305a8d5fa9f53529be073c95aedfec1970997336d971cc2dc3976",
+  "codeSha256": "d185fcf771af0c61286737e99f5efecddb06dc5806580ac4c2783e484ea6fd62",
+  "createdAt": "2026-11-16T16:04:17.963094+00:00"
+}

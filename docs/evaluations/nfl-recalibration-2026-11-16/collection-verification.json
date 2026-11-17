@@ -1,0 +1,52 @@
+{
+  "job": {
+    "active": true,
+    "jobname": "nfl-exact-price-collection-30min",
+    "schedule": "12,42 * * * *",
+    "command_sha256": "835dce9e9cfde2eb99077c31079d78b4b8bd81c75f701f72ef6261b21f2fe891"
+  },
+  "nbaLastRun": {
+    "history": {
+      "games": 185,
+      "cutoff": "2026-11-15T20:21:09.327Z",
+      "failure": null,
+      "invalid": 4,
+      "complete": true,
+      "repaired": 88,
+      "reconciliation": {
+        "at": "2026-11-16T15:57:22.619Z",
+        "checked": 0,
+        "accepted": 0,
+        "remaining": 4
+      }
+    },
+    "settled": 0,
+    "validation": {
+      "modelHash": "31a5b080bdf88ff0ce6eb3b8c06c204e4bdd3e8693b1953cb919eb3a8aa2a0ce",
+      "protocolId": "nba-prospective-bilateral-2026-11-09-v4",
+      "enrolledForecasts": 364,
+      "matchesFrozenModel": true
+    },
+    "completedAt": "2026-11-16T15:57:25.748556+00:00",
+    "productionWeight": 0
+  },
+  "nflLatestRun": {
+    "ok": true,
+    "runId": "1cb85b99-99c8-49a0-882e-cf7a83308be0",
+    "records": 261,
+    "inserted": 261,
+    "rejected": {
+      "UNAVAILABLE_QUOTE": 2,
+      "MISSING_OPPOSITE_SIDE": 3,
+      "STALE_OR_UNDATED_SIDE": 70
+    },
+    "sourceUrl": "https://sports-analytics-prediction-system-tau.vercel.app/api/nflprops?books=draftkings,fanduel,betmgm,caesars,bovada,pinnacle&limit=20",
+    "startedAt": "2026-11-16T15:58:11.772Z",
+    "receivedAt": "2026-11-16T15:58:28.447Z",
+    "completedAt": "2026-11-16T15:58:29.372Z",
+    "productionWeight": 0,
+    "rawResponseSha256": "04717fcbd27ea42d2a6324dfc4061a407042e590d52bfb8975b99837c2aa771f",
+    "productionEligible": false
+  },
+  "nflObservations": 261
+}

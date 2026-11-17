@@ -1,0 +1,27 @@
+{
+  "contract": "nba-outcome-identity-review-v1",
+  "aliases": [
+    {
+      "eventID": "sgo:OeymLe7wQY2zwKedvCrU",
+      "playerID": "BOBBY_PORTIS_1_NBA",
+      "providerName": "Bobby Portis",
+      "officialName": "Bobby Portis Jr.",
+      "nbaPersonId": 1626171
+    },
+    {
+      "eventID": "sgo:OeymLe7wQY2zwKedvCrU",
+      "playerID": "RON_HOLLAND_1_NBA",
+      "providerName": "Ron Holland",
+      "officialName": "Ronald Holland II",
+      "nbaPersonId": 1641842
+    },
+    {
+      "eventID": "sgo:P85upZIi5P758SI7lZPk",
+      "playerID": "PJ_WASHINGTON_JR_1_NBA",
+      "providerName": "P.J. Washington Jr.",
+      "officialName": "P.J. Washington",
+      "nbaPersonId": 1629023
+    }
+  ],
+  "orientations": []
+}
