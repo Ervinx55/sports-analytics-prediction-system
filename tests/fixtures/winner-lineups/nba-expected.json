@@ -1,0 +1,489 @@
+{
+  "games": [
+    {
+      "gameId": "0022600253",
+      "gameStatus": 1,
+      "gameStatusText": "7:30 pm ET",
+      "homeTeam": {
+        "teamId": 1610612761,
+        "teamAbbreviation": "TOR",
+        "players": [
+          {
+            "personId": 1629628,
+            "teamId": 1610612761,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1642266,
+            "teamId": 1610612761,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630193,
+            "teamId": 1610612761,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630567,
+            "teamId": 1610612761,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1642867,
+            "teamId": 1610612761,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      },
+      "awayTeam": {
+        "teamId": 1610612752,
+        "teamAbbreviation": "NYK",
+        "players": [
+          {
+            "personId": 1628969,
+            "teamId": 1610612752,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628404,
+            "teamId": 1610612752,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628973,
+            "teamId": 1610612752,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628384,
+            "teamId": 1610612752,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1626157,
+            "teamId": 1610612752,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      }
+    },
+    {
+      "gameId": "0022600254",
+      "gameStatus": 1,
+      "gameStatusText": "8:00 pm ET",
+      "homeTeam": {
+        "teamId": 1610612750,
+        "teamAbbreviation": "MIN",
+        "players": [
+          {
+            "personId": 1630245,
+            "teamId": 1610612750,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630228,
+            "teamId": 1610612750,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630163,
+            "teamId": 1610612750,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630183,
+            "teamId": 1610612750,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 203497,
+            "teamId": 1610612750,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      },
+      "awayTeam": {
+        "teamId": 1610612757,
+        "teamAbbreviation": "POR",
+        "players": [
+          {
+            "personId": 1631321,
+            "teamId": 1610612757,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1641739,
+            "teamId": 1610612757,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 203081,
+            "teamId": 1610612757,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630166,
+            "teamId": 1610612757,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1642270,
+            "teamId": 1610612757,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      }
+    },
+    {
+      "gameId": "0022600255",
+      "gameStatus": 1,
+      "gameStatusText": "8:00 pm ET",
+      "homeTeam": {
+        "teamId": 1610612759,
+        "teamAbbreviation": "SAS",
+        "players": [
+          {
+            "personId": 1642264,
+            "teamId": 1610612759,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1642844,
+            "teamId": 1610612759,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628368,
+            "teamId": 1610612759,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630170,
+            "teamId": 1610612759,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1641705,
+            "teamId": 1610612759,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      },
+      "awayTeam": {
+        "teamId": 1610612765,
+        "teamAbbreviation": "DET",
+        "players": [
+          {
+            "personId": 1642450,
+            "teamId": 1610612765,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628989,
+            "teamId": 1610612765,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630595,
+            "teamId": 1610612765,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1641709,
+            "teamId": 1610612765,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628381,
+            "teamId": 1610612765,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      }
+    },
+    {
+      "gameId": "0022600257",
+      "gameStatus": 1,
+      "gameStatusText": "10:30 pm ET",
+      "homeTeam": {
+        "teamId": 1610612746,
+        "teamAbbreviation": "LAC",
+        "players": [
+          {
+            "personId": 1627739,
+            "teamId": 1610612746,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1627884,
+            "teamId": 1610612746,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629636,
+            "teamId": 1610612746,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629060,
+            "teamId": 1610612746,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 201572,
+            "teamId": 1610612746,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      },
+      "awayTeam": {
+        "teamId": 1610612762,
+        "teamAbbreviation": "UTA",
+        "players": [
+          {
+            "personId": 1643408,
+            "teamId": 1610612762,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630182,
+            "teamId": 1610612762,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1641718,
+            "teamId": 1610612762,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1642846,
+            "teamId": 1610612762,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1628964,
+            "teamId": 1610612762,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      }
+    },
+    {
+      "gameId": "0022600256",
+      "gameStatus": 1,
+      "gameStatusText": "11:00 pm ET",
+      "homeTeam": {
+        "teamId": 1610612747,
+        "teamAbbreviation": "LAL",
+        "players": [
+          {
+            "personId": 1629656,
+            "teamId": 1610612747,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629680,
+            "teamId": 1610612747,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629029,
+            "teamId": 1610612747,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1631222,
+            "teamId": 1610612747,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1630572,
+            "teamId": 1610612747,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      },
+      "awayTeam": {
+        "teamId": 1610612766,
+        "teamAbbreviation": "CHA",
+        "players": [
+          {
+            "personId": 1642883,
+            "teamId": 1610612766,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1641706,
+            "teamId": 1610612766,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "SF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629632,
+            "teamId": 1610612766,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PG",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1629675,
+            "teamId": 1610612766,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "PF",
+            "timestamp": "2026-11-17T12:31:35"
+          },
+          {
+            "personId": 1631217,
+            "teamId": 1610612766,
+            "lineupStatus": "Expected",
+            "rosterStatus": "Active",
+            "position": "C",
+            "timestamp": "2026-11-17T12:31:35"
+          }
+        ]
+      }
+    }
+  ]
+}
