@@ -1,4 +1,5 @@
 import {canonicalHash,createWinnerModelManifest,projectWinnerBaseline} from './winner-prospective-models.js';
+import {validScheduleRevision} from './winner-schedule-revisions.js';
 const stamp=value=>typeof value==='string'&&Number.isFinite(Date.parse(value));
 const https=value=>{try{const u=new URL(value);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}};
 const sha=value=>typeof value==='string'&&/^[a-f0-9]{64}$/i.test(value);
@@ -7,20 +8,34 @@ const identity=value=>typeof value==='string'&&value.length>0&&value.length<=200
 function sourceValid(source,cutoff){return https(source?.sourceUrl)&&sha(source.sha256)&&receipt(source.fetchedAt,cutoff)&&
  (!source.publishedAt||receipt(source.publishedAt,Date.parse(source.fetchedAt)))&&(!source.sourceAsOf||receipt(source.sourceAsOf,Date.parse(source.fetchedAt)));}
 
+function officialDailyReceipt(event,e,cutoff){
+ const feed=/^https:\/\/stats\.nba\.com\/js\/data\/leaders\/00_daily_lineups_(\d{4})(\d{2})(\d{2})\.json$/.exec(e.sourceUrl??''),proof=e.identityEvidence,schedule=e.identitySource;
+ if(event.sport!=='NBA'||e.receiptContract!=='NBA_OFFICIAL_DAILY_LINEUPS_V1'||e.source!=='NBA_OFFICIAL'||e.publishedAt!==null||e.publicationTimeKnown!==false||!feed||!sourceValid(e,cutoff)||e.sourceHash!==e.sha256||!sourceValid(schedule,cutoff)||schedule.sourceHash!==schedule.sha256||schedule.sourceUrl!==`https://www.nba.com/games?date=${feed[1]}-${feed[2]}-${feed[3]}`)return false;
+ if(cutoff-Date.parse(e.fetchedAt)>600000||cutoff-Date.parse(schedule.fetchedAt)>600000||Date.parse(schedule.fetchedAt)>=Date.parse(event.startsAt)||!/^\d{10}$/.test(e.officialGameId??'')||proof?.gameId!==e.officialGameId||proof.gameStatus!==1||proof.period!==0||Date.parse(proof.startsAt)!==Date.parse(event.startsAt))return false;
+ return ['home','away'].every(side=>/^\d+$/.test(proof[side]?.officialId??'')&&proof[side].canonicalId===event[side].id&&proof[side].abbreviation===event[side].abbreviation);
+}
+
 export function normalizeLineupEvidence(event,evidence=[],issuedAt){
  const now=Date.parse(issuedAt),items=Array.isArray(evidence)?evidence.filter(e=>e?.eventID===event.eventID).slice(0,8):[];
  const safe=items.filter(e=>!['FINAL_GAMEBOOK','TARGET_BOXSCORE'].includes(e.kind)&&JSON.stringify(e).length<=50000&&
-  sourceValid(e,now)&&receipt(e.publishedAt,Date.parse(e.fetchedAt))&&Date.parse(e.fetchedAt)<Date.parse(event.startsAt));
+  sourceValid(e,now)&&(receipt(e.publishedAt,Date.parse(e.fetchedAt))||officialDailyReceipt(event,e,now))&&Date.parse(e.fetchedAt)<Date.parse(event.startsAt));
  const observed=safe.map(e=>({kind:e.kind||'UNKNOWN',status:e.status||'UNAVAILABLE',source:e.source||null,
   sourceUrl:https(e.sourceUrl)?e.sourceUrl:null,publishedAt:stamp(e.publishedAt)?e.publishedAt:null,
-  fetchedAt:stamp(e.fetchedAt)?e.fetchedAt:null,sha256:sha(e.sha256)?e.sha256:null,
+  fetchedAt:stamp(e.fetchedAt)?e.fetchedAt:null,sha256:sha(e.sha256)?e.sha256:null,sourceHash:sha(e.sourceHash)?e.sourceHash:null,
+  ...(e.receiptContract?{receiptContract:e.receiptContract,publicationTimeKnown:e.publicationTimeKnown,officialGameId:e.officialGameId,identitySource:e.identitySource,identityEvidence:e.identityEvidence}:{}),
+  ...(e.pdfSha256?{pdfSha256:e.pdfSha256,reportRetrievedAt:e.reportRetrievedAt}:{}),
+  ...(e.kind==='NFL_OFFICIAL_INACTIVES'?{sourceUpdatedAt:e.sourceUpdatedAt,completeInactiveLists:e.completeInactiveLists===true,listedNamesVerified:e.listedNamesVerified===true,completeActiveRoster:false,participationConfirmed:false}:{}),
   reason:e.reason||null,rows:Array.isArray(e.rows)?e.rows.slice(0,100):undefined}));
  const verified=safe.filter(e=>{
   if(event.sport!=='NBA'||e.kind!=='CONFIRMED_STARTERS'||e.status!=='VERIFIED'||e.source!=='NBA_OFFICIAL'||!sourceValid(e,now)||
-   !receipt(e.publishedAt,Date.parse(e.fetchedAt))||Date.parse(e.fetchedAt)>=Date.parse(event.startsAt)||
+   !(receipt(e.publishedAt,Date.parse(e.fetchedAt))||officialDailyReceipt(event,e,now))||Date.parse(e.fetchedAt)>=Date.parse(event.startsAt)||
    e.homeTeamId!==event.home.id||e.awayTeamId!==event.away.id||Date.parse(e.startsAt)!==Date.parse(event.startsAt))return false;
   const host=new URL(e.sourceUrl).hostname;
   if(host!=='nba.com'&&!host.endsWith('.nba.com'))return false;
+  if(e.receiptContract==='NBA_OFFICIAL_DAILY_LINEUPS_V1'){
+   if(!officialDailyReceipt(event,e,now)||!Array.isArray(e.rows))return false;
+   for(const side of ['home','away']){const players=e.rows.filter(p=>p.side===side&&['PG','SG','SF','PF','C'].includes(p.position));if(players.length!==5||new Set(players.map(p=>p.position)).size!==5||players.some(p=>p.lineupStatus!=='Confirmed'||p.rosterStatus!=='Active'||p.officialTeamId!==e.identityEvidence[side].officialId)||JSON.stringify(players.map(p=>p.playerId).sort())!==JSON.stringify([...(e[side+'PlayerIds']??[])].sort()))return false;}
+  }
   return Array.isArray(e.homePlayerIds)&&e.homePlayerIds.length===5&&Array.isArray(e.awayPlayerIds)&&e.awayPlayerIds.length===5&&
    [...e.homePlayerIds,...e.awayPlayerIds].every(identity)&&new Set([...e.homePlayerIds,...e.awayPlayerIds]).size===10;
  });
@@ -58,7 +73,13 @@ function validEvent(event,sport,issued){
   stamp(event.startsAt)&&Date.parse(event.startsAt)>issued&&receipt(event.sourceFetchedAt,issued)&&
   Number.isInteger(event.season)&&identity(event.home?.id)&&identity(event.away?.id)&&event.home.id!==event.away.id&&
   identity(event.home.abbreviation)&&identity(event.away.abbreviation)&&event.home.abbreviation!==event.away.abbreviation&&
-  identity(event.sourceIds?.[primary])&&event.eventID===primary+':'+event.sourceIds[primary];
+  identity(event.sourceIds?.[primary])&&(event.eventID===primary+':'+event.sourceIds[primary]&&!event.scheduleRevision||
+   sport==='NFL'&&validScheduleRevision(event.scheduleRevision,new Date(issued).toISOString())&&event.eventID===event.scheduleRevision.eventID&&
+   event.providerEventID==='nflverse:'+event.sourceIds.nflverse&&event.providerEventID===event.scheduleRevision.baseEventID&&
+   event.startsAt===event.scheduleRevision.startsAt&&event.home.id===event.scheduleRevision.home&&event.away.id===event.scheduleRevision.away&&
+   event.scheduleAgreement?.sourceEventId===event.scheduleRevision.sourceEventId&&event.scheduleAgreement.startsAt===event.startsAt&&
+   event.scheduleAgreement.home===event.home.id&&event.scheduleAgreement.away===event.away.id&&sha(event.scheduleAgreement.sourceHash)&&
+   receipt(event.scheduleAgreement.fetchedAt,issued)&&issued-Date.parse(event.scheduleAgreement.fetchedAt)<=60000&&Date.parse(event.scheduleAgreement.fetchedAt)<Date.parse(event.startsAt));
 }
 export function buildWinnerCandidates({sport,events=[],history,quotes=[],lineupEvidence=[],observedAt,issuedAt,modelManifest}){
  const candidates=[],excluded=[],issued=Date.parse(issuedAt);
@@ -75,10 +96,13 @@ export function buildWinnerCandidates({sport,events=[],history,quotes=[],lineupE
   try{
    const projection=projectWinnerBaseline({sport,event,history,issuedAt});
    const lineup=normalizeLineupEvidence(event,lineupEvidence,issuedAt),quoteComparison=normalizeWinnerQuotes(event,quotes,issuedAt);
+   if(event.scheduleRevision&&!quoteComparison.eligible)throw Error('SCHEDULE_REVISION_PAIRED_PRICE_REQUIRED');
    const primary=event.eventID.split(':')[0];
    const identityEvidence={eventID:event.eventID,sourceIds:{[primary]:event.sourceIds[primary]},home:event.home,away:event.away,startsAt:event.startsAt,
-    season:event.season,week:event.week??null,gameDate:event.gameDate??null,neutralSite:event.neutralSite??null};
-   const eventEvidence={sourceIds:event.sourceIds,sourceFetchedAt:event.sourceFetchedAt};
+    season:event.season,week:event.week??null,gameDate:event.gameDate??null,neutralSite:event.neutralSite??null,
+    ...(event.scheduleRevision?{providerEventID:event.providerEventID,scheduleRevisionHash:event.scheduleRevision.revisionHash,officialGameID:event.scheduleRevision.officialGameID}:{})};
+   const eventEvidence={sourceIds:event.sourceIds,sourceFetchedAt:event.sourceFetchedAt,
+    ...(event.scheduleRevision?{scheduleRevision:event.scheduleRevision,scheduleAgreement:event.scheduleAgreement}:{})};
    const input={identity:identityEvidence,eventEvidence,sourceSnapshots:history.sourceSnapshots,features:projection.features,featureEvidence:projection.featureEvidence,
     lineup,quoteComparison,modelManifestHash:frozen.manifestHash,observedAt,issuedAt};
    const forecast={contract:'winner-prospective-forecast-v1',sport,eventID:event.eventID,startsAt:event.startsAt,identity:identityEvidence,

@@ -1,0 +1,100 @@
+{
+  "props": {
+    "pageProps": {
+      "selectedDate": "2026-11-17",
+      "gameCardFeed": {
+        "modules": [
+          {
+            "cards": [
+              {
+                "cardData": {
+                  "gameId": "0022600253",
+                  "gameTimeUtc": "2026-11-18T00:30:00Z",
+                  "gameStatus": 1,
+                  "period": 0,
+                  "actualStartTimeUTC": null,
+                  "homeTeam": {
+                    "teamId": 1610612761,
+                    "teamTricode": "TOR"
+                  },
+                  "awayTeam": {
+                    "teamId": 1610612752,
+                    "teamTricode": "NYK"
+                  }
+                }
+              },
+              {
+                "cardData": {
+                  "gameId": "0022600255",
+                  "gameTimeUtc": "2026-11-18T01:00:00Z",
+                  "gameStatus": 1,
+                  "period": 0,
+                  "actualStartTimeUTC": null,
+                  "homeTeam": {
+                    "teamId": 1610612759,
+                    "teamTricode": "SAS"
+                  },
+                  "awayTeam": {
+                    "teamId": 1610612765,
+                    "teamTricode": "DET"
+                  }
+                }
+              },
+              {
+                "cardData": {
+                  "gameId": "0022600254",
+                  "gameTimeUtc": "2026-11-18T01:00:00Z",
+                  "gameStatus": 1,
+                  "period": 0,
+                  "actualStartTimeUTC": null,
+                  "homeTeam": {
+                    "teamId": 1610612750,
+                    "teamTricode": "MIN"
+                  },
+                  "awayTeam": {
+                    "teamId": 1610612757,
+                    "teamTricode": "POR"
+                  }
+                }
+              },
+              {
+                "cardData": {
+                  "gameId": "0022600257",
+                  "gameTimeUtc": "2026-11-18T03:30:00Z",
+                  "gameStatus": 1,
+                  "period": 0,
+                  "actualStartTimeUTC": null,
+                  "homeTeam": {
+                    "teamId": 1610612746,
+                    "teamTricode": "LAC"
+                  },
+                  "awayTeam": {
+                    "teamId": 1610612762,
+                    "teamTricode": "UTA"
+                  }
+                }
+              },
+              {
+                "cardData": {
+                  "gameId": "0022600256",
+                  "gameTimeUtc": "2026-11-18T04:00:00Z",
+                  "gameStatus": 1,
+                  "period": 0,
+                  "actualStartTimeUTC": null,
+                  "homeTeam": {
+                    "teamId": 1610612747,
+                    "teamTricode": "LAL"
+                  },
+                  "awayTeam": {
+                    "teamId": 1610612766,
+                    "teamTricode": "CHA"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

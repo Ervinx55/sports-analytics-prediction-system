@@ -3,6 +3,8 @@ import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from '..
 import {parseCsv,NFLVERSE_GAMES_URL,normalizeTeam} from '../lib/nfl-model.js';
 import {buildWinnerCandidates} from '../lib/winner-capture-policy.js';
 import {createWinnerModelManifest} from '../lib/winner-prospective-models.js';
+import {applyOfficialScheduleRevision,cloneScheduleForRevision,resolveOfficialScheduleFinal,NFL_SCHEDULE_REVISIONS} from '../lib/winner-schedule-revisions.js';
+import {createWinnerLineupCollector,nflInactiveEvidence} from '../lib/winner-lineup-evidence.js';
 
 const ESPN_NBA='https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard';
 const BOOKS=['draftkings','fanduel','betmgm','caesars','bovada','pinnacle'];
@@ -74,8 +76,8 @@ async function fetchSource(url,{fetchImpl,now,signal,maxBytes=8*1024*1024}){
  return sourceRow(url,text,stamp(now));
 }
 
-export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerFetch=protectedSportsGameOddsFetch,optimize=optimizeSportsGameOddsObjectLimit,env=process.env}={}){
- const historicalCache=new Map();
+export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerFetch=protectedSportsGameOddsFetch,optimize=optimizeSportsGameOddsObjectLimit,env=process.env,scheduleRevisions=NFL_SCHEDULE_REVISIONS}={}){
+ const historicalCache=new Map(),collectLineups=createWinnerLineupCollector({fetchImpl,now});
  return async({action,pending=[],signal=AbortSignal.timeout(23000)}={})=>{
   const today=easternDate(now()),historyDates=Array.from({length:21},(_,i)=>dateOffset(today,i-21));
   const settleDates=[...new Set(pending.filter(p=>p.sport==='NBA').map(p=>easternDate(p.starts_at??p.forecast?.identity?.startsAt)))].sort().slice(0,21);
@@ -100,8 +102,11 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
   const invalidNflHistory=nflResult.rejectedHistoryRows?.filter(r=>r.season>=season-1&&r.season<=season).length??0;
   const nflComplete=nflResult.ok&&invalidNflHistory===0;
   const groups={NBA:{events:nbaEvents.filter(inWindow),history:{games:nbaGames,complete:nbaComplete,sourceSnapshots:nbaResults.filter(r=>r.ok).map(r=>snapshot(r.value.row))}},NFL:{events:nflResult.ok?nflResult.events.filter(inWindow):[],history:{schedule:nflResult.ok?nflResult.schedule:[],complete:nflComplete,sourceSnapshots:nflResult.ok?[snapshot(nflResult.row)]:[]}}};
-  const finals=[...nbaEvents,...(nflResult.events??[])].filter(e=>e.status==='FINAL');
+  const finals=[...nbaEvents,...(nflResult.events??[]).map(e=>e.status==='FINAL'?resolveOfficialScheduleFinal(e,stamp(now),scheduleRevisions):e)].filter(e=>e.status==='FINAL');
   const quoteStatus={NBA:'NOT_REQUESTED',NFL:'NOT_REQUESTED'},quotes=[],scheduleSourceConflicts=[];
+  // Fetch pregame evidence alongside quotes inside the same outer deadline.
+  // NFL observations are rebound below after any audited schedule revision.
+  const lineupPromise=action==='refresh'?collectLineups({events:[...groups.NBA.events,...groups.NFL.events],signal}):Promise.resolve({sources:[],lineupEvidence:[],coverage:{}});
   const apiKey=env.SPORTS_ODDS_API_KEY||env.SPORTSGAMEODDS_API_KEY||env.Sports_Game_Odds_API;
   if(action==='refresh'&&apiKey&&!signal.aborted){
    const result=await limitedMap(['NBA','NFL'],2,async sport=>{
@@ -120,6 +125,10 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
      const home=normalize(raw.teams?.home?.names?.short||raw.teams?.home?.names?.long),away=normalize(raw.teams?.away?.names?.short||raw.teams?.away?.names?.long);
      const providerStart=Date.parse(raw.status?.startsAt);if(!Number.isFinite(providerStart))continue;
      const sameDate=groups[sport].events.filter(e=>e.home.abbreviation===home&&e.away.abbreviation===away&&easternDate(e.startsAt)===easternDate(providerStart));
+     if(sport==='NFL'&&sameDate.length===1){
+      const revised=applyOfficialScheduleRevision({event:sameDate[0],provider:{...raw,home,away},providerSource:row,issuedAt:stamp(now),revisions:scheduleRevisions});
+      if(revised){const correctedSchedule=cloneScheduleForRevision(groups.NFL.history.schedule,revised);Object.assign(sameDate[0],revised);groups.NFL.history.schedule=correctedSchedule;}
+     }
      if(sameDate.length===1&&Date.parse(sameDate[0].startsAt)!==providerStart){
       const event=sameDate[0];event.identityVerified=false;event.identityConflict='SCHEDULE_SOURCE_CONFLICT';
       scheduleSourceConflicts.push({sport,eventID:event.eventID,sourceEventId:raw.eventID,reason:'SCHEDULE_SOURCE_CONFLICT',home:event.home.abbreviation,away:event.away.abbreviation,scheduleStartsAt:event.startsAt,providerStartsAt:new Date(providerStart).toISOString(),scheduleSourceHash:event.sourceHash,providerSourceHash:row.source_hash,scheduleSourceFetchedAt:event.sourceFetchedAt,providerSourceFetchedAt:row.fetched_at});
@@ -140,7 +149,11 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
    });
    ['NBA','NFL'].forEach((sport,i)=>{if(!result[i].ok)quoteStatus[sport]='UNAVAILABLE';});
   }
-  return {groups,finals,sources,quotes,coverage:{nbaHistoryDays:nbaHistorySources.length,nbaHistoryComplete:nbaComplete,nbaIdentityConflict:nbaConflict,nflHistoryComplete:nflComplete,nflRejectedHistoryRows:invalidNflHistory,quoteStatus,scheduleSourceConflicts,scheduleSourceConflictCount:new Set(scheduleSourceConflicts.map(c=>c.sport+':'+c.eventID)).size}};
+  const lineupResult=await lineupPromise;sources.push(...lineupResult.sources);
+  const lineupEvidence=lineupResult.lineupEvidence.filter(e=>e.kind!=='NFL_OFFICIAL_INACTIVES'&&groups.NBA.events.some(event=>event.eventID===e.eventID&&event.identityVerified===true));
+  if(action==='refresh')for(const source of lineupResult.sources)if(source.source_url.startsWith('https://www.nfl.com/news/')&&source.source_url.includes('inactives'))lineupEvidence.push(...nflInactiveEvidence({events:groups.NFL.events,html:source.body.rawText,source,issuedAt:stamp(now)}));
+  const lineupCoverage={...lineupResult.coverage,nflInactiveGames:new Set(lineupEvidence.filter(e=>e.status==='VERIFIED_INACTIVE_LISTS').map(e=>e.eventID)).size};
+  return {groups,finals,sources,quotes,lineupEvidence,coverage:{nbaHistoryDays:nbaHistorySources.length,nbaHistoryComplete:nbaComplete,nbaIdentityConflict:nbaConflict,nflHistoryComplete:nflComplete,nflRejectedHistoryRows:invalidNflHistory,quoteStatus,lineups:lineupCoverage,scheduleSourceConflicts,scheduleSourceConflictCount:new Set(scheduleSourceConflicts.map(c=>c.sport+':'+c.eventID)).size,scheduleRevisionsApplied:groups.NFL.events.filter(e=>e.scheduleRevision).map(e=>({eventID:e.eventID,providerEventID:e.providerEventID,revisionHash:e.scheduleRevision.revisionHash}))}};
  };
 }
 
@@ -169,12 +182,13 @@ export function createWinnerStore({env=process.env,fetchImpl=fetch,deadlineSigna
 }
 function publicStatus(data){
  const result={status:typeof data?.status==='string'?data.status:'RESEARCH_ONLY',productionEligible:false,productionWeight:0};
- for(const key of ['capturedForecasts','distinctGames','settledGames','binaryPairs','sourceCount','outcomeRevisions','quarantined_games','quality_flagged_events'])if(Number.isFinite(data?.[key]))result[key]=data[key];
+ for(const key of ['capturedForecasts','distinctGames','settledGames','binaryPairs','sourceCount','outcomeRevisions','quarantined_games','quality_flagged_events','schedule_resolutions'])if(Number.isFinite(data?.[key]))result[key]=data[key];
  if(typeof data?.generatedAt==='string')result.generatedAt=data.generatedAt;
  if(Array.isArray(data?.sports))result.sports=data.sports.filter(r=>['NBA','NFL'].includes(r?.sport)).map(r=>({sport:r.sport,...Object.fromEntries(Object.entries(r).filter(([k,v])=>/^(forecasts|distinctGames|settledGames|binaryPairs|sourceCount|baselineOnly|fullFeatureEligible|capturedForecasts|outcomeRevisions)$/.test(k)&&Number.isFinite(v)))}));
- if(Array.isArray(data?.cohorts))result.cohorts=data.cohorts.filter(r=>['NBA','NFL'].includes(r?.sport)).map(r=>({sport:r.sport,capture_window:['EARLY','PRE90_30','PRE30_5'].includes(r.capture_window)?r.capture_window:null,...Object.fromEntries(Object.entries(r).filter(([k,v])=>/^(forecast_rows|games|eligible_games|quarantined_games|lineup_verified|paired_prices|final_results|ties|awaiting_outcome)$/.test(k)&&Number.isFinite(v)))}));
+ if(Array.isArray(data?.cohorts))result.cohorts=data.cohorts.filter(r=>['NBA','NFL'].includes(r?.sport)).map(r=>({sport:r.sport,capture_window:['EARLY','PRE90_30','PRE30_5'].includes(r.capture_window)?r.capture_window:null,...Object.fromEntries(Object.entries(r).filter(([k,v])=>/^(forecast_rows|games|eligible_games|quarantined_games|schedule_resolved_games|lineup_verified|paired_prices|final_results|ties|awaiting_outcome)$/.test(k)&&Number.isFinite(v)))}));
  if(data?.latest&&typeof data.latest.generatedAt==='string')result.latest={generatedAt:data.latest.generatedAt,status:'RESEARCH_ONLY',...Object.fromEntries(['candidates','excluded','outcomeConflicts'].filter(k=>Number.isFinite(data.latest[k])).map(k=>[k,data.latest[k]]))};
  if(result.latest){const count=data.latest.scheduleSourceConflicts??data.latest.coverage?.scheduleSourceConflictCount;if(Number.isInteger(count)&&count>=0)result.latest.schedule_source_conflicts=count;}
+ if(result.latest&&data.latest.coverage?.lineups)result.latest.lineups=Object.fromEntries(['nbaCheckedGames','nbaConfirmedGames','nbaExpectedGames','nbaInjuryGames','nflCheckedGames','nflInactiveGames','nflOutsideGameDayWindow'].filter(k=>Number.isInteger(data.latest.coverage.lineups[k])&&data.latest.coverage.lineups[k]>=0).map(k=>[k,data.latest.coverage.lineups[k]]));
  return result;
 }
 export function createWinnerHandler({env=process.env,fetchImpl=fetch,now=Date.now,providerFetch=protectedSportsGameOddsFetch,optimize=optimizeSportsGameOddsObjectLimit,store,loadSources,collectionTimeoutMs=WINNER_PHASE_BUDGET_MS.sources,logger=entry=>console.error(JSON.stringify(entry))}={}){
@@ -199,7 +213,7 @@ export function createWinnerHandler({env=process.env,fetchImpl=fetch,now=Date.no
    const observedAt=receiptTimes.length?new Date(Math.max(...receiptTimes)).toISOString():issuedAt;
    if(body.action==='refresh')for(const sport of ['NBA','NFL']){
     const manifest=createWinnerModelManifest(sport);manifests.push({model_hash:manifest.modelHash??manifest.manifestHash,sport,model_version:manifest.modelVersion,manifest});
-    const result=buildWinnerCandidates({sport,...source.groups[sport],quotes:source.quotes,observedAt,issuedAt,modelManifest:manifest,lineupEvidence:[]});
+    const result=buildWinnerCandidates({sport,...source.groups[sport],quotes:source.quotes,observedAt,issuedAt,modelManifest:manifest,lineupEvidence:source.lineupEvidence??[]});
     excluded.push(...result.excluded);
     for(const candidate of result.candidates){const {inputEvidence,inputObservedAt,...row}=candidate;forecasts.push({...row,model_hash:row.forecast.manifestHash});source.sources.push({source_hash:row.input_hash,source_url:'urn:edge-lab:winner-inputs',fetched_at:inputObservedAt,body:inputEvidence});}
    }

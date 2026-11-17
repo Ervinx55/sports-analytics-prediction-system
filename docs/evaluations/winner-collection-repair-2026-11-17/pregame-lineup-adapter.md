@@ -1,0 +1,13 @@
+# Official pregame evidence adapter
+
+The adapter captures evidence for the existing frozen winner baseline without changing coefficients or production eligibility. Expected starters, injury status, NFL depth, and NFL inactive lists remain distinct. Only exact official NBA confirmed starter lists can set lineup.verified.
+
+Observed source contracts on 2026-11-17:
+
+- NBA official daily-lineups JSON has games, gameId/gameStatus, official team IDs/abbreviations, and player personId/teamId/lineupStatus/rosterStatus/position/timestamp. Tonight's 50 rows are Expected. Yesterday's feed labels all 278 roster rows Confirmed, so starters must additionally have exactly the five PG/SG/SF/PF/C positions; bench rows have empty position. Yesterday's gameStatus3 payload is never usable pregame.
+- NBA official schedule HTML __NEXT_DATA__.props.pageProps.gameCardFeed modules/cards contains official gameId, exact gameTimeUtc, gameStatus, period, team IDs/tricodes, and actualStartTimeUTC. It links the lineup feed to canonical events by unique exact teams and kickoff.
+- NBA daily player timestamps lack timezone. Retain them verbatim, leave publishedAt null, and use the actual archived HTTP receipt as proof the observation existed before kickoff. A narrow NBA_OFFICIAL_DAILY_LINEUPS_V1 policy contract requires the linked official pregame schedule receipt and exact identity. Do not manufacture publication times.
+- Existing /api/nbaavailability returns official injury PDF URL/hash, publishedAt/retrievedAt, and parsed rows. Save a raw JSON receipt and event-scoped matched rows, never infer active/starters from absence.
+- NFL official inactive articles expose NewsArticle JSON-LD with datePublished/dateModified/headline/articleBody and per-team headings. Discover article paths from the fixed NFL news series index; only same-host news paths containing the event week and inactives qualify. Match season/week, same Eastern game-day publication, both exact team headings, and fetch before kickoff. The result is verified inactive-name context, not a complete active roster or starter lineup.
+
+Implementation plan: add bounded source collector/pure parsers; add recorded-format fixtures and red/green identity, chronology, expected/confirmed, final-game, duplicate-player, missing-list and unavailable-source regressions; narrowly extend lineup normalization for the audited receipt contract; root integrates the collector into the hosted handler after the concurrent schedule work. Raw snapshots and actual receipts are returned to the caller for its atomic append. No database writes or deployments are part of this module work.
