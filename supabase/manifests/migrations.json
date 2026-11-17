@@ -478,6 +478,16 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261117174404",
+      "name": "nba_source_scoped_outcome_queue",
+      "path": "supabase/migrations/20261117174404_nba_source_scoped_outcome_queue.sql",
+      "sha256": "a5f7dcc9e4d87169d6cffeceb84e165aca42ca95a2f80516469fcca46f023f4c",
+      "recoveredFromProduction": false,
+      "statementCount": 3,
+      "appliedToProduction": true,
+      "productionVersion": "20261117174823"
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -485,7 +495,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 55,
+    "repository_total_migrations": 56,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
