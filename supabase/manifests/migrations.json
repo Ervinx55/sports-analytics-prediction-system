@@ -451,6 +451,33 @@
       "recoveredFromProduction": false,
       "appliedToProduction": true,
       "statementCount": null
+    },
+    {
+      "version": "20261117162439",
+      "name": "winner_research_collection",
+      "path": "supabase/migrations/20261117162439_winner_research_collection.sql",
+      "sha256": "a02dbb55da2789e4fe357b4340618194cddfa70bb4a36cb595098be237db9608",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261117164615",
+      "name": "schedule_winner_research_collection",
+      "path": "supabase/migrations/20261117164615_schedule_winner_research_collection.sql",
+      "sha256": "53e1f35998906b6c12a2ba4166bc3c21a31141cc0c76328e431ddb2e4152feca",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
+    },
+    {
+      "version": "20261117165217",
+      "name": "winner_event_quality_flags",
+      "path": "supabase/migrations/20261117165217_winner_event_quality_flags.sql",
+      "sha256": "ad0efe9015c7e47e897c571cb95de3640f9ff90098a1a30805f18fd11f76f529",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -458,7 +485,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 36,
+    "repository_total_migrations": 55,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
