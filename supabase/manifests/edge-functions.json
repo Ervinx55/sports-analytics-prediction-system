@@ -883,6 +883,35 @@
         "observedOn": "2026-11-10",
         "localSourceParityVerified": false
       }
+    },
+    {
+      "slug": "audit-nba-outcome-sources",
+      "version": 4,
+      "status": "ACTIVE",
+      "verify_jwt": true,
+      "appliedToProduction": true,
+      "bundle_sha256": "fc9931b04cc67e52633679faa6e1a152559bd4f5aa0068a87353ac4a4fa833ee",
+      "entrypoint": "index.ts",
+      "files": [
+        {
+          "path": "supabase/functions/audit-nba-outcome-sources/index.ts",
+          "name": "supabase/functions/audit-nba-outcome-sources/index.ts",
+          "sha256": "eafc38543d96a37dfcfe1cabcf2eebde4f62e59baf55216863eda8fd337dc19a"
+        },
+        {
+          "path": "scripts/nba/outcome-source-audit.mjs",
+          "name": "scripts/nba/outcome-source-audit.mjs",
+          "sha256": "710b926663eb219ed33a6df682dca028a7066fbe65d33fc94814f6a619c4c7ad"
+        }
+      ],
+      "deployed_at": "2026-11-17",
+      "deploymentObservation": {
+        "status": "ACTIVE",
+        "version": 4,
+        "bundle_sha256": "fc9931b04cc67e52633679faa6e1a152559bd4f5aa0068a87353ac4a4fa833ee",
+        "localSourceParityVerified": true,
+        "verify_jwt": true
+      }
     }
   ],
   "final_verified_at": "2026-09-24T10:08:52.938Z",

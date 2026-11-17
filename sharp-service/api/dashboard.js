@@ -1,4 +1,5 @@
 import nbaLiveHandler from '../handlers/nba-live-decisions.js';
+import winnerHandler from '../handlers/winner-forecasts.js';
 import cfbHandler from '../handlers/cfb-forecasts.js';
 import edgeVnextHandler from "../lib/edge-vnext-handler.js";
 import {
@@ -94,6 +95,7 @@ function settled(result) {
 }
 
 export default async function handler(req, res) {
+  if(req.query?.winnerCapture==='1')return winnerHandler(req,res);
   if(req.query?.cfb==='1')return cfbHandler(req,res);
   if(req.query?.nbaLive==='1')return nbaLiveHandler(req,res);
   if (req.query?.edgeVnext === "1") return edgeVnextHandler(req, res);
