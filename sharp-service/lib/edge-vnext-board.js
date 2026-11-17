@@ -1,6 +1,5 @@
 import { decisionGate } from "./edge-vnext.js";
 
-const truthy = x => x === true;
 const probability = x => typeof x === "number" && Number.isFinite(x) && x >= 0 && x <= 1;
 export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = new Date().toISOString() } = {}) {
   const nowMs = Date.parse(now);
@@ -12,7 +11,10 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
   for (const m of nflMarkets) {
     const starts = Date.parse(m.startsAt);
     if (!Number.isFinite(starts) || starts <= nowMs || starts > nowMs + 8 * 86400000) continue;
-    const p = probability(m.modelProbability) ? m.modelProbability : null;
+    const weight = probability(m.independentContributionWeight) ? m.independentContributionWeight : null;
+    const marketOnly = m.probabilitySource === "market_only" && weight === 0;
+    const blend = m.probabilitySource === "market_blend" && weight !== null && weight > 0;
+    const p = blend && probability(m.modelProbability) ? m.modelProbability : null;
     const fair = probability(m.marketFairProbability) ? m.marketFairProbability : null;
     const gate = decisionGate({
       modelProbability:p, marketFairProbability:fair,
@@ -27,10 +29,14 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
       bestBook:m.bestBook ?? null, bestOdds:m.bestOdds ?? null,
       modelProbability:p, marketFairProbability:fair,
       edgePercentagePoints:gate.edgePercentagePoints,
-      modelOrigin:"MARKET_ANCHORED_SHADOW",
+      probabilitySource:marketOnly?"market_only":blend?"market_blend":"unverified",
+      independentContributionWeight:weight,
+      modelOrigin:marketOnly?"MARKET_ONLY":blend?"MARKET_BLEND_UNVALIDATED":"UNVERIFIED_PROBABILITY_SOURCE",
       dataQuality:m.dataQuality ?? null,
       decision:"AVOID", reasons:gate.reasons,
-      note:"Existing NFL model uses market shrinkage and is not independently promoted."
+      note:marketOnly?"Market prices only; independent model contribution is 0%. No model probability or model edge is available.":
+        blend?`${(weight*100).toFixed(1)}% independent model contribution; the remainder comes from market prices. This blend is unvalidated and not cleared for production.`:
+        "Probability source is unverified; no model probability or model edge is available."
     });
   }
   rows.sort((a,b)=>(b.modelProbability ?? -1)-(a.modelProbability ?? -1));
@@ -46,7 +52,7 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
     sports:{
       NFL:{state:nflSourceOk?"MARKET_ANCHORED_SHADOW":"UNAVAILABLE",
         generatedAt:nflGenerated, upcomingMarkets:rows.length,
-        reason:nflSourceOk?"Model exists but its ML/spread prices are market-anchored; no independent promotion.":"NFL source unavailable or failed."},
+        reason:nflSourceOk?"Market-only references and explicitly labeled unvalidated blends; no independent promotion.":"NFL source unavailable or failed."},
       NBA:{state:nbaHasIndependent?"INTEGRATION_REVIEW_REQUIRED":"NO_VERIFIED_INDEPENDENT_MODEL",
         generatedAt:nbaResponse?.generatedAt ?? null, upcomingMarkets:0,
         reason:"No independently calibrated NBA forecasts connected; sportsbook odds are not substitute model predictions."}

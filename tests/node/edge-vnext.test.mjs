@@ -92,8 +92,9 @@ test("Model board never promotes old NFL rows or manufactures NBA probability",(
   const now="2026-11-09T12:00:00Z";
   const nfl={league:"NFL",generatedAt:"2026-11-09T11:59:00Z",markets:[
     {eventID:"game1",startsAt:"2026-11-09T20:00:00Z",away:"BUF",home:"MIN",
-      marketType:"moneyline",side:"home",label:"Minnesota",
-      bestOdds:-200,modelProbability:.72,marketFairProbability:.7},
+      marketType:"total",side:"over",label:"Over",line:44.5,
+      bestOdds:-200,modelProbability:.72,marketFairProbability:.7,
+      probabilitySource:"market_blend",independentContributionWeight:.125},
     {eventID:"game0",startsAt:"2026-11-08T19:00:00Z",marketType:"moneyline",
       modelProbability:.99,marketFairProbability:.5}
   ]};
@@ -104,6 +105,44 @@ test("Model board never promotes old NFL rows or manufactures NBA probability",(
   assert.ok(board.rows[0].reasons.includes("UNCALIBRATED"));
   assert.equal(board.sports.NBA.state,"NO_VERIFIED_INDEPENDENT_MODEL");
   assert.equal(board.productionEligible,false);
+});
+
+test("legacy NFL board never turns market-only or unverified inputs into model probability or edge",()=>{
+  const base={startsAt:"2026-11-09T20:00:00Z",away:"BUF",home:"MIN",
+    marketType:"moneyline",side:"home",label:"Minnesota",bestOdds:-200,
+    modelProbability:.72,marketFairProbability:.7};
+  const inputs=[
+    {eventID:"market",probabilitySource:"market_only",independentContributionWeight:0},
+    {eventID:"unknown"},
+    {eventID:"zero-blend",probabilitySource:"market_blend",independentContributionWeight:0},
+    {eventID:"conflicting-source",probabilitySource:"market_only",independentContributionWeight:.125},
+    {eventID:"invalid-weight",probabilitySource:"market_blend",independentContributionWeight:2},
+    {eventID:"blend",marketType:"total",side:"over",label:"Over",line:44.5,
+      probabilitySource:"market_blend",independentContributionWeight:.125}
+  ];
+  const board=buildEdgeBoard({now:"2026-11-09T12:00:00Z",nflResponse:{
+    league:"NFL",generatedAt:"2026-11-09T11:59:00Z",markets:inputs.map(row=>({...base,...row}))
+  }});
+  const byId=new Map(board.rows.map(row=>[row.eventId,row]));
+  for(const id of ["market","unknown","zero-blend","conflicting-source","invalid-weight"]){
+    const row=byId.get(id);
+    assert.equal(row.modelProbability,null,id);
+    assert.equal(row.marketFairProbability,.7,id);
+    assert.equal(row.edgePercentagePoints,null,id);
+    assert.equal(row.modelExpectedReturn??null,null,id);
+    assert.equal(row.decision,"AVOID",id);
+  }
+  assert.equal(byId.get("market").probabilitySource,"market_only");
+  assert.equal(byId.get("market").independentContributionWeight,0);
+  assert.match(byId.get("market").note,/market prices only/i);
+  const blend=byId.get("blend");
+  assert.equal(blend.modelProbability,.72);
+  assert.equal(blend.probabilitySource,"market_blend");
+  assert.equal(blend.independentContributionWeight,.125);
+  assert.match(blend.modelOrigin,/BLEND/);
+  assert.match(blend.note,/12.5%/);
+  close(blend.edgePercentagePoints,2);
+  assert.equal(blend.decision,"AVOID");
 });
 
 function res() {

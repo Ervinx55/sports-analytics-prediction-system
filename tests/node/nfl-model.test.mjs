@@ -275,6 +275,38 @@ test("NFL model produces shadow-only team market grades", async (t) => {
   assert.ok(response.body.markets.every((row) =>
     ["PLAY", "PASS"].includes(row.shadowStatus)
   ));
+  assert.equal(response.body.events[0].forecastReadiness.available, true);
+  assert.ok(response.body.markets.every((row) => row.forecastReadiness.available));
+  assert.equal(homeMoneyline.probabilitySource, "market_only");
+  assert.equal(homeMoneyline.independentContributionWeight, 0);
+
+  // A fresh conflicting depth chart must retain the blocked event for display,
+  // without leaving any apparently usable flattened market rows.
+  const successfulFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => String(url).includes("depth_charts_2026.csv")
+    ? textResponse(depthCharts.replace("Jordan Love", "Malik Willis"))
+    : successfulFetch(url);
+  globalThis.__edgeLabNflDataCache = new Map();
+  const blocked = await invoke({ season: "2026" });
+  assert.equal(blocked.statusCode, 200);
+  assert.equal(blocked.body.eventCount, 1);
+  assert.equal(blocked.body.availableEventCount, 0);
+  assert.deepEqual(blocked.body.markets, []);
+  assert.deepEqual(blocked.body.shadowPlays, []);
+  assert.equal(blocked.body.events[0].forecastReadiness.available, false);
+  assert.match(blocked.body.events[0].forecastReadiness.reasons.join(" "), /Jordan Love.*Malik Willis/);
+
+  // A failed source request is missing evidence, never an all-clear fallback.
+  globalThis.fetch = async (url) => String(url).includes("depth_charts_2026.csv")
+    ? textResponse("unavailable", 503)
+    : successfulFetch(url);
+  globalThis.__edgeLabNflDataCache = new Map();
+  const missing = await invoke({ season: "2026" });
+  assert.equal(missing.statusCode, 200);
+  assert.equal(missing.body.sourceHealth.depthCharts.status, "UNAVAILABLE");
+  assert.equal(missing.body.availableEventCount, 0);
+  assert.deepEqual(missing.body.markets, []);
+  assert.equal(missing.body.events[0].forecastReadiness.available, false);
 });
 
 test("NFL model rejects unsupported methods before fetching", async () => {
