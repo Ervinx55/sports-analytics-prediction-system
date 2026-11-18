@@ -21,7 +21,9 @@ export function modelRows(data, kind, now = Date.now()) {
         : marketOnly ? 'Market prices only; independent model contribution is 0%. This is not a validated model win rate.'
         : blend ? `${(weight * 100).toFixed(1)}% independent model contribution; the remainder comes from market prices. This blend is not cleared for production.`
         : 'Probability source is unverified; no model percentage is shown.';
-      return {...row, model, market: probability(row.marketFairProbability), probabilityLabel, probabilityNote, status: 'SHADOW', stale};
+      const matchingEvents=kind==='props'?[]:(data.events||[]).filter(event=>event.eventID===row.eventID&&event.eventID&&(!event.startsAt||Date.parse(event.startsAt)===Date.parse(row.startsAt)));
+      const teamScoringContext=row.teamScoringContext??(matchingEvents.length===1?matchingEvents[0].teamScoringContext:undefined);
+      return {...row, ...(teamScoringContext?{teamScoringContext}:{}), model, market: probability(row.marketFairProbability), probabilityLabel, probabilityNote, status: 'SHADOW', stale};
     }).sort((a,b)=>Date.parse(a.startsAt)-Date.parse(b.startsAt));
 }
 export function marketLabel(row, kind) {

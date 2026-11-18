@@ -12,7 +12,8 @@ button{background:#277da7;color:white;border:0;border-radius:8px;padding:10px 15
 label{display:block;color:var(--muted);font-size:13px;margin-top:12px}input,select,textarea{background:#0a1728;border:1px solid #395170;border-radius:7px;color:white;padding:10px 11px;width:100%;font:inherit}
 .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:10px}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1px solid #263c54;padding:10px 7px;font-size:13px}th{color:var(--muted);font-weight:600}strong{color:#fff}
-.metric{font-size:27px;font-weight:800} .good{color:var(--green)}.warn{color:var(--amber)}.scroll{overflow-x:auto}
+.metric{font-size:27px;font-weight:800} .good{color:var(--green)}.warn{color:var(--amber)}.scroll{overflow-x:auto;container-type:inline-size}
+.team-scoring-row .team-scoring{max-width:calc(100cqw - 16px);position:sticky;left:0}
 a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 </style></head><body><main>
 <div class="tag">Edge Lab / Research only / No automatic wagers</div>
@@ -51,7 +52,8 @@ a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
 <button id="ledger" style="margin-top:14px">Calculate settled results</button><div id="ledgerResult" class="small" aria-live="polite"></div></article>
 </section>
 <p class="small">Read-only research tool. Provider fees and historical access require separate verification. Missing source data returns an unavailable state, not a manufactured estimate.</p>
-</main><script>
+</main><script type="module">
+import {teamScoringHtml} from './team-scoring-view.js';
 const $=id=>document.getElementById(id);
 $("refreshNba").onclick=async()=>{
  $("refreshNba").disabled=true;$("nbaStatus").textContent="Loading NBA forecasts and current prices…";
@@ -63,7 +65,7 @@ $("refreshNba").onclick=async()=>{
   $("nbaCoverage").textContent=coverage?`${coverage.matchedGames}/${coverage.games} games matched to odds · ${coverage.gamesWithSharpPairs} with fresh sharp pairs · ${coverage.pricedSides} priced forecast sides. Remaining checks: ${Object.entries(coverage.reasonCounts||{}).map(([reason,count])=>reason+": "+count).join(" · ")}`:"Market comparison unavailable.";
   $("nbaWinners").textContent=(d.rankings?.winners||[]).map((r,i)=>`${i+1}. ${r.team} ${pct(r.probability)}`).join(" · ")||"No usable independent forecasts.";
   $("nbaValueRows").innerHTML=(d.rankings?.value||[]).length?d.rankings.value.map(r=>'<tr><td>'+esc(r.selection)+'</td><td>'+esc(r.book)+' '+esc(r.odds>0?"+"+r.odds:r.odds)+'</td><td>'+pct(r.modelProbability)+'</td><td>'+pct(r.marketFairProbability)+'</td><td>'+pct(r.modelExpectedReturn)+'</td><td class="warn">'+esc((r.reasons||[]).join(", "))+'</td></tr>').join(""):'<tr><td colspan="6">No current priced forecasts. See the missing checks above.</td></tr>';
-  $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">'+esc((r.reasons||[]).join(", "))+'</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
+  $("nbaRows").innerHTML=(d.rows||[]).length?(d.rows||[]).map(r=>'<tr><td>'+esc(r.away)+' @ '+esc(r.home)+'</td><td>'+pct(r.homeWinProbability)+'</td><td>'+pct(r.awayWinProbability)+'</td><td>'+ (typeof r.projectedHomeMargin==="number"?r.projectedHomeMargin.toFixed(1)+" points":"—")+'</td><td class="warn">'+esc((r.reasons||[]).join(", "))+'</td></tr><tr class="team-scoring-row"><td colspan="5">'+teamScoringHtml(r.teamScoringContext)+'</td></tr>').join(""):'<tr><td colspan="5">No valid upcoming NBA predictions. Insufficient source coverage or minimum team games.</td></tr>';
  }catch(e){$("nbaStatus").textContent="NBA baseline unavailable: "+e.message}
  finally{$("refreshNba").disabled=false;}
 };
@@ -78,11 +80,12 @@ async function request(params){
 }
 $("refresh").onclick=async()=>{
  $("refresh").disabled=true;$("status").textContent="Loading existing NFL model; no automatic BUY activation…";
+ $("models").innerHTML="";$("modelSummary").innerHTML="";
  try{
  const d=await request({mode:"board",live:1});
  $("status").textContent=d.sourceError?"Model unavailable: "+d.sourceError:"Model snapshot "+d.generatedAt;
  $("modelSummary").innerHTML=Object.entries(d.sports||{}).map(([sport,v])=>'<div><strong>'+esc(sport)+'</strong><div class="small">'+esc(v.state)+'</div></div>').join("");
- $("models").innerHTML=(d.rows||[]).length ? d.rows.slice(0,40).map(r=>'<tr><td>'+esc(r.matchup||r.eventId)+' · '+esc(r.label)+' '+esc(r.marketType)+' '+esc(r.line??"")+'</td><td>'+pct(r.modelProbability)+'<div class="small">'+esc(r.probabilitySource==='market_only'?'Market reference only':r.probabilitySource==='market_blend'?'Market + model blend':'Source unverified')+'</div><div class="small">'+esc(r.note)+'</div></td><td>'+pct(r.marketFairProbability)+'</td><td>'+ (typeof r.edgePercentagePoints==="number"?r.edgePercentagePoints.toFixed(1)+" pp":"—")+'</td><td class="warn">'+esc(r.decision)+' (shadow)</td></tr>').join(""):'<tr><td colspan="5">No current validated model rows. Check availability, game window or model service.</td></tr>';
+ $("models").innerHTML=(d.rows||[]).length ? d.rows.slice(0,40).map(r=>'<tr><td>'+esc(r.matchup||r.eventId)+' · '+esc(r.label)+' '+esc(r.marketType)+' '+esc(r.line??"")+'</td><td>'+pct(r.modelProbability)+'<div class="small">'+esc(r.probabilitySource==='market_only'?'Market reference only':r.probabilitySource==='market_blend'?'Market + model blend':'Source unverified')+'</div><div class="small">'+esc(r.note)+'</div></td><td>'+pct(r.marketFairProbability)+'</td><td>'+ (typeof r.edgePercentagePoints==="number"?r.edgePercentagePoints.toFixed(1)+" pp":"—")+'</td><td class="warn">'+esc(r.decision)+' (shadow)</td></tr><tr class="team-scoring-row"><td colspan="5">'+teamScoringHtml(r.teamScoringContext)+'</td></tr>').join(""):'<tr><td colspan="5">No current validated model rows. Check availability, game window or model service.</td></tr>';
  }catch(e){$("status").textContent=e.message;}finally{$("refresh").disabled=false;}
 };
 $("calculate").onclick=async()=>{

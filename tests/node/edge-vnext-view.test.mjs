@@ -1,3 +1,4 @@
+import {teamScoringHtml} from '../../sharp-service/team-scoring-view.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,8 +14,8 @@ test('legacy probability table labels market-only references and unvalidated ble
   {eventID:'blend',startsAt,marketType:'total',modelProbability:.55,marketFairProbability:.5,probabilitySource:'market_blend',independentContributionWeight:.125}
  ]}});
  const html=fs.readFileSync(new URL('../../sharp-service/edge-vnext.html',import.meta.url),'utf8');
- const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
- const context=vm.createContext({document:{getElementById:get},location:{origin:'https://example.test'},URL,fetch:async()=>({ok:true,json:async()=>data})});
+ const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;$/gm,'');
+ const context=vm.createContext({document:{getElementById:get},teamScoringHtml,location:{origin:'https://example.test'},URL,fetch:async()=>({ok:true,json:async()=>data})});
  vm.runInContext(script,context);
  await get('refresh').onclick();
  assert.match(get('models').innerHTML,/Market reference only/);

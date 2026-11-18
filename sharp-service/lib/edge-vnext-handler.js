@@ -1,6 +1,7 @@
 import { buildEdgeBoard } from "./edge-vnext-board.js";
 import { parseEspnScoreboard, projectNbaGames } from "./nba-vnext-baseline.js";
 import { backtestNbaBaseline } from "./nba-vnext-backtest.js";
+import { buildTeamScoringContext } from "./team-scoring-context.js";
 import { poissonMass, thresholdProbability, priceKalshi, priceAmerican,
   comboProbability, summarizePositions } from "./edge-vnext.js";
 
@@ -43,7 +44,8 @@ async function fetchNbaScoreboard(date) {
     const r=await fetch(url,{signal:controller.signal,cache:"no-store",
       headers:{accept:"application/json"}});
     if(!r.ok)throw new Error("NBA scores feed HTTP "+r.status);
-    return parseEspnScoreboard(await r.json());
+    const games=parseEspnScoreboard(await r.json());
+    return {games,observedAt:new Date().toISOString()};
   } finally {clearTimeout(timeout);}
 }
 async function fetchNbaMarketBoard(target) {
@@ -79,7 +81,7 @@ async function fetchNbaBaseline(target, audit=false, quotes=false) {
   const results=new Array(dates.length);let cursor=0;
   async function worker() {
     while(cursor<dates.length){
-      const i=cursor++;try{results[i]={ok:true,games:await fetchNbaScoreboard(dates[i])};}
+      const i=cursor++;try{results[i]={ok:true,...await fetchNbaScoreboard(dates[i])};}
       catch(e){results[i]={ok:false,error:String(e.message||e)};}
     }
   }
@@ -95,7 +97,12 @@ async function fetchNbaBaseline(target, audit=false, quotes=false) {
   });
   const validation = audit ? backtestNbaBaseline({games:history.flatMap(x=>x.games||[])}) : null;
   const auditSummary = validation ? (({records, ...summary}) => summary)(validation) : null;
-  return {...report,backtest:auditSummary,scoreboardCoverage:{daysRequested:history.length,
+  const observedAt=successful?history.filter(x=>x.ok).map(x=>x.observedAt).sort().at(-1):null;
+  const rows=(report.rows||[]).map(row=>({...row,teamScoringContext:buildTeamScoringContext({
+    sport:'NBA',event:{eventId:row.eventId,startsAt:row.startsAt,home:{teamId:row.home,teamName:row.home},away:{teamId:row.away,teamName:row.away}},
+    games:history.flatMap(x=>x.games||[]),cutoffAt:asOf,observedAt
+  })}));
+  return {...report,rows,backtest:auditSummary,scoreboardCoverage:{daysRequested:history.length,
     daysAvailable:successful,upcomingAvailable:true,source:"ESPN NBA scoreboard"}};
 }
 

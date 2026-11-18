@@ -1,12 +1,13 @@
+import {teamScoringHtml} from '../../sharp-service/team-scoring-view.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 function view(payload){
  const nodes=new Map();const get=id=>{if(!nodes.has(id))nodes.set(id,{textContent:'',innerHTML:'',disabled:false});return nodes.get(id);};
- const script=fs.readFileSync(new URL('../../sharp-service/edge-vnext.html',import.meta.url),'utf8').match(/<script>([\s\S]*)<\/script>/)[1];
+ const script=fs.readFileSync(new URL('../../sharp-service/edge-vnext.html',import.meta.url),'utf8').match(/<script type="module">([\s\S]*)<\/script>/)[1].replace(/^import .*;$/gm,'');
  let request;
- vm.runInNewContext(script,{document:{getElementById:get},URL,location:{origin:'https://example.test'},fetch:async u=>{request=u;return {ok:true,json:async()=>payload};}});
+ vm.runInNewContext(script,{document:{getElementById:get},teamScoringHtml,URL,location:{origin:'https://example.test'},fetch:async u=>{request=u;return {ok:true,json:async()=>payload};}});
  return {get,refresh:()=>get('refreshNba').onclick(),request:()=>request};
 }
 test('NBA refresh requests market evidence and displays separate winner and price rankings',async()=>{

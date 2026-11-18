@@ -4,6 +4,7 @@ import {normalizeSgoGame,reconcileUpcomingGames,assembleHistory,validateSchedule
 import {forecastGames} from '../lib/cfb-model.js';
 import {providerWindow,mergeCurrentForecasts,mergeSeasonSchedules,collectOutcomeRevisions,captureCandidate} from '../lib/cfb-collection-policy.js';
 import {contentHash,evaluateCandidates} from '../lib/cfb-evaluation.js';
+import {buildTeamScoringContext} from '../lib/team-scoring-context.js';
 const sameSecret=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length>0&&Buffer.byteLength(a)===Buffer.byteLength(b)&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
 const safeReport=r=>r?{status:r.status,modelVersion:r.modelVersion,config:r.config,development:r.development&&{n:r.development.n,brier:r.development.brier,logLoss:r.development.logLoss},holdout:r.holdout&&{n:r.holdout.n,brier:r.holdout.brier,logLoss:r.holdout.logLoss,accuracy:r.holdout.accuracy},marketComparison:r.marketComparison,limitations:r.limitations,productionEligible:false}:null;
 export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=protectedSportsGameOddsFetch,optimize=optimizeSportsGameOddsObjectLimit,now=Date.now}={}){
@@ -80,8 +81,14 @@ export function createCfbHandler({env=process.env,fetchImpl=fetch,providerFetch=
    const forecastAt=new Date(now()).toISOString();
    const forecasts=source.complete?forecastGames(source.games,eligible,model.config,forecastAt):{forecasts:[],excluded:[{reasons:['SOURCE_RECONCILIATION_INCOMPLETE']}]};
    const matchedByID=new Map(eligible.map(g=>[g.sgoID,g]));
+   const scoringByID=new Map(eligible.map(g=>[g.sgoID,buildTeamScoringContext({sport:'CFB',
+    event:{eventId:g.id,startsAt:g.startsAt,season:g.season,fbsVerified:g.fbsVerified,
+     home:{teamId:g.homeID,teamName:g.homeName},away:{teamId:g.awayID,teamName:g.awayName}},
+    games:source.games,cutoffAt:forecastAt
+   })]));
    const payload={status:'RESEARCH_NOT_CLEARED',generatedAt:forecastAt,modelVersion:model.modelVersion,evaluation:safeReport(model),provider:'SportsGameOdds',providerFetchedAt:new Date(sgo.fetchedAt).toISOString(),coverage:{providerEvents:games.length,providerComplete:!cursor,providerPagesThisRun:pages,matched:paired.matched.length,forecasts:forecasts.forecasts.length,identityUnmatched:paired.unmatched.length,historyComplete:source.complete,historyConflicts:source.conflicts.length,scheduleRefreshFailures:updates.filter(r=>r.status==='rejected').length,excluded:forecasts.excluded.length},forecasts:forecasts.forecasts.map(f=>({...f,modelVersion:model.modelVersion,generatedAt:forecastAt,providerStartsAt:matchedByID.get(f.eventID)?.providerStartsAt,quoteComparisonEligible:matchedByID.get(f.eventID)?.quoteComparisonEligible,scheduleVerification:matchedByID.get(f.eventID)?.scheduleVerification,historyCheckedAt:source.schedules.filter(s=>s.season===season&&s.games.some(g=>g.id===f.espnEventID)).map(s=>s.fetchedAt).sort()[0]||null})),productionEligible:false};
    payload.contract='cfb-research-v1';
+   payload.forecasts=payload.forecasts.map(f=>({...f,teamScoringContext:scoringByID.get(f.eventID)}));
    const inputHash=contentHash(source.games);await save('input:'+inputHash,{games:source.games,membership:source.membership,recordedAt:forecastAt},true);
    const freshForecasts=payload.forecasts;
    const candidates=freshForecasts.map(f=>captureCandidate(f,raw.find(e=>e.eventID===f.eventID),observedByID.get(f.eventID),inputHash));
