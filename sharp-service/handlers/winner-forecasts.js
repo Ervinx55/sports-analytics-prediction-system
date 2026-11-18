@@ -5,6 +5,7 @@ import {buildWinnerCandidates,inspectWinnerQuotes} from '../lib/winner-capture-p
 import {createWinnerModelManifest} from '../lib/winner-prospective-models.js';
 import {applyOfficialScheduleRevision,cloneScheduleForRevision,resolveOfficialScheduleFinal,NFL_SCHEDULE_REVISIONS} from '../lib/winner-schedule-revisions.js';
 import {createWinnerLineupCollector,nflInactiveEvidence,lineupReadiness} from '../lib/winner-lineup-evidence.js';
+import {collectWinnerSpreadQuotes,WINNER_SPREAD_ODD_IDS} from '../lib/winner-spread-quotes.js';
 
 const ESPN_NBA='https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard';
 const BOOKS=['draftkings','fanduel','betmgm','caesars','bovada','pinnacle'];
@@ -104,7 +105,7 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
   const groups={NBA:{events:nbaEvents.filter(inWindow),history:{games:nbaGames,complete:nbaComplete,sourceSnapshots:nbaResults.filter(r=>r.ok).map(r=>snapshot(r.value.row))}},NFL:{events:nflResult.ok?nflResult.events.filter(inWindow):[],history:{schedule:nflResult.ok?nflResult.schedule:[],complete:nflComplete,sourceSnapshots:nflResult.ok?[snapshot(nflResult.row)]:[]}}};
   const finals=[...nbaEvents,...(nflResult.events??[]).map(e=>e.status==='FINAL'?resolveOfficialScheduleFinal(e,stamp(now),scheduleRevisions):e)].filter(e=>e.status==='FINAL');
   const quoteStatus={NBA:'NOT_REQUESTED',NFL:'NOT_REQUESTED'},quotes=[],scheduleSourceConflicts=[];
-  const quoteSourceReasons={},quoteMappings=new Map();
+  const quoteSourceReasons={},quoteMappings=new Map(),spreadInputs=new Map();
   // Fetch pregame evidence alongside quotes inside the same outer deadline.
   // NFL observations are rebound below after any audited schedule revision.
   const lineupPromise=action==='refresh'?collectLineups({events:[...groups.NBA.events,...groups.NFL.events],signal}):Promise.resolve({sources:[],lineupEvidence:[],coverage:{}});
@@ -117,7 +118,7 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
    const result=await limitedMap(['NBA','NFL'],2,async sport=>{
     const policy=await optimize({apiKey,requestedLimit:40,defaultLimit:40,priority:'background',fanout:2});if(policy.blocked){quoteSourceReasons[sport]='PROVIDER_BUDGET_RESERVED';throw Error('PROVIDER_BUDGET_RESERVED');}
     const bucket=Math.floor(now()/300000)*300000;
-    const params=new URLSearchParams({leagueID:sport,type:'match',oddIDs:'points-home-game-ml-home,points-away-game-ml-away',bookmakerID:BOOKS.join(','),oddsAvailable:'true',finalized:'false',includeAltLines:'false',limit:String(policy.effectiveLimit||40),startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+7*86400000).toISOString()});
+    const params=new URLSearchParams({leagueID:sport,type:'match',oddIDs:['points-home-game-ml-home','points-away-game-ml-away',...WINNER_SPREAD_ODD_IDS].join(','),bookmakerID:BOOKS.join(','),oddsAvailable:'true',finalized:'false',includeAltLines:'false',limit:String(policy.effectiveLimit||40),startsAfter:new Date(bucket).toISOString(),startsBefore:new Date(bucket+7*86400000).toISOString()});
     const url='https://api.sportsgameodds.com/v2/events?'+params;
     const r=await providerFetch({url,apiKey,freshMs:60000,staleMs:60000,timeoutMs:5000,consumer:'winner-prospective-quotes',priority:'background',objectPolicy:policy});
     const fetchedAt=new Date(r.fetchedAt).toISOString();
@@ -149,6 +150,7 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
      if(rawMatches.length!==1){mapping.mappingStatus='QUOTE_EVENT_MAPPING_AMBIGUOUS';continue;}
      if(event.identityVerified!==true)continue;const raw=rawMatches[0];mapping.mappingStatus='EXACT_MATCH';
      event.sourceIds.sgo=raw.eventID;
+     spreadInputs.set(event,{raw,source:row});
      for(const book of BOOKS){const h=raw.odds?.['points-home-game-ml-home']?.byBookmaker?.[book],a=raw.odds?.['points-away-game-ml-away']?.byBookmaker?.[book];if(h?.available!==true||a?.available!==true){if((h?.available===true)!==(a?.available===true))mapping.oneSidedBooks++;else mapping.unavailableBooks++;continue;}
       quotes.push({eventID:event.eventID,sourceEventId:raw.eventID,book,homeOdds:Number(h.odds),awayOdds:Number(a.odds),homeUpdatedAt:h.lastUpdatedAt,awayUpdatedAt:a.lastUpdatedAt,fetchedAt,sourceUrl:url,sourceHash:row.source_hash});
      }
@@ -165,7 +167,7 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
   const lineupCoverage={...lineupResult.coverage,nflInactiveGames:new Set(lineupEvidence.filter(e=>e.status==='VERIFIED_INACTIVE_LISTS').map(e=>e.eventID)).size,
    nflOutsideGameDayWindow:groups.NFL.events.filter(e=>Date.parse(e.startsAt)-now()>3*3600000).length,
    ...lineupReadiness([...groups.NBA.events,...groups.NFL.events],lineupEvidence,lineupResult.coverage.unavailable??[],stamp(now))};
-  const quoteCoverage={},assessedAt=stamp(now);
+  const quoteCoverage={},spreadCoverage={},assessedAt=stamp(now);
   for(const sport of ['NBA','NFL']){
    const status=quoteStatus[sport],reasonCounts={};
    const readiness=groups[sport].events.map(event=>{
@@ -182,8 +184,17 @@ export function createWinnerSourceLoader({fetchImpl=fetch,now=Date.now,providerF
     return {eventID:event.eventID,startsAt:event.startsAt,sourceStatus:status,...mapping,pairedPriceEligible:comparison.eligible,pairCount:comparison.pairs.length,matchingQuotes:diagnostics.matchingQuotes,rejectedQuotes:diagnostics.rejectedQuotes,conflictingBooks:diagnostics.conflictingBooks,reasons:[...new Set(reasons)]};
    });
    quoteCoverage[sport]={status,assessedAt,expectedEvents:readiness.length,mappedEvents:readiness.filter(r=>r.mappingStatus==='EXACT_MATCH').length,eventsWithPairs:readiness.filter(r=>r.pairedPriceEligible).length,eligiblePairs:readiness.reduce((n,r)=>n+r.pairCount,0),reasonCounts,readiness};
+   const spreadReasons={},spreadReadiness=groups[sport].events.slice(0,100).map(event=>{
+    const mapping=quoteMappings.get(event),input=spreadInputs.get(event);
+    const missing=!['OBSERVED','PARTIAL_PROVIDER_PAGE'].includes(status)?quoteSourceReasons[sport]:mapping.mappingStatus==='UNMATCHED'?(status==='PARTIAL_PROVIDER_PAGE'?'QUOTE_EVENT_NOT_RETURNED_PARTIAL_PAGE':'QUOTE_EVENT_NOT_RETURNED'):mapping.mappingStatus;
+    const observation=input?collectWinnerSpreadQuotes({event,...input,books:BOOKS,issuedAt:assessedAt}):{pairedPriceEligible:false,pairs:[],matchingQuotes:0,rejectedQuotes:0,oneSidedBooks:0,unavailableBooks:0,reasons:[missing.replace(/^QUOTE_/,'SPREAD_')]};
+    for(const reason of observation.reasons)spreadReasons[reason]=(spreadReasons[reason]??0)+1;
+    return {eventID:event.eventID,startsAt:event.startsAt,sourceStatus:status,mappingStatus:mapping.mappingStatus,pairedPriceEligible:observation.pairedPriceEligible,pairCount:observation.pairs.length,matchingQuotes:observation.matchingQuotes,rejectedQuotes:observation.rejectedQuotes,oneSidedBooks:observation.oneSidedBooks,unavailableBooks:observation.unavailableBooks,reasons:observation.reasons,pairs:observation.pairs};
+   });
+   if(groups[sport].events.length>spreadReadiness.length)spreadReasons.SPREAD_DIAGNOSTIC_LIMIT_EXCEEDED=groups[sport].events.length-spreadReadiness.length;
+   spreadCoverage[sport]={purpose:'PRICE_EVIDENCE_ONLY',coverProbabilityAvailable:false,productionEligible:false,status,assessedAt,expectedEvents:groups[sport].events.length,inspectedEvents:spreadReadiness.length,mappedEvents:spreadReadiness.filter(r=>r.mappingStatus==='EXACT_MATCH').length,eventsWithPairs:spreadReadiness.filter(r=>r.pairedPriceEligible).length,eligiblePairs:spreadReadiness.reduce((n,r)=>n+r.pairCount,0),reasonCounts:spreadReasons,readiness:spreadReadiness};
   }
-  return {groups,finals,sources,quotes,lineupEvidence,coverage:{nbaHistoryDays:nbaHistorySources.length,nbaHistoryComplete:nbaComplete,nbaIdentityConflict:nbaConflict,nflHistoryComplete:nflComplete,nflRejectedHistoryRows:invalidNflHistory,quoteStatus,quotes:quoteCoverage,lineups:lineupCoverage,scheduleSourceConflicts,scheduleSourceConflictCount:new Set(scheduleSourceConflicts.map(c=>c.sport+':'+c.eventID)).size,scheduleRevisionsApplied:groups.NFL.events.filter(e=>e.scheduleRevision).map(e=>({eventID:e.eventID,providerEventID:e.providerEventID,revisionHash:e.scheduleRevision.revisionHash}))}};
+  return {groups,finals,sources,quotes,lineupEvidence,coverage:{nbaHistoryDays:nbaHistorySources.length,nbaHistoryComplete:nbaComplete,nbaIdentityConflict:nbaConflict,nflHistoryComplete:nflComplete,nflRejectedHistoryRows:invalidNflHistory,quoteStatus,quotes:quoteCoverage,spreads:spreadCoverage,lineups:lineupCoverage,scheduleSourceConflicts,scheduleSourceConflictCount:new Set(scheduleSourceConflicts.map(c=>c.sport+':'+c.eventID)).size,scheduleRevisionsApplied:groups.NFL.events.filter(e=>e.scheduleRevision).map(e=>({eventID:e.eventID,providerEventID:e.providerEventID,revisionHash:e.scheduleRevision.revisionHash}))}};
  };
 }
 
@@ -226,7 +237,7 @@ function publicQuoteCoverage(value){
  const result={};
  for(const sport of ['NBA','NFL']){
   const row=value?.[sport];if(!row||!safeCode(row.status))continue;
-  result[sport]={status:row.status,...(safeTime(row.assessedAt)?{assessedAt:row.assessedAt}:{}),...safeCounts(row,['expectedEvents','mappedEvents','eventsWithPairs','eligiblePairs']),reasonCounts:safeReasonCounts(row.reasonCounts)};
+  result[sport]={status:row.status,...(safeTime(row.assessedAt)?{assessedAt:row.assessedAt}:{}),...safeCounts(row,['expectedEvents','inspectedEvents','mappedEvents','eventsWithPairs','eligiblePairs']),reasonCounts:safeReasonCounts(row.reasonCounts)};
   if(Array.isArray(row.readiness))result[sport].readiness=row.readiness.filter(r=>safeEventId(r?.eventID)&&safeTime(r.startsAt)&&safeCode(r.sourceStatus)&&safeCode(r.mappingStatus)).slice(0,100).map(r=>({eventID:r.eventID,startsAt:r.startsAt,sourceStatus:r.sourceStatus,mappingStatus:r.mappingStatus,pairedPriceEligible:r.pairedPriceEligible===true,...safeCounts(r,['pairCount','matchingQuotes','rejectedQuotes','conflictingBooks','oneSidedBooks','unavailableBooks']),reasons:safeReasons(r.reasons)}));
  }
  return result;
@@ -235,18 +246,30 @@ function publicReadiness(value){
  if(value?.basis!=='LATEST_PREGAME_OBSERVATION_NOT_ORIGINAL_FORECAST')return null;
  return {basis:value.basis,...safeCounts(value,['maxAgeSeconds']),events:(Array.isArray(value.events)?value.events:[]).filter(r=>['NBA','NFL'].includes(r?.sport)&&safeEventId(r.event_id)&&safeTime(r.starts_at)&&safeTime(r.observed_at)&&safeTime(r.issued_at)&&['EARLY','PRE90_30','PRE30_5'].includes(r.capture_window)).slice(0,100).map(r=>({sport:r.sport,event_id:r.event_id,starts_at:r.starts_at,observed_at:r.observed_at,issued_at:r.issued_at,...(safeTime(r.recorded_at)?{recorded_at:r.recorded_at}:{}),capture_window:r.capture_window,observation_fresh:r.observation_fresh===true,lineup_verified_at_observation:r.lineup_verified_at_observation===true,lineup_status:safeCode(r.lineup_status)?r.lineup_status:'UNAVAILABLE',lineup_reason:safeCode(r.lineup_reason)?r.lineup_reason:null,paired_prices_at_observation:r.paired_prices_at_observation===true,...safeCounts(r,['pair_count']),price_reasons:safeReasons(r.price_reasons)}))};
 }
+function publicValidationStudies(value){
+ if(value?.basis!=='REQUESTS_ONLY_NO_CONFIRMATION_ENROLLMENT')return null;
+ const studies=[],seen=new Set();
+ for(const row of (Array.isArray(value.studies)?value.studies:[]).slice(0,100)){
+  if(!['NBA','NFL'].includes(row?.sport)||!['WINNER','SPREAD'].includes(row.market)||typeof row.studyId!=='string'||!/^[a-zA-Z0-9_:.\-]{1,200}$/.test(row.studyId)||!safeTime(row.recordedAt)||![row.policyHash,row.incumbentHash].every(h=>typeof h==='string'&&/^[a-f0-9]{64}$/i.test(h))||row.status!=='RECORDED_NOT_ENROLLING'||row.confirmationStatus!=='NOT_STARTED'||row.enrollmentEnabled!==false||row.registration!==null)continue;
+  const key=row.sport+':'+row.market;if(seen.has(key))continue;seen.add(key);
+  studies.push({studyId:row.studyId,sport:row.sport,market:row.market,recordedAt:row.recordedAt,policyHash:row.policyHash,incumbentHash:row.incumbentHash,status:'RECORDED_NOT_ENROLLING',confirmationStatus:'NOT_STARTED',enrollmentEnabled:false,registration:null,blockers:safeReasons(row.blockers),productionEligible:false,productionWeight:0});
+ }
+ return {basis:'REQUESTS_ONLY_NO_CONFIRMATION_ENROLLMENT',studies:studies.slice(0,4)};
+}
 function publicStatus(data){
  const result={status:typeof data?.status==='string'?data.status:'RESEARCH_ONLY',productionEligible:false,productionWeight:0};
  for(const key of ['capturedForecasts','distinctGames','settledGames','binaryPairs','sourceCount','outcomeRevisions','quarantined_games','quality_flagged_events','schedule_resolutions'])if(Number.isFinite(data?.[key]))result[key]=data[key];
  if(typeof data?.generatedAt==='string')result.generatedAt=data.generatedAt;
  Object.assign(result,safeCounts(data,['readinessObservations']));
  const readiness=publicReadiness(data?.readiness);if(readiness)result.readiness=readiness;
+ const validationStudies=publicValidationStudies(data?.validationStudies);if(validationStudies)result.validationStudies=validationStudies;
  if(Array.isArray(data?.sports))result.sports=data.sports.filter(r=>['NBA','NFL'].includes(r?.sport)).map(r=>({sport:r.sport,...Object.fromEntries(Object.entries(r).filter(([k,v])=>/^(forecasts|distinctGames|settledGames|binaryPairs|sourceCount|baselineOnly|fullFeatureEligible|capturedForecasts|outcomeRevisions)$/.test(k)&&Number.isFinite(v)))}));
  if(Array.isArray(data?.cohorts))result.cohorts=data.cohorts.filter(r=>['NBA','NFL'].includes(r?.sport)).map(r=>({sport:r.sport,capture_window:['EARLY','PRE90_30','PRE30_5'].includes(r.capture_window)?r.capture_window:null,...Object.fromEntries(Object.entries(r).filter(([k,v])=>/^(forecast_rows|games|eligible_games|quarantined_games|schedule_resolved_games|lineup_verified|paired_prices|final_results|ties|awaiting_outcome)$/.test(k)&&Number.isFinite(v)))}));
  if(data?.latest&&typeof data.latest.generatedAt==='string')result.latest={generatedAt:data.latest.generatedAt,status:'RESEARCH_ONLY',...Object.fromEntries(['candidates','excluded','outcomeConflicts'].filter(k=>Number.isFinite(data.latest[k])).map(k=>[k,data.latest[k]]))};
  if(result.latest){const count=data.latest.scheduleSourceConflicts??data.latest.coverage?.scheduleSourceConflictCount;if(Number.isInteger(count)&&count>=0)result.latest.schedule_source_conflicts=count;}
  if(result.latest&&data.latest.coverage?.lineups)result.latest.lineups=publicLineupCoverage(data.latest.coverage.lineups);
  if(result.latest&&data.latest.coverage?.quotes)result.latest.quotes=publicQuoteCoverage(data.latest.coverage.quotes);
+ if(result.latest&&data.latest.coverage?.spreads)result.latest.spreads=Object.fromEntries(Object.entries(publicQuoteCoverage(data.latest.coverage.spreads)).map(([sport,row])=>[sport,{...row,purpose:'PRICE_EVIDENCE_ONLY',coverProbabilityAvailable:false,productionEligible:false}]));
  return result;
 }
 export function createWinnerHandler({env=process.env,fetchImpl=fetch,now=Date.now,providerFetch=protectedSportsGameOddsFetch,optimize=optimizeSportsGameOddsObjectLimit,store,loadSources,collectionTimeoutMs=WINNER_PHASE_BUDGET_MS.sources,logger=entry=>console.error(JSON.stringify(entry))}={}){
@@ -272,11 +295,11 @@ export function createWinnerHandler({env=process.env,fetchImpl=fetch,now=Date.no
    if(body.action==='refresh')for(const sport of ['NBA','NFL']){
     const manifest=createWinnerModelManifest(sport);manifests.push({model_hash:manifest.modelHash??manifest.manifestHash,sport,model_version:manifest.modelVersion,manifest});
     const result=buildWinnerCandidates({sport,...source.groups[sport],quotes:source.quotes,observedAt,issuedAt,modelManifest:manifest,lineupEvidence:source.lineupEvidence??[]});
-    excluded.push(...result.excluded);
+    excluded.push(...result.excluded.map(row=>({sport,...row})));
     for(const candidate of result.candidates){const {inputEvidence,inputObservedAt,...row}=candidate;forecasts.push({...row,model_hash:row.forecast.manifestHash});source.sources.push({source_hash:row.input_hash,source_url:'urn:edge-lab:winner-inputs',fetched_at:inputObservedAt,body:inputEvidence});}
    }
    const settlements=winnerOutcomeRevisions(pending,source.finals,source.sources,issuedAt);
-   const payload={p_manifests:manifests,p_sources:[...new Map(source.sources.map(s=>[s.source_hash,s])).values()],p_forecasts:forecasts,p_outcomes:settlements.rows,p_status:{status:'RESEARCH_ONLY',generatedAt:issuedAt,action:body.action,coverage:source.coverage,candidates:forecasts.length,excluded:excluded.length,outcomeConflicts:settlements.conflicts.length,scheduleSourceConflicts:source.coverage.scheduleSourceConflictCount??0,checkedEvents:pending.map(p=>({sport:p.sport,event_id:p.event_id})),productionEligible:false,productionWeight:0}};
+   const payload={p_manifests:manifests,p_sources:[...new Map(source.sources.map(s=>[s.source_hash,s])).values()],p_forecasts:forecasts,p_outcomes:settlements.rows,p_status:{status:'RESEARCH_ONLY',generatedAt:issuedAt,action:body.action,coverage:source.coverage,candidates:forecasts.length,excluded:excluded.length,excludedEvents:excluded.slice(0,200),outcomeConflicts:settlements.conflicts.length,scheduleSourceConflicts:source.coverage.scheduleSourceConflictCount??0,checkedEvents:pending.map(p=>({sport:p.sport,event_id:p.event_id})),productionEligible:false,productionWeight:0}};
    phase='append';const saved=await database.append(payload);
    return res.status(200).json({...publicStatus(saved),status:'COLLECTED',generatedAt:issuedAt,captured:saved?.captured??0,coverage:source.coverage,excluded:excluded.length,outcomeConflicts:settlements.conflicts.length});
   }catch(error){
