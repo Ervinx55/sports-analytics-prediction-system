@@ -1,0 +1,21 @@
+{
+  "id": "winner-spread-prospective-v1",
+  "declaredAt": "2026-11-18T18:56:12Z",
+  "purpose": "OFFLINE_CONFIRMATION_CRITERIA_NOT_PRODUCTION_AUTHORIZATION",
+  "scopes": {
+    "NBA:WINNER": {"minimumScoredGames":300,"minimumBlocks":60,"blockUnit":"EASTERN_DAY","minimumWindowDays":60},
+    "NBA:SPREAD": {"minimumScoredGames":400,"minimumBlocks":60,"blockUnit":"EASTERN_DAY","minimumWindowDays":60},
+    "NFL:WINNER": {"minimumScoredGames":200,"minimumBlocks":20,"blockUnit":"EASTERN_ISO_WEEK","minimumWindowDays":140},
+    "NFL:SPREAD": {"minimumScoredGames":250,"minimumBlocks":24,"blockUnit":"EASTERN_ISO_WEEK","minimumWindowDays":168}
+  },
+  "maximumPriceAgeSeconds":300,
+  "maximumIncumbentIssueSkewSeconds":60,
+  "minimumPregameLeadSeconds":60,
+  "minimumPairedCaptureCoverage":0.95,
+  "power": {"targetBrierImprovement":0.01,"minimumPower":0.8,"minimumDesignEffect":1,"maximumFamilySize":100},
+  "uncertainty": {"bootstrapIterations":5000,"maximumBootstrapIterations":100000,"minimumExpectedTailSamples":20,"seed":20261118,"familywiseAlpha":0.05,"winnerIntervalsPerScope":6,"spreadIntervalsPerScope":9,"maximumBrierIntervalWidth":0.04},
+  "performance": {"minimumBrierPointImprovement":0.005,"maximumLoglossUpperDelta":0.005},
+  "calibration": {"bins":10,"minimumOccupiedBinGames":25,"maximumEceUpper":0.05,"maximumAbsoluteBiasBound":0.025},
+  "spread": {"lineIncrement":0.5,"requireIndependentDistribution":true,"maximumAbsolutePushBiasBound":0.025},
+  "authority": {"productionEligible":false,"productionWeight":0,"automaticPlayEnabled":false,"bestPossibleStatus":"HUMAN_REVIEW_ONLY"}
+}
