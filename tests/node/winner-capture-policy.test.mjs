@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildWinnerCandidates,normalizeLineupEvidence,normalizeWinnerQuotes} from '../../sharp-service/lib/winner-capture-policy.js';
+import {buildWinnerCandidates,normalizeLineupEvidence,normalizeWinnerQuotes,inspectWinnerQuotes} from '../../sharp-service/lib/winner-capture-policy.js';
 import {createWinnerModelManifest,canonicalHash} from '../../sharp-service/lib/winner-prospective-models.js';
 const issuedAt='2026-11-17T20:00:00Z',observedAt='2026-11-17T19:59:30Z';
 const event={sport:'NBA',eventID:'espn:123',sourceIds:{espn:'123',sgo:'sgo123'},startsAt:'2026-11-18T01:00:00Z',season:2026,home:{id:'1',abbreviation:'ATL'},away:{id:'2',abbreviation:'BOS'},identityVerified:true,status:'SCHEDULED',sourceFetchedAt:observedAt};
@@ -57,4 +57,42 @@ test('paired quote comparisons demand exact event, same-book pair, freshness and
  const base=buildWinnerCandidates(input()).candidates[0].forecast.homeProbability;
  const withQuotes=buildWinnerCandidates({...input(),quotes:[quote]}).candidates[0].forecast;
  assert.equal(withQuotes.homeProbability,base);assert.equal(withQuotes.pairedPriceEligible,true);
+});
+
+test('quote diagnostics distinguish rejection causes without changing frozen normalized evidence',()=>{
+ const quote={eventID:event.eventID,sourceEventId:'sgo123',book:'pinnacle',homeOdds:-120,awayOdds:110,homeUpdatedAt:observedAt,awayUpdatedAt:observedAt,fetchedAt:observedAt,sourceUrl:'https://api.sportsgameodds.com/v2/events',sourceHash:'c'.repeat(64)};
+ for(const [changed,reason] of [
+  [{sourceEventId:'wrong'},'QUOTE_IDENTITY_UNVERIFIED'],
+  [{fetchedAt:'2026-11-17T20:01:00Z'},'QUOTE_RECEIPT_FUTURE_OR_INVALID'],
+  [{homeUpdatedAt:null},'QUOTE_UPDATE_TIMESTAMP_INVALID'],
+  [{homeUpdatedAt:'2026-11-17T20:00:00Z'},'QUOTE_UPDATE_AFTER_RECEIPT'],
+  [{homeUpdatedAt:'2026-11-17T19:40:00Z'},'QUOTE_UPDATE_STALE'],
+  [{homeUpdatedAt:'2026-11-17T19:55:00Z'},'QUOTE_PAIR_TIMESTAMP_SKEW'],
+  [{homeOdds:0},'QUOTE_INVALID_PRICE_OR_OVERROUND']
+ ]){
+  const quotes=[{...quote,...changed}],result=inspectWinnerQuotes(event,quotes,issuedAt);
+  assert.equal(result.diagnostics.reasonCounts[reason],1,reason);
+  assert.equal(result.diagnostics.matchingQuotes,1);assert.equal(result.diagnostics.rejectedQuotes,1);
+  assert.deepEqual(result.comparison,normalizeWinnerQuotes(event,quotes,issuedAt));
+ }
+ const good=inspectWinnerQuotes(event,[quote,quote],issuedAt);
+ assert.equal(good.diagnostics.eligiblePairs,1);assert.deepEqual(good.diagnostics.reasonCounts,{});
+ const conflict=inspectWinnerQuotes(event,[quote,{...quote,homeOdds:-130}],issuedAt);
+ assert.equal(conflict.diagnostics.conflictingBooks,1);assert.equal(conflict.diagnostics.eligiblePairs,0);
+ assert.equal(conflict.diagnostics.reasonCounts.CONFLICTING_BOOK_QUOTES,1);
+ assert.deepEqual(normalizeWinnerQuotes(event,[quote],issuedAt),{
+  eligible:true,pairs:[{book:quote.book,homeOdds:-120,awayOdds:110,homeUpdatedAt:observedAt,awayUpdatedAt:observedAt,fetchedAt:observedAt,sourceUrl:quote.sourceUrl,sourceHash:quote.sourceHash,sourceEventId:'sgo123',homeNoVigProbability:(120/220)/(120/220+100/210),awayNoVigProbability:(100/210)/(120/220+100/210)}],
+  reasons:[],probabilityBasis:'SAME_BOOK_TWO_WAY_PROPORTIONAL_NO_VIG',oddsInfluenceOnModel:0
+ });
+});
+
+test('another sport or event cannot exhaust the per-event quote inspection bound',()=>{
+ const quote={eventID:event.eventID,sourceEventId:'sgo123',book:'pinnacle',homeOdds:-120,awayOdds:110,homeUpdatedAt:observedAt,awayUpdatedAt:observedAt,fetchedAt:observedAt,sourceUrl:'https://api.sportsgameodds.com/v2/events',sourceHash:'c'.repeat(64)};
+ const otherEvents=Array.from({length:120},(_,i)=>({...quote,eventID:'nflverse:other'+i}));
+ const expected=normalizeWinnerQuotes(event,[quote],issuedAt);
+ assert.deepEqual(normalizeWinnerQuotes(event,[...otherEvents,quote],issuedAt),expected);
+ assert.deepEqual(normalizeWinnerQuotes(event,[quote,...otherEvents],issuedAt),expected);
+ assert.equal(inspectWinnerQuotes(event,[...otherEvents,quote],issuedAt).diagnostics.matchingQuotes,1);
+ // The existing100quote bound still applies to this event's own evidence.
+ assert.equal(inspectWinnerQuotes(event,Array.from({length:101},()=>quote),issuedAt).diagnostics.matchingQuotes,100);
 });

@@ -48,25 +48,41 @@ export function normalizeLineupEvidence(event,evidence=[],issuedAt){
   injuryReportIsLineup:false,depthChartIsLineup:false,adjustmentApplied:false};
 }
 function implied(value){return typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)>=100?(value>0?100/(100+value):-value/(100-value)):null;}
-export function normalizeWinnerQuotes(event,quotes=[],issuedAt){
+// Diagnostics describe this collection, separately from immutable input evidence.
+export function inspectWinnerQuotes(event,quotes=[],issuedAt){
  const now=Date.parse(issuedAt),pairs=[],reasons=[],books=new Map();
- for(const q of (Array.isArray(quotes)?quotes:[]).slice(0,100)){
-  if(q?.eventID!==event.eventID)continue;
-  if(!identity(q.book)||!event.sourceIds?.sgo||q.sourceEventId!==event.sourceIds.sgo||!https(q.sourceUrl)||!sha(q.sourceHash)){reasons.push('QUOTE_IDENTITY_UNVERIFIED');continue;}
+ const diagnostics={matchingQuotes:0,rejectedQuotes:0,conflictingBooks:0,eligiblePairs:0,reasonCounts:{}};
+ const note=reason=>{diagnostics.reasonCounts[reason]=(diagnostics.reasonCounts[reason]??0)+1;};
+ // The collector combines both sports. Apply the safety cap after identity
+ // filtering so another game's books cannot hide this game's valid pair.
+ for(const q of (Array.isArray(quotes)?quotes:[]).filter(q=>q?.eventID===event.eventID).slice(0,100)){
+  diagnostics.matchingQuotes++;
+  if(!identity(q.book)||!event.sourceIds?.sgo||q.sourceEventId!==event.sourceIds.sgo||!https(q.sourceUrl)||!sha(q.sourceHash)){reasons.push('QUOTE_IDENTITY_UNVERIFIED');note('QUOTE_IDENTITY_UNVERIFIED');diagnostics.rejectedQuotes++;continue;}
   if(!receipt(q.fetchedAt,now)||Date.parse(q.fetchedAt)>=Date.parse(event.startsAt)||
    ![q.homeUpdatedAt,q.awayUpdatedAt].every(t=>receipt(t,Date.parse(q.fetchedAt))&&now-Date.parse(t)<=600000)||
-   Math.abs(Date.parse(q.homeUpdatedAt)-Date.parse(q.awayUpdatedAt))>120000){reasons.push('QUOTE_STALE_FUTURE_OR_UNPAIRED');continue;}
+   Math.abs(Date.parse(q.homeUpdatedAt)-Date.parse(q.awayUpdatedAt))>120000){
+   reasons.push('QUOTE_STALE_FUTURE_OR_UNPAIRED');diagnostics.rejectedQuotes++;
+   if(!receipt(q.fetchedAt,now))note('QUOTE_RECEIPT_FUTURE_OR_INVALID');
+   else if(Date.parse(q.fetchedAt)>=Date.parse(event.startsAt))note('QUOTE_RECEIPT_NOT_PREGAME');
+   else if(![q.homeUpdatedAt,q.awayUpdatedAt].every(stamp))note('QUOTE_UPDATE_TIMESTAMP_INVALID');
+   else if(![q.homeUpdatedAt,q.awayUpdatedAt].every(t=>receipt(t,Date.parse(q.fetchedAt))))note('QUOTE_UPDATE_AFTER_RECEIPT');
+   else if([q.homeUpdatedAt,q.awayUpdatedAt].some(t=>now-Date.parse(t)>600000))note('QUOTE_UPDATE_STALE');
+   else note('QUOTE_PAIR_TIMESTAMP_SKEW');
+   continue;
+  }
   const home=implied(q.homeOdds),away=implied(q.awayOdds),sum=home+away;
-  if(home===null||away===null||sum<1||sum>1.15){reasons.push('QUOTE_INVALID_PRICE_OR_OVERROUND');continue;}
+  if(home===null||away===null||sum<1||sum>1.15){reasons.push('QUOTE_INVALID_PRICE_OR_OVERROUND');note('QUOTE_INVALID_PRICE_OR_OVERROUND');diagnostics.rejectedQuotes++;continue;}
   const normalized={book:q.book,homeOdds:q.homeOdds,awayOdds:q.awayOdds,homeUpdatedAt:q.homeUpdatedAt,awayUpdatedAt:q.awayUpdatedAt,
    fetchedAt:q.fetchedAt,sourceUrl:q.sourceUrl,sourceHash:q.sourceHash,sourceEventId:q.sourceEventId,homeNoVigProbability:home/sum,awayNoVigProbability:away/sum};
   if(!books.has(q.book))books.set(q.book,new Map());books.get(q.book).set(canonicalHash(normalized),normalized);
  }
- for(const entries of books.values())if(entries.size===1)pairs.push([...entries.values()][0]);else reasons.push('CONFLICTING_BOOK_QUOTES');
+ for(const entries of books.values())if(entries.size===1)pairs.push([...entries.values()][0]);else {reasons.push('CONFLICTING_BOOK_QUOTES');note('CONFLICTING_BOOK_QUOTES');diagnostics.conflictingBooks++;}
  pairs.sort((a,b)=>a.book.localeCompare(b.book));
- return {eligible:pairs.length>0,pairs:pairs.slice(0,20),reasons:[...new Set(reasons.length?reasons:pairs.length?[]:['PAIRED_PRICE_UNAVAILABLE'])],
-  probabilityBasis:'SAME_BOOK_TWO_WAY_PROPORTIONAL_NO_VIG',oddsInfluenceOnModel:0};
+ diagnostics.eligiblePairs=pairs.slice(0,20).length;
+ return {comparison:{eligible:pairs.length>0,pairs:pairs.slice(0,20),reasons:[...new Set(reasons.length?reasons:pairs.length?[]:['PAIRED_PRICE_UNAVAILABLE'])],
+  probabilityBasis:'SAME_BOOK_TWO_WAY_PROPORTIONAL_NO_VIG',oddsInfluenceOnModel:0},diagnostics};
 }
+export function normalizeWinnerQuotes(event,quotes=[],issuedAt){return inspectWinnerQuotes(event,quotes,issuedAt).comparison;}
 function validEvent(event,sport,issued){
  const primary=sport==='NFL'?'nflverse':event?.eventID?.startsWith('espn:')?'espn':'sgo';
  return event?.sport===sport&&identity(event.eventID)&&event.identityVerified===true&&event.status==='SCHEDULED'&&
