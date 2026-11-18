@@ -1,5 +1,6 @@
 // Descriptive scoring evidence only. Never used to calculate model features or probabilities.
 import {availableAfter} from './cfb-model.js';
+import {NFL_SCHEDULE_REVISIONS,validScheduleRevision} from './winner-schedule-revisions.js';
 
 const DAY = 86400000;
 const easternFormat = new Intl.DateTimeFormat('en-CA', {timeZone:'America/New_York',year:'numeric',month:'2-digit',day:'2-digit'});
@@ -69,6 +70,18 @@ function deduplicate(rows) {
   return [...unique.values()].map(value => value.row).filter(row => !conflicts.has(row.id));
 }
 
+function reviewedNflTarget(rows,event,cutoffAt) {
+  const revisions = NFL_SCHEDULE_REVISIONS.filter(revision => validScheduleRevision(revision,cutoffAt) &&
+    event.eventId === revision.sourceEventId && event.season === revision.season && iso(event.startsAt) === revision.startsAt &&
+    event.home.teamId === revision.home && event.away.teamId === revision.away && easternDay(event.startsAt) === revision.gameDate);
+  if (revisions.length !== 1) return null;
+  const revision = revisions[0];
+  const targets = rows.filter(row => row.validIdentity && row.eligible && row.regular && row.id === revision.providerGameID &&
+    row.season === revision.season && row.week === revision.week && row.home === revision.home && row.away === revision.away &&
+    row.start === revision.oldStartsAt && easternDay(row.start) === revision.gameDate);
+  return targets.length === 1 ? {target:targets[0],revision} : null;
+}
+
 function sideContext(side, games, label, missingReason) {
   const own = games.filter(game => [game.home,game.away].includes(side?.teamId));
   const windows = [['history',null,label],['last5',5,'Last 5 within this sample'],['last10',10,'Last 10 within this sample']].map(([key,requestedGames,windowLabel]) => {
@@ -104,11 +117,23 @@ export function buildTeamScoringContext({sport,event,games=[],cutoffAt,observedA
     candidates = candidates.filter(game => ids.has(game?.game_id));
   }
   const rows = deduplicate(candidates.map(game => normalizeGame(sport,game)));
-  let target = null;
+  let target = null,targetScheduleEvidence = null;
   if (sport === 'NFL' && !missingReason) {
     const targets = rows.filter(row => row.validIdentity && row.eligible && row.regular && row.season === event.season && row.start === iso(event.startsAt) && row.home === event.home.teamId && row.away === event.away.teamId);
-    if (targets.length !== 1) missingReason = 'Exact target schedule identity is unavailable or conflicting.';
-    else target = targets[0];
+    if (targets.length === 1) target = targets[0];
+    else if (targets.length === 0) {
+      // A reviewed kickoff correction may identify the target week. Never change
+      // raw schedule times, scoring history or inference, and never revive rows
+      // removed by duplicate conflict detection above.
+      const reviewed = reviewedNflTarget(rows,event,cutoffAt);
+      if (reviewed) {
+        target = reviewed.target;
+        const revision = reviewed.revision;
+        targetScheduleEvidence = Object.fromEntries(['contract','revisionHash','providerGameID','sourceEventId','oldStartsAt','startsAt',
+          'announcementUrl','scheduleUrl','announcementFetchedAt','scheduleFetchedAt','sourceUpdatedAt'].map(key => [key,revision[key]]));
+      }
+    }
+    if (!target) missingReason = 'Exact target schedule identity is unavailable or conflicting.';
   }
   if (sport === 'CFB' && (event?.fbsVerified !== true || !Number.isInteger(event?.season))) missingReason = 'Target season or FBS identity is unavailable.';
   const targetDay = Number.isFinite(start) ? easternDay(event.startsAt) : null;
@@ -124,6 +149,8 @@ export function buildTeamScoringContext({sport,event,games=[],cutoffAt,observedA
   const receipts = relevant.map(row => time(row.observedAt)).filter(Number.isFinite);
   const receipt = observedAt === null ? receipts.length ? new Date(Math.max(...receipts)).toISOString() : null : iso(observedAt);
   return {contract:'team-scoring-context-v1',purpose:'EXPLANATION_ONLY',adjustmentApplied:false,sport,
-    cutoffAt:iso(cutoffAt),source:description.source,observedAt:receipt,scope:description.scope,
+    cutoffAt:iso(cutoffAt),source:description.source+(targetScheduleEvidence ? '; NFL official schedule correction' : ''),observedAt:receipt,
+    scope:description.scope+(targetScheduleEvidence ? ' Target kickoff uses a previously verified NFL schedule correction; scoring history is unchanged.' : ''),
+    ...(targetScheduleEvidence ? {targetScheduleEvidence} : {}),
     home:sideContext(event?.home,eligible,description.label,missingReason),away:sideContext(event?.away,eligible,description.label,missingReason)};
 }

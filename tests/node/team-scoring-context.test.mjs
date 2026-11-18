@@ -8,6 +8,8 @@ import {parseCsv,teamSnapshot,leagueBaselines,projectEvent} from '../../sharp-se
 import {createCfbHandler} from '../../sharp-service/handlers/cfb-forecasts.js';
 import {normalizeEspnGame} from '../../sharp-service/lib/cfb-sources.js';
 import {buildTeamScoringContext as build} from '../../sharp-service/lib/team-scoring-context.js';
+import {NFL_SCHEDULE_REVISIONS} from '../../sharp-service/lib/winner-schedule-revisions.js';
+import {projectWinnerBaseline} from '../../sharp-service/lib/winner-prospective-models.js';
 const cutoffAt = '2026-11-17T20:00:00Z';
 const nbaEvent = {eventId:'target',startsAt:'2026-11-18T01:00:00Z',home:{teamId:'ATL',teamName:'Atlanta'},away:{teamId:'BOS',teamName:'Boston'}};
 const nbaGame = (eventId, startsAt, homeScore=110, awayScore=100, extra={}) => ({eventId,startsAt,home:'ATL',away:'BOS',homeScore,awayScore,completed:true,...extra});
@@ -97,6 +99,73 @@ test('NFL missing or conflicting exact target schedule binding withholds average
     [previous,nflTarget,{...nflTarget,season:'2025'}],[previous,nflTarget,{...nflTarget,home_team:'MIN'}]]){
     const result=build({sport:'NFL',event:nflEvent,games,cutoffAt});
     assert.equal(history(result.home).pointsFor,null);assert.match(history(result.home).missingReason,/identity|schedule/i);
+  }
+});
+
+function revisedNflFixture(revision) {
+  const games=[8,9,10,11].map(week=>({
+    game_id:`2026_${String(week).padStart(2,'0')}_${revision.away}_${revision.home}`,season:'2026',week:String(week),game_type:'REG',
+    gameday:week===11?revision.gameDate:`2026-11-${String(1+(week-8)*7).padStart(2,'0')}`,
+    gametime:week===11&&revision.home==='PHI'?'16:25':'13:00',home_team:revision.home,away_team:revision.away,
+    home_score:week===11?'':'24',away_score:week===11?'':'20',result:week===11?'':'4',location:'Home'
+  }));
+  const event={eventId:revision.sourceEventId,startsAt:revision.startsAt,season:revision.season,
+    home:{teamId:revision.home,teamName:revision.homeName},away:{teamId:revision.away,teamName:revision.awayName}};
+  return {sport:'NFL',event,games,cutoffAt};
+}
+
+test('only the two pinned NFL kickoff revisions restore exact scoring samples with official evidence', () => {
+  for(const revision of NFL_SCHEDULE_REVISIONS){
+    const input=revisedNflFixture(revision),before=structuredClone(input);
+    const originalEvent={eventID:revision.baseEventID,startsAt:revision.oldStartsAt,season:revision.season,week:revision.week,gameDate:revision.gameDate,
+      home:{id:revision.home,abbreviation:revision.home},away:{id:revision.away,abbreviation:revision.away},neutralSite:false,sourceIds:{nflverse:revision.providerGameID}};
+    const infer=()=>projectWinnerBaseline({sport:'NFL',event:originalEvent,history:{complete:true,schedule:input.games},issuedAt:cutoffAt});
+    const prediction=infer(),result=build(input);
+    assert.equal(history(result.home).gameCount,3,revision.sourceEventId+' must use the verified corrected kickoff');
+    assert.equal(history(result.home).pointsFor,24);assert.equal(history(result.home).pointsAgainst,20);
+    assert.equal(history(result.away).pointsFor,20);assert.equal(result.observedAt,null);
+    assert.match(result.source,/NFL official schedule/);assert.match(result.scope,/verified.*schedule correction/i);
+    assert.equal(result.targetScheduleEvidence.revisionHash,revision.revisionHash);
+    for(const key of ['announcementUrl','scheduleUrl','announcementFetchedAt','scheduleFetchedAt','oldStartsAt','startsAt']){
+      assert.equal(result.targetScheduleEvidence[key],revision[key]);
+    }
+    assert.deepEqual(input,before);assert.deepEqual(infer(),prediction);
+  }
+});
+
+test('official scoring fallback rejects wrong provider identity, teams, times and evidence cutoff', () => {
+  for(const revision of NFL_SCHEDULE_REVISIONS){
+    for(const change of [
+      input=>{input.event.eventId='unreviewed-event';},
+      input=>{input.event.home.teamId='DAL';},
+      input=>{input.event.away.teamId='MIN';},
+      input=>{input.event.season=2025;},
+      input=>{input.event.startsAt=new Date(Date.parse(revision.startsAt)+60000).toISOString();},
+      input=>{input.cutoffAt='2026-11-17T17:34:49.780Z';},
+      input=>{input.cutoffAt='2026-11-17T17:34:49.834Z';},
+      input=>{input.games.pop();},
+      input=>{input.games.at(-1).gameday='2026-11-21';},
+      input=>{input.games.at(-1).gametime='15:00';},
+      input=>{input.games.at(-1).week='12';}
+    ]){
+      const input=revisedNflFixture(revision);change(input);const result=build(input);
+      assert.equal(history(result.home).pointsFor,null);assert.ok(history(result.home).missingReason);
+      assert.equal(result.targetScheduleEvidence,undefined);
+    }
+  }
+});
+
+test('official scoring fallback never revives a conflicting target or overrides exact schedule matching', () => {
+  for(const revision of NFL_SCHEDULE_REVISIONS){
+    for(const change of [{gametime:revision.home==='PHI'?'13:00':'16:25'},{home_team:'DAL'},{season:'2025'},{game_type:'POST'}]){
+      const input=revisedNflFixture(revision);input.games.push({...input.games.at(-1),...change});
+      const result=build(input);assert.equal(history(result.home).gameCount,0);assert.equal(result.targetScheduleEvidence,undefined);
+    }
+    const exact=revisedNflFixture(revision);exact.games.at(-1).gametime=revision.home==='PHI'?'13:00':'16:25';
+    const normal=build(exact);assert.equal(history(normal.home).gameCount,3);assert.equal(normal.targetScheduleEvidence,undefined);
+    // Two different valid schedule IDs at the same exact kickoff remain ambiguous.
+    exact.games.push({...exact.games.at(-1),game_id:`2026_12_${revision.away}_${revision.home}`,week:'12'});
+    const ambiguous=build(exact);assert.equal(history(ambiguous.home).gameCount,0);assert.equal(ambiguous.targetScheduleEvidence,undefined);
   }
 });
 
