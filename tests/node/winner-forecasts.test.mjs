@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createWinnerHandler,createWinnerSourceLoader,nflKickoff,parseWinnerScoreboard,parseWinnerNflSchedule,winnerOutcomeRevisions} from '../../sharp-service/handlers/winner-forecasts.js';
-import {canonicalHash} from '../../sharp-service/lib/winner-prospective-models.js';
+import {canonicalHash,createWinnerModelManifest} from '../../sharp-service/lib/winner-prospective-models.js';
+import {buildWinnerCandidates} from '../../sharp-service/lib/winner-capture-policy.js';
 const env={SUPABASE_SERVICE_ROLE_KEY:'service-test-key'};
 const response=()=>({code:200,headers:{},setHeader(k,v){this.headers[k]=v;},status(n){this.code=n;return this;},json(body){this.body=body;return this;}});
 
@@ -42,6 +43,18 @@ test('NFL kickoff uses the exact Eastern calendar date across UTC midnight and D
  assert.equal(nflKickoff({gameday:'2026-11-19',gametime:''}),null);
 });
 
+test('study request status never exposes enrollment or production claims',async()=>{
+ const study={studyId:'nba-winner-2026-11-18',sport:'NBA',market:'WINNER',recordedAt:'2026-11-18T20:00:00Z',policyHash:'a'.repeat(64),incumbentHash:'b'.repeat(64),status:'RECORDED_NOT_ENROLLING',confirmationStatus:'NOT_STARTED',enrollmentEnabled:false,registration:null,blockers:['CANDIDATE_ARTIFACT_MISSING','unsafe raw source'],productionEligible:true,productionWeight:1,raw:'private-study-source'};
+ const pending=[study,...[['NBA','SPREAD'],['NFL','WINNER'],['NFL','SPREAD']].map(([sport,market])=>({...study,sport,market,studyId:`${sport.toLowerCase()}-${market.toLowerCase()}-2026-11-18`,recordedAt:'2026-11-18T20:00:00+00:00',blockers:['CANDIDATE_ARTIFACT_MISSING','TIMESTAMPED_ENROLLMENT_COLLECTOR_MISSING']}))];
+ const handler=createWinnerHandler({env,store:{status:async()=>({productionEligible:true,validationStudies:{basis:'REQUESTS_ONLY_NO_CONFIRMATION_ENROLLMENT',studies:[{...study,studyId:'active',sport:'NFL',status:'ACTIVE'},{...study,studyId:'enrolling',market:'SPREAD',enrollmentEnabled:true},{...study,studyId:'registered',registration:{secret:'private-study-source'}},...pending]},latest:{generatedAt:study.recordedAt,excludedEvents:[{reason:'private-study-source'}]}})}}),res=response();
+ await handler({method:'GET',headers:{}},res);
+ assert.equal(res.body.productionEligible,false);assert.equal(res.body.validationStudies.basis,'REQUESTS_ONLY_NO_CONFIRMATION_ENROLLMENT');assert.equal(res.body.validationStudies.studies.length,4);
+ assert.deepEqual(res.body.validationStudies.studies.map(r=>[r.sport,r.market]),[['NBA','WINNER'],['NBA','SPREAD'],['NFL','WINNER'],['NFL','SPREAD']]);
+ for(const row of res.body.validationStudies.studies){assert.equal(row.enrollmentEnabled,false);assert.equal(row.productionEligible,false);assert.equal(row.registration,null);}
+ const actual=res.body.validationStudies.studies[0];assert.equal(actual.enrollmentEnabled,false);assert.equal(actual.registration,null);assert.equal(actual.status,'RECORDED_NOT_ENROLLING');assert.equal(actual.confirmationStatus,'NOT_STARTED');
+ assert.deepEqual(actual.blockers,['CANDIDATE_ARTIFACT_MISSING']);assert.equal(actual.productionEligible,false);assert.equal(actual.productionWeight,0);assert.equal(JSON.stringify(res.body).includes('private-study-source'),false);
+});
+
 test('NBA source rejects a repeated source ID with conflicting teams instead of choosing one',()=>{
  const team=(id,abbreviation,homeAway)=>({homeAway,team:{id,abbreviation},score:'100'});
  const game={id:'1',date:'2026-11-18T00:30:00Z',status:{type:{state:'pre',completed:false}},season:{year:2027},competitions:[{neutralSite:false,competitors:[team('1','BOS','home'),team('2','NY','away')]}]};
@@ -71,6 +84,7 @@ test('incomplete NBA history saves evidence but excludes prospective forecasts',
  let saved;const handler=createWinnerHandler({env,now:()=>Date.parse(issueAt),loadSources:async()=>collected(false),store:{pending:async()=>[],append:async p=>{saved=p;return {captured:0};}}});
  const res=response();await handler({method:'POST',headers:{authorization:'Bearer service-test-key'},body:{action:'refresh'}},res);
  assert.equal(res.code,200);assert.equal(saved.p_forecasts.length,0);assert.equal(saved.p_status.excluded,1);assert.equal(saved.p_sources.length,1);
+ assert.deepEqual(saved.p_status.excludedEvents,[{sport:'NBA',eventID:'espn:1',reason:'HISTORY_INCOMPLETE'}]);
 });
 
 test('settlement preserves saved identity exactly and rejects changed teams or kickoff',()=>{
@@ -121,6 +135,24 @@ test('quote coverage separates provider, mapping, one-sided book and stale-price
  assert.equal(good.coverage.quotes.NBA.eventsWithPairs,1);assert.equal(good.coverage.quotes.NBA.readiness[0].pairCount,1);
  assert.equal(good.coverage.quotes.NBA.assessedAt,issueAt.replace('Z','.000Z'));
  for(const [data,options,reason] of cases){const result=await collect(data,options),coverage=result.coverage.quotes.NBA;assert.equal(coverage.eventsWithPairs,0,reason);assert.equal(coverage.reasonCounts[reason],1,reason);assert.ok(coverage.readiness[0].reasons.includes(reason));}
+});
+
+test('spread evidence shares bounded provider requests, preserves raw provenance and never changes ML forecasts',async()=>{
+ const game={id:'1',date:'2026-11-18T00:30:00Z',status:{type:{state:'pre'}},season:{year:2027},competitions:[{competitors:[{homeAway:'home',team:{id:'1',abbreviation:'BOS'}},{homeAway:'away',team:{id:'2',abbreviation:'NY'}}]}]};
+ const quote={available:true,odds:'-110',lastUpdatedAt:sourceAt},raw={eventID:'sgo1',leagueID:'NBA',type:'match',status:{startsAt:game.date},teams:{home:{names:{short:'BOS'}},away:{names:{short:'NY'}}},odds:{'points-home-game-ml-home':{byBookmaker:{draftkings:quote}},'points-away-game-ml-away':{byBookmaker:{draftkings:quote}}}};
+ const urls=[];const collect=async payload=>createWinnerSourceLoader({env:{SPORTS_ODDS_API_KEY:'provider-test-key'},now:()=>Date.parse(issueAt),fetchImpl:async url=>url.includes('/basketball/nba/')?new Response(JSON.stringify({events:url.includes('dates=20261117')?[game]:[]})):new Response('',{status:503}),optimize:async()=>({effectiveLimit:40}),providerFetch:async({url})=>{urls.push(url);return {fetchedAt:Date.parse(issueAt),payload:{data:url.includes('leagueID=NBA')?[payload]:[]}};}})({action:'refresh'});
+ const base=await collect(raw),withSpread=structuredClone(raw);
+ withSpread.odds['points-home-game-sp-home']={byBookmaker:{draftkings:{...quote,spread:'-4.5'}}};
+ withSpread.odds['points-away-game-sp-away']={byBookmaker:{draftkings:{...quote,spread:'+4.5'}}};
+ const observed=await collect(withSpread);assert.equal(urls.length,4);
+ for(const url of urls){const p=new URL(url).searchParams;assert.deepEqual(p.get('oddIDs').split(','),['points-home-game-ml-home','points-away-game-ml-away','points-home-game-sp-home','points-away-game-sp-away']);assert.equal(p.get('includeAltLines'),'false');assert.equal(p.get('limit'),'40');}
+ const coverage=observed.coverage.spreads.NBA;assert.equal(coverage.eventsWithPairs,1);assert.equal(coverage.eligiblePairs,1);assert.equal(coverage.coverProbabilityAvailable,false);
+ const pair=coverage.readiness[0].pairs[0],snapshot=observed.sources.find(s=>s.source_hash===pair.sourceHash);assert.ok(snapshot);assert.equal(snapshot.fetched_at,pair.fetchedAt);assert.equal(JSON.parse(snapshot.body.rawText).data[0].odds['points-home-game-sp-home'].byBookmaker.draftkings.spread,'-4.5');
+ const forecast=data=>buildWinnerCandidates({sport:'NBA',events:data.groups.NBA.events,history:collected().groups.NBA.history,quotes:data.quotes,observedAt:issueAt,issuedAt:issueAt,modelManifest:createWinnerModelManifest('NBA')}).candidates[0].forecast;
+ assert.equal(forecast(base).homeProbability,forecast(observed).homeProbability);assert.equal(forecast(base).quoteComparison.pairs.length,forecast(observed).quoteComparison.pairs.length);assert.equal('spread' in forecast(observed),false);
+ withSpread.odds['points-away-game-sp-away'].byBookmaker.draftkings.spread=5.5;const invalid=await collect(withSpread);assert.equal(invalid.coverage.spreads.NBA.eventsWithPairs,0);assert.equal(invalid.coverage.quotes.NBA.eventsWithPairs,1);
+ const handler=createWinnerHandler({env,store:{status:async()=>({latest:{generatedAt:issueAt,coverage:observed.coverage}})}}),res=response();await handler({method:'GET',headers:{}},res);
+ assert.equal(res.body.latest.spreads.NBA.eligiblePairs,1);assert.equal(res.body.latest.spreads.NBA.coverProbabilityAvailable,false);assert.equal('pairs' in res.body.latest.spreads.NBA.readiness[0],false);assert.equal(JSON.stringify(res.body).includes(pair.sourceHash),false);
 });
 
 test('collection deadline aborts source work without writing partial forecasts',async()=>{

@@ -1,0 +1,49 @@
+{
+  "contract": "WINNER_VALIDATION_PENDING_RECEIPTS_V1",
+  "project": "yeoxroijaptomomshdii",
+  "status": "RECORDED_NOT_ENROLLING",
+  "confirmationStatus": "NOT_STARTED",
+  "enrollmentEnabled": false,
+  "registration": null,
+  "productionEligible": false,
+  "productionWeight": 0,
+  "automaticPlayEnabled": false,
+  "receipts": [
+    {
+      "sport": "NBA",
+      "market": "SPREAD",
+      "studyId": "nba-spread-winner-spread-prospective-v1",
+      "policyHash": "f9213244823af53a2542ec21f268460a5ba383701fd9df63279556ec766284e8",
+      "recordedAt": "2026-11-18T19:49:23.237816+00:00",
+      "requestHash": "8fb61ece664f421ee560dac6c362600cc6340837df5bc524631821f46533ec6a",
+      "incumbentHash": "e64b9841f72c9f00a51e8a015a88d60c93d05fcb19b45065c20bb85c2a894df6"
+    },
+    {
+      "sport": "NBA",
+      "market": "WINNER",
+      "studyId": "nba-winner-winner-spread-prospective-v1",
+      "policyHash": "f9213244823af53a2542ec21f268460a5ba383701fd9df63279556ec766284e8",
+      "recordedAt": "2026-11-18T19:49:23.225102+00:00",
+      "requestHash": "efc115a357fd2959e2b26a2968a981607ddec02ba5035cb8b53fd2065ab0156d",
+      "incumbentHash": "e64b9841f72c9f00a51e8a015a88d60c93d05fcb19b45065c20bb85c2a894df6"
+    },
+    {
+      "sport": "NFL",
+      "market": "SPREAD",
+      "studyId": "nfl-spread-winner-spread-prospective-v1",
+      "policyHash": "f9213244823af53a2542ec21f268460a5ba383701fd9df63279556ec766284e8",
+      "recordedAt": "2026-11-18T19:49:23.239436+00:00",
+      "requestHash": "c69446fb1e0a26a90eaeeaae85ecaf51551ff58505a82297c543c774b7128d95",
+      "incumbentHash": "a8997909da1c5a1cf71c4cd4a463f2807020d830ba772a4869a2307d67765685"
+    },
+    {
+      "sport": "NFL",
+      "market": "WINNER",
+      "studyId": "nfl-winner-winner-spread-prospective-v1",
+      "policyHash": "f9213244823af53a2542ec21f268460a5ba383701fd9df63279556ec766284e8",
+      "recordedAt": "2026-11-18T19:49:23.238672+00:00",
+      "requestHash": "2c790d49dcaf3e086aa363d7950a63ebd4b9fed23c22a23492fe124bb10fb30f",
+      "incumbentHash": "a8997909da1c5a1cf71c4cd4a463f2807020d830ba772a4869a2307d67765685"
+    }
+  ]
+}

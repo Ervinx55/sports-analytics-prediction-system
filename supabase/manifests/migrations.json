@@ -508,6 +508,16 @@
       "appliedToProduction": true,
       "statementCount": null,
       "productionVersion": "20261118185332"
+    },
+    {
+      "version": "20261118194724",
+      "name": "winner_validation_study_requests",
+      "path": "supabase/migrations/20261118194724_winner_validation_study_requests.sql",
+      "sha256": "e3e4cd0188cc4e6c43cee528f219e45f5b9fc862bd3f52cb98d15a44db5d0b6f",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": null,
+      "productionVersion": "20261118194724"
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -515,7 +525,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 58,
+    "repository_total_migrations": 59,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
