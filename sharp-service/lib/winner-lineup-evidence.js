@@ -29,7 +29,8 @@ export function nbaOfficialLineupEvidence({events=[],scheduleHtml,scheduleSource
   const matches=cards.filter(c=>nbaAlias(c.homeTeam?.teamTricode)===event.home.abbreviation&&nbaAlias(c.awayTeam?.teamTricode)===event.away.abbreviation&&time(c.gameTimeUtc)===time(event.startsAt));
   if(matches.length!==1){unavailable.push({eventID:event.eventID,reason:'OFFICIAL_SCHEDULE_IDENTITY_UNAVAILABLE'});continue;}
   const card=matches[0],games=lineupPayload.games.filter(g=>g.gameId===card.gameId);
-  if(!/^\d{10}$/.test(card.gameId)||cards.filter(c=>c.gameId===card.gameId).length!==1||card.gameStatus!==1||card.period!==0||card.actualStartTimeUTC||games.length!==1||games[0].gameStatus!==1||/CANCEL|POSTPON|SUSPEND|DELAY/i.test([card.gameStatusText,games[0].gameStatusText].join(' '))||[scheduleSource,lineupSource].some(s=>time(s.fetched_at)>=time(event.startsAt))){unavailable.push({eventID:event.eventID,reason:'OFFICIAL_LINEUP_NOT_PREGAME'});continue;}
+  if(games.length!==1){unavailable.push({eventID:event.eventID,reason:games.length?'OFFICIAL_LINEUP_GAME_AMBIGUOUS':'OFFICIAL_LINEUP_GAME_UNAVAILABLE'});continue;}
+  if(!/^\d{10}$/.test(card.gameId)||cards.filter(c=>c.gameId===card.gameId).length!==1||card.gameStatus!==1||card.period!==0||card.actualStartTimeUTC||games[0].gameStatus!==1||/CANCEL|POSTPON|SUSPEND|DELAY/i.test([card.gameStatusText,games[0].gameStatusText].join(' '))||[scheduleSource,lineupSource].some(s=>time(s.fetched_at)>=time(event.startsAt))){unavailable.push({eventID:event.eventID,reason:'OFFICIAL_LINEUP_NOT_PREGAME'});continue;}
   const game=games[0],rows=[],starters={};let valid=true;
   for(const side of ['home','away']){
    const team=game[side+'Team'],official=card[side+'Team'];
@@ -105,16 +106,40 @@ async function fetchSnapshot(url,{fetchImpl,now,signal,timeoutMs}){
  const text=Buffer.concat(chunks).toString('utf8'),rawSha256=sha(text);
  return{source_hash:sha(JSON.stringify({sourceUrl:url,rawSha256})),source_url:url,fetched_at:new Date(now()).toISOString(),body:{rawText:text,rawSha256}};
 }
+
+// Diagnostics describe this collection attempt; they never replace source evidence
+// or make an expected lineup / inactive-name list eligible as confirmed starters.
+export function lineupReadiness(events,evidence,unavailable,issuedAt){
+ const readiness=events.filter(e=>['NBA','NFL'].includes(e.sport)).map(event=>{
+  const observations=evidence.filter(e=>e.eventID===event.eventID),confirmed=observations.some(e=>e.kind==='CONFIRMED_STARTERS'&&e.status==='VERIFIED'),expected=observations.some(e=>e.kind==='EXPECTED_STARTERS'),inactives=observations.some(e=>e.kind==='NFL_OFFICIAL_INACTIVES'&&e.completeInactiveLists===true);
+  const result={sport:event.sport,eventID:event.eventID,startsAt:event.startsAt,status:'UNAVAILABLE',reason:null,injuryReportObserved:observations.some(e=>e.kind==='OFFICIAL_INJURY_REPORT'),inactiveListsVerified:inactives,participationConfirmed:false};
+  if(event.sport==='NBA'){
+   if(time(event.startsAt)-time(issuedAt)>86400000){result.status='NOT_DUE';result.reason='NBA_OUTSIDE_LINEUP_WINDOW';}
+   else if(confirmed){result.status='VERIFIED_PREGAME_STARTERS';result.participationConfirmed=true;}
+   else if(expected){result.status='EXPECTED_STARTERS';result.reason='OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED';}
+   else{
+    const date=day(event.startsAt),urls=[`https://www.nba.com/games?date=${date}`,`https://stats.nba.com/js/data/leaders/00_daily_lineups_${date.replaceAll('-','')}.json`];
+    result.reason=unavailable.find(e=>e?.eventID===event.eventID&&e.reason?.startsWith('OFFICIAL_'))?.reason??(unavailable.some(e=>urls.includes(e?.source))?'OFFICIAL_LINEUP_SOURCE_UNAVAILABLE':'OFFICIAL_LINEUP_EVIDENCE_UNAVAILABLE');
+   }
+  }else if(time(event.startsAt)-time(issuedAt)>3*3600000){result.status='NOT_DUE';result.reason='NFL_OUTSIDE_GAME_DAY_WINDOW';}
+  else if(inactives){result.status='INACTIVE_LISTS_ONLY';result.reason='INACTIVE_LIST_DOES_NOT_CONFIRM_ACTIVE_ROSTER_OR_STARTERS';}
+  else if(observations.some(e=>e.kind==='NFL_OFFICIAL_INACTIVES')){result.status='PARTIAL_INACTIVE_LISTS';result.reason='NFL_INACTIVE_LIST_PARTIAL';}
+  else result.reason=unavailable.some(e=>e?.source===NFL_NEWS||e?.source?.startsWith('https://www.nfl.com/news/'))?'NFL_INACTIVE_SOURCE_UNAVAILABLE':unavailable.some(e=>e?.reason==='NFL_GAME_DAY_INACTIVE_ARTICLE_NOT_PUBLISHED')?'NFL_GAME_DAY_INACTIVE_ARTICLE_NOT_PUBLISHED':'NFL_GAME_DAY_INACTIVE_EVIDENCE_UNAVAILABLE';
+  return result;
+ });
+ const reasonCounts={};for(const row of readiness)if(row.reason)reasonCounts[row.reason]=(reasonCounts[row.reason]??0)+1;
+ return {readiness,reasonCounts};
+}
 export function createWinnerLineupCollector({fetchImpl=fetch,now=Date.now,timeoutMs=3500}={}){
  return async({events=[],signal=new AbortController().signal}={})=>{
   const issuedAt=new Date(now()).toISOString(),pregame=events.filter(e=>validEvent(e,issuedAt)).slice(0,40),nba=pregame.filter(e=>e.sport==='NBA'&&time(e.startsAt)-time(issuedAt)<=86400000),nfl=pregame.filter(e=>e.sport==='NFL'&&time(e.startsAt)-time(issuedAt)<=3*3600000),sources=[],lineupEvidence=[],unavailable=[];
   const get=async url=>{try{const row=await fetchSnapshot(url,{fetchImpl,now,signal,timeoutMs:Math.max(1,Math.min(timeoutMs,3500))});sources.push(row);return row;}catch{unavailable.push({source:url,reason:'LINEUP_SOURCE_UNAVAILABLE'});return null;}};
   const dates=[...new Set(nba.map(e=>day(e.startsAt)))].sort().slice(0,2);
   await Promise.all([
-   ...dates.map(async date=>{const [scheduleSource,lineupSource]=await Promise.all([get('https://www.nba.com/games?date='+date),get(`https://stats.nba.com/js/data/leaders/00_daily_lineups_${date.replaceAll('-','')}.json`)]);if(!scheduleSource||!lineupSource)return;try{const result=nbaOfficialLineupEvidence({events:nba,scheduleHtml:scheduleSource.body.rawText,scheduleSource,lineupPayload:JSON.parse(lineupSource.body.rawText),lineupSource,issuedAt:new Date(now()).toISOString()});lineupEvidence.push(...result.evidence);unavailable.push(...result.unavailable);}catch{unavailable.push({reason:'OFFICIAL_LINEUP_PARSE_UNAVAILABLE'});}}),
+   ...dates.map(async date=>{const scoped=nba.filter(e=>day(e.startsAt)===date),[scheduleSource,lineupSource]=await Promise.all([get('https://www.nba.com/games?date='+date),get(`https://stats.nba.com/js/data/leaders/00_daily_lineups_${date.replaceAll('-','')}.json`)]);if(!scheduleSource||!lineupSource)return;try{const result=nbaOfficialLineupEvidence({events:scoped,scheduleHtml:scheduleSource.body.rawText,scheduleSource,lineupPayload:JSON.parse(lineupSource.body.rawText),lineupSource,issuedAt:new Date(now()).toISOString()});lineupEvidence.push(...result.evidence);for(const item of result.unavailable)unavailable.push(...(typeof item==='string'?scoped.map(e=>({eventID:e.eventID,reason:item})):[item]));}catch{unavailable.push(...scoped.map(e=>({eventID:e.eventID,reason:'OFFICIAL_LINEUP_PARSE_UNAVAILABLE'})));}}),
    ...(nba.length?[get(INJURY_URL).then(source=>{if(source)try{lineupEvidence.push(...nbaInjuryEvidence({events:nba,report:JSON.parse(source.body.rawText),source,issuedAt:new Date(now()).toISOString()}));}catch{unavailable.push({reason:'OFFICIAL_INJURY_PARSE_UNAVAILABLE'});}})]:[]),
    ...(nfl.length?[get(NFL_NEWS).then(async index=>{if(!index)return;const weeks=new Set(nfl.map(e=>e.week));const paths=[...new Set([...index.body.rawText.matchAll(/href=["'](?:https:\/\/www\.nfl\.com)?(\/news\/[a-z0-9-]*inactives[a-z0-9-]*)["']/g)].map(m=>m[1]))].filter(path=>weeks.has(Number(/week-(\d{1,2})-/.exec(path)?.[1]))).slice(0,3);await Promise.all(paths.map(async path=>{const source=await get('https://www.nfl.com'+path);if(source)lineupEvidence.push(...nflInactiveEvidence({events:nfl,html:source.body.rawText,source,issuedAt:new Date(now()).toISOString()}));}));if(!paths.length)unavailable.push({reason:'NFL_GAME_DAY_INACTIVE_ARTICLE_NOT_PUBLISHED'});})]:[])
   ]);
-  return{lineupEvidence,sources,coverage:{nbaCheckedGames:nba.length,nbaConfirmedGames:lineupEvidence.filter(e=>e.kind==='CONFIRMED_STARTERS').length,nbaExpectedGames:lineupEvidence.filter(e=>e.kind==='EXPECTED_STARTERS').length,nbaInjuryGames:lineupEvidence.filter(e=>e.kind==='OFFICIAL_INJURY_REPORT').length,nflCheckedGames:nfl.length,nflInactiveGames:lineupEvidence.filter(e=>e.status==='VERIFIED_INACTIVE_LISTS').length,nflOutsideGameDayWindow:pregame.filter(e=>e.sport==='NFL').length-nfl.length,unavailable:unavailable.slice(0,40)}};
+  return{lineupEvidence,sources,coverage:{nbaCheckedGames:nba.length,nbaConfirmedGames:lineupEvidence.filter(e=>e.kind==='CONFIRMED_STARTERS').length,nbaExpectedGames:lineupEvidence.filter(e=>e.kind==='EXPECTED_STARTERS').length,nbaInjuryGames:lineupEvidence.filter(e=>e.kind==='OFFICIAL_INJURY_REPORT').length,nflCheckedGames:nfl.length,nflInactiveGames:lineupEvidence.filter(e=>e.status==='VERIFIED_INACTIVE_LISTS').length,nflOutsideGameDayWindow:pregame.filter(e=>e.sport==='NFL').length-nfl.length,...lineupReadiness(pregame,lineupEvidence,unavailable,issuedAt),unavailable:unavailable.slice(0,40)}};
  };
 }

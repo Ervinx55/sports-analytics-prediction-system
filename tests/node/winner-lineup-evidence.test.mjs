@@ -103,3 +103,91 @@ test('public status exposes only numeric current lineup and schedule-resolution 
  const res={status(n){this.code=n;return this;},setHeader(){},json(body){this.body=body;return this;}};await handler({method:'GET'},res);
  assert.equal(res.code,200);assert.equal(res.body.schedule_resolutions,2);assert.equal(res.body.cohorts[0].schedule_resolved_games,2);assert.equal(res.body.latest.lineups.nbaExpectedGames,5);assert.equal(res.body.latest.lineups.nbaConfirmedGames,0);assert.equal(JSON.stringify(res.body).includes('private'),false);
 });
+
+const nbaCollector=(payload=daily,extra={})=>createWinnerLineupCollector({now:()=>Date.parse(issuedAt),fetchImpl:async url=>{
+ if(url.startsWith('https://www.nba.com/games?'))return new Response(scheduleHtml);
+ if(url.startsWith('https://stats.nba.com/'))return new Response(JSON.stringify(payload));
+ return new Response('{}');
+},...extra});
+
+test('expected NBA starters produce an event readiness reason without upgrading the immutable evidence',async()=>{
+ const original=JSON.stringify(daily),result=await nbaCollector()({events:[event]});
+ assert.deepEqual(result.coverage.readiness,[{sport:'NBA',eventID:event.eventID,startsAt:event.startsAt,status:'EXPECTED_STARTERS',reason:'OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED',injuryReportObserved:false,inactiveListsVerified:false,participationConfirmed:false}]);
+ assert.deepEqual(result.coverage.reasonCounts,{OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED:1});
+ assert.equal(result.coverage.nbaConfirmedGames,0);
+ assert.equal(normalizeLineupEvidence(event,result.lineupEvidence,issuedAt).verified,false);
+ assert.equal(JSON.stringify(daily),original);
+});
+
+test('official NBA missing and duplicate lineup games have distinct diagnoses from a live game',()=>{
+ const absent=args();absent.lineupPayload.games=[];
+ assert.equal(nbaOfficialLineupEvidence(absent).unavailable[0].reason,'OFFICIAL_LINEUP_GAME_UNAVAILABLE');
+ const duplicate=args();duplicate.lineupPayload.games.push(structuredClone(duplicate.lineupPayload.games[0]));
+ assert.equal(nbaOfficialLineupEvidence(duplicate).unavailable[0].reason,'OFFICIAL_LINEUP_GAME_AMBIGUOUS');
+ const live=confirm(args());live.lineupPayload.games[0].gameStatus=2;
+ assert.equal(nbaOfficialLineupEvidence(live).unavailable[0].reason,'OFFICIAL_LINEUP_NOT_PREGAME');
+ for(const a of [absent,duplicate,live])assert.equal(nbaOfficialLineupEvidence(a).evidence.length,0);
+});
+
+test('a missing NBA game is tracked per event while a source failure remains distinguishable',async()=>{
+ const missing=await nbaCollector({...daily,games:[]})({events:[event]});
+ assert.equal(missing.coverage.readiness[0].reason,'OFFICIAL_LINEUP_GAME_UNAVAILABLE');
+ const failed=await nbaCollector(daily,{fetchImpl:async()=>new Response('',{status:503})})({events:[event]});
+ assert.equal(failed.coverage.readiness[0].reason,'OFFICIAL_LINEUP_SOURCE_UNAVAILABLE');
+ assert.equal(failed.coverage.readiness[0].participationConfirmed,false);
+ assert.equal(failed.lineupEvidence.length,0);
+});
+
+test('future NFL games report not-due status without fetching or inventing a missing starting lineup',async()=>{
+ let calls=0;const collect=createWinnerLineupCollector({now:()=>Date.parse('2026-11-12T20:00:00Z'),fetchImpl:async()=>{calls++;throw Error('not due');}});
+ const result=await collect({events:[nflEvent]});
+ assert.equal(calls,0);assert.equal(result.coverage.nflOutsideGameDayWindow,1);
+ assert.equal(result.coverage.readiness[0].status,'NOT_DUE');
+ assert.equal(result.coverage.readiness[0].reason,'NFL_OUTSIDE_GAME_DAY_WINDOW');
+ assert.deepEqual(result.coverage.reasonCounts,{NFL_OUTSIDE_GAME_DAY_WINDOW:1});
+ assert.equal(result.coverage.readiness[0].participationConfirmed,false);
+});
+
+test('NFL inactive tracking distinguishes a complete list from missing game evidence without claiming starters',async()=>{
+ const collectFor=html=>createWinnerLineupCollector({now:()=>Date.parse('2026-11-13T00:00:00Z'),fetchImpl:async url=>new Response(url.endsWith('/series/around-the-nfl-news')?`<a href="${nflUrl}">Inactive lists</a>`:html)});
+ const complete=await collectFor(nflArgs().html)({events:[nflEvent]});
+ assert.equal(complete.coverage.readiness[0].status,'INACTIVE_LISTS_ONLY');
+ assert.equal(complete.coverage.readiness[0].inactiveListsVerified,true);
+ assert.equal(complete.coverage.readiness[0].participationConfirmed,false);
+ const wrongWeek=nflArgs({...article,headline:article.headline.replace('Week 10','Week 9')}).html;
+ const missing=await collectFor(wrongWeek)({events:[nflEvent]});
+ assert.equal(missing.coverage.readiness[0].reason,'NFL_GAME_DAY_INACTIVE_EVIDENCE_UNAVAILABLE');
+ assert.equal(missing.coverage.readiness[0].inactiveListsVerified,false);
+ assert.equal(missing.lineupEvidence.length,0);
+});
+
+test('readiness recognizes only explicit confirmed NBA fives and preserves the pregame receipt guard',async()=>{
+ const payload=confirm(args()).lineupPayload;
+ const confirmed=await nbaCollector(payload)({events:[event]});
+ assert.equal(confirmed.coverage.readiness[0].status,'VERIFIED_PREGAME_STARTERS');
+ assert.equal(confirmed.coverage.readiness[0].participationConfirmed,true);
+ assert.equal(confirmed.coverage.readiness[0].reason,null);
+ assert.deepEqual(confirmed.coverage.reasonCounts,{});
+ assert.equal(normalizeLineupEvidence(event,confirmed.lineupEvidence,issuedAt).verified,true);
+ const live=structuredClone(payload);live.games[0].gameStatus=2;
+ const rejected=await nbaCollector(live)({events:[event]});
+ assert.equal(rejected.coverage.readiness[0].participationConfirmed,false);
+ assert.equal(rejected.coverage.readiness[0].reason,'OFFICIAL_LINEUP_NOT_PREGAME');
+});
+
+test('a malformed daily feed is diagnosed only for its own slate date',async()=>{
+ const second={...event,eventID:'espn:402',startsAt:'2026-11-18T17:30:00Z'};
+ const secondSchedule=structuredClone(schedule);secondSchedule.props.pageProps.selectedDate='2026-11-18';
+ const card=secondSchedule.props.pageProps.gameCardFeed.modules[0].cards[0].cardData;card.gameId='0022600299';card.gameTimeUtc=second.startsAt;
+ const collect=nbaCollector(daily,{fetchImpl:async url=>{
+  if(url.endsWith('date=2026-11-17'))return new Response(scheduleHtml);
+  if(url.endsWith('date=2026-11-18'))return new Response('<script id="__NEXT_DATA__">'+JSON.stringify(secondSchedule)+'</script>');
+  if(url.endsWith('20261117.json'))return new Response(JSON.stringify(daily));
+  if(url.endsWith('20261118.json'))return new Response('{');
+  return new Response('{}');
+ }});
+ const result=await collect({events:[event,second]});
+ assert.equal(result.coverage.readiness.find(r=>r.eventID===event.eventID).reason,'OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED');
+ assert.equal(result.coverage.readiness.find(r=>r.eventID===second.eventID).reason,'OFFICIAL_LINEUP_PARSE_UNAVAILABLE');
+ assert.equal(result.coverage.nbaExpectedGames,1);assert.equal(result.coverage.nbaConfirmedGames,0);
+});

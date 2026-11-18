@@ -21,6 +21,21 @@ test('public winner status exposes aggregate counts and never stored forecast do
  assert.equal(JSON.stringify(res.body).includes('private-source'),false);assert.equal('sources' in res.body,false);
 });
 
+test('public status distinguishes current readiness from immutable cohorts and sanitizes diagnostics',async()=>{
+ const event={sport:'NBA',event_id:'espn:1',starts_at:'2026-11-18T00:30:00Z',observed_at:'2026-11-17T16:00:00Z',issued_at:'2026-11-17T16:00:00Z',capture_window:'EARLY',observation_fresh:true,lineup_verified_at_observation:false,lineup_status:'UNAVAILABLE',lineup_reason:'CONFIRMED_PREGAME_LINEUP_UNAVAILABLE',paired_prices_at_observation:true,pair_count:2,price_reasons:[],forecast:{secret:'private-source'},sourceUrl:'https://private.test'};
+ const quoteEvent={eventID:'espn:1',startsAt:event.starts_at,sourceStatus:'OBSERVED',mappingStatus:'EXACT_MATCH',pairedPriceEligible:true,pairCount:2,matchingQuotes:2,rejectedQuotes:0,conflictingBooks:0,oneSidedBooks:1,unavailableBooks:3,reasons:['QUOTE_ONE_SIDED_BOOK'],raw:'private-source'};
+ const lineupEvent={sport:'NBA',eventID:'espn:1',startsAt:event.starts_at,status:'EXPECTED_STARTERS',reason:'OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED',injuryReportObserved:true,inactiveListsVerified:false,participationConfirmed:false,raw:'private-source'};
+ const handler=createWinnerHandler({env,store:{status:async()=>({readinessObservations:12,cohorts:[{sport:'NBA',capture_window:'EARLY',games:21,paired_prices:5}],readiness:{basis:'LATEST_PREGAME_OBSERVATION_NOT_ORIGINAL_FORECAST',maxAgeSeconds:900,events:[event,{...event,sport:'OTHER'}]},latest:{generatedAt:event.issued_at,coverage:{quotes:{NBA:{status:'OBSERVED',assessedAt:event.issued_at,expectedEvents:1,mappedEvents:1,eventsWithPairs:1,eligiblePairs:2,reasonCounts:{QUOTE_ONE_SIDED_BOOK:1,'unsafe reason':2,NEGATIVE:-1},readiness:[quoteEvent]}},lineups:{nbaExpectedGames:1,reasonCounts:{OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED:1},readiness:[lineupEvent]}}}})}});
+ const res=response();await handler({method:'GET',headers:{}},res);
+ assert.equal(res.body.cohorts[0].paired_prices,5);assert.equal(res.body.readiness.events[0].paired_prices_at_observation,true);
+ assert.equal(res.body.readiness.events.length,1);assert.equal(res.body.readiness.basis,'LATEST_PREGAME_OBSERVATION_NOT_ORIGINAL_FORECAST');
+ assert.equal(res.body.readinessObservations,12);assert.equal(res.body.latest.quotes.NBA.readiness[0].oneSidedBooks,1);
+ assert.deepEqual(res.body.latest.quotes.NBA.reasonCounts,{QUOTE_ONE_SIDED_BOOK:1});
+ assert.equal(res.body.latest.lineups.readiness[0].participationConfirmed,false);
+ assert.deepEqual(res.body.latest.lineups.reasonCounts,{OFFICIAL_STARTERS_EXPECTED_NOT_CONFIRMED:1});
+ assert.equal(JSON.stringify(res.body).includes('private'),false);
+});
+
 test('NFL kickoff uses the exact Eastern calendar date across UTC midnight and DST',()=>{
  assert.equal(nflKickoff({gameday:'2026-11-19',gametime:'20:15'}),'2026-11-20T01:15:00.000Z');
  assert.equal(nflKickoff({gameday:'2026-09-10',gametime:'20:20'}),'2026-09-11T00:20:00.000Z');
@@ -92,6 +107,20 @@ test('conflicting SGO event IDs cannot silently choose the first moneyline mappi
  const load=createWinnerSourceLoader({env:{SPORTS_ODDS_API_KEY:'sgo-test'},now:()=>Date.parse(issueAt),optimize:async()=>({effectiveLimit:40}),providerFetch:async({url})=>({fetchedAt:Date.parse(sourceAt),payload:{data:new URL(url).searchParams.get('leagueID')==='NBA'?[{...raw,eventID:'first'},{...raw,eventID:'second'}]:[]}}),fetchImpl:async url=>url.includes('/basketball/nba/')?new Response(JSON.stringify({events:url.includes('dates=20261117')?[upcoming]:[]})):new Response('',{status:503})});
  const result=await load({action:'refresh'});
  assert.equal(result.quotes.length,0);assert.equal(result.groups.NBA.events[0].sourceIds.sgo,undefined);
+});
+
+test('quote coverage separates provider, mapping, one-sided book and stale-price gaps',async()=>{
+ const team=(id,abbreviation,homeAway)=>({homeAway,team:{id,abbreviation}});
+ const game={id:'1',date:'2026-11-18T00:30:00Z',status:{type:{state:'pre',completed:false}},season:{year:2027},competitions:[{competitors:[team('1','BOS','home'),team('2','NY','away')]}]};
+ const h={available:true,odds:-110,lastUpdatedAt:sourceAt},raw={eventID:'sgo1',leagueID:'NBA',type:'match',status:{startsAt:game.date},teams:{home:{names:{short:'BOS'}},away:{names:{short:'NY'}}},odds:{'points-home-game-ml-home':{byBookmaker:{draftkings:h}},'points-away-game-ml-away':{byBookmaker:{draftkings:h}}}};
+ const collect=async(data,options={})=>createWinnerSourceLoader({env:options.noKey?{}:{SPORTS_ODDS_API_KEY:'provider-test-key'},now:()=>Date.parse(issueAt),fetchImpl:async url=>url.includes('/basketball/nba/')?new Response(JSON.stringify({events:url.includes('dates=20261117')?[game]:[]})):new Response('',{status:503}),optimize:async()=>({blocked:options.blocked,effectiveLimit:40}),providerFetch:async({url})=>({fetchedAt:Date.parse(issueAt),payload:{data:url.includes('leagueID=NBA')?data:[],...(options.partial?{nextCursor:'next'}:{})}})})({action:'refresh'});
+ const good=await collect([raw]),oneSided=structuredClone(raw),stale=structuredClone(raw);
+ delete oneSided.odds['points-away-game-ml-away'].byBookmaker.draftkings;
+ stale.odds['points-home-game-ml-home'].byBookmaker.draftkings.lastUpdatedAt='2026-11-17T15:30:00Z';
+ const cases=[[[oneSided],{},'QUOTE_ONE_SIDED_BOOK'],[[stale],{},'QUOTE_UPDATE_STALE'],[[],{},'QUOTE_EVENT_NOT_RETURNED'],[[],{partial:true},'QUOTE_EVENT_NOT_RETURNED_PARTIAL_PAGE'],[[raw,{...raw,eventID:'other'}],{},'QUOTE_EVENT_MAPPING_AMBIGUOUS'],[[],{noKey:true},'QUOTE_SOURCE_NOT_CONFIGURED'],[[],{blocked:true},'PROVIDER_BUDGET_RESERVED']];
+ assert.equal(good.coverage.quotes.NBA.eventsWithPairs,1);assert.equal(good.coverage.quotes.NBA.readiness[0].pairCount,1);
+ assert.equal(good.coverage.quotes.NBA.assessedAt,issueAt.replace('Z','.000Z'));
+ for(const [data,options,reason] of cases){const result=await collect(data,options),coverage=result.coverage.quotes.NBA;assert.equal(coverage.eventsWithPairs,0,reason);assert.equal(coverage.reasonCounts[reason],1,reason);assert.ok(coverage.readiness[0].reasons.includes(reason));}
 });
 
 test('collection deadline aborts source work without writing partial forecasts',async()=>{
