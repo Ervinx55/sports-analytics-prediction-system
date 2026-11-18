@@ -7,6 +7,7 @@ import {
   seasonForDate,
   teamSnapshot
 } from "../lib/nfl-model.js";
+import { buildTeamScoringContext } from "../lib/team-scoring-context.js";
 
 const DEFAULT_BOARD_URL =
   "https://sports-analytics-prediction-system-tau.vercel.app/api/board";
@@ -122,8 +123,8 @@ export default async function handler(req, res) {
     );
     const weatherByEvent = new Map(weatherEntries);
 
-    const projections = events.map((event) =>
-      projectEvent({
+    const projections = events.map((event) => {
+      const projection = projectEvent({
         event,
         schedule: nflData.schedule,
         stats: nflData.stats,
@@ -133,8 +134,16 @@ export default async function handler(req, res) {
         season,
         weatherContext: weatherByEvent.get(event.eventID) || null,
         sourceHealth: nflData.sourceHealth
-      })
-    );
+      });
+      return {...projection,teamScoringContext:buildTeamScoringContext({
+        sport:'NFL',event:{eventId:event.eventID,startsAt:event.startsAt,season,
+          home:{teamId:projection.matchup?.home?.nflverse,teamName:event.matchup?.home?.name},
+          away:{teamId:projection.matchup?.away?.nflverse,teamName:event.matchup?.away?.name}},
+        games:nflData.schedule,cutoffAt:projection.forecastReadiness?.asOf || new Date(Date.now()).toISOString(),
+        // loadNflData may serve cached text and does not expose its original receipt.
+        observedAt:null
+      })};
+    });
 
     const markets = projections
       .filter((projection) => projection.available)
@@ -145,6 +154,7 @@ export default async function handler(req, res) {
           away: projection.matchup.away.name,
           home: projection.matchup.home.name,
           forecastReadiness: projection.forecastReadiness,
+          teamScoringContext: projection.teamScoringContext,
           ...market
         }))
       )

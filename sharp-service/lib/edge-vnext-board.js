@@ -24,6 +24,7 @@ export function buildEdgeBoard({ nflResponse = null, nbaResponse = null, now = n
     });
     rows.push({
       sport:"NFL", eventId:m.eventID, startsAt:m.startsAt, label:m.label,
+      ...(m.teamScoringContext?{teamScoringContext:m.teamScoringContext}:{}),
       matchup:[m.away,m.home].filter(Boolean).join(" @ "),
       marketType:m.marketType, side:m.side, line:m.line ?? null,
       bestBook:m.bestBook ?? null, bestOdds:m.bestOdds ?? null,

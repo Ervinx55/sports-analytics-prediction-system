@@ -1,3 +1,4 @@
+import {teamScoringHtml} from '../../sharp-service/team-scoring-view.js';
 import {deepDiveHtml} from '../../sharp-service/deep-dive.js';
 import {decisionPresentation,decisionTime} from '../../sharp-service/decision-display.js';
 import test from 'node:test';
@@ -65,7 +66,7 @@ test('failed refresh cannot restore old cards through a filter or timer render',
  const html=fs.readFileSync(new URL('../../sharp-service/nfl.html',import.meta.url),'utf8');
  const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;$/gm,'');
  const payload={generatedAt:new Date().toISOString(),markets:[{eventID:'one',away:'Away',home:'Home',startsAt:new Date(Date.now()+3600000).toISOString(),marketType:'total',label:'Over',line:44.5,modelProbability:.55,marketFairProbability:.5}]};
- const context=vm.createContext({document:{getElementById:get},modelRows,marketLabel,decisionPresentation,decisionTime,deepDiveHtml,preserveDeepDives(){},AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
+ const context=vm.createContext({document:{getElementById:get},teamScoringHtml,modelRows,marketLabel,decisionPresentation,decisionTime,deepDiveHtml,preserveDeepDives(){},AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
  await vm.runInContext(script,context);assert.match(get('cards').innerHTML,/44.5/);assert.match(get('cards').innerHTML,/NOT CLEARED/);assert.match(get('cards').innerHTML,/Decision recorded: Not recorded/);
  context.fetch=async()=>{throw new Error('Upstream unavailable')};await vm.runInContext('load(true)',context);vm.runInContext('render()',context);
  assert.equal(get('cards').innerHTML,'');assert.match(get('status').textContent,/Upstream unavailable/);
@@ -77,7 +78,7 @@ test('NFL rendered cards distinguish market reference from model and show blocke
  const script=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1].replace(/^import .*;$/gm,'');
  const startsAt=new Date(Date.now()+3600000).toISOString();
  const payload={generatedAt:new Date().toISOString(),productionEligible:false,markets:[{eventID:'one',away:'Away',home:'Home',startsAt,marketType:'moneyline',label:'Home',modelProbability:.75,marketFairProbability:.75,probabilitySource:'market_only',independentContributionWeight:0}],events:[{eventID:'two',startsAt,available:false,matchup:{away:{name:'Visitor'},home:{name:'Host'}},reason:'Quarterback sources disagree: scheduled Old & depth New.'}]};
- const context=vm.createContext({document:{getElementById:get},modelRows,marketLabel,decisionPresentation,decisionTime,deepDiveHtml,preserveDeepDives(){},AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
+ const context=vm.createContext({document:{getElementById:get},teamScoringHtml,modelRows,marketLabel,decisionPresentation,decisionTime,deepDiveHtml,preserveDeepDives(){},AbortController,setTimeout,clearTimeout,setInterval(){},fetch:async()=>({ok:true,json:async()=>payload})});
  await vm.runInContext(script,context);
  const cards=get('cards').innerHTML;
  assert.match(cards,/Market prices only; independent model contribution is 0%/);
