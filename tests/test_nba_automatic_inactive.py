@@ -12,6 +12,24 @@ def api():
 def test_automatic_endpoint_is_present():
     assert hasattr(api(),'final_response')
 
+def test_comma_suffix_remains_one_exact_roster_identity():
+    from official_inactive import parse_inactive,resolve_roster
+    game,card,rosters,text=fixture_sources()
+    text=text.replace('Reaves (Illness)','Udeh, Jr. (Illness), Reaves (Illness)')
+    teams=[{'name':'Los Angeles Lakers','shortName':'Lakers','tricode':'LAL'},{'name':'Atlanta Hawks','shortName':'Hawks','tricode':'ATL'}]
+    names=parse_inactive(text,'2026-11-09',teams)['LAL']
+    assert names==['Udeh, Jr.','Reaves']
+    rosters[0]['roster'].append({'PLAYER_ID':1643640,'PLAYER':'Ernest Udeh, Jr.'})
+    result=resolve_roster(rosters[0],{'teamId':1610612747,'tricode':'LAL','name':'Los Angeles Lakers'},names,'2026-27')
+    assert result[0]['fullName']=='Ernest Udeh, Jr.'
+    assert result[0]['firstName']=='Ernest' and result[0]['lastName']=='Udeh, Jr.'
+
+def test_orphan_suffix_is_rejected():
+    from official_inactive import parse_inactive
+    _,_,_,text=fixture_sources()
+    teams=[{'name':'Los Angeles Lakers','shortName':'Lakers','tricode':'LAL'},{'name':'Atlanta Hawks','shortName':'Hawks','tricode':'ATL'}]
+    with pytest.raises(ValueError):parse_inactive(text.replace('Reaves (Illness)','Jr. (Illness)'),'2026-11-09',teams)
+
 def test_strict_first_page_explicit_inactive():
     from official_inactive import parse_inactive
     text="FINAL BOX\nMonday, November 9, 2026 Arena\nVISITOR: Los Angeles Lakers (1-0)\nHOME: ATLANTA HAWKS (0-1)\nInactive: Lakers - Reaves (Injury (illness)), Grimes (Right\n Finger)\nInactive: Hawks - None\nPoints in the Paint: Lakers 10"
@@ -78,6 +96,7 @@ def test_explicit_bare_surname_is_allowed_inside_inactive_section():
     teams=[{'name':'Los Angeles Lakers','shortName':'Lakers','tricode':'LAL'},{'name':'Atlanta Hawks','shortName':'Hawks','tricode':'ATL'}]
     assert parse_inactive(text,'2026-11-09',teams)['LAL']==['Reaves','James']
 @pytest.mark.parametrize('gid,pair,expected',[
+    ('0022600204','CLECHA',['Ernest Udeh, Jr.','Moussa Diabaté']),
     ('0022600203','LALATL',['Austin Reaves','Quentin Grimes']),
     ('0022600206','MEMTOR',['Scottie Barnes','Immanuel Quickley','Collin Murray-Boyles']),
     ('0022600209','SASPHX',['Mark Williams','Devin Vassell']),
