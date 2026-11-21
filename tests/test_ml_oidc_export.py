@@ -32,7 +32,12 @@ def test_github_ml_export_function_has_narrow_oidc_trust():
     assert '.github/workflows/ml-shadow.yml@refs/heads/master' in source
     assert 'refs/heads/master' in source
     assert 'player_prop_training_export' in source
-    assert 'SUPABASE_SECRET_KEYS' in source
+    assert 'serverKey((name: string) => Deno.env.get(name))' in source
+    credentials = (
+        ROOT / "supabase" / "functions" / "github-ml-training-export"
+        / "credentials.mjs"
+    ).read_text()
+    assert 'SUPABASE_SECRET_KEYS' in credentials
 
     config = tomllib.loads(
         (ROOT / "supabase" / "config.toml").read_text()

@@ -48,6 +48,21 @@ server credential.
 Local administrators can still run `export_player_prop_snapshot.py` with a
 Supabase secret/service-role key, but scheduled GitHub training uses OIDC only.
 
+The Edge Function prefers its already-provisioned `SUPABASE_SERVICE_ROLE_KEY`
+for the internal Data API request. On 2026-11-09, the modern-key request returned
+HTTP 401 (`PGRST303`) after GitHub OIDC authorization succeeded, which surfaced
+as an HTTP 500 to the workflow. The training view still contained 9,464 rows at
+the 2026-11-10 diagnostic check. Modern-only projects remain supported through
+`SUPABASE_SECRET_KEYS`; a modern key is sent only in `apikey`, never as a bearer
+token. No credential is stored in GitHub or returned to the workflow.
+
+After deploying a credential-path change, rerun the existing shadow workflow
+and confirm the live export, evaluation, training, and artifact upload all
+finish. A unit-test pass alone does not establish live recovery. Repair and
+verify the project's modern-key authentication before retiring its existing
+service-role JWT. Do not change the function's OIDC trust or the training gates
+to get around an export failure.
+
 Scheduled retraining does not automatically promote a model. It only refreshes
 evidence and artifacts; the promotion gates remain authoritative.
 
