@@ -175,12 +175,19 @@ function playoffLeverage(team) {
 }
 
 async function fetchJson(url) {
-  const r = await fetch(url, { headers: { accept: "application/json" }, cache: "no-store" });
-  const text = await r.text();
-  let body;
-  try { body = JSON.parse(text); } catch { body = { error: text.slice(0, 400) }; }
-  if (!r.ok) throw new Error(`${r.status} ${url}: ${JSON.stringify(body).slice(0, 400)}`);
-  return body;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const r = await fetch(url, {
+      headers: { accept: "application/json" },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!r.ok) throw new Error("UPSTREAM_HTTP_" + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function selectPitcherSplit(payload) {
@@ -260,16 +267,27 @@ export default async function handler(req, res) {
     if (startsAfter) boardParams.set("startsAfter", startsAfter);
     if (startsBefore) boardParams.set("startsBefore", startsBefore);
 
-    const [board, alerts, standings, schedule] = await Promise.all([
-      fetchJson(`${BOARD_URL}?${boardParams.toString()}`),
-      fetchJson(`${ALERT_URL}?league=MLB&hours=36&minBooks=3`),
-      fetchJson(
-        "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason"
-      ),
-      fetchJson(
-        `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${encodeURIComponent(date)}&hydrate=probablePitcher`
-      ),
-    ]);
+    const dependencies = [
+      ["board", `${BOARD_URL}?${boardParams.toString()}`],
+      ["alerts", `${ALERT_URL}?league=MLB&hours=36&minBooks=3`],
+      ["standings", "https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=2026&standingsTypes=regularSeason"],
+      ["schedule", `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${encodeURIComponent(date)}&hydrate=probablePitcher`],
+    ];
+    const results = await Promise.allSettled(dependencies.map(([, url]) => fetchJson(url)));
+    const failures = results.flatMap((result, index) =>
+      result.status === "rejected"
+        ? [{ dependency: dependencies[index][0], reason: "UPSTREAM_UNAVAILABLE" }]
+        : []
+    );
+    if (failures.length) {
+      return res.status(503).json({
+        error: "Decision dependencies unavailable",
+        code: "DATA_BLOCKED",
+        finalPlayAuthorized: false,
+        failedDependencies: failures,
+      });
+    }
+    const [board, alerts, standings, schedule] = results.map((result) => result.value);
 
     const stMap = standingsRows(standings);
     const games = schedule?.dates?.flatMap((d) => d.games || []) || [];
