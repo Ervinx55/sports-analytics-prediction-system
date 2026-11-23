@@ -1,3 +1,5 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const BOARD_URL = "https://sports-analytics-prediction-system-tau.vercel.app/api/board";
@@ -21,6 +23,13 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "POST only" }), {
         status: 405,
         headers: { "content-type": "application/json" },
+      });
+    }
+
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
       });
     }
 
@@ -53,7 +62,7 @@ Deno.serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const serviceRole = serviceRoleKey()!;
     const supabase = createClient(supabaseUrl, serviceRole);
 
     const { data: run, error: runError } = await supabase
@@ -105,8 +114,21 @@ Deno.serve(async (req) => {
             line: toNum(b.line),
             odds: toInt(b.odds),
             available: b.available ?? null,
-            source: "mainstream",
+            source:
+              event.provider ??
+              board.source ??
+              "mainstream",
             raw: {
+              provider:
+                event.provider ??
+                board.source ??
+                null,
+              providerEventID:
+                event.providerEventID ?? null,
+              providerChain:
+                board.providerChain ?? null,
+              providersUsed:
+                board.providersUsed ?? null,
               updatedAt: b.updatedAt ?? null,
               openOdds: b.openOdds ?? null,
               openLine: b.openLine ?? null,
@@ -130,9 +152,19 @@ Deno.serve(async (req) => {
       .update({
         row_count: rows.length,
         status: "ok",
-        note: board.unavailableLeagues?.length
-          ? JSON.stringify(board.unavailableLeagues)
-          : null,
+        note:
+          board.providerFailures?.length ||
+          board.unavailableLeagues?.length
+            ? JSON.stringify({
+                source: board.source ?? null,
+                providersUsed:
+                  board.providersUsed ?? [],
+                providerFailures:
+                  board.providerFailures ?? [],
+                unavailableLeagues:
+                  board.unavailableLeagues ?? [],
+              })
+            : null,
       })
       .eq("id", run.id);
 
