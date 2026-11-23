@@ -134,104 +134,221 @@
     {
       "slug": "capture-nba-player-props",
       "status": "ACTIVE",
-      "version": 7,
+      "version": 8,
       "verify_jwt": true,
-      "bundle_sha256": "cf1401b157f8cf2ff02fda16d6d45ebce4d95da44bfe41841619df725480d3b2",
+      "bundle_sha256": "40dbf32098014e066253e45739ab08f5c3b1382fc652d05f538d3fd228f5536b",
       "entrypoint": "index.ts",
-      "sourceRoot": "supabase/deployed-snapshots/capture-nba-player-props/v7",
+      "sourceRoot": "supabase/functions/capture-nba-player-props",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-nba-player-props/v7/index.ts",
+          "path": "supabase/functions/capture-nba-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "68cab45b2b157e03ac9e547e362278607bc05b52699730f73f8a7f3fd20451b8",
-          "bytes": 10077
+          "sha256": "2cbd1568d783109923b2b8493856d00d7f7df5c7834ccf910ef514b18ba5201b",
+          "bytes": 10393
         },
         {
-          "path": "supabase/deployed-snapshots/capture-nba-player-props/v7/service-role-key.mjs",
+          "path": "supabase/functions/capture-nba-player-props/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/capture-nba-player-props/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_3c54388f-ea20-4c48-bace-62c1b62a7e31_7/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_3c54388f-ea20-4c48-bace-62c1b62a7e31_8/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role authorization before protected work"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:19.006000+00:00"
+      "deployed_at": "2026-11-23T18:41:53.610000+00:00",
+      "previousDeployment": {
+        "slug": "capture-nba-player-props",
+        "status": "ACTIVE",
+        "version": 7,
+        "verify_jwt": true,
+        "bundle_sha256": "cf1401b157f8cf2ff02fda16d6d45ebce4d95da44bfe41841619df725480d3b2",
+        "entrypoint": "index.ts",
+        "sourceRoot": "supabase/deployed-snapshots/capture-nba-player-props/v7",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-nba-player-props/v7/index.ts",
+            "name": "index.ts",
+            "sha256": "68cab45b2b157e03ac9e547e362278607bc05b52699730f73f8a7f3fd20451b8",
+            "bytes": 10077
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-nba-player-props/v7/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_3c54388f-ea20-4c48-bace-62c1b62a7e31_7/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:19.006000+00:00"
+      }
     },
     {
       "slug": "capture-nfl-player-props",
       "status": "ACTIVE",
-      "version": 6,
+      "version": 7,
       "verify_jwt": true,
-      "bundle_sha256": "a7092d70a3dfb76172306ca22deaae703fc0904008e356eea89914c27c5fd068",
+      "bundle_sha256": "c3bf584ebfb94da9e95262c1376c1ea3c71eccb14fee198ddf51c95add0ddfd1",
       "entrypoint": "index.ts",
-      "sourceRoot": "supabase/deployed-snapshots/capture-nfl-player-props/v6",
+      "sourceRoot": "supabase/functions/capture-nfl-player-props",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-nfl-player-props/v6/index.ts",
+          "path": "supabase/functions/capture-nfl-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "788be03a47be127007fa4208df423a6b4291ea1b3bf85362c280888a78ecee1d",
-          "bytes": 11097
+          "sha256": "18e2c5e1b75c54d35c9b458d1d3e52ee66b19075e7055cfeef5d1b52cb364cd1",
+          "bytes": 11413
         },
         {
-          "path": "supabase/deployed-snapshots/capture-nfl-player-props/v6/service-role-key.mjs",
+          "path": "supabase/functions/capture-nfl-player-props/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/capture-nfl-player-props/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_a427397e-df88-43d5-a2fb-781856f930f2_6/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_a427397e-df88-43d5-a2fb-781856f930f2_7/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role authorization before protected work"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:17.736000+00:00"
+      "deployed_at": "2026-11-23T18:41:55.532000+00:00",
+      "previousDeployment": {
+        "slug": "capture-nfl-player-props",
+        "status": "ACTIVE",
+        "version": 6,
+        "verify_jwt": true,
+        "bundle_sha256": "a7092d70a3dfb76172306ca22deaae703fc0904008e356eea89914c27c5fd068",
+        "entrypoint": "index.ts",
+        "sourceRoot": "supabase/deployed-snapshots/capture-nfl-player-props/v6",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-nfl-player-props/v6/index.ts",
+            "name": "index.ts",
+            "sha256": "788be03a47be127007fa4208df423a6b4291ea1b3bf85362c280888a78ecee1d",
+            "bytes": 11097
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-nfl-player-props/v6/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_a427397e-df88-43d5-a2fb-781856f930f2_6/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:17.736000+00:00"
+      }
     },
     {
       "slug": "capture-pitchmix-features",
-      "version": 8,
+      "version": 9,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "7e4d45bc88945f38125a1a75886b94f278a34fbdb154a9185657bec15530ccca",
+      "bundle_sha256": "c53198030f9a137a89d4d64888d9fac65d1947116a0669036957a2f98795dfc4",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-pitchmix-features/v8/index.ts",
+          "path": "supabase/functions/capture-pitchmix-features/index.ts",
           "name": "index.ts",
-          "sha256": "b0f87a1df168c9b3d49c719b21bfdf85fe07d606f9c365acfab860d3ad73e7d3",
-          "bytes": 5163
+          "sha256": "1a6d1a7ca53979ed07185820e82ba3d52d5df6c31c6024d6adee136f32835a33",
+          "bytes": 5207
         },
         {
-          "path": "supabase/deployed-snapshots/capture-pitchmix-features/v8/service-role-key.mjs",
+          "path": "supabase/functions/capture-pitchmix-features/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/capture-pitchmix-features/v8",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/capture-pitchmix-features",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_fe6b34ca-0014-47d1-a6c5-07748e477c5b_8/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_fe6b34ca-0014-47d1-a6c5-07748e477c5b_9/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "strict modern credential default"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:11:18.347000+00:00"
+      "deployed_at": "2026-11-23T18:42:04.248000+00:00",
+      "previousDeployment": {
+        "slug": "capture-pitchmix-features",
+        "version": 8,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "7e4d45bc88945f38125a1a75886b94f278a34fbdb154a9185657bec15530ccca",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-pitchmix-features/v8/index.ts",
+            "name": "index.ts",
+            "sha256": "b0f87a1df168c9b3d49c719b21bfdf85fe07d606f9c365acfab860d3ad73e7d3",
+            "bytes": 5163
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-pitchmix-features/v8/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/capture-pitchmix-features/v8",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_fe6b34ca-0014-47d1-a6c5-07748e477c5b_8/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:11:18.347000+00:00"
+      }
     },
     {
       "slug": "capture-player-props",
@@ -984,42 +1101,89 @@
     {
       "slug": "grade-nba-player-props",
       "status": "ACTIVE",
-      "version": 7,
+      "version": 8,
       "verify_jwt": true,
-      "bundle_sha256": "399b8f0b7dba6ae9a7aadca91854681254025fdcb3992ef1951dabf9fe1ecba4",
+      "bundle_sha256": "af81be7ae32cbe0a0f700bf31f94d04457a508366116ac489122a183d5c55379",
       "entrypoint": "index.ts",
-      "sourceRoot": "supabase/deployed-snapshots/grade-nba-player-props/v7",
+      "sourceRoot": "supabase/functions/grade-nba-player-props",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/index.ts",
+          "path": "supabase/functions/grade-nba-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "de5a0abf1f475e0b863290f564f53e10fe753d2137f8273fc6f6d823443c21c3",
-          "bytes": 5914
+          "sha256": "b27c50968092fbdca10a42d4af05a0c1dba930a4d431f59526b53a0c39655619",
+          "bytes": 6230
         },
         {
-          "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/service-role-key.mjs",
+          "path": "supabase/functions/grade-nba-player-props/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/grade-nba-player-props/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         },
         {
-          "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/nba-player-results.js",
+          "path": "supabase/functions/grade-nba-player-props/nba-player-results.js",
           "name": "nba-player-results.js",
           "sha256": "3cf5ca49b484b07d0f5d59fb1d77b3970d952532e174feb22b1f9cbcdc879212",
           "bytes": 7680
         }
       ],
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5aea5de7-546d-46b7-84a6-ee3c45e81e27_7/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5aea5de7-546d-46b7-84a6-ee3c45e81e27_8/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role authorization before protected work"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:20.348000+00:00"
+      "deployed_at": "2026-11-23T18:41:58.632000+00:00",
+      "previousDeployment": {
+        "slug": "grade-nba-player-props",
+        "status": "ACTIVE",
+        "version": 7,
+        "verify_jwt": true,
+        "bundle_sha256": "399b8f0b7dba6ae9a7aadca91854681254025fdcb3992ef1951dabf9fe1ecba4",
+        "entrypoint": "index.ts",
+        "sourceRoot": "supabase/deployed-snapshots/grade-nba-player-props/v7",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/index.ts",
+            "name": "index.ts",
+            "sha256": "de5a0abf1f475e0b863290f564f53e10fe753d2137f8273fc6f6d823443c21c3",
+            "bytes": 5914
+          },
+          {
+            "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          },
+          {
+            "path": "supabase/deployed-snapshots/grade-nba-player-props/v7/nba-player-results.js",
+            "name": "nba-player-results.js",
+            "sha256": "3cf5ca49b484b07d0f5d59fb1d77b3970d952532e174feb22b1f9cbcdc879212",
+            "bytes": 7680
+          }
+        ],
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5aea5de7-546d-46b7-84a6-ee3c45e81e27_7/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:20.348000+00:00"
+      }
     },
     {
       "slug": "grade-player-props",
@@ -2091,37 +2255,72 @@
     },
     {
       "slug": "provider-health-status",
-      "version": 10,
+      "version": 11,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "c6dbb992df476818e7b29aff4fa4ddd87f52cdf5a38735bfaaa3c80ab7f4acb0",
+      "bundle_sha256": "bbd84287a3eb67f8704c5a91b668c634381b7e2006d82602f790bf4e33de20d8",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/provider-health-status/v10/index.ts",
+          "path": "supabase/functions/provider-health-status/index.ts",
           "name": "index.ts",
-          "sha256": "73d57bfc1b38cf642057cff73760d2d5627c05c5b70088b923e38ef3c151bcf4",
-          "bytes": 13001
+          "sha256": "12e474c2e8091d14cd3055f9e78f324e2377634ed89f16d05feebbca2db45e6e",
+          "bytes": 13045
         },
         {
-          "path": "supabase/deployed-snapshots/provider-health-status/v10/service-role-key.mjs",
+          "path": "supabase/functions/provider-health-status/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/provider-health-status/v10",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/provider-health-status",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_99fa6b2e-53d6-4332-9a66-0f5bfa44c2e3_10/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_99fa6b2e-53d6-4332-9a66-0f5bfa44c2e3_11/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "strict modern credential default"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:11:17.116000+00:00"
+      "deployed_at": "2026-11-23T18:42:06.518000+00:00",
+      "previousDeployment": {
+        "slug": "provider-health-status",
+        "version": 10,
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "bundle_sha256": "c6dbb992df476818e7b29aff4fa4ddd87f52cdf5a38735bfaaa3c80ab7f4acb0",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/provider-health-status/v10/index.ts",
+            "name": "index.ts",
+            "sha256": "73d57bfc1b38cf642057cff73760d2d5627c05c5b70088b923e38ef3c151bcf4",
+            "bytes": 13001
+          },
+          {
+            "path": "supabase/deployed-snapshots/provider-health-status/v10/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/provider-health-status/v10",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_99fa6b2e-53d6-4332-9a66-0f5bfa44c2e3_10/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:11:17.116000+00:00"
+      }
     },
     {
       "slug": "refresh-mlb-verification-gate",
@@ -2228,42 +2427,89 @@
     {
       "slug": "refresh-nba-player-prop-clv",
       "status": "ACTIVE",
-      "version": 7,
+      "version": 8,
       "verify_jwt": true,
-      "bundle_sha256": "08f2aacfba74a2d2fd9d43211f710748192a72366c006e428bec4124a9580142",
+      "bundle_sha256": "7c16d148b4abca29c567789ba29d171b68ac2355fc270cfabe64bd30dbcbdfb1",
       "entrypoint": "index.ts",
-      "sourceRoot": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7",
+      "sourceRoot": "supabase/functions/refresh-nba-player-prop-clv",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/index.ts",
+          "path": "supabase/functions/refresh-nba-player-prop-clv/index.ts",
           "name": "index.ts",
-          "sha256": "f7da4b8bb30850268959eec9eb7a885da9c959cd79301b0ba528bcd02389fa50",
-          "bytes": 13094
+          "sha256": "0ee3f05bd1502a517717272ac1f51bd45f69ff683483ad46bd934774b4682f6b",
+          "bytes": 13410
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/service-role-key.mjs",
+          "path": "supabase/functions/refresh-nba-player-prop-clv/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/refresh-nba-player-prop-clv/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/nba-clv.js",
+          "path": "supabase/functions/refresh-nba-player-prop-clv/nba-clv.js",
           "name": "nba-clv.js",
           "sha256": "7ac04e89ccd68045416e98b81b55ab824893fa831ca59461ad246e30dfc6ec46",
           "bytes": 6617
         }
       ],
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "observedOn": "2026-11-23T18:42:35.350094+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_b7a13c80-b560-4dd4-83a4-72ed3e7bb363_7/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_b7a13c80-b560-4dd4-83a4-72ed3e7bb363_8/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T18:42:35.350094+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role authorization before protected work"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:21.852000+00:00"
+      "deployed_at": "2026-11-23T18:42:00.808000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-nba-player-prop-clv",
+        "status": "ACTIVE",
+        "version": 7,
+        "verify_jwt": true,
+        "bundle_sha256": "08f2aacfba74a2d2fd9d43211f710748192a72366c006e428bec4124a9580142",
+        "entrypoint": "index.ts",
+        "sourceRoot": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/index.ts",
+            "name": "index.ts",
+            "sha256": "f7da4b8bb30850268959eec9eb7a885da9c959cd79301b0ba528bcd02389fa50",
+            "bytes": 13094
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-nba-player-prop-clv/v7/nba-clv.js",
+            "name": "nba-clv.js",
+            "sha256": "7ac04e89ccd68045416e98b81b55ab824893fa831ca59461ad246e30dfc6ec46",
+            "bytes": 6617
+          }
+        ],
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_b7a13c80-b560-4dd4-83a4-72ed3e7bb363_7/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:21.852000+00:00"
+      }
     },
     {
       "slug": "refresh-player-prop-clv",
@@ -2702,7 +2948,7 @@
       "deployed_at": "2026-11-01T15:38:12.811000+00:00"
     }
   ],
-  "final_verified_at": "2026-11-23T18:25:23.179571+00:00",
+  "final_verified_at": "2026-11-23T18:42:35.350094+00:00",
   "authority_verification": {
     "status": "OBSERVED_FUNCTION_SOURCES_MATCH",
     "active_functions": 68,
@@ -2710,9 +2956,17 @@
     "repository_total_edge_functions": 68,
     "deployed_snapshot_bundles": 67,
     "deployed_snapshot_files": 195,
-    "reviewed_deployment": "github-ml-training-export version 11",
     "behavior_approval": "NOT_GRANTED_BY_SOURCE_RECOVERY",
-    "schema_security_cron_parity": "NOT_REBASELINED"
+    "schema_security_cron_parity": "NOT_REBASELINED",
+    "reviewed_deployments": [
+      "github-ml-training-export version 11",
+      "capture-nba-player-props version 8",
+      "capture-nfl-player-props version 7",
+      "capture-pitchmix-features version 9",
+      "grade-nba-player-props version 8",
+      "provider-health-status version 11",
+      "refresh-nba-player-prop-clv version 8"
+    ]
   },
   "historical_authority_verification": {
     "verified_at": "2026-09-24T10:08:52.938Z",

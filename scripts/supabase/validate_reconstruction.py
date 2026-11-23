@@ -238,14 +238,16 @@ def validate_repository(root: Path) -> list[str]:
                     errors.append(f"{location}: status must be ACTIVE or LOCAL_SOURCE")
                     source_roots = ()
                 _validate_source_files(root, item.get("files"), location, errors, source_roots)
-                if "deploymentObservation" in item:
-                    observation = item["deploymentObservation"]
+                for field in ("deploymentObservation", "previousDeployment"):
+                    if field not in item:
+                        continue
+                    observation = item[field]
                     if not isinstance(observation, dict):
-                        errors.append(f"{location}: deploymentObservation must be an object")
+                        errors.append(f"{location}: {field} must be an object")
                     else:
                         _validate_source_files(
-                            root, observation.get("files"), f"{location}.deploymentObservation", errors,
-                            _snapshot_source_roots(slug, observation, f"{location}.deploymentObservation", errors),
+                            root, observation.get("files"), f"{location}.{field}", errors,
+                            _snapshot_source_roots(slug, observation, f"{location}.{field}", errors),
                         )
 
     errors.extend(check_secrets(root))

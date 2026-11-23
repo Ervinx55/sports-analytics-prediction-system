@@ -35,10 +35,12 @@ def repository(tmp_path):
     current = source_entry(root, "supabase/functions/local-only/index.ts", b"// local source\n")
     deployed_local = source_entry(root, "supabase/deployed-snapshots/local-only/v2/index.ts", b"// deployed local variant\n")
     deployed_remote = source_entry(root, "supabase/deployed-snapshots/remote-only/v3/index.ts", b"// deployed remote-only source\n")
+    previous_remote = source_entry(root, "supabase/deployed-snapshots/remote-only/v2/index.ts", b"// previous deployed remote source\n")
     items = [
         {"slug": "local-only", "status": "LOCAL_SOURCE", "files": [current],
          "deploymentObservation": {"version": 2, "files": [deployed_local]}},
-        {"slug": "remote-only", "status": "ACTIVE", "version": 3, "files": [deployed_remote]},
+        {"slug": "remote-only", "status": "ACTIVE", "version": 3, "files": [deployed_remote],
+         "previousDeployment": {"version": 2, "files": [previous_remote]}},
     ]
     write_json(manifests / "edge-functions.json", {"items": items})
     return root, items
@@ -51,6 +53,8 @@ def save_items(root: Path, items) -> None:
 def entries(items, location):
     if location == "deployment":
         return items[0]["deploymentObservation"]["files"]
+    if location == "previous":
+        return items[1]["previousDeployment"]["files"]
     return items[0 if location == "local" else 1]["files"]
 
 
@@ -59,7 +63,7 @@ def test_canonical_and_snapshot_identities_are_a_union(repository):
     assert validate_repository(root) == []
 
 
-@pytest.mark.parametrize("location", ["local", "active", "deployment"])
+@pytest.mark.parametrize("location", ["local", "active", "deployment", "previous"])
 def test_modified_source_bytes_fail_the_recorded_hash(repository, location):
     root, items = repository
     entry = entries(items, location)[0]
@@ -67,7 +71,7 @@ def test_modified_source_bytes_fail_the_recorded_hash(repository, location):
     assert any("sha256 mismatch" in e and entry["path"] in e for e in validate_repository(root))
 
 
-@pytest.mark.parametrize("location", ["active", "deployment"])
+@pytest.mark.parametrize("location", ["active", "deployment", "previous"])
 def test_missing_snapshot_file_fails(repository, location):
     root, items = repository
     entry = entries(items, location)[0]
@@ -76,21 +80,26 @@ def test_missing_snapshot_file_fails(repository, location):
 
 
 @pytest.mark.parametrize("shape", [None, {}, "not-a-list", [], ["not-an-object"]])
-@pytest.mark.parametrize("location", ["active", "deployment"])
+@pytest.mark.parametrize("location", ["active", "deployment", "previous"])
 def test_invalid_nested_file_containers_fail(repository, shape, location):
     root, items = repository
-    owner = items[0]["deploymentObservation"] if location == "deployment" else items[1]
+    owner = {
+        "deployment": items[0]["deploymentObservation"],
+        "previous": items[1]["previousDeployment"],
+        "active": items[1],
+    }[location]
     owner["files"] = shape
     save_items(root, items)
     assert any("files" in e and ("list" in e or "object" in e) for e in validate_repository(root))
 
 
 @pytest.mark.parametrize("value", [None, [], "not-an-object"])
-def test_invalid_deployment_observation_container_fails(repository, value):
+@pytest.mark.parametrize("field,index", [("deploymentObservation", 0), ("previousDeployment", 1)])
+def test_invalid_deployment_container_fails(repository, value, field, index):
     root, items = repository
-    items[0]["deploymentObservation"] = value
+    items[index][field] = value
     save_items(root, items)
-    assert any("deploymentObservation must be an object" in e for e in validate_repository(root))
+    assert any(f"{field} must be an object" in e for e in validate_repository(root))
 
 
 @pytest.mark.parametrize("field,value", [("path", None), ("path", ""), ("path", []), ("sha256", None), ("sha256", ""), ("sha256", "not-a-digest")])
@@ -151,6 +160,7 @@ def test_unrepresented_snapshot_identity_fails(repository):
     "active_other_slug", "active_canonical_unverified", "active_wrong_version",
     "observation_wrong_version", "observation_canonical", "local_points_to_snapshot",
     "active_other_slug_with_parity", "active_other_slug_symlink",
+    "previous_wrong_version", "previous_canonical_with_parity", "previous_other_slug",
 ])
 def test_source_files_are_bound_to_their_owning_slug_version_and_status(repository, kind):
     root, items = repository
@@ -165,6 +175,13 @@ def test_source_files_are_bound_to_their_owning_slug_version_and_status(reposito
         local["deploymentObservation"]["version"] = 999
     elif kind == "observation_canonical":
         local["deploymentObservation"]["files"] = copy.deepcopy(local["files"])
+    elif kind == "previous_wrong_version":
+        active["previousDeployment"]["version"] = 999
+    elif kind == "previous_canonical_with_parity":
+        active["previousDeployment"]["files"] = [source_entry(root, "supabase/functions/remote-only/index.ts", b"// current reviewed deployment\n")]
+        active["sourceRecovery"] = {"localSourceParityVerified": True}
+    elif kind == "previous_other_slug":
+        active["previousDeployment"]["files"] = copy.deepcopy(local["deploymentObservation"]["files"])
     elif kind == "local_points_to_snapshot":
         local["files"] = copy.deepcopy(local["deploymentObservation"]["files"])
     elif kind == "active_other_slug_symlink":
@@ -193,9 +210,11 @@ def test_only_explicit_true_parity_allows_own_reviewed_canonical_source(reposito
 
 
 @pytest.mark.parametrize("version", [None, True, 0, "3"])
-def test_observed_version_is_a_positive_integer(repository, version):
+@pytest.mark.parametrize("location", ["active", "previous"])
+def test_observed_version_is_a_positive_integer(repository, version, location):
     root, items = repository
-    items[1]["version"] = version
+    owner = items[1]["previousDeployment"] if location == "previous" else items[1]
+    owner["version"] = version
     save_items(root, items)
     assert any("version must be a positive integer" in e for e in validate_repository(root))
 
