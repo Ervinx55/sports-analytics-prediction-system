@@ -1,16 +1,18 @@
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 function adminKey() {
+  if (Deno.env.get("EDGE_LAB_SERVICE_ROLE_KEY")?.trim()) return serviceRoleKey();
   const modern = Deno.env.get("SUPABASE_SECRET_KEYS");
   if (modern) {
     try {
       const parsed = JSON.parse(modern);
-      if (parsed?.default) return String(parsed.default);
+      if (typeof parsed?.default === "string" && parsed.default.trim()) return parsed.default.trim();
     } catch {
       // Fall through to legacy key.
     }
   }
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  return serviceRoleKey() || "";
 }
 
 function pct(n: number, d: number) {
