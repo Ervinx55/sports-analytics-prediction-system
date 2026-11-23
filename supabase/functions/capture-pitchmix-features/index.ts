@@ -1,3 +1,4 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
 import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -24,6 +25,13 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "POST only" }), {
         status: 405,
         headers: { "content-type": "application/json" },
+      });
+    }
+
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
       });
     }
 

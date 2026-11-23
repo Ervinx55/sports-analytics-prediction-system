@@ -1,3 +1,5 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SOURCE_NAMES = ["pinnacle","circa","bookmaker"];
@@ -251,10 +253,17 @@ Deno.serve(async(req)=>{
     if(req.method!=="POST"){
       return new Response(JSON.stringify({error:"POST only"}),{status:405,headers:{"content-type":"application/json"}});
     }
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
+      });
+    }
+
     const body=await req.json().catch(()=>({}));
     const hours=Math.max(1,Math.min(336,Number(body.hours||48)));
     const since=new Date(Date.now()-hours*3600_000).toISOString();
-    const supabase=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const supabase=createClient(Deno.env.get("SUPABASE_URL")!,serviceRoleKey()!);
 
     const {data:gates,error:ge}=await supabase.from("sharp_gate_history").select("*")
       .gte("checked_at",since).order("checked_at",{ascending:true}).limit(2000);

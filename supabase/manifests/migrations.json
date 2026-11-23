@@ -1339,6 +1339,17 @@
       "statementCount": 1,
       "productionVersion": "20261123171926",
       "productionAppliedAt": "2026-11-23T17:19:26Z"
+    },
+    {
+      "version": "20261123185724",
+      "name": "authorize_active_scheduled_writers",
+      "path": "supabase/migrations/20261123185724_authorize_active_scheduled_writers.sql",
+      "sha256": "e8a569ff0be03fa40018648b98a5e5f42e85eab2c72ad2c6ef1e7c19a6558882",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": 1,
+      "productionVersion": "20261123190554",
+      "productionAppliedAt": "2026-11-23T19:05:54+00:00"
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -1346,7 +1357,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 103,
+    "repository_total_migrations": 104,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   },
@@ -1371,5 +1382,14 @@
     "productionMutations": false,
     "report": "docs/operations/2026-11-23-migration-history-recovery.md",
     "verifiedAt": "2026-11-23T18:20:02.883995+00:00"
+  },
+  "latestReviewedMigration": {
+    "observedAt": "2026-11-23T19:09:40.598682+00:00",
+    "productionVersion": "20261123190554",
+    "name": "authorize_active_scheduled_writers",
+    "storedSourceSha256Matches": true,
+    "statementCount": 1,
+    "scope": "six scheduled caller definitions and one restricted origin helper",
+    "report": "docs/operations/2026-11-23-active-scheduler-authorization.md"
   }
 }
