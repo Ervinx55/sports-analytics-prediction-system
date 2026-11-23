@@ -90,6 +90,27 @@ It compares migration/function/schema/security/cron expectations and must never 
 
 When drift is reported, classify it first. Fix Git if the repository is wrong; create a reviewed migration/function change if production needs to change. Do not auto-remediate production.
 
+The project ID is public configuration and is recorded in the workflow and
+inventory. The workflow still requires `SUPABASE_ACCESS_TOKEN` for read-only
+Management API function metadata and `SUPABASE_DB_PASSWORD` for its PostgreSQL
+catalog and cron queries. Configure those as GitHub Actions secrets through an
+authorized administrator; do not substitute service-role API keys.
+
+Preflight runs before CLI/client installation and writes `drift-report.json`
+even when credentials are missing. The report includes variable names, never
+credential values. Exit status `2` means the check was blocked or failed, with
+`drift: null`; `1` means a completed comparison found drift; `0` means a complete
+comparison was clean. `--preflight-only` returns `0` with
+`status: preflight_passed` and `drift: null` after configuration validation, and
+does not perform a production comparison. Runtime errors preserve completed
+sections and identify the failed stage without printing exception text.
+
+Migration comparisons include recovered history and migrations explicitly
+marked `appliedToProduction`, using `productionVersion` when a hosted
+deployment received a different version from its local filename. Local-only
+catch-up and pending repair files are excluded. Unrepresented hosted changes
+continue to appear as drift until their source has been reviewed and recovered.
+
 ## Dashboard and SQL-editor rule
 
 Do not make Dashboard-only or SQL-editor-only production schema/function changes without immediately recovering the change into Git.

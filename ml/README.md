@@ -48,6 +48,19 @@ server credential.
 Local administrators can still run `export_player_prop_snapshot.py` with a
 Supabase secret/service-role key, but scheduled GitHub training uses OIDC only.
 
+The repository now contains the exact deployed version 10 source recovered on
+2026-11-23. Its server-only `EDGE_LAB_SERVICE_ROLE_KEY` override takes precedence
+over injected keys. Without an override it uses `SUPABASE_SECRET_KEYS.default`,
+then the injected `SUPABASE_SERVICE_ROLE_KEY`. Modern keys are sent only in the
+`apikey` header; JWT credentials also receive a bearer header. Credentials stay
+inside the Edge Function, behind the existing GitHub OIDC trust checks.
+
+The [2026-11-22 scheduled run](https://github.com/Ervinx55/sports-analytics-prediction-system/actions/runs/45051829391)
+completed live OIDC export, walk-forward evaluation, training, and artifact
+upload. The older PR #44 does not include the deployed override; replacing the
+recovered source with that older patch could undo the working configuration.
+Source recovery itself requires no production redeployment.
+
 Scheduled retraining does not automatically promote a model. It only refreshes
 evidence and artifacts; the promotion gates remain authoritative.
 

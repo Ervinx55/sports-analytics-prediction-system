@@ -1,3 +1,4 @@
+import { serviceRoleKey } from "./service-role-key.mjs";
 import {
   createRemoteJWKSet,
   jwtVerify,
@@ -22,6 +23,7 @@ const ALLOWED_EVENTS = new Set([
 class AuthError extends Error {}
 
 function adminKey(): string {
+  if (Deno.env.get("EDGE_LAB_SERVICE_ROLE_KEY")?.trim()) return serviceRoleKey();
   const modern = Deno.env.get("SUPABASE_SECRET_KEYS");
   if (modern) {
     try {
@@ -31,7 +33,7 @@ function adminKey(): string {
       // Fall through to the legacy service-role key.
     }
   }
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  return serviceRoleKey() || "";
 }
 
 async function authorize(req: Request) {

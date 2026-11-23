@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 15
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      SUPABASE_PROJECT_ID: yeoxroijaptomomshdii
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       PGHOST: aws-0-us-east-1.pooler.supabase.com
       PGPORT: "5432"
@@ -28,6 +28,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Validate required runtime secrets
+        env:
+          PYTHONPATH: .
+        run: python scripts/supabase/production_drift.py --preflight-only --output drift-report.json
 
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
@@ -46,16 +51,10 @@ jobs:
           supabase migration list --help >/tmp/migration-list-help.txt
           supabase link --help >/tmp/link-help.txt
 
-      - name: Validate required runtime secrets
-        run: |
-          test -n "$SUPABASE_ACCESS_TOKEN"
-          test -n "$SUPABASE_PROJECT_ID"
-          test -n "$SUPABASE_DB_PASSWORD"
-
       - name: Run read-only production drift check
         env:
           PYTHONPATH: .
-          PGUSER: postgres.${{ secrets.SUPABASE_PROJECT_ID }}
+          PGUSER: postgres.${{ env.SUPABASE_PROJECT_ID }}
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
         run: python scripts/supabase/production_drift.py --output drift-report.json
 

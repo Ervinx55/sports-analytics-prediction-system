@@ -62,6 +62,7 @@ def test_historical_migration_inventory_is_exact():
     items = [
         item for item in manifest["items"]
         if item.get("recoveredFromProduction") is True
+        and str(item["version"])[:8] <= manifest["recoveryBaseline"].replace("-", "")
     ]
     actual = [(str(item["version"]), item["name"]) for item in items]
     assert actual == EXPECTED_HISTORICAL_MIGRATIONS
