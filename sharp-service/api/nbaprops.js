@@ -3,6 +3,8 @@ import {protectedSportsGameOddsFetch} from '../lib/provider-protection.js';
 import {directSgoProps,NBA_PROP_PAGE_SIZE} from '../lib/nba-direct-props.js';
 import {bookCoverage,bookmakerQuery} from '../lib/bookmakers.js';
 import {researchPropsResponse} from '../lib/nba-research-props.js';
+import {withNbaPropReadiness} from '../lib/nba-prop-readiness.js';
+import {prizePicksDiagnosticHandler} from '../lib/prizepicks-diagnostic.js';
 function propsBookCoverage(events,requestedBooks,now){
  const quotes=[];
  for(const event of events)for(const player of event.players??[])for(const side of ['over','under'])for(const [book,price] of Object.entries(player.prop?.[side]?.books??{}))quotes.push({book,price});
@@ -26,13 +28,22 @@ export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KE
   return {status:200,body:{...body,bookCoverage:propsBookCoverage(body.events,requestedBooks,now??Date.now()),source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0}};
  }catch{return unavailable();}
 }
+export async function nbaResearchResponse({loadQuotes=researchPropsResponse,loadExplanation=explanationSnapshot,...options}={}){
+ // Start both reads together and handle context failure immediately, including
+ // when quote collection fails before the historical read finishes.
+ const explanation=Promise.resolve().then(()=>loadExplanation()).catch(()=>null);
+ const result=await loadQuotes(options);
+ if(result.status!==200)return result;
+ const enriched=await enrichQuoteExplanations(result.body,explanation);
+ return {...result,body:withNbaPropReadiness(enriched,options.now??Date.now())};
+}
 export default async function handler(req,res){
+ if(req.query?.view==='prizepicks')return prizePicksDiagnosticHandler(req,res);
  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({error:'GET required'});}
  if(req.query?.view==='research'){
-  const explanation=explanationSnapshot();
-  const {status,body}=await researchPropsResponse({requestedBooks:bookmakerQuery(req.query?.books)});
+  const {status,body}=await nbaResearchResponse({requestedBooks:bookmakerQuery(req.query?.books)});
   res.setHeader('Cache-Control','no-store');
-  return res.status(status).json(status===200?await enrichQuoteExplanations(body,explanation):body);
+  return res.status(status).json(body);
  }
  const explanation=explanationSnapshot();const {status,body}=await propsResponse({requestedBooks:bookmakerQuery(req.query?.books)});const ttl=status===200?Math.max(0,Math.min(30,Math.floor((600000-(Date.now()-Date.parse(body.generatedAt)))/1000))):0;const enriched=status===200?await enrichQuoteExplanations(body,explanation):body;const rows=(enriched.events||[]).flatMap(e=>e.players||[]);const healthy=rows.length>0&&rows.every(p=>p.context?.evidenceRead?.status==='fresh');res.setHeader('Cache-Control',ttl>0&&healthy?`public, max-age=0, s-maxage=${ttl}`:'no-store');return res.status(status).json(enriched);
 }

@@ -88,7 +88,7 @@ def test_production_drift_workflow_is_read_only_and_pinned():
     assert "python scripts/supabase/production_drift.py" in workflow
 
     assert "SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}" in workflow
-    assert "SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}" in workflow
+    assert "SUPABASE_PROJECT_ID: yeoxroijaptomomshdii" in workflow
     assert "SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}" in workflow
 
     forbidden = (

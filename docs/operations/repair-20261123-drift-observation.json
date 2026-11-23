@@ -1,0 +1,1195 @@
+{
+  "checked": [
+    "edge_functions",
+    "migrations"
+  ],
+  "ci_configuration_blockers": [
+    "SUPABASE_ACCESS_TOKEN",
+    "SUPABASE_DB_PASSWORD"
+  ],
+  "counts": {
+    "expected_active_functions": 55,
+    "expected_applied_migrations": 56,
+    "observed_active_functions": 68,
+    "observed_migrations": 92,
+    "repository_function_directories": 55,
+    "repository_migration_files": 67
+  },
+  "drift": true,
+  "function_diff": {
+    "changed": [
+      {
+        "actual": {
+          "ezbr_sha256": "fefc77170cddb59374bd1ebbc9269c17df7f1a406f298131c41dd2a20f7ab500",
+          "slug": "capture-market-snapshot",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "c8ca80cc4e1a8f1d5d1d7d2cd501ba9b89f9fcc4e8894e6e29da834ae81eca48",
+          "slug": "capture-market-snapshot",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "capture-market-snapshot"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "110c6722d76f77327a7c1fa272635fda4281d49c409994c9e1f1cb67d4066c4e",
+          "slug": "capture-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 12
+        },
+        "expected": {
+          "ezbr_sha256": "e35389b19f0462061a6a77ddf97e9053c41965796db707c228c9c400e0612796",
+          "slug": "capture-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 5
+        },
+        "identity": "capture-model-audit"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "7e4d45bc88945f38125a1a75886b94f278a34fbdb154a9185657bec15530ccca",
+          "slug": "capture-pitchmix-features",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "ce3481934781248c5bc4655ad51cf0f2186b8a05b3aa594f20c6fb86e132e81c",
+          "slug": "capture-pitchmix-features",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "capture-pitchmix-features"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "4e57d00b73ca4a4b76683b759fba84f2409127cbbfa98e1a6276f82b40c7044d",
+          "slug": "capture-player-props",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "98ecbaf60ca38de3b20b91dce7cb476491ee59a45c7788bed857ba05dec01ba5",
+          "slug": "capture-player-props",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 3
+        },
+        "identity": "capture-player-props"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "601245fe6217a03b4f8bdb2b7e9781e82b44a864b2b95d56bff577a9cecf236f",
+          "slug": "capture-sharp-clv",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "2e22108cf4b8b723cbb5f0b85e0f930f8fe9ffe84f14eadd0a4921e07a869625",
+          "slug": "capture-sharp-clv",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 1
+        },
+        "identity": "capture-sharp-clv"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "681860a084bf969ce739a6fff3aa445f4a75215c4915e79bf0a7c29484cbb3b4",
+          "slug": "capture-sport-predictions",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "c78acc5faa825eec879e642f37e0387fe4941030b070bfe390085394ce9eccbf",
+          "slug": "capture-sport-predictions",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 4
+        },
+        "identity": "capture-sport-predictions"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "864dfa701e319f890441bc195a03c2ef6a19347429467aa4d73949cab3ed3512",
+          "slug": "dashboard-results",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "6b46319769b906353236d09cf4761a8438c6802a4a1c22a8936ce718da2814b2",
+          "slug": "dashboard-results",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "dashboard-results"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "148fc44f8a9173b3ca204c6a770866c6b3c4376847e4d32c17714dee275d9c1d",
+          "slug": "decision-fusion-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "5b752aa4698726b6d11ba3e2737c6cf88239f07deee0efc7e56b90360f47f306",
+          "slug": "decision-fusion-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "decision-fusion-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "f8bfc984bac50670b64b736afa07632b622e0902a69ff4b6016740e045847db7",
+          "slug": "decision-fusion-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "deec29ad9e087e52202d7a6baad413afbcb2eeb74779194e46adace56b0f4d03",
+          "slug": "decision-fusion-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "decision-fusion-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c1804f96e99c9d559046474f309552c9ea2979fa62a299b5e76d6768be1543ec",
+          "slug": "decision-results",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 9
+        },
+        "expected": {
+          "ezbr_sha256": "d19efc4c15fe80db496c0f1e975dab5acd22fb7e048d9c1f2019f16c05f8d108",
+          "slug": "decision-results",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 3
+        },
+        "identity": "decision-results"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "186117a517f93f11cb21a61f19323e57093f8c82d1deea479d49cde5444f81e0",
+          "slug": "decision-timing-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "231191bcc9a4586aef396c9cee1da2e24d88122b924e31b957b10ba14d87e70a",
+          "slug": "decision-timing-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "decision-timing-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "00ac8de9f52409d8b0a978138eb3bc5f515186163618a5d6a6fa59a4fd03cd59",
+          "slug": "decision-timing-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "c47a91582a9566a8d7623ea44fe5b1aeecc7c31ec8daf46b2c60f179c7e0d4c7",
+          "slug": "decision-timing-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "decision-timing-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "d746d3fec0653f9c21239d85fb1d8e423003c35a3eddc359d78505725466d128",
+          "slug": "evaluate-sharp-gate",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "3a97ded1ebaec2220283de84b5b7078b0ac744f2f9e0245b2d3bfad0e2f81537",
+          "slug": "evaluate-sharp-gate",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "evaluate-sharp-gate"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "6b5fff6a4395ee2ecf4c96c57baa8729d0a5f9b4b15bc3bd62a50ca4f48148ef",
+          "slug": "grade-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "609af7add2c480072833194554588898bc44ee18b17cb0147bc53d8e3c87499a",
+          "slug": "grade-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 1
+        },
+        "identity": "grade-model-audit"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "84f45caa8f19e194e66fa63154949ae5b5b4ceb75e22e75aeb048d28197416a9",
+          "slug": "grade-player-props",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "0659019156b720156c7954106eb912cee5688151d7460af33eb05069aec3977e",
+          "slug": "grade-player-props",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "grade-player-props"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "b8ed3c069c00a94dc682d5a0336d11e098bfe53238a2f494c95984750c6cada6",
+          "slug": "grade-team-markets",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "a86195334bc0f54b76afaca08e2a0aa01015d7531402ebf93a1c3a5f03e5c076",
+          "slug": "grade-team-markets",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "grade-team-markets"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "4b668c748f1d9d2b9b3d8134ee1e60ae4c387155f10fa43869c0048e4638d567",
+          "slug": "ingest-sharp-board",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "d00d70401c540252484213cbaa442f6d55550b386474cd52d603cbb4b81953fc",
+          "slug": "ingest-sharp-board",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 1
+        },
+        "identity": "ingest-sharp-board"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "e712201ca5b2991f0f10843b61e2dead0dc51fdcfcc13e49ac908efcab6cebec",
+          "slug": "latest-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "83591df79172b7c9a6a412507c56fd4250e0152d5b07d3439a75dae12d54eb5f",
+          "slug": "latest-model-audit",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "latest-model-audit"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "e82f3e34790b7eee511bfad8b62223649ac73710d82a95fc43dd8441c3cce8dc",
+          "slug": "market-alerts",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "7162cb4120241829acb4076f7a4f872c8194ad66e45b24a5d4580e7b1227ff66",
+          "slug": "market-alerts",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 3
+        },
+        "identity": "market-alerts"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "f6a8860b878b450779015aee7339b3d50e1426930b3952d29a8506ce631a806b",
+          "slug": "market-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "b0195704af2ee7fb553e27f69d38cbcba6b62e531f02e38ce906622df1f908b9",
+          "slug": "market-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 3
+        },
+        "identity": "market-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "8a9100a0fcbee28850e3fafee3e2a0f7562905d5e5f262ae71ddef4e001f44ed",
+          "slug": "market-card",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 16
+        },
+        "expected": {
+          "ezbr_sha256": "1f5def4d4ec50726e005310251efa2423aa2a713af1d956fae4994eb07df31cd",
+          "slug": "market-card",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 10
+        },
+        "identity": "market-card"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c6e63f0c3628581361e7c7f5195453b6b215e85a195cca3b55bb2b859182b919",
+          "slug": "market-movement",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "9c0563364eea722917ae7f4989ab080a1b16815ac0f0434895e836be24ae8b7f",
+          "slug": "market-movement",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "market-movement"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c3132af772df118b242386cd0245610a3f251949d82bdc76869e73661eb23294",
+          "slug": "market-policy-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "b08c52885810eab842a121c4fde934ba9fb13150d8db2152ee030e267aa9a322",
+          "slug": "market-policy-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 2
+        },
+        "identity": "market-policy-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "71fb7495da1d73ea899f289937cb85eb1dd18ffd1fa19e557dcbfa1bcde17d21",
+          "slug": "market-uncertainty",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "c0f2f10b287fa0a2666e0a4fc0eaf66c0971a60cb3eb3100077d6596d1020cc9",
+          "slug": "market-uncertainty",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "market-uncertainty"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "ecd9383fc63c56cf8682394cde3da26850a6e7f9c1ebd59c58351bae36a35e64",
+          "slug": "mlb-verification-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "32454e52ea2b98112b8293904c2ffc2b4aa84246e4c811c1ecfe396d44491e66",
+          "slug": "mlb-verification-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "mlb-verification-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "85a7b5e925980c90ad4154bcb5173b2d4dc5e4cb5fb79ab2bc7e1fab4321cb36",
+          "slug": "mlb-verification-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "e54eb1005f8e869fe3278dd5cb0df8f7fb0b0ae5c561c735c645617ff63bdf03",
+          "slug": "mlb-verification-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 2
+        },
+        "identity": "mlb-verification-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "8ef549e472f4e9ee6ae80f61766ddf826a9840e31d8ecf592f1b0d9be8d05662",
+          "slug": "mlb-weather-park-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "b0b44d7b54aeb569844cac9d88cda3115774248bc25c120551e2f99ea87e61b9",
+          "slug": "mlb-weather-park-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "mlb-weather-park-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c8dddf6c80bae15499e1b7710bc4ec4f403a4fa309fbb07e708ac44a58d1c55a",
+          "slug": "mlb-weather-park-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "cbdfa086b53d1393ea416dc6699fa1a2bf5b247706b1d0f92e68f6ef1996fd45",
+          "slug": "mlb-weather-park-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "mlb-weather-park-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "ac2c6937f79b1897be8db8c61e7dca704ae942cbfc6e37a9c58c4379ab9d955b",
+          "slug": "model-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "8434085ceac4f46ad308d8caaca833d2595526dc195d1e51ee6e32ef8594029c",
+          "slug": "model-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "model-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "081e2c78ea081b3e596fafd9486e5be9e1a13bf28c2b80b57a7b5a9312a4a7ac",
+          "slug": "model-governance-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "fd2c04a5b8c07331eb823b550d3c744dfdfa1835f71e4bf8682ab30f662f10b2",
+          "slug": "model-governance-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "model-governance-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "768eeec8fa7b2c18eeb6000033d6964709dae1daec3aba296827f4c262a991bd",
+          "slug": "outcome-attribution-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "39acbdc58da219d74b8725080b84662fac2d470f7ae242b2fffac18838e7dc2c",
+          "slug": "outcome-attribution-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "outcome-attribution-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c595b74f888432f9c3e75ea69a83a640d33edaff99857ed6695932175a5ba6b6",
+          "slug": "parlay-correlation-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "e4e724cbf8980ded949613b9256bb96e72e9cdf19f1934f4dad6468c8a835bec",
+          "slug": "parlay-correlation-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "parlay-correlation-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "9929345b8c4d3151f78891e2d1f38637441eb2fcc58f8e3ebcc9356e34d513de",
+          "slug": "parlay-correlation-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "b4ab5a9ed92fe362f2c60ffb1d34373a43a27332250699d4326bb35a4c51ab99",
+          "slug": "parlay-correlation-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "parlay-correlation-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "e77adb06c26744c0e6d3d7542256466ed1a79b3b404559c1a4646352b660ab25",
+          "slug": "pipeline-health-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "dd9732190d1f0a32ac9a3eb46397b75a0764898797488c318b3070b99065ab10",
+          "slug": "pipeline-health-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "pipeline-health-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "430116db4b800c73bbff3cc13eb3047292e85d03d7c44df91cdf1f872b6e9998",
+          "slug": "player-prop-card",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 13
+        },
+        "expected": {
+          "ezbr_sha256": "bc90a0c9177ed76f49d0060176bd234deb3c4a28177218cbf5638e813ce03fcc",
+          "slug": "player-prop-card",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 8
+        },
+        "identity": "player-prop-card"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "53cfd0b01cc1d78648289d7a70a6ab9068d62feeb124f8f4b04240e07cc72973",
+          "slug": "player-prop-clv-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "7210c41b9e5ebcef183bdec789b4cdcd571bef5c915c238afa5ca9a9cbffeb2d",
+          "slug": "player-prop-clv-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "player-prop-clv-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "d68c7a7ac28de7f2ec7cb0a3fe9efe0f4402ea1aeb9ab803e1811417d5ad5d6a",
+          "slug": "player-prop-clv-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "da80072ba8f4d7205a74be3a5b9d2488356d67aae96ae7d9aeceab94e7f6df9b",
+          "slug": "player-prop-clv-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "player-prop-clv-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "489de2a577a92022eaa5e8d0712efc03008780ec57ceeda5cacceae102d9077b",
+          "slug": "player-prop-fusion-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "9d405cd657c46e4f6ceac090d1d25a51b1775f064ba1c605709101dfdfeafabb",
+          "slug": "player-prop-fusion-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "player-prop-fusion-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "7cf10b74fc5d5f0ecc809f33522bd08a1a68bfd121e9af2142556261b3bc4641",
+          "slug": "player-prop-fusion-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "d21254b31fbf656bf748e0c130d0149f25f628e514f8f5ddd3ab9c4381aa3b97",
+          "slug": "player-prop-fusion-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "player-prop-fusion-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "30dc2deb14c3a4c5c309e3c2e432c12c0f3a40e70f0063eb537e798276f0b1b8",
+          "slug": "price-sensitivity",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "b21e52c131386c8d465c14b20dc18c7d83dc8ae780a82018aea3ddda94384535",
+          "slug": "price-sensitivity",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "price-sensitivity"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "c6dbb992df476818e7b29aff4fa4ddd87f52cdf5a38735bfaaa3c80ab7f4acb0",
+          "slug": "provider-health-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 10
+        },
+        "expected": {
+          "ezbr_sha256": "9a6f6169462841ac4666a1211afb6ab638d092b85a51140cd70885789a32ef80",
+          "slug": "provider-health-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 4
+        },
+        "identity": "provider-health-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "31c4f1667429fff3b9805de7bae6fc4aebe87f6addbbf8132cba6abac179fafe",
+          "slug": "refresh-mlb-verification-gate",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 10
+        },
+        "expected": {
+          "ezbr_sha256": "51e51f7eda9430f15499ef2f648e29fd854a2545d4033c712a4d8b11428ab915",
+          "slug": "refresh-mlb-verification-gate",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 5
+        },
+        "identity": "refresh-mlb-verification-gate"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "7a543e2eeedfa1303a65408dca4e88425f503ba182d858d7310872ada3e32258",
+          "slug": "refresh-mlb-weather-park",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "aedff2262017969736d580b2b6f8c3041265d6ebcb665274dd33b4c4083e40b4",
+          "slug": "refresh-mlb-weather-park",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 3
+        },
+        "identity": "refresh-mlb-weather-park"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "59c1633baa25df8795e2a74e2c286f53836cc9e8a15a535d62c51284673ac648",
+          "slug": "refresh-model-governance",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "052842df22893e226f34ec9fb20f58131ca4cc0ef8a9180490a78cef17a00161",
+          "slug": "refresh-model-governance",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 1
+        },
+        "identity": "refresh-model-governance"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "9797e230ad6f8024100087250bea4b5f12fa0cb0739eeefc7149ea58038f08df",
+          "slug": "refresh-player-prop-clv",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "a24834ff01bf8a222a7f966ec6e53f3ef9a9ac081c9ec4acd85d53d97aefc92a",
+          "slug": "refresh-player-prop-clv",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "refresh-player-prop-clv"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "ae68927343ab2eac5d8b6b9ed053a657544c1ed8c8bdff8486e896c455e9275e",
+          "slug": "refresh-sharp-disagreement-shadow",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "3503491c34c185ea7f1577d2b498c17a7ef8e3270b4ada1d46bebee8eb5550bb",
+          "slug": "refresh-sharp-disagreement-shadow",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 2
+        },
+        "identity": "refresh-sharp-disagreement-shadow"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "f3e2929bd787505fc6637b304c389205c78db5b89cb9d20e34a2a4ac8d043782",
+          "slug": "refresh-sharp-sources",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 10
+        },
+        "expected": {
+          "ezbr_sha256": "89ad4e51c28d3a32c4db4cd75216fb44d153681cc3caa4aab6e6c00b5f58831f",
+          "slug": "refresh-sharp-sources",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 4
+        },
+        "identity": "refresh-sharp-sources"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "0dce4faa99f450e7066a76b49d4873fa2c7c8c3cbc1b70b93d8fde4c0aec47bd",
+          "slug": "settle-sport-predictions",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "2155404a321f5e897fbac57790aebed2581f0967745833b13eb19f8879d3976e",
+          "slug": "settle-sport-predictions",
+          "status": "ACTIVE",
+          "verify_jwt": true,
+          "version": 4
+        },
+        "identity": "settle-sport-predictions"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "965aecab2cd4e67c19f236f1b40977e08a4b3df2633ffa94ff6974a7d20f125d",
+          "slug": "sharp-disagreement-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "4752d71532771afd0bed70231c81576f23042c6bba5c138bff09d4069dcb579c",
+          "slug": "sharp-disagreement-calibration",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "sharp-disagreement-calibration"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "db8595a1c64ecb8a1361adef2b952aff900a13e58e9e172122fcdbf4a2a787b3",
+          "slug": "sharp-disagreement-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "d17d2500c07ba962ef4c68848114d812efc13905a850351091fd7134a1ca4e10",
+          "slug": "sharp-disagreement-status",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "sharp-disagreement-status"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "31ecd32b29d848321e5fa12758a16050d30abe3a77059cfaed7e327b185354b9",
+          "slug": "sharp-gate-history",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 8
+        },
+        "expected": {
+          "ezbr_sha256": "89b41728935e850523d2b168f60ea38f7f68e9816c201f528d83e5e7ff95dec6",
+          "slug": "sharp-gate-history",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 3
+        },
+        "identity": "sharp-gate-history"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "0ef67cf23e56bacf7c103e69a73eb163ad1a8fd477377850919ed0b7f71aa283",
+          "slug": "sharp-movement",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 6
+        },
+        "expected": {
+          "ezbr_sha256": "066b23b0de698383e800b88a4c284a849378e8e526b2c9bad1e14bb3c9db1e53",
+          "slug": "sharp-movement",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 1
+        },
+        "identity": "sharp-movement"
+      },
+      {
+        "actual": {
+          "ezbr_sha256": "e953adf961edb982cbe22594051c7e60b3f57eacfaa448839661844f671a3fa3",
+          "slug": "sharp-source-health",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 7
+        },
+        "expected": {
+          "ezbr_sha256": "1ce87f58b20a1363aa9be1647afe51e5a45c7bd917912116f5f53c09117b0f89",
+          "slug": "sharp-source-health",
+          "status": "ACTIVE",
+          "verify_jwt": false,
+          "version": 2
+        },
+        "identity": "sharp-source-health"
+      }
+    ],
+    "missing": [],
+    "unexpected": [
+      {
+        "ezbr_sha256": "5d6d0aa3460aa95d8a81a9936fa7752d05f2ca15645e10b755f40ee83773648a",
+        "slug": "audit-nba-boxscores",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 6
+      },
+      {
+        "ezbr_sha256": "cf1401b157f8cf2ff02fda16d6d45ebce4d95da44bfe41841619df725480d3b2",
+        "slug": "capture-nba-player-props",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 7
+      },
+      {
+        "ezbr_sha256": "a7092d70a3dfb76172306ca22deaae703fc0904008e356eea89914c27c5fd068",
+        "slug": "capture-nfl-player-props",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 6
+      },
+      {
+        "ezbr_sha256": "1e479fca78d3ec562eaff38cd99fcf14cccb9f2230fb15f027c49ef9a1452db6",
+        "slug": "collect-nba-props",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 47
+      },
+      {
+        "ezbr_sha256": "4ecfd4c4cf12608eba07085f6b2994def891f82587c948a2edf6e1443ab06064",
+        "slug": "collect-nfl-prices",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 1
+      },
+      {
+        "ezbr_sha256": "399b8f0b7dba6ae9a7aadca91854681254025fdcb3992ef1951dabf9fe1ecba4",
+        "slug": "grade-nba-player-props",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 7
+      },
+      {
+        "ezbr_sha256": "7188bb67be566ba02ece564a1fc5dec33ef602dc87dd347570eb93452a76143e",
+        "slug": "nba-player-prop-calibration",
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "version": 6
+      },
+      {
+        "ezbr_sha256": "388a172a83c8906b32f7588a93a47caafb827e4088e62c567947912c61159153",
+        "slug": "nba-player-prop-feedback-status",
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "version": 6
+      },
+      {
+        "ezbr_sha256": "c0274a9bde860c3a27b0e0c1de9dff371026bebc29c07767b4c6902f3dfc585b",
+        "slug": "prediction-performance",
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "version": 12
+      },
+      {
+        "ezbr_sha256": "12df317b61f6d62ba092cebc09081dcb3cedcbda81d63b3274e8bb5e9d4078c7",
+        "slug": "probe-nba-backup",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 4
+      },
+      {
+        "ezbr_sha256": "08f2aacfba74a2d2fd9d43211f710748192a72366c006e428bec4124a9580142",
+        "slug": "refresh-nba-player-prop-clv",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 7
+      },
+      {
+        "ezbr_sha256": "0f4593427b2e997fef88fc503c35a326be1ce4b1710050c410e0a4ad83c14cd1",
+        "slug": "service-auth-health",
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "version": 5
+      },
+      {
+        "ezbr_sha256": "00ebe633cd79d0ac4ffc167f5dfcc4b81cd0d9810d1a3bcfd8bd87a8a0ab020d",
+        "slug": "track-nba-research",
+        "status": "ACTIVE",
+        "verify_jwt": false,
+        "version": 7
+      }
+    ]
+  },
+  "migration_diff": {
+    "changed": [],
+    "missing": [],
+    "unexpected": [
+      {
+        "name": "archive_player_prop_market_quotes",
+        "version": "20260925045727"
+      },
+      {
+        "name": "archive_player_prop_market_quotes_retention",
+        "version": "20260925045757"
+      },
+      {
+        "name": "register_nfl_player_prop_capture_component",
+        "version": "20260925050326"
+      },
+      {
+        "name": "register_nba_player_prop_capture_component",
+        "version": "20260925055553"
+      },
+      {
+        "name": "add_sport_to_player_prop_feedback_v2",
+        "version": "20260925062619"
+      },
+      {
+        "name": "register_nba_player_prop_feedback_components",
+        "version": "20260925063434"
+      },
+      {
+        "name": "isolate_player_prop_latest_by_sport",
+        "version": "20260925073838"
+      },
+      {
+        "name": "create_options_iv_snapshots",
+        "version": "20260926212332"
+      },
+      {
+        "name": "create_options_profit_tracking",
+        "version": "20260926214103"
+      },
+      {
+        "name": "index_options_paper_trade_setup_fk",
+        "version": "20260926214350"
+      },
+      {
+        "name": "prediction_performance_ledger",
+        "version": "20261029023500"
+      },
+      {
+        "name": "mlb_performance_publication",
+        "version": "20261029023515"
+      },
+      {
+        "name": "sport_capture_receipts",
+        "version": "20261029023517"
+      },
+      {
+        "name": "priority_sport_contracts",
+        "version": "20261029023518"
+      },
+      {
+        "name": "register_prediction_performance_jobs",
+        "version": "20261029023519"
+      },
+      {
+        "name": "performance_read",
+        "version": "20261029023525"
+      },
+      {
+        "name": "exact_market_semantics",
+        "version": "20261029023547"
+      },
+      {
+        "name": "final_pass_publication",
+        "version": "20261029023554"
+      },
+      {
+        "name": "global_portfolio_read",
+        "version": "20261029023606"
+      },
+      {
+        "name": "nba_research_scoreboard_cache",
+        "version": "20261101153743"
+      },
+      {
+        "name": "create_edge_lab_slip_archive",
+        "version": "20261105035258"
+      },
+      {
+        "name": "edge_lab_private_read_only_slip_dashboard_rpc",
+        "version": "20261105035635"
+      },
+      {
+        "name": "create_private_edge_lab_pregame_research_boards",
+        "version": "20261105154730"
+      },
+      {
+        "name": "edge_lab_nba_nfl_propgpt_market_capture_v1",
+        "version": "20261107173526"
+      },
+      {
+        "name": "edge_lab_external_nba_nfl_prop_sample_quarantine_v1",
+        "version": "20261107173920"
+      },
+      {
+        "name": "edge_lab_service_role_only_capture_rpc_v1",
+        "version": "20261107174420"
+      },
+      {
+        "name": "hosted_nba_prop_collection",
+        "version": "20261109134149"
+      },
+      {
+        "name": "harden_hosted_nba_lease",
+        "version": "20261109134355"
+      },
+      {
+        "name": "rotate_hosted_nba_settlement_dates",
+        "version": "20261109134514"
+      },
+      {
+        "name": "schedule_hosted_nba_prop_research",
+        "version": "20261109135023"
+      },
+      {
+        "name": "support_automatic_nba_inactive_outcomes",
+        "version": "20261110085941"
+      },
+      {
+        "name": "reviewed_nba_live_decisions",
+        "version": "20261110112053"
+      },
+      {
+        "name": "batch_nba_forecast_persistence",
+        "version": "20261110163916"
+      },
+      {
+        "name": "nfl_exact_price_evidence",
+        "version": "20261116155528"
+      },
+      {
+        "name": "schedule_nfl_exact_price_collection",
+        "version": "20261116155905"
+      },
+      {
+        "name": "edge_sharp_money_research_snapshots",
+        "version": "20261119213136"
+      }
+    ]
+  },
+  "ml_source_recovery": {
+    "bundle_sha256": "ce62827b66d30d909408415855eb99ef783645e2ff677a9d411224077237a6c8",
+    "files": [
+      {
+        "name": "index.ts",
+        "path": "supabase/functions/github-ml-training-export/index.ts",
+        "sha256": "728891a1eee278d89cfd1000362b82244614209c55b4f54d6d8e8f1a427ede6d"
+      },
+      {
+        "name": "service-role-key.mjs",
+        "path": "supabase/functions/github-ml-training-export/service-role-key.mjs",
+        "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d"
+      }
+    ],
+    "localSourceParityVerified": true,
+    "slug": "github-ml-training-export",
+    "version": 10
+  },
+  "not_checked": [
+    "schema_security",
+    "cron"
+  ],
+  "observed_at": "2026-11-23T17:09:45.244377+00:00",
+  "project_ref": "yeoxroijaptomomshdii",
+  "read_only": true,
+  "source": "Supabase list_edge_functions and list_migrations; compared with reviewed repository manifests",
+  "status": "PARTIAL_OBSERVATION"
+}

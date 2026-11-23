@@ -2,6 +2,7 @@ import {protectedSportsGameOddsFetch,optimizeSportsGameOddsObjectLimit} from './
 import {bookCoverage,bookmakerIds} from './bookmakers.js';
 import {PROP_BOOKS,platformType,assessPropQuote} from '../prop-price-checks.js';
 import {canonicalBookmaker} from '../book-catalog.js';
+import {withNbaPropReadiness} from './nba-prop-readiness.js';
 const MARKET_SCOPE={NBA:['points','rebounds','assists'],NFL:['passing_yards','passing_touchdowns','rushing_yards','receiving_receptions','receiving_yards']},PAGE_SIZE=16,MAX_PAGES=2;
 const number=value=>{
  if(typeof value==='number')return Number.isFinite(value)?value:null;
@@ -71,8 +72,8 @@ export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODD
    pagesFetched++;times.push(result.fetchedAt);
    for(const e of result.payload.data)if(e?.eventID&&!raw.has(e.eventID))raw.set(e.eventID,e);
    const next=result.payload.nextCursor;
-   if(!next){eventsComplete=true;break;}
-   if(typeof next!=='string'||seenCursors.has(next)){reasons.push('INVALID_CURSOR');break;}
+   if(next===null||next===undefined||next===''){eventsComplete=true;break;}
+   if(typeof next!=='string'||next.length>2048||seenCursors.has(next)){reasons.push('INVALID_CURSOR');break;}
    seenCursors.add(next);cursor=next;if(i===MAX_PAGES-1)reasons.push('PAGE_LIMIT_REACHED');
   }catch{if(!pagesFetched)return unavailable();reasons.push('PAGE_UNAVAILABLE');break;}
  }
@@ -85,5 +86,6 @@ export async function researchPropsResponse({now=null,key=process.env.SPORTS_ODD
  // The browser derives the same checks from these original observations. Avoid
  // repeating long diagnostic paragraphs for every book/side in large slates.
  for(const {price} of quotes)delete price.priceCheck;
- return {status:200,body:{...empty,events,generatedAt,source:'SportsGameOdds',scope:league+' all-book research; main lines only; 48-hour window. Frozen validation collection unchanged.',partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,providerEvents:raw.size,bookmakers:books.length?books:'account-entitled bookmakers',markets},bookCoverage:{...coverage,configured,scope:'Returned research lines only. The displayed list includes monitored platforms and observed books; missing lines do not establish missing entitlement. DFS and exchange execution terms remain separate.'}}};
+ const body={...empty,events,generatedAt,source:'SportsGameOdds',scope:league+' all-book research; main lines only; 48-hour window. Frozen validation collection unchanged.',partialCoverage:true,coverage:{pagesFetched,eventsComplete,reasons,returnedEvents:events.length,providerEvents:raw.size,bookmakers:books.length?books:'account-entitled bookmakers',markets},bookCoverage:{...coverage,configured,scope:'Returned research lines only. The displayed list includes monitored platforms and observed books; missing lines do not establish missing entitlement. DFS and exchange execution terms remain separate.'}};
+ return {status:200,body:league==='NBA'?withNbaPropReadiness(body,evaluatedAt):body};
 }

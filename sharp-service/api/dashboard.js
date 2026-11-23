@@ -1,6 +1,7 @@
 import nbaLiveHandler from '../handlers/nba-live-decisions.js';
 import winnerHandler from '../handlers/winner-forecasts.js';
 import cfbHandler from '../handlers/cfb-forecasts.js';
+import {currentDecisionCard,sportPropCard} from '../current-card.js';
 import edgeVnextHandler from "../lib/edge-vnext-handler.js";
 import {
   getSportsGameOddsUsageSnapshot
@@ -67,7 +68,7 @@ async function fetchJsonNow(url, timeoutMs = 12000, externalSignal = null) {
     try {
       data = JSON.parse(text);
     } catch {
-      data = { error: text.slice(0, 500) };
+      throw new Error('Dashboard source returned invalid JSON');
     }
     if (!r.ok) {
       throw new Error(
@@ -155,6 +156,8 @@ export default async function handler(req, res) {
   };
 
   const requested=new Set(view==='all'?Object.keys(urls):['audit','marketCard','playerProps','pipelineHealth','results','providerHealth',...extraSources[view]]);
+  // This legacy endpoint is MLB-only; it must not appear under another sport.
+  if(sport!=='MLB')requested.delete('playerProps');
   const read=name=>requested.has(name)?fetchJson(urls[name]):Promise.resolve(null);
   // Put current cards and health ahead of historical analytics in the bounded queue.
   for(const name of ['audit','marketCard','playerProps','pipelineHealth','results','providerHealth'])read(name).catch(()=>{});
@@ -228,6 +231,10 @@ export default async function handler(req, res) {
 
   const candidates = sources.audit.data?.candidates || [];
   const now = Date.now();
+  const displayMarketCard=currentDecisionCard(sources.marketCard.data,{sport,now,available:sources.marketCard.ok});
+  const playerPropCard=sport==='MLB'?currentDecisionCard(sources.playerProps.data,{sport,kind:'props',now,available:sources.playerProps.ok}):sportPropCard(sport);
+  if(displayMarketCard.availability==='UNAVAILABLE')sourceHealth.marketCard={ok:false,error:displayMarketCard.reason};
+  if(playerPropCard.availability==='UNAVAILABLE')sourceHealth.playerProps={ok:false,error:playerPropCard.reason};
   const activeCandidates = candidates.filter((c) => {
     const t = Date.parse(c.starts_at || "");
     return !Number.isFinite(t) || t > now - 4 * 60 * 60 * 1000;
@@ -294,7 +301,9 @@ export default async function handler(req, res) {
       activeCandidates: activeCandidates.length,
       scheduleGames: scheduleGames.length,
       dataMode:
-        activeCandidates.length > 0
+        displayMarketCard.availability==='UNAVAILABLE'||!sources.audit.ok
+          ? 'DATA_UNAVAILABLE'
+          : activeCandidates.length > 0
           ? "MODEL_MARKETS"
           : scheduleGames.length > 0
             ? "SCHEDULE_ONLY"
@@ -311,16 +320,10 @@ export default async function handler(req, res) {
         sources.results.data?.summary?.marketSnapshots ?? 0,
       alerts: alertList.length,
       movements: movementList.length,
-      finalPlays:
-        sources.marketCard.data?.summary?.play ??
-        sources.sharpGate.data?.summary?.finalPlayCount ??
-        0,
-      pending:
-        sources.marketCard.data?.summary?.pending ?? 0,
-      pass:
-        sources.marketCard.data?.summary?.pass ?? 0,
-      gradedMarkets:
-        sources.marketCard.data?.summary?.markets ?? 0,
+      finalPlays: displayMarketCard.summary.play,
+      pending: displayMarketCard.summary.pending,
+      pass: displayMarketCard.summary.pass,
+      gradedMarkets: displayMarketCard.summary.markets,
       sharpGateChecks:
         sources.sharpGate.data?.summary?.historyCount ?? 0,
     },
@@ -425,21 +428,8 @@ export default async function handler(req, res) {
       finalPlays: [],
       summary: { latestCount: 0, historyCount: 0, finalPlayCount: 0 },
     },
-    marketCard: sources.marketCard.data || {
-      summary: { markets: 0, play: 0, pending: 0, pass: 0 },
-      markets: [],
-      plays: [],
-      pending: [],
-      passes: [],
-    },
-    playerProps: sources.playerProps.data || {
-      summary: { gradedProps: 0, play: 0, pending: 0, pass: 0 },
-      plays: [],
-      pending: [],
-      passes: [],
-      props: [],
-      recentResults: [],
-    },
+    marketCard: displayMarketCard,
+    playerProps: playerPropCard,
     decisionResults: sources.decisionResults.data || {
       summary: {
         team: { total: 0, plays: 0, passes: 0, playRecord: { wins: 0, losses: 0, pushes: 0 }, passRecord: { goodPasses: 0, missedWins: 0, pushedPasses: 0 } },

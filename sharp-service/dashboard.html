@@ -189,13 +189,13 @@
   </section>
 
   <section class="section" id="plays">
-    <div class="section-title"><h2>Plays</h2><p>every currently qualified wager</p></div>
+    <div class="section-title"><h2>Plays</h2><p>Cleared selections ranked by win likelihood; price and EV shown separately</p></div>
 
     <div class="card">
       <div class="candidate-head">
         <div>
           <div class="match">Team Market Plays</div>
-          <div class="pick">Moneylines, run lines, and totals that are labeled PLAY.</div>
+          <div class="pick">Current moneyline, spread, and total BUYs, highest model win probability first.</div>
         </div>
         <span class="badge play" id="singleCountBadge">0 QUALIFIED</span>
       </div>
@@ -208,7 +208,7 @@
       <div class="candidate-head">
         <div>
           <div class="match">Player Prop Plays</div>
-          <div class="pick">Kept separate from team markets and ranked by the prop model.</div>
+          <div class="pick">Current prop BUYs, highest model win probability first.</div>
         </div>
         <span class="badge play" id="playsPropCountBadge">0 QUALIFIED</span>
       </div>
@@ -436,6 +436,7 @@
 
 <script type="module">
 import {deepDiveHtml,preserveDeepDives} from "./deep-dive.js";
+import {rankByWinProbability} from "./current-card.js";
   const $ = (id) => document.getElementById(id);
   const fmtPct = (x, digits=1) => x == null ? "—" : (Number(x)*100).toFixed(digits)+"%";
   const fmtPP = (x) => x == null ? "—" : (Number(x)>=0?"+":"")+Number(x).toFixed(2)+" pp";
@@ -879,7 +880,7 @@ import {deepDiveHtml,preserveDeepDives} from "./deep-dive.js";
             </div>`).join("");
         return;
       }
-      $("marketCardList").innerHTML='<div class="empty">No graded markets or scheduled games are available yet.</div>';
+      $("marketCardList").innerHTML='<div class="empty">'+esc(card?.reason||'No current graded markets or scheduled games are available yet.')+'</div>';
       return;
     }
 
@@ -1015,10 +1016,10 @@ ${deepDiveHtml(c,{scope:"candidates",reason:(c.blockers||[]).join("; ")})}
   function renderPlays(card, parlayCorrelation){
     const singles=[...(card?.plays||[])];
     $("singleCountBadge").textContent=singles.length+" QUALIFIED";
-    const ranked=[...singles].sort((a,b)=>Number(b.ev_pct??-999)-Number(a.ev_pct??-999));
+    const ranked=rankByWinProbability(singles);
 
     if(!ranked.length){
-      $("singlePlayList").innerHTML='<div class="empty">No team-market singles are labeled PLAY right now.</div>';
+      $("singlePlayList").innerHTML='<div class="empty">'+esc(card?.reason||'No current team-market BUYs are cleared.')+'</div>';
     } else {
       $("singlePlayList").innerHTML=ranked.map((g,i)=>`
         <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(77,226,208,.45)">
@@ -1027,7 +1028,7 @@ ${deepDiveHtml(c,{scope:"candidates",reason:(c.blockers||[]).join("; ")})}
               <div class="match">#${i+1} · ${esc(g.market_label)}</div>
               <div class="pick">${esc(g.away_team)} @ ${esc(g.home_team)} · ${fmtTime(g.starts_at)}</div>
             </div>
-            <span class="badge play">PLAY</span>
+            <span class="badge play">BUY</span>
           </div>
           <div class="grid4">
             <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(g.best_odds)}</div><div class="small">${esc(g.best_book||"—")}</div></div>
@@ -1076,14 +1077,12 @@ ${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.
   }
 
   function renderPropPlaysInPlays(card){
-    const props=[...(card?.plays||[])].sort((a,b)=>
-      Number(b.ev_pct??-999)-Number(a.ev_pct??-999)
-    );
+    const props=rankByWinProbability(card?.plays||[]);
 
     $("playsPropCountBadge").textContent=props.length+" QUALIFIED";
 
     if(!props.length){
-      $("playsPropList").innerHTML='<div class="empty">No player props are labeled PLAY right now.</div>';
+      $("playsPropList").innerHTML='<div class="empty">'+esc(card?.reason||'No current player-prop BUYs are cleared.')+'</div>'+(card?.researchUrl?'<a href="'+esc(card.researchUrl)+'">Open '+esc(card.sport)+' decisions and research</a>':'');
       return;
     }
 
@@ -1094,7 +1093,7 @@ ${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.
             <div class="match">#${i+1} · ${esc(p.label)}</div>
             <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
           </div>
-          <span class="badge play">PROP PLAY</span>
+          <span class="badge play">PROP BUY</span>
         </div>
         <div class="grid4">
           <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
@@ -1182,14 +1181,14 @@ ${deepDiveHtml(g,{scope:"final-plays",presentation:{title:g.final_status==="FINA
 
   function renderPlayerProps(card){
     const summary=card?.summary||{};
-    $("pTotal").textContent=summary.gradedProps??0;
-    $("pPlay").textContent=summary.play??0;
-    $("pPending").textContent=summary.pending??0;
-    $("pPass").textContent=summary.pass??0;
+    $("pTotal").textContent=summary.gradedProps??'Unavailable';
+    $("pPlay").textContent=summary.play??'Unavailable';
+    $("pPending").textContent=summary.pending??'Unavailable';
+    $("pPass").textContent=summary.pass??'Unavailable';
 
     const playRows=card?.plays||[];
     if(!playRows.length){
-      $("propPlayList").innerHTML='<div class="empty">No prop plays currently qualify.</div>';
+      $("propPlayList").innerHTML='<div class="empty">'+esc(card?.reason||'No current prop BUYs qualify.')+'</div>'+(card?.researchUrl?'<a href="'+esc(card.researchUrl)+'">Open '+esc(card.sport)+' decisions and research</a>':'');
     } else {
       $("propPlayList").innerHTML=playRows.slice(0,25).map((p,i)=>`
         <div class="card" style="border-color:rgba(77,226,208,.45)">
@@ -1937,9 +1936,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     preserveDeepDives(document.body);
     DATA=data;
     const s=data.summary||{};
-    $("mActive").textContent=s.gradedMarkets??data.marketCard?.summary?.markets??0;
-    $("mReady").textContent=s.pending??data.marketCard?.summary?.pending??0;
-    $("mFinal").textContent=s.finalPlays??0;
+    $("mActive").textContent=s.gradedMarkets??data.marketCard?.summary?.markets??'Unavailable';
+    $("mReady").textContent=s.pending??data.marketCard?.summary?.pending??'Unavailable';
+    $("mFinal").textContent=s.finalPlays??'Unavailable';
     $("mGrades").textContent=s.grades??0;
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
     $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
@@ -1973,7 +1972,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     const bad=sourceBad||pipelineBad||providerBad;
     $("healthDot").classList.toggle("bad",bad);
     $("healthText").textContent=
-      data.summary?.dataMode==="SCHEDULE_ONLY"
+      data.summary?.dataMode==="DATA_UNAVAILABLE"
+      ? "Current decisions unavailable · source check failed"
+      : data.summary?.dataMode==="SCHEDULE_ONLY"
       ? "Games connected · awaiting validated model markets"
       : bad
       ? "Some data sources or pipeline components are degraded"
@@ -1981,7 +1982,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
         ? "Provider protection is active with recent warnings"
         : pipelineWarming
           ? "Pipeline monitoring warming up"
-          : "Live system connected";
+          : data.summary?.dataMode==='EMPTY'
+            ? "No current model markets available"
+            : "Live system connected";
   }
 
   async function fetchProviderStatusData(){

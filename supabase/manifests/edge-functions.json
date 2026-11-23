@@ -822,19 +822,29 @@
     },
     {
       "slug": "github-ml-training-export",
-      "version": 2,
+      "version": 10,
       "status": "ACTIVE",
       "verify_jwt": false,
-      "bundle_sha256": "0314a48631fe367133cc69ad2bd23a97fa185f7c5d6e388283bfda81dbcf9d24",
+      "bundle_sha256": "ce62827b66d30d909408415855eb99ef783645e2ff677a9d411224077237a6c8",
       "entrypoint": "index.ts",
       "files": [
         {
           "path": "supabase/functions/github-ml-training-export/index.ts",
           "name": "index.ts",
-          "sha256": "a4d7a2e5a2f1054672cb8afbd6724cb10f5ee66af7c26cb4da50c3c55af4399d"
+          "sha256": "728891a1eee278d89cfd1000362b82244614209c55b4f54d6d8e8f1a427ede6d"
+        },
+        {
+          "path": "supabase/functions/github-ml-training-export/service-role-key.mjs",
+          "name": "service-role-key.mjs",
+          "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d"
         }
       ],
-      "deployed_at": "2026-09-24"
+      "deployed_at": "2026-11-10T17:11:19.583000+00:00",
+      "sourceRecovery": {
+        "observedOn": "2026-11-23",
+        "localSourceParityVerified": true,
+        "source": "Supabase get_edge_function version 10; no production deployment performed"
+      }
     },
     {
       "slug": "capture-sport-predictions",

@@ -4,7 +4,9 @@ import argparse
 import json
 import os
 import subprocess
+import urllib.error
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -164,58 +166,106 @@ def expected_function_inventory(items: list[dict[str, Any]]) -> list[dict[str, A
     return expected
 
 
+def expected_migration_inventory(items: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Use recorded hosted identities; local catch-up files are not deployments."""
+    return [
+        {"version": str(item.get("productionVersion", item["version"])), "name": item["name"]}
+        for item in items
+        if item.get("recoveredFromProduction") or item.get("appliedToProduction")
+    ]
+
+
+def write_report(output: Path, report: dict[str, Any]) -> None:
+    output.parent.mkdir(parents=True, exist_ok=True)
+    rendered = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    output.write_text(rendered)
+    print(rendered, end="")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=Path("drift-report.json"))
+    parser.add_argument("--preflight-only", action="store_true", help="validate runtime configuration without making requests")
     args = parser.parse_args()
 
-    project_ref = os.environ["SUPABASE_PROJECT_ID"]
-    token = os.environ["SUPABASE_ACCESS_TOKEN"]
-
-    expected_inventory = json.loads((ROOT / "supabase/manifests/production-inventory.json").read_text())
-    expected_cron = json.loads((ROOT / "supabase/manifests/cron-jobs.json").read_text())["items"]
-    migration_manifest = json.loads((ROOT / "supabase/manifests/migrations.json").read_text())["items"]
-    expected_migrations = [
-        {"version": str(x["version"]), "name": x["name"]}
-        for x in migration_manifest if x.get("recoveredFromProduction")
-    ]
-    edge_manifest = json.loads((ROOT / "supabase/manifests/edge-functions.json").read_text())["items"]
-    expected_functions = expected_function_inventory(edge_manifest)
-
-    actual_inventory = live_inventory(project_ref)
-    schema_diff = compare_inventory(expected_inventory, actual_inventory)
-    migration_diff = compare_exact(expected_migrations, live_migrations(), ("version",))
-    cron_diff = compare_exact(expected_cron, live_cron(), ("jobname",))
-
-    actual_functions = [
-        {
-            "slug": x["slug"],
-            "status": x["status"],
-            "version": int(x["version"]),
-            "verify_jwt": bool(x["verify_jwt"]),
-            "ezbr_sha256": x.get("ezbr_sha256"),
-        }
-        for x in live_functions(project_ref, token)
-        if x.get("status") == "ACTIVE"
-    ]
-    function_diff = compare_exact(expected_functions, actual_functions, ("slug",))
-
-    report = {
-        "project_ref": project_ref,
+    report: dict[str, Any] = {
         "read_only": True,
-        "migration_diff": migration_diff,
-        "function_diff": function_diff,
-        "schema_security_diff": schema_diff,
-        "cron_diff": cron_diff,
+        "checked_at": datetime.now(timezone.utc).isoformat(),
+        "status": "blocked",
+        "drift": None,
     }
-    drift = any(
-        any(section.values())
-        for section in (migration_diff, function_diff, schema_diff, cron_diff)
-    )
-    report["drift"] = drift
-    args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
-    print(json.dumps(report, indent=2, sort_keys=True))
-    return 1 if drift else 0
+    stage = "manifests"
+    try:
+        expected_inventory = json.loads((ROOT / "supabase/manifests/production-inventory.json").read_text())
+        expected_project = expected_inventory["project_ref"]
+        project_ref = os.environ.get("SUPABASE_PROJECT_ID", "").strip() or expected_project
+        report["project_ref"] = project_ref
+        if project_ref != expected_project:
+            report["error"] = {
+                "code": "project_mismatch",
+                "message": "Runtime project does not match the captured inventory project.",
+                "expected_project_ref": expected_project,
+            }
+            write_report(args.output, report)
+            return 2
+
+        missing = [name for name in ("SUPABASE_ACCESS_TOKEN", "SUPABASE_DB_PASSWORD")
+                   if not os.environ.get(name, "").strip()]
+        if missing:
+            report["error"] = {
+                "code": "missing_runtime_configuration",
+                "message": "Configure the required GitHub Actions secrets before running production drift checks.",
+                "missing_variables": missing,
+            }
+            write_report(args.output, report)
+            return 2
+        if args.preflight_only:
+            report["status"] = "preflight_passed"
+            write_report(args.output, report)
+            return 0
+
+        token = os.environ["SUPABASE_ACCESS_TOKEN"]
+        expected_cron = json.loads((ROOT / "supabase/manifests/cron-jobs.json").read_text())["items"]
+        migration_manifest = json.loads((ROOT / "supabase/manifests/migrations.json").read_text())["items"]
+        expected_migrations = expected_migration_inventory(migration_manifest)
+        edge_manifest = json.loads((ROOT / "supabase/manifests/edge-functions.json").read_text())["items"]
+        expected_functions = expected_function_inventory(edge_manifest)
+
+        stage = "schema_security"
+        report["schema_security_diff"] = compare_inventory(expected_inventory, live_inventory(project_ref))
+        stage = "migrations"
+        report["migration_diff"] = compare_exact(expected_migrations, live_migrations(), ("version",))
+        stage = "cron"
+        report["cron_diff"] = compare_exact(expected_cron, live_cron(), ("jobname",))
+        stage = "edge_functions"
+        actual_functions = [
+            {
+                "slug": x["slug"],
+                "status": x["status"],
+                "version": int(x["version"]),
+                "verify_jwt": bool(x["verify_jwt"]),
+                "ezbr_sha256": x.get("ezbr_sha256"),
+            }
+            for x in live_functions(project_ref, token)
+            if x.get("status") == "ACTIVE"
+        ]
+        report["function_diff"] = compare_exact(expected_functions, actual_functions, ("slug",))
+    except Exception as exc:
+        # Database and HTTP exceptions may embed credentials. Report only their
+        # class, stage, and HTTP status; never serialize exception text or env.
+        report["status"] = "error"
+        report["error"] = {"code": "check_failed", "stage": stage, "type": type(exc).__name__}
+        if isinstance(exc, urllib.error.HTTPError):
+            report["error"]["http_status"] = exc.code
+        write_report(args.output, report)
+        return 2
+
+    report["status"] = "complete"
+    report["drift"] = any(any(report[name].values()) for name in (
+        "migration_diff", "function_diff", "schema_security_diff", "cron_diff",
+    ))
+    write_report(args.output, report)
+    return 1 if report["drift"] else 0
 
 
 if __name__ == "__main__":

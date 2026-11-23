@@ -315,7 +315,9 @@
       "path": "supabase/migrations/20260930070000_adaptive_model_capture.sql",
       "sha256": "41ecc2e900ccb9b9157810b9a1f511954a26b8f83216fb2b45c9a88256be6ace",
       "recoveredFromProduction": false,
-      "statementCount": 4
+      "statementCount": 4,
+      "appliedToProduction": true,
+      "productionVersion": "20261005031532"
     },
     {
       "version": "20261110171432",
@@ -324,7 +326,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": 1
+      "statementCount": 1,
+      "productionVersion": "20261110171511"
     },
     {
       "version": "20261110202539",
@@ -333,7 +336,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261110202547"
     },
     {
       "version": "20261110202646",
@@ -342,7 +346,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261110202730"
     },
     {
       "version": "20261110203105",
@@ -351,7 +356,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261110203147"
     },
     {
       "version": "20261111114726",
@@ -360,7 +366,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111114929"
     },
     {
       "version": "20261111120910",
@@ -369,7 +376,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111120919"
     },
     {
       "version": "20261111121202",
@@ -378,7 +386,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111121220"
     },
     {
       "version": "20261111121713",
@@ -387,7 +396,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111121734"
     },
     {
       "version": "20261111122519",
@@ -396,7 +406,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111122613"
     },
     {
       "version": "20261111190000",
@@ -405,7 +416,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": 3
+      "statementCount": 3,
+      "productionVersion": "20261111110030"
     },
     {
       "version": "20261111190001",
@@ -414,7 +426,8 @@
       "sha256": null,
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261111115501"
     },
     {
       "version": "20261114153407",
@@ -423,7 +436,8 @@
       "sha256": "52769dc4c9b25e9de9dbe667735a2e216a09b91cfbfabd0c3fb347af4ae6bf5d",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261114154433"
     },
     {
       "version": "20261114155924",
@@ -432,7 +446,8 @@
       "sha256": "2568c02d8a74877ff0bd9f39d98832300e424985e62961f86e08d3a82308d907",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261114160312"
     },
     {
       "version": "20261114161057",
@@ -441,7 +456,8 @@
       "sha256": "ddf29591062f68003f47ea091049937f4ba34bab31070cd490190801f2bf84a6",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261114161223"
     },
     {
       "version": "20261114161306",
@@ -450,7 +466,8 @@
       "sha256": "109e0b54f362b580e163d1e4b2580b8748d97ab2637ae3d81c2dd81c3cd0bd61",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261114161335"
     },
     {
       "version": "20261117162439",
@@ -459,7 +476,8 @@
       "sha256": "a02dbb55da2789e4fe357b4340618194cddfa70bb4a36cb595098be237db9608",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261117164241"
     },
     {
       "version": "20261117164615",
@@ -468,7 +486,8 @@
       "sha256": "53e1f35998906b6c12a2ba4166bc3c21a31141cc0c76328e431ddb2e4152feca",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261117164822"
     },
     {
       "version": "20261117165217",
@@ -477,7 +496,8 @@
       "sha256": "ad0efe9015c7e47e897c571cb95de3640f9ff90098a1a30805f18fd11f76f529",
       "recoveredFromProduction": false,
       "appliedToProduction": true,
-      "statementCount": null
+      "statementCount": null,
+      "productionVersion": "20261117165533"
     },
     {
       "version": "20261117173646",
@@ -518,6 +538,87 @@
       "appliedToProduction": true,
       "statementCount": null,
       "productionVersion": "20261118194724"
+    },
+    {
+      "version": "20261122141232",
+      "name": "add_append_only_edge_decision_journal_v1",
+      "path": "supabase/migrations/20261122141232_add_append_only_edge_decision_journal_v1.sql",
+      "sha256": "b724cc2f2b1a690dc5c03145642069ef9cdce27a9775d7a3473f55f74d7fc349",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122143435",
+      "name": "journal_market_grade_observations_and_backfill",
+      "path": "supabase/migrations/20261122143435_journal_market_grade_observations_and_backfill.sql",
+      "sha256": "6c33e9864b452b00e067f0875060b99cf3f2ef9d915140be68d72dd3ba8ac257",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122143451",
+      "name": "journal_future_performance_decisions",
+      "path": "supabase/migrations/20261122143451_journal_future_performance_decisions.sql",
+      "sha256": "1893d947cc02735ecd33e18229c28023e52c3d994f9f3b231746e59c768c78fb",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122143717",
+      "name": "add_read_only_edge_journal_scorecards_and_quality",
+      "path": "supabase/migrations/20261122143717_add_read_only_edge_journal_scorecards_and_quality.sql",
+      "sha256": "19ee561fe54dffc79880126573da65ae310248b75ab98370038685a1fe5a4b76",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122143737",
+      "name": "link_journal_to_existing_outcome_attribution_readonly",
+      "path": "supabase/migrations/20261122143737_link_journal_to_existing_outcome_attribution_readonly.sql",
+      "sha256": "d51df4f734c81626201b9707ef77772e69a2f1fb5a3eed39a9cf2775a3b93dd5",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122145745",
+      "name": "journal_future_nba_live_decisions",
+      "path": "supabase/migrations/20261122145745_journal_future_nba_live_decisions.sql",
+      "sha256": "7066e4dafa7a6180c88b0923f44214253a37f109b1f97326b8a9601b8e8e3ccd",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261122145750",
+      "name": "add_nba_prop_research_outcome_audit",
+      "path": "supabase/migrations/20261122145750_add_nba_prop_research_outcome_audit.sql",
+      "sha256": "ddc33c84170c21de77cac049d493f6c12ca145425029b0e758f3f84803cd9f58",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "statementCount": 1
+    },
+    {
+      "version": "20261123170415",
+      "name": "repair_decision_journal_integrity",
+      "path": "supabase/migrations/20261123170415_repair_decision_journal_integrity.sql",
+      "sha256": "952204532c85061230b6db4b3eacf13e9bc73517cd9bc6612a767cbfdd833957",
+      "recoveredFromProduction": false,
+      "appliedToProduction": true,
+      "statementCount": 1,
+      "productionVersion": "20261123171926",
+      "productionAppliedAt": "2026-11-23T17:19:26Z"
     }
   ],
   "final_verified_at": "2026-09-24T09:21:26Z",
@@ -525,7 +626,7 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 59,
+    "repository_total_migrations": 67,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
   }
