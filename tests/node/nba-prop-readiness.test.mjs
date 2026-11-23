@@ -60,7 +60,7 @@ test('a failed quote response does not create an unhandled context rejection',as
 });
 
 test('PrizePicks diagnostic is authenticated on the deployed NBA route before provider access',async()=>{
- const names=['SHARP_MONITOR_TOKEN','SPORTS_ODDS_API_KEY','Sports_Game_Odds_API'];
+ const names=['PRIZEPICKS_MONITOR_TOKEN','SHARP_MONITOR_TOKEN','SPORTS_ODDS_API_KEY','Sports_Game_Odds_API'];
  const saved=Object.fromEntries(names.map(name=>[name,process.env[name]]));
  const oldFetch=globalThis.fetch;let calls=0;
  globalThis.fetch=async()=>{calls++;throw Error('unauthorized upstream request');};
@@ -71,7 +71,7 @@ test('PrizePicks diagnostic is authenticated on the deployed NBA route before pr
  try{
   for(const name of names)delete process.env[name];
   const absent=await invoke({});assert.equal(absent.statusCode,503);assert.equal(absent.body.reason,'MONITOR_AUTH_UNAVAILABLE');
-  process.env.SHARP_MONITOR_TOKEN='test-monitor-token';
+  process.env.PRIZEPICKS_MONITOR_TOKEN='test-monitor-token';
   const denied=await invoke({'x-monitor-token':'incorrect'});assert.equal(denied.statusCode,401);
   assert.equal(denied.headers['Cache-Control'],'private, no-store');
   assert.equal(calls,0);

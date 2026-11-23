@@ -26,7 +26,7 @@ Quote collection and historical explanation collection start concurrently. A his
 
 ### Protected PrizePicks diagnostic
 
-The route is `GET /api/nbaprops?view=prizepicks`, authenticated with the existing `SHARP_MONITOR_TOKEN` via the `x-monitor-token` header. Authentication runs before provider access and before cache reuse. All responses use `Cache-Control: private, no-store`. This adds no Vercel function.
+The route is `GET /api/nbaprops?view=prizepicks`. The dedicated-credential follow-up authenticates it exclusively with `PRIZEPICKS_MONITOR_TOKEN` via a single `x-monitor-token` header. It does not accept the legacy `SHARP_MONITOR_TOKEN` or a URL query credential. Authentication runs before provider access and before cache reuse. All responses use `Cache-Control: private, no-store`. This adds no Vercel function. See the [credential-isolation report](prizepicks-monitor-credential-20261123.md) for the reason, manual setup and separate publication/live-verification status.
 
 The only upstream is the configured SportsGameOdds account, using `SPORTS_ODDS_API_KEY` or the existing legacy `Sports_Game_Odds_API` fallback. The implementation uses both `optimizeSportsGameOddsObjectLimit` and `protectedSportsGameOddsFetch`; background priority preserves critical traffic capacity. It does not call PrizePicks directly, evade provider blocks, change accounts, expand a subscription or assume an entitlement.
 
@@ -36,8 +36,8 @@ Duplicate event pages do not inflate quote counts. Original provider fetch and q
 
 | Condition | HTTP result | Meaning |
 | --- | --- | --- |
-| Monitor token is not configured | 503 `MONITOR_AUTH_UNAVAILABLE` | No upstream request |
-| Missing or incorrect supplied monitor token | 401 | No upstream request or cached data |
+| `PRIZEPICKS_MONITOR_TOKEN` is absent, including when only legacy `SHARP_MONITOR_TOKEN` exists | 503 `MONITOR_AUTH_UNAVAILABLE`, with `requiredEnvironmentVariable: "PRIZEPICKS_MONITOR_TOKEN"` | No upstream request |
+| Dedicated token exists, but the header is missing, incorrect, repeated/invalid, or supplied only through query parameters | 401 | No upstream request or cached data |
 | Provider key is missing | 503 `PRIZEPICKS_PROVIDER_NOT_CONFIGURED` | No quote request |
 | Object quota is exhausted | 429 `PRIZEPICKS_OBJECT_QUOTA_EXHAUSTED` | No quote request |
 | Provider rejects access with 401 or 403 | 502 `PRIZEPICKS_PROVIDER_ACCESS_DENIED` | No returned quotes, even if a prior page or cache exists |
@@ -70,7 +70,7 @@ The full Node suite also passed **533 tests, zero failures** before the last two
 
 The initial scoped implementation used controlled fixtures and made no authenticated production feed request. After PR #79 deployed, the integrating agent captured the actual public research response: 10 NBA events and 911 player-market records, with provider roster identity and readiness metadata. Its book coverage reported **552 available, fresh PrizePicks DFS quote sides and zero comparable executable price sides**. This is evidence that the configured SportsGameOdds account returned those research lines at that observation time. It does not establish entry payouts, individual-pick prices, model probabilities or a cleared play.
 
-The separate private diagnostic returned **HTTP 503 `MONITOR_AUTH_UNAVAILABLE`**. Its production monitor token is not configured, so the authenticated diagnostic's live upstream path remains unverified. Public research coverage and private diagnostic readiness are different operational results. Do not describe the private diagnostic as fully enabled, or the returned DFS lines as executable betting prices. These production captures remain outside the repository; no provider credential is included in this report.
+The original deployed private diagnostic returned **HTTP 503 `MONITOR_AUTH_UNAVAILABLE`** while it still read the shared `SHARP_MONITOR_TOKEN`. That observation established missing shared-token configuration for that deployment; it is not a production observation of the later dedicated-credential repair. A subsequent review found that adding the shared variable would also gate existing public board consumers. The [credential-isolation report](prizepicks-monitor-credential-20261123.md) records the correction and pending configuration. The authenticated diagnostic's live upstream path remains unverified. Public research coverage and private diagnostic readiness are different operational results. Do not describe the private diagnostic as fully enabled, or the returned DFS lines as executable betting prices. These production captures remain outside the repository; no provider credential is included in this report.
 
 Confirmed rotations, player-specific injury clearance, independently validated prop distributions and calibration are still missing inputs. This repair makes those blockers explicit and connected to the live response; it does not clear player-prop BUY decisions.
 

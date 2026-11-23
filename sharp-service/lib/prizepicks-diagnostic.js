@@ -108,8 +108,8 @@ export async function prizePicksDiagnosticResponse({now=null,
 export async function prizePicksDiagnosticHandler(req,res){
  res.setHeader('Cache-Control','private, no-store');
  if(req.method!=='GET'){res.setHeader('Allow','GET');return res.status(405).json({error:'GET required'});}
- const token=process.env.SHARP_MONITOR_TOKEN,supplied=req.headers?.['x-monitor-token'];
- if(!token)return res.status(503).json({...emptyBody(),status:'UNAVAILABLE',reason:'MONITOR_AUTH_UNAVAILABLE'});
+ const token=process.env.PRIZEPICKS_MONITOR_TOKEN,supplied=req.headers?.['x-monitor-token'];
+ if(!token)return res.status(503).json({...emptyBody(),status:'UNAVAILABLE',reason:'MONITOR_AUTH_UNAVAILABLE',requiredEnvironmentVariable:'PRIZEPICKS_MONITOR_TOKEN'});
  if(typeof supplied!=='string'||Buffer.byteLength(supplied)!==Buffer.byteLength(token)||!timingSafeEqual(Buffer.from(supplied),Buffer.from(token)))
   return res.status(401).json({error:'Unauthorized',productionEligible:false,productionWeight:0});
  const {status,body}=await prizePicksDiagnosticResponse();

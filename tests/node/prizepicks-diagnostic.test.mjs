@@ -127,7 +127,7 @@ test('provider access denial cannot be masked by cached or partially collected d
 });
 
 test('authenticated deployed diagnostic coalesces concurrent reads through real provider protection',async()=>{
- const names=['SHARP_MONITOR_TOKEN','SPORTS_ODDS_API_KEY','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','SPORTS_ODDS_REQUESTS_PER_MINUTE','SPORTS_ODDS_OBJECT_OPTIMIZATION'];
+ const names=['PRIZEPICKS_MONITOR_TOKEN','SHARP_MONITOR_TOKEN','SPORTS_ODDS_API_KEY','SUPABASE_SECRET_KEY','SUPABASE_SERVICE_ROLE_KEY','SPORTS_ODDS_REQUESTS_PER_MINUTE','SPORTS_ODDS_OBJECT_OPTIMIZATION'];
  const saved=Object.fromEntries(names.map(name=>[name,process.env[name]]));
  const previousFetch=globalThis.fetch,previousClock=Date.now;
  let release,started,calls=0;const beginning=new Promise(resolve=>{started=resolve;});
@@ -138,7 +138,7 @@ test('authenticated deployed diagnostic coalesces concurrent reads through real 
  const pending=[];
  try{
   resetProviderProtectionForTests();Date.now=()=>now;
-  process.env.SHARP_MONITOR_TOKEN='fixture-monitor';process.env.SPORTS_ODDS_API_KEY='fixture-provider';
+  process.env.PRIZEPICKS_MONITOR_TOKEN='fixture-monitor';delete process.env.SHARP_MONITOR_TOKEN;process.env.SPORTS_ODDS_API_KEY='fixture-provider';
   process.env.SPORTS_ODDS_REQUESTS_PER_MINUTE='20';process.env.SPORTS_ODDS_OBJECT_OPTIMIZATION='0';
   delete process.env.SUPABASE_SECRET_KEY;delete process.env.SUPABASE_SERVICE_ROLE_KEY;
   globalThis.fetch=async(url,options)=>{
@@ -146,7 +146,9 @@ test('authenticated deployed diagnostic coalesces concurrent reads through real 
    assert.equal(new URL(url).pathname,'/v2/events');assert.equal(options.headers['x-api-key'],'fixture-provider');
    calls++;started();return new Promise(resolve=>{release=()=>resolve(new Response(JSON.stringify({success:true,data:[event()]}),{status:200}));});
   };
-  pending.push(invoke(),invoke());await beginning;assert.equal(calls,1);release();
+  pending.push(invoke(),invoke());
+  await Promise.race([beginning,Promise.all(pending).then(results=>assert.deepEqual(results.map(r=>r.statusCode),[200,200]))]);
+  assert.equal(calls,1);release();
   const results=await Promise.all(pending);
   assert.deepEqual(results.map(r=>r.statusCode),[200,200]);assert.equal(calls,1);
   assert.deepEqual(results.map(r=>r.body.cache.statuses[0]).sort(),['COALESCED','MISS']);

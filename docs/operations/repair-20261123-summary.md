@@ -141,13 +141,20 @@ coverage included **552** available and fresh PrizePicks DFS quote sides, with
 zero comparable single-pick price sides. These are time-specific feed
 observations, not proof of model readiness or executable standalone prices.
 
-The protected diagnostic returned HTTP **503** with
-`MONITOR_AUTH_UNAVAILABLE`, confirming that `SHARP_MONITOR_TOKEN` is not
-configured in this deployment. An authenticated diagnostic was not performed.
+At that observation, the original diagnostic handler returned HTTP **503** with
+`MONITOR_AUTH_UNAVAILABLE` because its shared `SHARP_MONITOR_TOKEN` was
+unavailable. An authenticated diagnostic was not performed.
 The Vercel connection available during repair did not expose the existing
 project, so that configuration remains blocked on access to the owning team.
 Code deployment succeeded through the existing Git integration. The two
 missing GitHub drift credentials listed above remain separate blockers.
+
+A subsequent source review found that adding `SHARP_MONITOR_TOKEN` would also
+gate existing `/api/board` and `/api/sharp` consumers. Do not add that shared
+variable just to enable the private diagnostic. The
+[dedicated-credential repair](prizepicks-monitor-credential-20261123.md) uses only
+`PRIZEPICKS_MONITOR_TOKEN` for that route and records the pending configuration
+and live verification separately from the original production observation.
 
 Live browser verification then exposed a further default-feed/display contract
 defect: the NBA page lost team and roster metadata and omitted readiness

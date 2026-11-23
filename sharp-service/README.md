@@ -19,8 +19,18 @@ Optional The Odds API quota controls:
 - THE_ODDS_API_MAX_PROP_EVENTS — maximum MLB events queried for player props
   per fallback refresh (default 2)
 
-Optional:
-- SHARP_MONITOR_TOKEN
+Monitor authentication:
+- `SHARP_MONITOR_TOKEN` optionally protects the existing `/api/board` and
+  `/api/sharp` routes. Enabling it requires their callers to supply that credential.
+- `PRIZEPICKS_MONITOR_TOKEN` protects only
+  `GET /api/nbaprops?view=prizepicks`. This private diagnostic requires a single
+  matching `x-monitor-token` header. It does not accept `SHARP_MONITOR_TOKEN` or a
+  URL query credential.
+
+Set only `PRIZEPICKS_MONITOR_TOKEN` to enable the private PrizePicks diagnostic.
+Adding `SHARP_MONITOR_TOKEN` for this purpose would also gate existing public
+game-research and board consumers. Keep monitor credentials out of browser code
+and URLs. See the [dedicated credential setup and verification instructions](../docs/operations/prizepicks-monitor-credential-20261123.md).
 
 Endpoint:
 - GET /api/sharp
