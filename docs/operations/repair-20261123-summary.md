@@ -122,17 +122,39 @@ for the service role. The post-deployment security check reported only the
 expected informational no-policy finding for these private service tables;
 see [the Supabase explanation](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
 
-The initial repair passed GitHub Actions run **45227170091**, including both
-browser checks, and Vercel confirmed its preview deployment. The additional
-replay repair requires fresh checks on its own commit before merging.
-Application deployment and subsequent remote test results are recorded in the
-repair pull request and its checks. Local browser execution could not be completed:
-the required Playwright browser was absent, and its standard download returned
-HTTP 403. The existing GitHub Actions browser checks remain part of the release
-verification. The SQL regression suite is now included in the main test
-workflow.
+The complete repair, including the replay correction, passed GitHub Actions
+Tests run **45228892885** and Probability Lab run **45228893124** on commit
+`e97742ec026d5090bbfb25b2f52d6de335ada35e`. Tests included PostgreSQL, Python,
+Node, the sharp-book browser check, and the desktop/mobile team-scoring browser
+check. [PR #79](https://github.com/Ervinx55/sports-analytics-prediction-system/pull/79)
+merged as `dfa4c2b724ca36e263e3aeebd0e04a75c6c1faf7`. The SQL regression suite
+is now included in the main test workflow.
 
+Vercel reported successful production deployment, and direct checks of
+[the canonical site](https://sports-analytics-prediction-system-tau.vercel.app)
+confirmed byte-for-byte matches for the reviewed current-card and replay
+modules. The deployed NBA dashboard contract reports model-win-probability
+ranking and routes NBA player observations to the NBA research page. The
+research API returned **911** player-market records, with explicit unmet
+readiness requirements and zero production-eligible predictions. Its book
+coverage included **552** available and fresh PrizePicks DFS quote sides, with
+zero comparable single-pick price sides. These are time-specific feed
+observations, not proof of model readiness or executable standalone prices.
+
+The protected diagnostic returned HTTP **503** with
+`MONITOR_AUTH_UNAVAILABLE`, confirming that `SHARP_MONITOR_TOKEN` is not
+configured in this deployment. An authenticated diagnostic was not performed.
 The Vercel connection available during repair did not expose the existing
-project. Release confirmation therefore requires the normal Git integration
-and a direct check of the canonical site's new response contracts. A merged
-commit alone must not be described as proof of a successful live deployment.
+project, so that configuration remains blocked on access to the owning team.
+Code deployment succeeded through the existing Git integration. The two
+missing GitHub drift credentials listed above remain separate blockers.
+
+Live browser verification then exposed a further default-feed/display contract
+defect: the NBA page lost team and roster metadata and omitted readiness
+disclosures. The follow-up and its regression evidence are recorded in
+[the props repair report](repair-20261123-props.md). The follow-up's integrated
+Node suite passed **561 tests**, including seven new regressions through the
+actual page renderer and three additional default-feed integrity regressions.
+Malformed cursors cannot imply complete coverage, and arrays or booleans cannot
+be coerced into numeric bookmaker observations. Its release and live
+verification are recorded in its pull request.

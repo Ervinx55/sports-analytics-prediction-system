@@ -18,6 +18,7 @@
 </main><script type="module">
 import {appendDeepDive,preserveDeepDives} from "./deep-dive.js";
 import {appendDecision} from "./decision-display.js";
+import {assessPropQuote} from "./prop-price-checks.js";
 const $ = id => document.getElementById(id);
 const el = (tag, className, value) => { const node=document.createElement(tag); if(className) node.className=className; if(value!==undefined) node.textContent=String(value); return node; };
 const add = (parent, tag, className, value) => { const node=el(tag,className,value); parent.append(node); return node; };
@@ -58,12 +59,46 @@ function renderTeam(data){
  const unavailableTarget=$('unavailable-cards');unavailableTarget.replaceChildren();if(!unavailable.length)empty(unavailableTarget,'No unavailable event estimates were returned.');
  for(const event of unavailable){const article=card(unavailableTarget,event.eventID||'Event identity unavailable','UNAVAILABLE','');add(article,'p','meta',date(event.startsAt));add(article,'p','',event.reason||'Model estimate unavailable.');}
 }
-function propQuotes(article,sideName,side){if(!side)return;const books=side.books||{};for(const [book,quote] of Object.entries(books)){const row=add(article,'div','');row.textContent=`${sideName} · ${book} · line ${line(quote.line)} · odds ${odds(quote.odds)} · ${label(quote.quoteState)} · observed ${date(quote.updatedAt)}`;}}
-function renderProps(data){
+function propQuoteChecks(prop,generatedAt,now){
+ const rows=[];
+ for(const side of ['over','under'])for(const [book,quote] of Object.entries(prop[side]?.books||{})){
+  if(!quote||typeof quote!=='object')continue;
+  rows.push({side,book,quote,check:assessPropQuote({book,quote,opposite:prop[side==='over'?'under':'over']?.books?.[book],generatedAt,now})});
+ }
+ return rows;
+}
+function propQuotes(article,rows){
+ for(const {side,book,quote,check} of rows){
+  const row=add(article,'div','');
+  const price=check.platformType==='sportsbook'?`odds ${odds(quote.odds)}`:'execution price unverified';
+  row.textContent=`${label(side)} · ${book} · line ${line(quote.line)} · ${price} · observed ${date(quote.updatedAt)}. At assessment: ${check.summary}`;
+  if(check.reasons.length)add(row,'p','',check.reasons.join(' '));
+ }
+}
+function renderProps(data,now=Date.now()){
  const events=Array.isArray(data.events)?data.events:[];const observations=events.flatMap(event=>(Array.isArray(event.players)?event.players:[]).map(player=>({event,player})));
  $('props-status').textContent=`${events.length} events · ${observations.length} player market records · Provider: ${data.oddsProvider||data.source||'not supplied'} · Quote source status: ${data.sourceHealth?.odds?.status||'Health not supplied'} · Updated ${date(data.generatedAt)}. Prediction unavailable for all.`;
  const metrics=$('props-metrics');metrics.hidden=false;metrics.replaceChildren();metric(metrics,'Events',events.length);metric(metrics,'Player market records',observations.length);metric(metrics,'Predictions available',0);metric(metrics,'Cleared plays',0);
- const target=$('props-cards');if(!batches(target,$('more-props'),observations,({event,player})=>{const prop=player.prop||{};const article=card(target,prop.playerName||'Player name unavailable','PREDICTION UNAVAILABLE','');add(article,'p','meta',`${event.matchup?.away?.name||'Away team unavailable'} @ ${event.matchup?.home?.name||'Home team unavailable'} · ${date(event.startsAt)}`);add(article,'p','',`${prop.marketName||label(prop.statID)} · quote quality: ${label(prop.quoteState)}`);add(article,'p','meta',`Provider: ${event.provider||data.oddsProvider||data.source||'not supplied'} · Latest quote: ${prop.latestQuoteAt?date(prop.latestQuoteAt):'see individual book timestamps'} · Player availability unverified.`);add(article,'p','meta',prop.identityStatus==='ROSTER_MATCHED'?'Roster matched: '+prop.verifiedTeam+' (ESPN). Injuries and participation remain unverified.':'Player roster identity is unverified.');appendDeepDive(article,{...prop,eventID:event.eventID,startsAt:event.startsAt,context:player.context||player.opportunity?.context,position:player.opportunity?.player?.position},{scope:'nba-quotes',presentation:{title:'NOT CLEARED — prediction unavailable',reason:'Bookmaker quotes alone cannot authorize a play.'}});const quotes=add(article,'div','quote-list');propQuotes(quotes,'Over',prop.over);propQuotes(quotes,'Under',prop.under);if(!quotes.childElementCount)add(article,'p','meta','No displayable bookmaker quote details.');}))empty(target,'No upcoming NBA player quotes were returned. No player predictions or PASS decisions can be inferred.');
+ const target=$('props-cards');if(!batches(target,$('more-props'),observations,({event,player})=>{
+  const prop=player.prop||{},provider=event.provider||data.oddsProvider||data.source||'not supplied';
+  const readiness=player.propReadiness?.contract==='nba-prop-readiness-v1'?player.propReadiness:null;
+  const reason=readiness?.summary||'Player readiness checks have not been supplied. No prop play is cleared.';
+  const reasons=Array.isArray(readiness?.reasons)?readiness.reasons:['PROP_READINESS_NOT_SUPPLIED'];
+  const identity=readiness?.identityStatus||prop.identityStatus;
+  const checks=propQuoteChecks(prop,data.generatedAt,now),comparable=checks.filter(row=>row.check.status==='COMPARABLE').length;
+  const stamps=checks.map(row=>Date.parse(row.quote.updatedAt)).filter(time=>Number.isFinite(time)&&time<=now);
+  const latestQuote=stamps.length?new Date(Math.max(...stamps)).toISOString():null;
+  const article=card(target,prop.playerName||'Player name unavailable','PREDICTION UNAVAILABLE','');
+  add(article,'p','meta',`${event.matchup?.away?.name||'Away team unavailable'} @ ${event.matchup?.home?.name||'Home team unavailable'} · ${date(event.startsAt)}`);
+  add(article,'p','',`${prop.marketName||label(prop.statID)} · ${comparable} of ${checks.length} quote sides comparable for price comparison.`);
+  add(article,'p','meta',`Quote checks assessed ${date(new Date(now).toISOString())}. Refresh to recheck prices.`);
+  add(article,'p','meta',`Provider: ${provider} · Latest quote: ${latestQuote?date(latestQuote):'timestamp unavailable'} · Player availability unverified.`);
+  add(article,'p','meta',identity==='PROVIDER_ROSTER_MATCHED'?`Provider roster matched for this matchup (${provider}). Injuries and participation remain unverified.`:identity==='ROSTER_MATCHED'&&prop.verifiedTeam?'Roster matched: '+prop.verifiedTeam+' (ESPN). Injuries and participation remain unverified.':'Player roster identity is unverified.');
+  add(article,'p','meta',reason);
+  appendDeepDive(article,{...prop,eventID:event.eventID,startsAt:event.startsAt,provider,context:player.context||player.opportunity?.context,position:player.context?.position||player.opportunity?.player?.position,propReadiness:readiness,reason,reasons,model:null,modelProbability:null,productionEligible:false,productionWeight:0},{scope:'nba-quotes',presentation:{title:'NOT CLEARED — prediction unavailable',reason:'Bookmaker quotes alone cannot authorize a play.'}});
+  const quotes=add(article,'div','quote-list');propQuotes(quotes,checks);
+  if(!quotes.childElementCount)add(article,'p','meta','No displayable bookmaker quote details.');
+ }))empty(target,'No upcoming NBA player quotes were returned. No player predictions or PASS decisions can be inferred.');
 }
 async function request(path,section,signal){
  const status=$(section+'-status');status.className='status';status.textContent=`Loading NBA ${section==='team'?'team estimates':'player quotes'}…`;

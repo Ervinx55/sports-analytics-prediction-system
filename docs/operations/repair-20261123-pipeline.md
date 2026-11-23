@@ -63,13 +63,15 @@ entries already recorded as applied. Their differing hosted versions are now
 mapped explicitly. `adaptive_model_capture` was additionally confirmed by an
 exact SHA-256 match with the hosted statement text before being marked applied.
 The seven November 22 journal migrations recovered by the ledger repair are
-included as already applied history; the new November 23 integrity repair is
-recorded as pending. No historical SQL was rewritten to change a deployment
-identity, and no recovered history should be replayed into production.
+included as already applied history. The new November 23 integrity repair was
+subsequently applied as hosted version `20261123171926`, verified against the
+reviewed statement hash, and marked applied with its hosted version in the
+manifest. No historical SQL was rewritten to change a deployment identity,
+and no recovered history should be replayed into production.
 
 ## Remaining inventory differences
 
-The read-only metadata observation is preserved in
+The pre-deployment read-only metadata observation is preserved in
 [repair-20261123-drift-observation.json](repair-20261123-drift-observation.json).
 It contains each missing, unexpected, or changed identity and its expected and
 observed metadata. This is a partial metadata comparison: schema/security and
