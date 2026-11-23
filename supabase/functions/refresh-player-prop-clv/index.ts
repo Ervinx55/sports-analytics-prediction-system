@@ -1,3 +1,5 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const PROPS_URL = "https://sports-analytics-prediction-system-tau.vercel.app/api/props";
@@ -126,6 +128,13 @@ Deno.serve(async(req)=>{
     if(req.method!=="POST"){
       return new Response(JSON.stringify({error:"POST only"}),{status:405,headers:{"content-type":"application/json"}});
     }
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
+      });
+    }
+
     const body=await req.json().catch(()=>({}));
     const windowMinutes=Math.max(60,Math.min(720,Number(body.windowMinutes||360)));
     const now=new Date();
@@ -180,7 +189,7 @@ Deno.serve(async(req)=>{
 
     const supabase=createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      serviceRoleKey()!
     );
 
     if(quoteRows.length){

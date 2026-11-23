@@ -1,3 +1,5 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const VERIFY_URL =
@@ -146,6 +148,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
+      });
+    }
+
     const body = await req.json().catch(() => ({}));
     const date = body.date ? String(body.date) : chicagoDate();
     const startsAfter = new Date().toISOString();
@@ -173,7 +182,7 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+      serviceRoleKey()!,
     );
 
     const capturedAt = new Date().toISOString();
