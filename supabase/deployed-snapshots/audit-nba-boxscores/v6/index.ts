@@ -1,0 +1,1 @@
+Deno.serve(()=>Response.json({error:'Audit complete; endpoint disabled'},{status:410}));

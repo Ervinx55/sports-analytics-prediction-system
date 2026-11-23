@@ -1,0 +1,24 @@
+{
+  "id": "nba-minutes-paired-2026-11-10-v1",
+  "registeredAt": "2026-11-10T07:39:47.055Z",
+  "startsAt": "2026-11-10T07:39:47.057Z",
+  "endsAt": "2026-12-01T00:00:00Z",
+  "modelHash": "880a76673cae94f50329671aaeb84254346348edaa6f4e7312a1f9910e442308",
+  "baselineModelHash": "31a5b080bdf88ff0ce6eb3b8c06c204e4bdd3e8693b1953cb919eb3a8aa2a0ce",
+  "minimumGames": 100,
+  "minimumPlayerGames": 500,
+  "productionEligible": false,
+  "productionWeight": 0,
+  "scope": "NBA DraftKings points/rebounds/assists; exact paired quote; conditional positive-minute participation",
+  "selection": "Earliest issuedAt then identity per event/player/market, before joining outcomes. Same selected rows for both models. Deduplicate minutes across markets.",
+  "baseline": "Development artifact baseline residual distribution and last-ten same-team mean, not frozen v4 probability distribution",
+  "candidate": "Frozen minutes_only residual distribution and EWMA minutes times last-ten minutes-weighted production rate",
+  "metrics": [
+    "game-balanced paired Brier and log loss by market, excluding pushes",
+    "game-balanced projection MAE",
+    "game-balanced minutes MAE",
+    "reliability bins, coverage, DNP and unresolved counts"
+  ],
+  "sourcePolicy": "Existing audited SGO/verified backup history; current native paired quotes. Direct SGO fallback if hosted quote endpoint fails; unchanged freshness and identity checks. Availability UNKNOWN remains explicitly blocked for plays.",
+  "decisionPolicy": "Frozen feasibility comparison. No tuning or automatic promotion. 100 games/500 player-games are sample floors, not proof or a power calculation. Review game-cluster uncertainty and calibration after fixed end; insufficient coverage remains inconclusive."
+}

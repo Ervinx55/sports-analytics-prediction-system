@@ -77,7 +77,8 @@ def test_historical_migration_inventory_is_exact():
         assert (ROOT / expected_path).exists()
 
 
-EXPECTED_EDGE_FUNCTION_COUNT = 53
+EXPECTED_EDGE_FUNCTION_COUNT = 68
+EXPECTED_RECOVERED_EDGE_FUNCTION_COUNT = 66
 
 
 def test_edge_function_recovery_is_complete_and_configured():
@@ -87,7 +88,8 @@ def test_edge_function_recovery_is_complete_and_configured():
     items = manifest["items"]
     recovered = [item for item in items if item['status'] == 'ACTIVE']
     local = [item for item in items if item['status'] == 'LOCAL_SOURCE']
-    assert len(recovered) == EXPECTED_EDGE_FUNCTION_COUNT
+    assert len(items) == EXPECTED_EDGE_FUNCTION_COUNT
+    assert len(recovered) == EXPECTED_RECOVERED_EDGE_FUNCTION_COUNT
     assert {item['slug'] for item in local} == {
         'capture-sport-predictions', 'settle-sport-predictions'
     }
@@ -99,17 +101,26 @@ def test_edge_function_recovery_is_complete_and_configured():
         assert item['deploymentObservation']['localSourceParityVerified'] is False
         for entry in item['files']:
             assert hashlib.sha256((ROOT / entry['path']).read_bytes()).hexdigest() == entry['sha256']
+        observation = item['deploymentObservation']
+        assert observation['files']
+        snapshot = Path('supabase/deployed-snapshots') / item['slug'] / f"v{observation['version']}"
+        for entry in observation['files']:
+            assert Path(entry['path']).is_relative_to(snapshot)
+            assert hashlib.sha256((ROOT / entry['path']).read_bytes()).hexdigest() == entry['sha256']
 
     slugs = [item["slug"] for item in items]
     assert len(slugs) == len(set(slugs))
 
     functions_dir = ROOT / "supabase" / "functions"
-    dirs = sorted(
+    dirs = {
         p.name
         for p in functions_dir.iterdir()
         if p.is_dir() and not p.name.startswith("_")
-    )
-    assert sorted(slugs) == dirs
+    }
+    snapshots_dir = ROOT / "supabase" / "deployed-snapshots"
+    assert snapshots_dir.is_dir()
+    dirs.update(p.name for p in snapshots_dir.iterdir() if p.is_dir())
+    assert set(slugs) == dirs
 
     config = tomllib.loads((ROOT / "supabase" / "config.toml").read_text())
     configured = config.get("functions", {})
@@ -123,8 +134,16 @@ def test_edge_function_recovery_is_complete_and_configured():
 
         for file_entry in item["files"]:
             path = ROOT / file_entry["path"]
-            assert path.exists()
-            assert file_entry["sha256"]
+            assert path.is_file()
+            assert hashlib.sha256(path.read_bytes()).hexdigest() == file_entry["sha256"]
+            if item["status"] == "ACTIVE":
+                snapshot = Path("supabase/deployed-snapshots") / item["slug"] / f"v{item['version']}"
+                canonical = Path("supabase/functions") / item["slug"]
+                source_path = Path(file_entry["path"])
+                assert source_path.is_relative_to(snapshot) or (
+                    item.get("sourceRecovery", {}).get("localSourceParityVerified") is True
+                    and source_path.is_relative_to(canonical)
+                )
 
 
 def test_production_inventory_shape_is_non_secret_and_complete():

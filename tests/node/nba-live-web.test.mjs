@@ -5,7 +5,7 @@ import {isCurrentPlay} from '../../sharp-service/nba-live.js';
 test('browser requires fresh server verification and current approval-backed PLAY',()=>{
  const now=Date.parse('2026-11-10T18:00:00Z');
  const data={contract:'nba-reviewed-live-v1',generatedAt:new Date(now).toISOString()};
- const row={status:'PLAY',productionEligible:true,productionWeight:1,approvalId:'review',issuedAt:data.generatedAt,validUntil:new Date(now+600000).toISOString(),startsAt:new Date(now+3600000).toISOString()};
+ const row={contract:'nba-reviewed-live-v1',status:'PLAY',productionEligible:true,productionWeight:1,approvalId:'review',issuedAt:data.generatedAt,forecastAt:data.generatedAt,quoteAt:data.generatedAt,oppositeQuoteAt:data.generatedAt,odds:-110,oppositeOdds:-110,modelProbability:.7,marketProbability:.5,validUntil:new Date(now+600000).toISOString(),startsAt:new Date(now+3600000).toISOString()};
  assert.equal(isCurrentPlay(row,data,now),true);
  for(const patch of [{status:'PASS'},{productionEligible:false},{productionWeight:0},{approvalId:null},{validUntil:data.generatedAt},{startsAt:data.generatedAt}])assert.equal(isCurrentPlay({...row,...patch},data,now),false);
  assert.equal(isCurrentPlay(row,data,now+30000),false);

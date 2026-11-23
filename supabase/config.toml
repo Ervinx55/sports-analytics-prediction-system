@@ -167,3 +167,45 @@ verify_jwt = true
 
 [functions.audit-nba-outcome-sources]
 verify_jwt = true
+
+# Observed deployed functions; exact bundles are in deployed-snapshots.
+# Source recovery does not authorize deployment. See its README and manifest.
+
+[functions.audit-nba-boxscores]
+verify_jwt = true
+
+[functions.capture-nba-player-props]
+verify_jwt = true
+
+[functions.capture-nfl-player-props]
+verify_jwt = true
+
+[functions.collect-nba-props]
+verify_jwt = true
+
+[functions.collect-nfl-prices]
+verify_jwt = true
+
+[functions.grade-nba-player-props]
+verify_jwt = true
+
+[functions.nba-player-prop-calibration]
+verify_jwt = false
+
+[functions.nba-player-prop-feedback-status]
+verify_jwt = false
+
+[functions.prediction-performance]
+verify_jwt = false
+
+[functions.probe-nba-backup]
+verify_jwt = true
+
+[functions.refresh-nba-player-prop-clv]
+verify_jwt = true
+
+[functions.service-auth-health]
+verify_jwt = true
+
+[functions.track-nba-research]
+verify_jwt = false

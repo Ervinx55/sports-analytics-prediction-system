@@ -310,6 +310,206 @@
       "statementCount": null
     },
     {
+      "version": "20260925045727",
+      "name": "archive_player_prop_market_quotes",
+      "path": "supabase/migrations/20260925045727_archive_player_prop_market_quotes.sql",
+      "sha256": "06b4f3451594faa75f8d2e276e223be93f4b3afe927a8acb950d03a53af9733b",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925045727",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 6545,
+        "sourceSha256": "06b4f3451594faa75f8d2e276e223be93f4b3afe927a8acb950d03a53af9733b",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925045757",
+      "name": "archive_player_prop_market_quotes_retention",
+      "path": "supabase/migrations/20260925045757_archive_player_prop_market_quotes_retention.sql",
+      "sha256": "1844fcef0d289867e580d0750252d1c672cd62618b5d3ac7268f80f0fa6aa497",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925045757",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 316,
+        "sourceSha256": "1844fcef0d289867e580d0750252d1c672cd62618b5d3ac7268f80f0fa6aa497",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925050326",
+      "name": "register_nfl_player_prop_capture_component",
+      "path": "supabase/migrations/20260925050326_register_nfl_player_prop_capture_component.sql",
+      "sha256": "67f502c3df1e3f5c8384aeb65d66750a8798c06c17b105fc29976cde0bf228ac",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925050326",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1037,
+        "sourceSha256": "67f502c3df1e3f5c8384aeb65d66750a8798c06c17b105fc29976cde0bf228ac",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925055553",
+      "name": "register_nba_player_prop_capture_component",
+      "path": "supabase/migrations/20260925055553_register_nba_player_prop_capture_component.sql",
+      "sha256": "5fc4e34e55cf9b2665c2606bda8f58744820af316cc5f3bb5ba1b5e2dbc2be54",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925055553",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1029,
+        "sourceSha256": "5fc4e34e55cf9b2665c2606bda8f58744820af316cc5f3bb5ba1b5e2dbc2be54",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925062619",
+      "name": "add_sport_to_player_prop_feedback_v2",
+      "path": "supabase/migrations/20260925062619_add_sport_to_player_prop_feedback_v2.sql",
+      "sha256": "5dd4954ba585f9ad5af0d262381113e99b43e0532b464762fcd2bddf0b76647e",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925062619",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1794,
+        "sourceSha256": "5dd4954ba585f9ad5af0d262381113e99b43e0532b464762fcd2bddf0b76647e",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925063434",
+      "name": "register_nba_player_prop_feedback_components",
+      "path": "supabase/migrations/20260925063434_register_nba_player_prop_feedback_components.sql",
+      "sha256": "fef792279ae65529c8e29d037eedb5f32c10c9933ef230b6edcf552ed55d7236",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925063434",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 2094,
+        "sourceSha256": "fef792279ae65529c8e29d037eedb5f32c10c9933ef230b6edcf552ed55d7236",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260925073838",
+      "name": "isolate_player_prop_latest_by_sport",
+      "path": "supabase/migrations/20260925073838_isolate_player_prop_latest_by_sport.sql",
+      "sha256": "dcca32b3c3bca11d063ae5d739f398ebf9b9c5e0379d44e2ae6a37349b8f903e",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260925073838",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 2272,
+        "sourceSha256": "dcca32b3c3bca11d063ae5d739f398ebf9b9c5e0379d44e2ae6a37349b8f903e",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260926212332",
+      "name": "create_options_iv_snapshots",
+      "path": "supabase/migrations/20260926212332_create_options_iv_snapshots.sql",
+      "sha256": "7865ab0bfc28cc146125fdb2a4f756b57d7cc7f05450b140505d14008632d290",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260926212332",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1197,
+        "sourceSha256": "7865ab0bfc28cc146125fdb2a4f756b57d7cc7f05450b140505d14008632d290",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260926214103",
+      "name": "create_options_profit_tracking",
+      "path": "supabase/migrations/20260926214103_create_options_profit_tracking.sql",
+      "sha256": "f4bd3c9678c6f3eb8d22e428f637a171336eb127e0c0e73a325cd9f7bb01c315",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260926214103",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 3225,
+        "sourceSha256": "f4bd3c9678c6f3eb8d22e428f637a171336eb127e0c0e73a325cd9f7bb01c315",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20260926214350",
+      "name": "index_options_paper_trade_setup_fk",
+      "path": "supabase/migrations/20260926214350_index_options_paper_trade_setup_fk.sql",
+      "sha256": "dfb185880cb8e80e1de6308f51b3ece1e56e60659b213324e7a31051eeb09ef8",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20260926214350",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 122,
+        "sourceSha256": "dfb185880cb8e80e1de6308f51b3ece1e56e60659b213324e7a31051eeb09ef8",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
       "version": "20260930070000",
       "name": "adaptive_model_capture",
       "path": "supabase/migrations/20260930070000_adaptive_model_capture.sql",
@@ -318,6 +518,466 @@
       "statementCount": 4,
       "appliedToProduction": true,
       "productionVersion": "20261005031532"
+    },
+    {
+      "version": "20261029023500",
+      "name": "prediction_performance_ledger",
+      "path": "supabase/migrations/20261029023500_prediction_performance_ledger.sql",
+      "sha256": "a3255fc65f08b17295ca4ec1a1268781ad84e285e4bd8bde788871b262048eb0",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023500",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 17154,
+        "sourceSha256": "a3255fc65f08b17295ca4ec1a1268781ad84e285e4bd8bde788871b262048eb0",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023515",
+      "name": "mlb_performance_publication",
+      "path": "supabase/migrations/20261029023515_mlb_performance_publication.sql",
+      "sha256": "7552f0a8510b5e8c81c179fac5e5f09758e94e3dbebab5616e32dea414446e18",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023515",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 9824,
+        "sourceSha256": "7552f0a8510b5e8c81c179fac5e5f09758e94e3dbebab5616e32dea414446e18",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023517",
+      "name": "sport_capture_receipts",
+      "path": "supabase/migrations/20261029023517_sport_capture_receipts.sql",
+      "sha256": "9f89c4e1f927a9dd290c4a5ad000df1295d9acada15de37b34e55e31e168b9d5",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023517",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 4157,
+        "sourceSha256": "9f89c4e1f927a9dd290c4a5ad000df1295d9acada15de37b34e55e31e168b9d5",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023518",
+      "name": "priority_sport_contracts",
+      "path": "supabase/migrations/20261029023518_priority_sport_contracts.sql",
+      "sha256": "909292b473564cc1e44c78e08901dc87fde3d508c602d81405be654bf47678c1",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023518",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 10500,
+        "sourceSha256": "909292b473564cc1e44c78e08901dc87fde3d508c602d81405be654bf47678c1",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023519",
+      "name": "register_prediction_performance_jobs",
+      "path": "supabase/migrations/20261029023519_register_prediction_performance_jobs.sql",
+      "sha256": "95f4539b1e5b3c22c1e24ad87e8835418beb953b54aff832afbdc87477776ab2",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023519",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 19105,
+        "sourceSha256": "95f4539b1e5b3c22c1e24ad87e8835418beb953b54aff832afbdc87477776ab2",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023525",
+      "name": "performance_read",
+      "path": "supabase/migrations/20261029023525_performance_read.sql",
+      "sha256": "b0ba6ba9d8d2c629f42482cd52f7aa4dd83151960fe5c8228995fd2cd2093e43",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023525",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 3423,
+        "sourceSha256": "b0ba6ba9d8d2c629f42482cd52f7aa4dd83151960fe5c8228995fd2cd2093e43",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023547",
+      "name": "exact_market_semantics",
+      "path": "supabase/migrations/20261029023547_exact_market_semantics.sql",
+      "sha256": "9667c57537fa3502489c091c358d1d20d748a49ccdf6fac8cfc6de43d41ed89a",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023547",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 19140,
+        "sourceSha256": "9667c57537fa3502489c091c358d1d20d748a49ccdf6fac8cfc6de43d41ed89a",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023554",
+      "name": "final_pass_publication",
+      "path": "supabase/migrations/20261029023554_final_pass_publication.sql",
+      "sha256": "64b3bd82cd384cf852c5d2f8dbf9bd90c45bd84d9f43ea20201737800cebf1f5",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023554",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 2644,
+        "sourceSha256": "64b3bd82cd384cf852c5d2f8dbf9bd90c45bd84d9f43ea20201737800cebf1f5",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261029023606",
+      "name": "global_portfolio_read",
+      "path": "supabase/migrations/20261029023606_global_portfolio_read.sql",
+      "sha256": "7e3b21e958c3e99d0f4d000d7bc851745ea8fcc94e6e767a6b79fab8c38dd8bc",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261029023606",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 3470,
+        "sourceSha256": "7e3b21e958c3e99d0f4d000d7bc851745ea8fcc94e6e767a6b79fab8c38dd8bc",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261101153743",
+      "name": "nba_research_scoreboard_cache",
+      "path": "supabase/migrations/20261101153743_nba_research_scoreboard_cache.sql",
+      "sha256": "3023daebd4b14ab76bf6b9d35a249ff083f3afe10779029627056cbf60ca1fb9",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261101153743",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 607,
+        "sourceSha256": "3023daebd4b14ab76bf6b9d35a249ff083f3afe10779029627056cbf60ca1fb9",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261105035258",
+      "name": "create_edge_lab_slip_archive",
+      "path": "supabase/migrations/20261105035258_create_edge_lab_slip_archive.sql",
+      "sha256": "e618248136a8a77051205251bed6cd0b0cd0a7eadd5ed5e4e40aea49d912c4f8",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261105035258",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1018,
+        "sourceSha256": "e618248136a8a77051205251bed6cd0b0cd0a7eadd5ed5e4e40aea49d912c4f8",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261105035635",
+      "name": "edge_lab_private_read_only_slip_dashboard_rpc",
+      "path": "supabase/migrations/20261105035635_edge_lab_private_read_only_slip_dashboard_rpc.sql",
+      "sha256": "ccb026b7e8b4c25a902e070e6e84005d734daf42763be633866a7796121a42c5",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261105035635",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 925,
+        "sourceSha256": "ccb026b7e8b4c25a902e070e6e84005d734daf42763be633866a7796121a42c5",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261105154730",
+      "name": "create_private_edge_lab_pregame_research_boards",
+      "path": "supabase/migrations/20261105154730_create_private_edge_lab_pregame_research_boards.sql",
+      "sha256": "7ea11078424736fd25f25973f4ea1ac20f6f2f397509b0ec3e1fa3387371797b",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261105154730",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 758,
+        "sourceSha256": "7ea11078424736fd25f25973f4ea1ac20f6f2f397509b0ec3e1fa3387371797b",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261107173526",
+      "name": "edge_lab_nba_nfl_propgpt_market_capture_v1",
+      "path": "supabase/migrations/20261107173526_edge_lab_nba_nfl_propgpt_market_capture_v1.sql",
+      "sha256": "07d4c99d1904d4e5d8e2dcbbfb093e85fb3288ea7555ff909c45ea8b05f69473",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261107173526",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 3054,
+        "sourceSha256": "07d4c99d1904d4e5d8e2dcbbfb093e85fb3288ea7555ff909c45ea8b05f69473",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261107173920",
+      "name": "edge_lab_external_nba_nfl_prop_sample_quarantine_v1",
+      "path": "supabase/migrations/20261107173920_edge_lab_external_nba_nfl_prop_sample_quarantine_v1.sql",
+      "sha256": "2f11c16519920f1c8ea264fab53010054632c3c4002b830911782e238f2653da",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261107173920",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1526,
+        "sourceSha256": "2f11c16519920f1c8ea264fab53010054632c3c4002b830911782e238f2653da",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261107174420",
+      "name": "edge_lab_service_role_only_capture_rpc_v1",
+      "path": "supabase/migrations/20261107174420_edge_lab_service_role_only_capture_rpc_v1.sql",
+      "sha256": "5628fa686b06957284df40ed02c8dd9551eb751751d01d5a6fad7a5cee28356a",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261107174420",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 2397,
+        "sourceSha256": "5628fa686b06957284df40ed02c8dd9551eb751751d01d5a6fad7a5cee28356a",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261109134149",
+      "name": "hosted_nba_prop_collection",
+      "path": "supabase/migrations/20261109134149_hosted_nba_prop_collection.sql",
+      "sha256": "a3a6fe08785208e143eef880c013f1c0deb00c0e27ab0f56df1e86f3ddfe097a",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261109134149",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 6272,
+        "sourceSha256": "a3a6fe08785208e143eef880c013f1c0deb00c0e27ab0f56df1e86f3ddfe097a",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261109134355",
+      "name": "harden_hosted_nba_lease",
+      "path": "supabase/migrations/20261109134355_harden_hosted_nba_lease.sql",
+      "sha256": "1329cd40feab51bd1437eb057ba43fdaee0d6c961a461da3c6c163503934401d",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261109134355",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 3462,
+        "sourceSha256": "1329cd40feab51bd1437eb057ba43fdaee0d6c961a461da3c6c163503934401d",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261109134514",
+      "name": "rotate_hosted_nba_settlement_dates",
+      "path": "supabase/migrations/20261109134514_rotate_hosted_nba_settlement_dates.sql",
+      "sha256": "b2d214099ac8f18c400d6c1cd69c307d638fe8d4ab4ce7083e50b748487957bd",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261109134514",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1412,
+        "sourceSha256": "b2d214099ac8f18c400d6c1cd69c307d638fe8d4ab4ce7083e50b748487957bd",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261109135023",
+      "name": "schedule_hosted_nba_prop_research",
+      "path": "supabase/migrations/20261109135023_schedule_hosted_nba_prop_research.sql",
+      "sha256": "41402d6bf7558c590ed0105491d53fe94463b981286f9c8d2eecbc7287cbf7ff",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261109135023",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 691,
+        "sourceSha256": "41402d6bf7558c590ed0105491d53fe94463b981286f9c8d2eecbc7287cbf7ff",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261110085941",
+      "name": "support_automatic_nba_inactive_outcomes",
+      "path": "supabase/migrations/20261110085941_support_automatic_nba_inactive_outcomes.sql",
+      "sha256": "877246426f9d89ba3c61be9760bfdad12e612ec941b5ba3012b2049af4b766a4",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261110085941",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 7780,
+        "sourceSha256": "877246426f9d89ba3c61be9760bfdad12e612ec941b5ba3012b2049af4b766a4",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261110112053",
+      "name": "reviewed_nba_live_decisions",
+      "path": "supabase/migrations/20261110112053_reviewed_nba_live_decisions.sql",
+      "sha256": "2329e3899fc977af71012cdfa2f7d508593a1950efdc643087cd86032f5c1f0e",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261110112053",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 9516,
+        "sourceSha256": "2329e3899fc977af71012cdfa2f7d508593a1950efdc643087cd86032f5c1f0e",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261110163916",
+      "name": "batch_nba_forecast_persistence",
+      "path": "supabase/migrations/20261110163916_batch_nba_forecast_persistence.sql",
+      "sha256": "c054530155ad81ba7bf340abe871e9b1a570314eb311e1712f38740d63ae419b",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261110163916",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 5260,
+        "sourceSha256": "c054530155ad81ba7bf340abe871e9b1a570314eb311e1712f38740d63ae419b",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
     },
     {
       "version": "20261110171432",
@@ -470,6 +1130,46 @@
       "productionVersion": "20261114161335"
     },
     {
+      "version": "20261116155528",
+      "name": "nfl_exact_price_evidence",
+      "path": "supabase/migrations/20261116155528_nfl_exact_price_evidence.sql",
+      "sha256": "eed746db4df9c92347c5293843dc08773ff607f4a7b57f03d1026e286c128390",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261116155528",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1608,
+        "sourceSha256": "eed746db4df9c92347c5293843dc08773ff607f4a7b57f03d1026e286c128390",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
+      "version": "20261116155905",
+      "name": "schedule_nfl_exact_price_collection",
+      "path": "supabase/migrations/20261116155905_schedule_nfl_exact_price_collection.sql",
+      "sha256": "17b2b62ab79bed13e950510d615527a7b0475877dece1febc0190b171c2a40ed",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261116155905",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 599,
+        "sourceSha256": "17b2b62ab79bed13e950510d615527a7b0475877dece1febc0190b171c2a40ed",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
+    },
+    {
       "version": "20261117162439",
       "name": "winner_research_collection",
       "path": "supabase/migrations/20261117162439_winner_research_collection.sql",
@@ -538,6 +1238,26 @@
       "appliedToProduction": true,
       "statementCount": null,
       "productionVersion": "20261118194724"
+    },
+    {
+      "version": "20261119213136",
+      "name": "edge_sharp_money_research_snapshots",
+      "path": "supabase/migrations/20261119213136_edge_sharp_money_research_snapshots.sql",
+      "sha256": "ff23a551fe0e9f699e22108b6ca16eb4c3d261d754785f20bb48543e49e513b2",
+      "recoveredFromProduction": true,
+      "recoveredOn": "2026-11-23",
+      "appliedToProduction": true,
+      "productionVersion": "20261119213136",
+      "statementCount": 1,
+      "sourceRecovery": {
+        "source": "supabase_migrations.schema_migrations.statements[1]",
+        "observedAt": "2026-11-23T18:15:20.970796+00:00",
+        "sourceEncoding": "UTF-8",
+        "sourceBytes": 1439,
+        "sourceSha256": "ff23a551fe0e9f699e22108b6ca16eb4c3d261d754785f20bb48543e49e513b2",
+        "verbatim": true,
+        "replayPolicy": "ALREADY_APPLIED_DO_NOT_REPLAY"
+      }
     },
     {
       "version": "20261122141232",
@@ -626,8 +1346,30 @@
     "status": "MATCH",
     "production_recorded_historical_migrations": 17,
     "recovered_historical_migrations": 17,
-    "repository_total_migrations": 67,
+    "repository_total_migrations": 103,
     "catchup_migrations": 10,
     "note": "Catch-up migrations reproduce already-live post-history state for fresh environments and must not be blindly replayed into current production."
+  },
+  "migrationHistoryRecovery": {
+    "observedAt": "2026-11-23T18:15:20.970796+00:00",
+    "projectRef": "yeoxroijaptomomshdii",
+    "status": "MIGRATION_IDENTITIES_MATCH",
+    "readOnly": true,
+    "source": "supabase_migrations.schema_migrations",
+    "recoveredThisPass": 36,
+    "recoveredSourceBytes": 157372,
+    "productionMigrations": 93,
+    "representedProductionMigrations": 93,
+    "unrepresentedProductionMigrations": 0,
+    "conflictingProductionMigrations": 0,
+    "repositoryMigrationFiles": 103,
+    "localCatchupMigrationsExcluded": 10,
+    "exactStoredSourceMatchesThisPass": 36,
+    "previousEntriesUnchanged": true,
+    "schemaSecurityVerified": false,
+    "cronVerified": false,
+    "productionMutations": false,
+    "report": "docs/operations/2026-11-23-migration-history-recovery.md",
+    "verifiedAt": "2026-11-23T18:20:02.883995+00:00"
   }
 }

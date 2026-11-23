@@ -1,0 +1,856 @@
+[
+  {
+    "eventID": "MDgL3At5aXMOhw1mWPdj",
+    "startsAt": "2026-11-10T00:30:00.000Z",
+    "bdlGameID": 21718069,
+    "officialGameID": "0022600206",
+    "sourceFingerprint": "2ea7dddc1c819a074dbae1df17a9b9773df19dfe1a7a139d28a5c9c97298f1c6",
+    "backupFingerprint": "9943d685c73529adbf6ac2caa44aba3fe184405d6298c7f2b733291424df3179",
+    "home": "TORONTO_RAPTORS_NBA",
+    "away": "MEMPHIS_GRIZZLIES_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261109/20261109_MEMTOR_book.pdf",
+      "retrievedAt": "2026-11-12T16:15:33.173Z",
+      "sha256": "c0c6474a86b95e1075fbb3ec30b7c7a84fc87a972814b3a21afdb44db02db264"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600206/box-score",
+      "sha256": "2224958e9435995bcfb59702ed62d0ec303b4edf57f0181ea70199bb47ac14db"
+    },
+    "crosswalk": [
+      {
+        "side": "home",
+        "name": "RJ Barrett",
+        "officialPlayerID": 1629628,
+        "bdlPlayerID": 666423,
+        "sgoPlayerID": "RJ_BARRETT_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Kyle Anderson",
+        "officialPlayerID": 203937,
+        "bdlPlayerID": 12,
+        "sgoPlayerID": "KYLE_ANDERSON_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Jakob Poeltl",
+        "officialPlayerID": 1627751,
+        "bdlPlayerID": 373,
+        "sgoPlayerID": "JAKOB_POELTL_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Ja'Kobe Walter",
+        "officialPlayerID": 1642266,
+        "bdlPlayerID": 1028029111,
+        "sgoPlayerID": "JAKOBE_WALTER_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Jamal Shead",
+        "officialPlayerID": 1642347,
+        "bdlPlayerID": 1028038426,
+        "sgoPlayerID": "JAMAL_SHEAD_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Jamison Battle",
+        "officialPlayerID": 1642419,
+        "bdlPlayerID": 1028243201,
+        "sgoPlayerID": "JAMISON_BATTLE_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Alijah Martin",
+        "officialPlayerID": 1642918,
+        "bdlPlayerID": 1057389862,
+        "sgoPlayerID": "ALIJAH_MARTIN_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Trayce Jackson-Davis",
+        "officialPlayerID": 1631218,
+        "bdlPlayerID": 56677799,
+        "sgoPlayerID": "TRAYCE_JACKSONDAVIS_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Allen Graves",
+        "officialPlayerID": 1643512,
+        "bdlPlayerID": 1091350801,
+        "sgoPlayerID": "ALLEN_GRAVES_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Jaden Bradley",
+        "officialPlayerID": 1643558,
+        "bdlPlayerID": 1091463018,
+        "sgoPlayerID": "JADEN_BRADLEY_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Malachi Smith",
+        "officialPlayerID": 1641869,
+        "bdlPlayerID": 1059753274,
+        "sgoPlayerID": "MALACHI_SMITH_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Jaylen Wells",
+        "officialPlayerID": 1642377,
+        "bdlPlayerID": 1028039105,
+        "sgoPlayerID": "JAYLEN_WELLS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Cameron Boozer",
+        "officialPlayerID": 1643409,
+        "bdlPlayerID": 1091339280,
+        "sgoPlayerID": "CAMERON_BOOZER_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Zach Edey",
+        "officialPlayerID": 1641744,
+        "bdlPlayerID": 1028025754,
+        "sgoPlayerID": "ZACH_EDEY_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Cedric Coward",
+        "officialPlayerID": 1642907,
+        "bdlPlayerID": 1057266649,
+        "sgoPlayerID": "CEDRIC_COWARD_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Ty Jerome",
+        "officialPlayerID": 1629660,
+        "bdlPlayerID": 666676,
+        "sgoPlayerID": "TY_JEROME_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "GG Jackson",
+        "officialPlayerID": 1641713,
+        "bdlPlayerID": 56677830,
+        "sgoPlayerID": "GG_JACKSON_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Javon Small",
+        "officialPlayerID": 1642914,
+        "bdlPlayerID": 1057396260,
+        "sgoPlayerID": "J_SMALL_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Cam Spencer",
+        "officialPlayerID": 1642285,
+        "bdlPlayerID": 1028048549,
+        "sgoPlayerID": "CAM_SPENCER_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Jerami Grant",
+        "officialPlayerID": 203924,
+        "bdlPlayerID": 182,
+        "sgoPlayerID": "JERAMI_GRANT_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Quinten Post",
+        "officialPlayerID": 1642366,
+        "bdlPlayerID": 1028047928,
+        "sgoPlayerID": "Q_POST_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Taylor Hendricks",
+        "officialPlayerID": 1641707,
+        "bdlPlayerID": 56677824,
+        "sgoPlayerID": "TAYLOR_HENDRICKS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Kris Murray",
+        "officialPlayerID": 1631200,
+        "bdlPlayerID": 56677791,
+        "sgoPlayerID": "KRIS_MURRAY_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Olivier-Maxence Prosper",
+        "officialPlayerID": 1641765,
+        "bdlPlayerID": 56677859,
+        "sgoPlayerID": "OLIVIERMAXENCE_PROSPER_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "playerID": "JAKOB_POELTL_1_NBA",
+        "name": "Jakob Poeltl",
+        "fields": {
+          "offensiveRebounds": [
+            6,
+            5
+          ],
+          "rebounds": [
+            8,
+            7
+          ],
+          "points+rebounds": [
+            26,
+            25
+          ],
+          "rebounds+assists": [
+            10,
+            9
+          ],
+          "points+rebounds+assists": [
+            28,
+            27
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "playerID": "JAMAL_SHEAD_1_NBA",
+        "name": "Jamal Shead",
+        "fields": {
+          "offensiveRebounds": [
+            0,
+            1
+          ],
+          "rebounds": [
+            2,
+            3
+          ],
+          "points+rebounds": [
+            22,
+            23
+          ],
+          "rebounds+assists": [
+            13,
+            14
+          ],
+          "points+rebounds+assists": [
+            33,
+            34
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "home",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "playerID": 1091463018,
+        "name": "Jaden Bradley",
+        "fields": {
+          "min": [
+            "9:08",
+            "09:08"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "home",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "playerID": 1059753274,
+        "name": "Malachi Smith",
+        "fields": {
+          "plus_minus": [
+            -8,
+            0
+          ],
+          "min": [
+            "0:48",
+            "00:48"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOddsIdentity",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "playerID": "J_SMALL_1_NBA",
+        "fields": {
+          "name": [
+            "J. Small",
+            "Javon Small"
+          ],
+          "firstName": [
+            "J.",
+            "Javon"
+          ]
+        },
+        "evidence": "Previously verified J_SMALL_1_NBA Memphis identity; official gamebook and NBA player ID crosswalk"
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "playerID": "J_SMALL_1_NBA",
+        "name": "Javon Small",
+        "fields": {
+          "secondsPlayed": [
+            1440,
+            1421
+          ],
+          "twoPointersMade": [
+            0,
+            2
+          ],
+          "twoPointersAttempted": [
+            0,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "playerID": 1028047928,
+        "name": "Quinten Post",
+        "fields": {
+          "min": [
+            "1:56",
+            "01:56"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "playerID": 56677791,
+        "name": "Kris Murray",
+        "fields": {
+          "min": [
+            "0:48",
+            "00:48"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "playerID": 56677859,
+        "name": "Olivier-Maxence Prosper",
+        "fields": {
+          "min": [
+            "0:48",
+            "00:48"
+          ]
+        }
+      }
+    ],
+    "revision": "official-gamebooks-2026-11-12",
+    "originalProvidersPreserved": true
+  },
+  {
+    "eventID": "WLq3Bh6XYeJ6aZy3a8bd",
+    "startsAt": "2026-11-10T03:00:00.000Z",
+    "bdlGameID": 21718073,
+    "officialGameID": "0022600210",
+    "sourceFingerprint": "160ccb057753ae96edb17bd35a6231cc22a98c45b2761e1be82dad44d9886fc2",
+    "backupFingerprint": "6e35696b1ca82b046bbef3fb00e4ce904bca8c13c1f9ec8aa368ca55e045330d",
+    "home": "GOLDEN_STATE_WARRIORS_NBA",
+    "away": "NEW_ORLEANS_PELICANS_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261109/20261109_NOPGSW_book.pdf",
+      "retrievedAt": "2026-11-12T16:15:33.652Z",
+      "sha256": "e0be89cecc42679a827be718b3f84e5d432a636ce932cc4738e07403c292f6c4"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600210/box-score",
+      "sha256": "c490a219553f149f293f31c1ffb38fe5d17c4a50532f995f1a485a0f63036b64"
+    },
+    "crosswalk": [
+      {
+        "side": "home",
+        "name": "Gui Santos",
+        "officialPlayerID": 1630611,
+        "bdlPlayerID": 57875092,
+        "sgoPlayerID": "GUI_SANTOS_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Yaxel Lendeborg",
+        "officialPlayerID": 1642865,
+        "bdlPlayerID": 1091351802,
+        "sgoPlayerID": "YAXEL_LENDEBORG_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Draymond Green",
+        "officialPlayerID": 203110,
+        "bdlPlayerID": 185,
+        "sgoPlayerID": "DRAYMOND_GREEN_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Brandin Podziemski",
+        "officialPlayerID": 1641764,
+        "bdlPlayerID": 56677858,
+        "sgoPlayerID": "BRANDIN_PODZIEMSKI_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Stephen Curry",
+        "officialPlayerID": 201939,
+        "bdlPlayerID": 115,
+        "sgoPlayerID": "STEPHEN_CURRY_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Al Horford",
+        "officialPlayerID": 201143,
+        "bdlPlayerID": 219,
+        "sgoPlayerID": "AL_HORFORD_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "De'Anthony Melton",
+        "officialPlayerID": 1629001,
+        "bdlPlayerID": 313,
+        "sgoPlayerID": "DEANTHONY_MELTON_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Georges Niang",
+        "officialPlayerID": 1627777,
+        "bdlPlayerID": 344,
+        "sgoPlayerID": "GEORGES_NIANG_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Brandon Williams",
+        "officialPlayerID": 1630314,
+        "bdlPlayerID": 24489167,
+        "sgoPlayerID": "BRANDON_WILLIAMS_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Charles Bassey",
+        "officialPlayerID": 1629646,
+        "bdlPlayerID": 17895854,
+        "sgoPlayerID": "CHARLES_BASSEY_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "LJ Cryer",
+        "officialPlayerID": 1643018,
+        "bdlPlayerID": 1057968644,
+        "sgoPlayerID": "LJ_CRYER_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Graham Ike",
+        "officialPlayerID": 1643633,
+        "bdlPlayerID": 1097894227,
+        "sgoPlayerID": "GRAHAM_IKE_1_NBA"
+      },
+      {
+        "side": "home",
+        "name": "Malevy Leons",
+        "officialPlayerID": 1642502,
+        "bdlPlayerID": 1028265620,
+        "sgoPlayerID": "MALEVY_LEONS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Herbert Jones",
+        "officialPlayerID": 1630529,
+        "bdlPlayerID": 17896024,
+        "sgoPlayerID": "HERBERT_JONES_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Saddiq Bey",
+        "officialPlayerID": 1630180,
+        "bdlPlayerID": 3547256,
+        "sgoPlayerID": "SADDIQ_BEY_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Karlo Matković",
+        "officialPlayerID": 1631255,
+        "bdlPlayerID": 1028245777,
+        "sgoPlayerID": "KARLO_MATKOVIC_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Dejounte Murray",
+        "officialPlayerID": 1627749,
+        "bdlPlayerID": 334,
+        "sgoPlayerID": "DEJOUNTE_MURRAY_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Jeremiah Fears",
+        "officialPlayerID": 1642847,
+        "bdlPlayerID": 1057267077,
+        "sgoPlayerID": "JEREMIAH_FEARS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Jordan Poole",
+        "officialPlayerID": 1629673,
+        "bdlPlayerID": 666848,
+        "sgoPlayerID": "JORDAN_POOLE_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Bennedict Mathurin",
+        "officialPlayerID": 1631097,
+        "bdlPlayerID": 38017686,
+        "sgoPlayerID": "BENNEDICT_MATHURIN_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Derik Queen",
+        "officialPlayerID": 1642852,
+        "bdlPlayerID": 1057274415,
+        "sgoPlayerID": "DERIK_QUEEN_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Bryce McGowens",
+        "officialPlayerID": 1631121,
+        "bdlPlayerID": 38017708,
+        "sgoPlayerID": "BRYCE_MCGOWENS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "AJ Johnson",
+        "officialPlayerID": 1642358,
+        "bdlPlayerID": 1028026717,
+        "sgoPlayerID": "AJ_JOHNSON_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Julian Reese",
+        "officialPlayerID": 1642882,
+        "bdlPlayerID": 1060111739,
+        "sgoPlayerID": "JULIAN_REESE_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "side": "home",
+        "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+        "playerID": 24489167,
+        "name": "Brandon Williams",
+        "fields": {
+          "min": [
+            "1:39",
+            "01:39"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+        "playerID": "GRAHAM_IKE_1_NBA",
+        "name": "Graham Ike",
+        "fields": {
+          "blocks": [
+            2,
+            1
+          ],
+          "blocks+steals": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+        "fields": {
+          "blocks": [
+            10,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "NEW_ORLEANS_PELICANS_NBA",
+        "playerID": "SADDIQ_BEY_1_NBA",
+        "name": "Saddiq Bey",
+        "fields": {
+          "assists": [
+            3,
+            4
+          ],
+          "points+assists": [
+            12,
+            13
+          ],
+          "rebounds+assists": [
+            3,
+            4
+          ],
+          "points+rebounds+assists": [
+            12,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "NEW_ORLEANS_PELICANS_NBA",
+        "playerID": "JEREMIAH_FEARS_1_NBA",
+        "name": "Jeremiah Fears",
+        "fields": {
+          "threePointersMade": [
+            0,
+            1
+          ],
+          "threePointersAttempted": [
+            4,
+            5
+          ],
+          "points": [
+            8,
+            11
+          ],
+          "twoPointersMade": [
+            4,
+            3
+          ],
+          "twoPointersAttempted": [
+            8,
+            7
+          ],
+          "points+assists": [
+            16,
+            19
+          ],
+          "points+rebounds": [
+            11,
+            14
+          ],
+          "points+rebounds+assists": [
+            19,
+            22
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "side": "away",
+        "teamID": "NEW_ORLEANS_PELICANS_NBA",
+        "playerID": 1060111739,
+        "name": "Julian Reese",
+        "fields": {
+          "min": [
+            "9:17",
+            "09:17"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "NEW_ORLEANS_PELICANS_NBA",
+        "fields": {
+          "threePointersMade": [
+            7,
+            8
+          ],
+          "threePointersAttempted": [
+            27,
+            28
+          ],
+          "assists": [
+            20,
+            21
+          ],
+          "twoPointersMade": [
+            22,
+            21
+          ],
+          "twoPointersAttempted": [
+            53,
+            52
+          ]
+        }
+      }
+    ],
+    "revision": "official-gamebooks-2026-11-12",
+    "originalProvidersPreserved": true
+  },
+  {
+    "eventID": "lifymi4jrXCpckkBVDDC",
+    "startsAt": "2026-11-15T00:30:00.000Z",
+    "bdlGameID": 21718105,
+    "officialGameID": "0022600232",
+    "sourceFingerprint": "6bdddbeb4079d51ea0300a0ccab3f5f8eadc9bf35b2a56b211b7b444631e2caa",
+    "backupFingerprint": "8ba354d29485c2bf07c9313f4b9b86a0a60071dee0f832a091911f58d326666b",
+    "home": "CLEVELAND_CAVALIERS_NBA",
+    "away": "DALLAS_MAVERICKS_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261114/20261114_DALCLE_book.pdf",
+      "retrievedAt": "2026-11-17T16:32:56.873Z",
+      "sha256": "fbaffbde3b25b849e8ace9def044026fe4ba666ccda0d8407d37097208f17289"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600232/box-score",
+      "retrievedAt": "2026-11-17T16:32:57.223Z",
+      "sha256": "0dca4d77c1f371af28efc7557875eac38bbf77da4476258d99ef219d41e434b5"
+    },
+    "crosswalk": [
+      {
+        "side": "away",
+        "name": "P.J. Washington",
+        "officialPlayerID": 1629023,
+        "bdlPlayerID": 666950,
+        "sgoPlayerID": "PJ_WASHINGTON_JR_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "fields": {
+          "rebounds": [
+            40,
+            39
+          ],
+          "fieldGoalsAttempted": [
+            94,
+            93
+          ],
+          "offensiveRebounds": [
+            14,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "playerID": "PJ_WASHINGTON_JR_1_NBA",
+        "fields": {
+          "rebounds": [
+            4,
+            3
+          ],
+          "fieldGoalsAttempted": [
+            10,
+            9
+          ],
+          "offensiveRebounds": [
+            2,
+            1
+          ],
+          "twoPointersAttempted": [
+            6,
+            5
+          ],
+          "points+rebounds": [
+            14,
+            13
+          ],
+          "rebounds+assists": [
+            5,
+            4
+          ],
+          "points+rebounds+assists": [
+            15,
+            14
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "eventID": "vF7mrlCAIjmb7rtvfi4s",
+    "startsAt": "2026-11-03T00:30:00.000Z",
+    "bdlGameID": 21718016,
+    "officialGameID": "0022600162",
+    "sourceFingerprint": "630540b3a1861735a4bb11c3ab80635b14a139b19bd29d57a2b01cf75e6c1d38",
+    "backupFingerprint": "8b5bbe06a61fcdbfcb4f837f42fad15ffb2f9b469a3805db1dee88baa6e430cd",
+    "home": "ORLANDO_MAGIC_NBA",
+    "away": "WASHINGTON_WIZARDS_NBA",
+    "gamebook": {
+      "url": "https://statsdmz.nba.com/pdfs/20261102/20261102_WASORL_book.pdf",
+      "retrievedAt": "2026-11-17T16:33:00.295Z",
+      "sha256": "7ed7437a69692b7e998db64cca86db943f0aab3d6d8055db7977cdfebd4fc6c9"
+    },
+    "identityPage": {
+      "url": "https://www.nba.com/game/0022600162/box-score",
+      "retrievedAt": "2026-11-17T16:33:01.781Z",
+      "sha256": "ed4aa518d56197422d92afd681fb07c3918237bc43086c3c189b773e0dc8067d"
+    },
+    "crosswalk": [
+      {
+        "side": "away",
+        "name": "Anthony Davis",
+        "officialPlayerID": 203076,
+        "bdlPlayerID": 117,
+        "sgoPlayerID": "ANTHONY_DAVIS_1_NBA"
+      },
+      {
+        "side": "away",
+        "name": "Bilal Coulibaly",
+        "officialPlayerID": 1641731,
+        "bdlPlayerID": 56677844,
+        "sgoPlayerID": "BILAL_COULIBALY_1_NBA"
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "playerID": "ANTHONY_DAVIS_1_NBA",
+        "fields": {
+          "steals": [
+            3,
+            4
+          ],
+          "blocks+steals": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "playerID": "BILAL_COULIBALY_1_NBA",
+        "fields": {
+          "steals": [
+            2,
+            1
+          ],
+          "blocks+steals": [
+            5,
+            4
+          ]
+        }
+      }
+    ]
+  }
+]

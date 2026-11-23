@@ -28,7 +28,10 @@ function adminKey(): string {
   if (modern) {
     try {
       const parsed = JSON.parse(modern);
-      if (parsed?.default) return String(parsed.default);
+      const key = typeof parsed?.default === "string"
+        ? parsed.default.trim()
+        : "";
+      if (key) return key;
     } catch {
       // Fall through to the legacy service-role key.
     }

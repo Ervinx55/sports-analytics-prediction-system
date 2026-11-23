@@ -1,0 +1,377 @@
+{
+  "policy": {
+    "version": "nba-defense-development-v1",
+    "season": 2024,
+    "split": "2025-02-01T00:00:00+00:00",
+    "ridgePenalty": 10,
+    "bootstrapDraws": 2000,
+    "seed": 20261104,
+    "minimumPriorGames": 3,
+    "variants": {
+      "baseline": [],
+      "level_control": [
+        "level"
+      ],
+      "form": [
+        "level",
+        "recentDelta",
+        "teamForm"
+      ],
+      "defense": [
+        "level",
+        "ownOffense",
+        "opponentDefense"
+      ],
+      "combined": [
+        "level",
+        "recentDelta",
+        "teamForm",
+        "ownOffense",
+        "opponentDefense"
+      ]
+    },
+    "productionWeight": 0,
+    "phase": "DEVELOPMENT_ONLY",
+    "availability": "Earlier UTC dates and at least 8 hours after start; historical publication times unknown",
+    "universe": "Actual positive-minute participants; not a pregame availability forecast",
+    "selection": "Report all variants; no automatic winner selection or promotion",
+    "inputHashes": {
+      "games.json": "d6f710ae1f196d7010506fb5205a5940a00577b606c8da40e7906d5a860c2a0a",
+      "player-stats.json": "6b1aefaa4721c6f7eb3f04d80f3783f0af8f1b1492a0154b445186c1d7c6fa54"
+    },
+    "codeSha256": "5f5376972294f17b24ee1d4a349feb3f379a71bbca2eb4656a1eb1b4213fff58",
+    "frozenAt": "2026-11-04T22:42:31.068359+00:00"
+  },
+  "models": {
+    "points": {
+      "level_control": {
+        "features": [
+          "level"
+        ],
+        "center": [
+          10.751532775718232
+        ],
+        "scale": [
+          7.030857325399376
+        ],
+        "coefficients": [
+          0.21408263412924972,
+          -0.548623369494598
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "form": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm"
+        ],
+        "center": [
+          10.751532775718216,
+          0.08214725059721385,
+          0.5002884173089931
+        ],
+        "scale": [
+          7.030857325399414,
+          1.753513816054131,
+          0.2637933671959906
+        ],
+        "coefficients": [
+          0.2140826341292484,
+          -0.5458660635099846,
+          0.19245290788971925,
+          -0.05364031782343486
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "defense": {
+        "features": [
+          "level",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          10.751532775718216,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          7.030857325399414,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.2140826341292553,
+          -0.5402701336969641,
+          -0.12997596570344888,
+          0.17879768690556982
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "combined": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          10.751532775718216,
+          0.08214725059721385,
+          0.5002884173089931,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          7.030857325399414,
+          1.753513816054131,
+          0.2637933671959906,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.21408263412925915,
+          -0.5399918772598359,
+          0.1882229736138625,
+          0.01746098820617429,
+          -0.1385728769260135,
+          0.17684761874484833
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      }
+    },
+    "rebounds": {
+      "level_control": {
+        "features": [
+          "level"
+        ],
+        "center": [
+          4.183146221267453
+        ],
+        "scale": [
+          2.6914083111634213
+        ],
+        "coefficients": [
+          0.06385496161372985,
+          -0.27585965375749155
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "form": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm"
+        ],
+        "center": [
+          4.183146221267445,
+          0.029223738216615686,
+          0.5002884173089931
+        ],
+        "scale": [
+          2.691408311163426,
+          0.7239607815077702,
+          0.2637933671959906
+        ],
+        "coefficients": [
+          0.063854961613729,
+          -0.27604771516503573,
+          0.13334110686928488,
+          -0.026008571145472698
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "defense": {
+        "features": [
+          "level",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          4.183146221267445,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          2.691408311163426,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.06385496161372622,
+          -0.27590175552511353,
+          0.0003698122193630705,
+          0.020344545101548695
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "combined": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          4.183146221267445,
+          0.029223738216615686,
+          0.5002884173089931,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          2.691408311163426,
+          0.7239607815077702,
+          0.2637933671959906,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.0638549616137181,
+          -0.27622144843740687,
+          0.13339435282384265,
+          -0.03835878689887733,
+          0.02215098832503122,
+          0.018392914494784612
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      }
+    },
+    "assists": {
+      "level_control": {
+        "features": [
+          "level"
+        ],
+        "center": [
+          2.489270187322251
+        ],
+        "scale": [
+          2.0665532916224616
+        ],
+        "coefficients": [
+          0.06711911643923679,
+          -0.15568442765270168
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "form": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm"
+        ],
+        "center": [
+          2.4892701873222274,
+          0.02558437575644749,
+          0.5002884173089931
+        ],
+        "scale": [
+          2.0665532916224567,
+          0.5389851199868829,
+          0.2637933671959906
+        ],
+        "coefficients": [
+          0.06711911643923686,
+          -0.15575208287347178,
+          0.06859673336406831,
+          -0.03167451672856255
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "defense": {
+        "features": [
+          "level",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          2.4892701873222274,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          2.0665532916224567,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.0671191164392337,
+          -0.15442902238270706,
+          -0.030788661579162515,
+          0.07183668590804214
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      },
+      "combined": {
+        "features": [
+          "level",
+          "recentDelta",
+          "teamForm",
+          "ownOffense",
+          "opponentDefense"
+        ],
+        "center": [
+          2.4892701873222274,
+          0.02558437575644749,
+          0.5002884173089931,
+          111.16948719694577,
+          111.22845550937325
+        ],
+        "scale": [
+          2.0665532916224567,
+          0.5389851199868829,
+          0.2637933671959906,
+          4.205609132961794,
+          4.192004070242014
+        ],
+        "coefficients": [
+          0.06711911643922869,
+          -0.15559988758917537,
+          0.06701370506791383,
+          -0.023772884613392276,
+          -0.017289076830463844,
+          0.07057943971035581
+        ],
+        "productionWeight": 0,
+        "modelProbability": null,
+        "trainingGames": 655,
+        "trainingRows": 13477
+      }
+    }
+  }
+}

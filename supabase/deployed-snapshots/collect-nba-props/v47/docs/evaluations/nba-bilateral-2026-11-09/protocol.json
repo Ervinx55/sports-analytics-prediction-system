@@ -1,0 +1,26 @@
+{
+  "id": "nba-prospective-bilateral-2026-11-09-v4",
+  "registeredAt": "2026-11-09T19:35:13.864Z",
+  "startsAt": "2026-11-09T19:35:13.864Z",
+  "endsAt": "2026-12-01T00:00:00Z",
+  "modelHash": "31a5b080bdf88ff0ce6eb3b8c06c204e4bdd3e8693b1953cb919eb3a8aa2a0ce",
+  "minimumGames": 100,
+  "minimumPlayerGames": 500,
+  "scope": "NBA SGO paired DraftKings points/rebounds/assists; conditional positive-minute participation; baseline-only and paired-context forecasts reported separately",
+  "selection": "Earliest saved forecast per game/player/market; minutes deduplicate across markets too. Exact ties use identity ascending.",
+  "baseline": "Saved last-ten same-team projection; saved baseline minutes",
+  "candidateMinutes": "nba-minutes-ewma-v1",
+  "metrics": [
+    "game-balanced paired minutes MAE",
+    "projection MAE by market",
+    "descriptive Brier"
+  ],
+  "purpose": "Prospective feasibility and calibration pilot; not a confirmatory promotion trial",
+  "samplePolicy": "Floors are feasibility targets, not a power calculation or automatic pass. Do not extend or tune this cohort based on results.",
+  "decisionPolicy": "No production promotion. Final game-cluster uncertainty and calibration review; any confirmatory trial requires a separate predeclared protocol.",
+  "productionEligible": false,
+  "productionWeight": 0,
+  "sourceChange": "16 event-scoped official NBA adjudications across both providers; player-summed team aggregates; exact Klay team correction and exclusion of misattributed Mason identity with Isaac retained under BALLDONTLIE identity. Previous cohorts remain immutable.",
+  "liveBdlContract": "nba-bdl-live-v4:b82b8c2456625960c1b0a62ba35813cf22aaec0ae2d3fb89e6663b9538c29c02",
+  "contextPolicy": "Missing opponent history leaves candidateProjection null. Never omit quarantined own-team games. Missing loaded summaries block all forecasts."
+}

@@ -1,0 +1,26 @@
+// Diagnostics only: never changes quotes, eligibility, or frozen forecast selection.
+export function describeQuoteReadiness(body,rows,now){
+ const index=new Map(),key=(event,player,market,book,side)=>JSON.stringify([event,player,market,book,side]);
+ for(const e of body?.events??[])for(const p of e.players??[]){const prop=p.prop;if(!prop)continue;
+  for(const side of ['over','under'])for(const [book,q] of Object.entries(prop[side]?.books??{})){
+   const k=key(e.eventID,prop.playerID,prop.statID,book,side);if(!index.has(k))index.set(k,[]);index.get(k).push(q);
+  }
+ }
+ const result={total:rows.length,ready:0,blocked:0,reasons:{},examples:[],scope:'CURRENT_EXACT_TWO_SIDED_QUOTES; not PLAY approval'};
+ const timestamp=(value,prefix)=>{const t=typeof value==='string'?Date.parse(value):NaN;return !Number.isFinite(t)?prefix+'_TIME_MISSING':t>now?prefix+'_TIME_FUTURE':now-t>600000?prefix+'_STALE':null;};
+ for(const r of rows){
+  let reason=timestamp(r.generatedAt,'FEED')||timestamp(r.updatedAt,'QUOTE');
+  const others=index.get(key(r.eventID,r.playerID,r.marketType,r.book,r.side==='OVER'?'under':'over'))??[];
+  const same=others.filter(q=>q.line===r.line),opposite=same[0];
+  if(!reason&&!same.length)reason=others.length?'OPPOSITE_LINE_MISMATCH':'OPPOSITE_QUOTE_MISSING';
+  if(!reason&&same.length>1)reason='OPPOSITE_QUOTE_AMBIGUOUS';
+  if(!reason&&opposite?.available===false)reason='OPPOSITE_QUOTE_UNAVAILABLE';
+  if(!reason)reason=timestamp(r.oppositeUpdatedAt,'OPPOSITE_QUOTE');
+  if(!reason&&(!Number.isFinite(r.odds)||!Number.isFinite(r.line)||!Number.isFinite(r.market)))reason='PAIR_PRICE_INVALID';
+  if(!reason){result.ready++;continue;}
+  result.blocked++;result.reasons[reason]=(result.reasons[reason]??0)+1;
+  if(result.examples.length<12)result.examples.push({eventID:r.eventID,playerID:r.playerID,market:r.marketType,side:r.side,line:r.line,book:r.book,reason});
+ }
+ return result;
+}
+

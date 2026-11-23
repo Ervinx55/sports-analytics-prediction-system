@@ -5,6 +5,7 @@ import {propsResponse} from '../../sharp-service/api/nbaprops.js';
 import {researchPropsResponse} from '../../sharp-service/lib/nba-research-props.js';
 import {assessPropQuote} from '../../sharp-service/prop-price-checks.js';
 import {buildDeepDive} from '../../sharp-service/deep-dive.js';
+import {setNbaQuoteNames} from '../../sharp-service/nba-live.js';
 
 const at='2026-11-23T17:43:05.616Z',now=Date.parse(at);
 const playerID='BRANDON_MILLER_1_NBA';
@@ -50,7 +51,7 @@ function render(body,checkedAt=now){
   deep.push(row);const node=new Element('details');
   node.textContent=buildDeepDive(row,options).sections.map(section=>section.text).join('\n');parent.append(node);
  };
- new Function('document','appendDeepDive','preserveDeepDives','appendDecision','assessPropQuote','data','now',source+'\nrenderProps(data,now);')(document,appendDeepDive,()=>{},()=>{},assessPropQuote,body,checkedAt);
+ new Function('document','appendDeepDive','preserveDeepDives','appendDecision','assessPropQuote','setNbaQuoteNames','data','now',source+'\nrenderProps(data,now);')(document,appendDeepDive,()=>{},()=>{},assessPropQuote,setNbaQuoteNames,body,checkedAt);
  return {text:nodes.get('props-cards').textContent,nodes,deep};
 }
 

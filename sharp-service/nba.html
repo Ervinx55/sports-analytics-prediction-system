@@ -19,6 +19,7 @@
 import {appendDeepDive,preserveDeepDives} from "./deep-dive.js";
 import {appendDecision} from "./decision-display.js";
 import {assessPropQuote} from "./prop-price-checks.js";
+import {setNbaQuoteNames} from "./nba-live.js";
 const $ = id => document.getElementById(id);
 const el = (tag, className, value) => { const node=document.createElement(tag); if(className) node.className=className; if(value!==undefined) node.textContent=String(value); return node; };
 const add = (parent, tag, className, value) => { const node=el(tag,className,value); parent.append(node); return node; };
@@ -76,6 +77,7 @@ function propQuotes(article,rows){
  }
 }
 function renderProps(data,now=Date.now()){
+ setNbaQuoteNames(data,now);
  const events=Array.isArray(data.events)?data.events:[];const observations=events.flatMap(event=>(Array.isArray(event.players)?event.players:[]).map(player=>({event,player})));
  $('props-status').textContent=`${events.length} events · ${observations.length} player market records · Provider: ${data.oddsProvider||data.source||'not supplied'} · Quote source status: ${data.sourceHealth?.odds?.status||'Health not supplied'} · Updated ${date(data.generatedAt)}. Prediction unavailable for all.`;
  const metrics=$('props-metrics');metrics.hidden=false;metrics.replaceChildren();metric(metrics,'Events',events.length);metric(metrics,'Player market records',observations.length);metric(metrics,'Predictions available',0);metric(metrics,'Cleared plays',0);

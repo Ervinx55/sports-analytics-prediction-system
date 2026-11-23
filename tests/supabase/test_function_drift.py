@@ -24,9 +24,13 @@ def test_repository_inventory_builds_drift_expectations():
     root = Path(__file__).resolve().parents[2]
     items = json.loads((root / 'supabase/manifests/edge-functions.json').read_text())['items']
     expected = expected_function_inventory(items)
-    assert len(expected) == 55
+    assert len(expected) == 68
+    assert {entry['slug'] for entry in expected} == {item['slug'] for item in items}
+    assert len({entry['slug'] for entry in expected}) == len(expected)
     for item in items:
         actual = next(x for x in expected if x['slug'] == item['slug'])
-        source = item.get('deploymentObservation', item)
+        source = item['deploymentObservation'] if item['status'] == 'LOCAL_SOURCE' else item
         assert actual['version'] == source['version']
         assert actual['ezbr_sha256'] == source['bundle_sha256']
+        assert actual['status'] == source['status']
+        assert actual['verify_jwt'] is source['verify_jwt']
