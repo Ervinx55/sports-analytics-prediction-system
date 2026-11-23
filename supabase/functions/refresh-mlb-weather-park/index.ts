@@ -1,3 +1,5 @@
+import { isServiceRoleRequest } from "./service-role-auth.mjs";
+import { serviceRoleKey } from "./service-role-key.mjs";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const MLB = "https://statsapi.mlb.com";
@@ -145,9 +147,16 @@ function propDirection(side:string,m:number|null){
 Deno.serve(async(req)=>{
   try{
     if(req.method!=="POST") return new Response(JSON.stringify({error:"POST only"}),{status:405,headers:{"content-type":"application/json"}});
+    if (!isServiceRoleRequest(req)) {
+      return new Response(JSON.stringify({ error: "Service authentication required" }), {
+        status: 401,
+        headers: { "content-type": "application/json", "cache-control": "no-store" },
+      });
+    }
+
     const body=await req.json().catch(()=>({}));
     const requested=Array.isArray(body.gamePks)?body.gamePks.map(Number).filter(Number.isFinite):[];
-    const supabase=createClient(Deno.env.get("SUPABASE_URL")!,Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const supabase=createClient(Deno.env.get("SUPABASE_URL")!,serviceRoleKey()!);
 
     const since=requested.length
       ? new Date(Date.now()-12*3600_000).toISOString()

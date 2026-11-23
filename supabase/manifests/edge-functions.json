@@ -140,37 +140,78 @@
     },
     {
       "slug": "capture-model-audit",
-      "version": 12,
+      "version": 13,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "110c6722d76f77327a7c1fa272635fda4281d49c409994c9e1f1cb67d4066c4e",
+      "bundle_sha256": "88df6f2a67e7739897787340c7ea956f743bf6f240085ba434d91568545ece54",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-model-audit/v12/index.ts",
+          "path": "supabase/functions/capture-model-audit/index.ts",
           "name": "index.ts",
-          "sha256": "adf1d7d314da60f2d4dd137ef83b1717d057b9040c30daddf71c5423af66e3ad",
-          "bytes": 17977
+          "sha256": "496b03f63d7b3b8d888fd53ee3021f3cca82a5df9a224d1888ceb5593375da91",
+          "bytes": 18293
         },
         {
-          "path": "supabase/deployed-snapshots/capture-model-audit/v12/service-role-key.mjs",
+          "path": "supabase/functions/capture-model-audit/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/capture-model-audit/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/capture-model-audit/v12",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/capture-model-audit",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_bca0d8c4-6dc2-4762-bb7a-56ff878eda64_12/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_bca0d8c4-6dc2-4762-bb7a-56ff878eda64_13/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:06.502000+00:00"
+      "deployed_at": "2026-11-23T19:15:45.240000+00:00",
+      "previousDeployment": {
+        "slug": "capture-model-audit",
+        "version": 12,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "110c6722d76f77327a7c1fa272635fda4281d49c409994c9e1f1cb67d4066c4e",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-model-audit/v12/index.ts",
+            "name": "index.ts",
+            "sha256": "adf1d7d314da60f2d4dd137ef83b1717d057b9040c30daddf71c5423af66e3ad",
+            "bytes": 17977
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-model-audit/v12/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/capture-model-audit/v12",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_bca0d8c4-6dc2-4762-bb7a-56ff878eda64_12/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:06.502000+00:00"
+      }
     },
     {
       "slug": "capture-nba-player-props",
@@ -410,71 +451,153 @@
     },
     {
       "slug": "capture-player-props",
-      "version": 8,
+      "version": 9,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "4e57d00b73ca4a4b76683b759fba84f2409127cbbfa98e1a6276f82b40c7044d",
+      "bundle_sha256": "34eb8948adb27f310831ddddb0295dea54348b2a9dd8b202d1649330de7cb1dd",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-player-props/v8/index.ts",
+          "path": "supabase/functions/capture-player-props/index.ts",
           "name": "index.ts",
-          "sha256": "cc0925710e336d0a2ddff033a7da380e1f4b5c4b5686bbb2ce8a576674a4a9a4",
-          "bytes": 4319
+          "sha256": "ce1aacea69f0cda4b1b19b4708f5679731c572c8ba10888f66dc819500200fdd",
+          "bytes": 4635
         },
         {
-          "path": "supabase/deployed-snapshots/capture-player-props/v8/service-role-key.mjs",
+          "path": "supabase/functions/capture-player-props/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/capture-player-props/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/capture-player-props/v8",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/capture-player-props",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_d5a20675-09ac-4f28-8ec0-97b6c87b2b11_8/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_d5a20675-09ac-4f28-8ec0-97b6c87b2b11_9/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:14.564000+00:00"
+      "deployed_at": "2026-11-23T19:15:47.625000+00:00",
+      "previousDeployment": {
+        "slug": "capture-player-props",
+        "version": 8,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "4e57d00b73ca4a4b76683b759fba84f2409127cbbfa98e1a6276f82b40c7044d",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-player-props/v8/index.ts",
+            "name": "index.ts",
+            "sha256": "cc0925710e336d0a2ddff033a7da380e1f4b5c4b5686bbb2ce8a576674a4a9a4",
+            "bytes": 4319
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-player-props/v8/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/capture-player-props/v8",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_d5a20675-09ac-4f28-8ec0-97b6c87b2b11_8/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:14.564000+00:00"
+      }
     },
     {
       "slug": "capture-sharp-clv",
-      "version": 6,
+      "version": 7,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "601245fe6217a03b4f8bdb2b7e9781e82b44a864b2b95d56bff577a9cecf236f",
+      "bundle_sha256": "300077302fae59511dd4533ea50295c7faeebae7d46131e948d420c94645a86c",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/capture-sharp-clv/v6/index.ts",
+          "path": "supabase/functions/capture-sharp-clv/index.ts",
           "name": "index.ts",
-          "sha256": "f107877c86dae9ae3fd39a4639de9c99c3b30e2ba7d6cc7afb16603ac9f91b27",
-          "bytes": 9778
+          "sha256": "d44cb6c26905b6eaa1ecf3a7b4362dd66dfc62ff07453e783593ba2758482363",
+          "bytes": 10094
         },
         {
-          "path": "supabase/deployed-snapshots/capture-sharp-clv/v6/service-role-key.mjs",
+          "path": "supabase/functions/capture-sharp-clv/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/capture-sharp-clv/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/capture-sharp-clv/v6",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/capture-sharp-clv",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_8fb05d89-a262-42ab-95c9-f3d4f29075cf_6/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_8fb05d89-a262-42ab-95c9-f3d4f29075cf_7/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:25.113000+00:00"
+      "deployed_at": "2026-11-23T19:15:50.519000+00:00",
+      "previousDeployment": {
+        "slug": "capture-sharp-clv",
+        "version": 6,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "601245fe6217a03b4f8bdb2b7e9781e82b44a864b2b95d56bff577a9cecf236f",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/capture-sharp-clv/v6/index.ts",
+            "name": "index.ts",
+            "sha256": "f107877c86dae9ae3fd39a4639de9c99c3b30e2ba7d6cc7afb16603ac9f91b27",
+            "bytes": 9778
+          },
+          {
+            "path": "supabase/deployed-snapshots/capture-sharp-clv/v6/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/capture-sharp-clv/v6",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_8fb05d89-a262-42ab-95c9-f3d4f29075cf_6/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:25.113000+00:00"
+      }
     },
     {
       "slug": "capture-sport-predictions",
@@ -1062,37 +1185,78 @@
     },
     {
       "slug": "evaluate-sharp-gate",
-      "version": 7,
+      "version": 8,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "d746d3fec0653f9c21239d85fb1d8e423003c35a3eddc359d78505725466d128",
+      "bundle_sha256": "5311cea2fa1c85a9674c44abcf26dc7e55b52afe7e8e99ab2cf4bab0ef3df8a3",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/evaluate-sharp-gate/v7/index.ts",
+          "path": "supabase/functions/evaluate-sharp-gate/index.ts",
           "name": "index.ts",
-          "sha256": "72e065f9012545f8f649e8c98e332490b8e6b371bc774be6c5754a552d9b7d25",
-          "bytes": 15707
+          "sha256": "86b431a3adf292210309df386540e52b9f6f9c5cd2bed68dacfda542669ee8dd",
+          "bytes": 16023
         },
         {
-          "path": "supabase/deployed-snapshots/evaluate-sharp-gate/v7/service-role-key.mjs",
+          "path": "supabase/functions/evaluate-sharp-gate/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/evaluate-sharp-gate/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/evaluate-sharp-gate/v7",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/evaluate-sharp-gate",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_9f6ed8a2-2a29-47bd-879b-e355ae783310_7/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_9f6ed8a2-2a29-47bd-879b-e355ae783310_8/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:18.627000+00:00"
+      "deployed_at": "2026-11-23T19:15:52.998000+00:00",
+      "previousDeployment": {
+        "slug": "evaluate-sharp-gate",
+        "version": 7,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "d746d3fec0653f9c21239d85fb1d8e423003c35a3eddc359d78505725466d128",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/evaluate-sharp-gate/v7/index.ts",
+            "name": "index.ts",
+            "sha256": "72e065f9012545f8f649e8c98e332490b8e6b371bc774be6c5754a552d9b7d25",
+            "bytes": 15707
+          },
+          {
+            "path": "supabase/deployed-snapshots/evaluate-sharp-gate/v7/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/evaluate-sharp-gate/v7",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_9f6ed8a2-2a29-47bd-879b-e355ae783310_7/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:18.627000+00:00"
+      }
     },
     {
       "slug": "github-ml-training-export",
@@ -1360,37 +1524,78 @@
     },
     {
       "slug": "ingest-sharp-board",
-      "version": 6,
+      "version": 7,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "4b668c748f1d9d2b9b3d8134ee1e60ae4c387155f10fa43869c0048e4638d567",
+      "bundle_sha256": "71ec7e42145728439553c0ce25114ebae0c4228db9f8f475f36277ced1f2ad39",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/ingest-sharp-board/v6/index.ts",
+          "path": "supabase/functions/ingest-sharp-board/index.ts",
           "name": "index.ts",
-          "sha256": "fb904461827a94a630468ea330f3227fcb6799b17c5a17bde560f0c23aa9e68b",
-          "bytes": 6433
+          "sha256": "384538d2ed310feced71e1fb1259b1b2279f6150c5559d8ace61986f48c4a2b8",
+          "bytes": 6749
         },
         {
-          "path": "supabase/deployed-snapshots/ingest-sharp-board/v6/service-role-key.mjs",
+          "path": "supabase/functions/ingest-sharp-board/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/ingest-sharp-board/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/ingest-sharp-board/v6",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/ingest-sharp-board",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_42f99fe0-d92e-49a9-9041-b5dab752c89f_6/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_42f99fe0-d92e-49a9-9041-b5dab752c89f_7/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:23.903000+00:00"
+      "deployed_at": "2026-11-23T19:15:55.694000+00:00",
+      "previousDeployment": {
+        "slug": "ingest-sharp-board",
+        "version": 6,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "4b668c748f1d9d2b9b3d8134ee1e60ae4c387155f10fa43869c0048e4638d567",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/ingest-sharp-board/v6/index.ts",
+            "name": "index.ts",
+            "sha256": "fb904461827a94a630468ea330f3227fcb6799b17c5a17bde560f0c23aa9e68b",
+            "bytes": 6433
+          },
+          {
+            "path": "supabase/deployed-snapshots/ingest-sharp-board/v6/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/ingest-sharp-board/v6",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_42f99fe0-d92e-49a9-9041-b5dab752c89f_6/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:23.903000+00:00"
+      }
     },
     {
       "slug": "latest-model-audit",
@@ -2423,105 +2628,228 @@
     },
     {
       "slug": "refresh-mlb-verification-gate",
-      "version": 10,
+      "version": 11,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "31c4f1667429fff3b9805de7bae6fc4aebe87f6addbbf8132cba6abac179fafe",
+      "bundle_sha256": "e4bce413e3f813b8e037f0fc7992df0172b0fd4156f3abba2c5697d65dc5cc90",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10/index.ts",
+          "path": "supabase/functions/refresh-mlb-verification-gate/index.ts",
           "name": "index.ts",
-          "sha256": "417e1b6b1d488e3dbac07c5c52fc4a022af9eeda216c5effa1bf5bea17205279",
-          "bytes": 31772
+          "sha256": "8ea0852012d803aa276af29e330428e403a22f5346915ab255b54042ac266193",
+          "bytes": 32088
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10/service-role-key.mjs",
+          "path": "supabase/functions/refresh-mlb-verification-gate/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/refresh-mlb-verification-gate/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/refresh-mlb-verification-gate",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_1a55d99e-1a08-41b0-a054-03b1fe291c78_10/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_1a55d99e-1a08-41b0-a054-03b1fe291c78_11/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:32.196000+00:00"
+      "deployed_at": "2026-11-23T19:15:58.372000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-mlb-verification-gate",
+        "version": 10,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "31c4f1667429fff3b9805de7bae6fc4aebe87f6addbbf8132cba6abac179fafe",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10/index.ts",
+            "name": "index.ts",
+            "sha256": "417e1b6b1d488e3dbac07c5c52fc4a022af9eeda216c5effa1bf5bea17205279",
+            "bytes": 31772
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/refresh-mlb-verification-gate/v10",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_1a55d99e-1a08-41b0-a054-03b1fe291c78_10/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:32.196000+00:00"
+      }
     },
     {
       "slug": "refresh-mlb-weather-park",
-      "version": 8,
+      "version": 9,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "7a543e2eeedfa1303a65408dca4e88425f503ba182d858d7310872ada3e32258",
+      "bundle_sha256": "d6f29918820499d731d228c21e06fd794704570668873af0339be0d76ab650ec",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8/index.ts",
+          "path": "supabase/functions/refresh-mlb-weather-park/index.ts",
           "name": "index.ts",
-          "sha256": "906b8cd0ec845b4c4c6f53db41e4758036471b8dc1f8f98ab1a67419b2840512",
-          "bytes": 18531
+          "sha256": "e0b9848efe79cd163573a846b2498038df2623e77fb7fd1ad76e80507ecaead1",
+          "bytes": 18847
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8/service-role-key.mjs",
+          "path": "supabase/functions/refresh-mlb-weather-park/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/refresh-mlb-weather-park/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/refresh-mlb-weather-park",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_543e4475-b703-48cb-a289-9ed16c6e8865_8/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_543e4475-b703-48cb-a289-9ed16c6e8865_9/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:36.570000+00:00"
+      "deployed_at": "2026-11-23T19:16:01.546000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-mlb-weather-park",
+        "version": 8,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "7a543e2eeedfa1303a65408dca4e88425f503ba182d858d7310872ada3e32258",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8/index.ts",
+            "name": "index.ts",
+            "sha256": "906b8cd0ec845b4c4c6f53db41e4758036471b8dc1f8f98ab1a67419b2840512",
+            "bytes": 18531
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/refresh-mlb-weather-park/v8",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_543e4475-b703-48cb-a289-9ed16c6e8865_8/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:36.570000+00:00"
+      }
     },
     {
       "slug": "refresh-model-governance",
-      "version": 6,
+      "version": 7,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "59c1633baa25df8795e2a74e2c286f53836cc9e8a15a535d62c51284673ac648",
+      "bundle_sha256": "3fcd36a72e30a3d95cf3a363c508decb21660cfbc81fd750c8df808b3cb54f51",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-model-governance/v6/index.ts",
+          "path": "supabase/functions/refresh-model-governance/index.ts",
           "name": "index.ts",
-          "sha256": "823efae0a3b6b3ae9787d00a389899d845ebf88848ed9b6c5f0285429d9511b6",
-          "bytes": 9685
+          "sha256": "96e9452fbd96d0b4543c38638cc62afcd0c8fb58619acd62b657fd1b603c64d2",
+          "bytes": 10001
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-model-governance/v6/service-role-key.mjs",
+          "path": "supabase/functions/refresh-model-governance/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/refresh-model-governance/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/refresh-model-governance/v6",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/refresh-model-governance",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_ad3e943d-dd12-4ba2-b6cf-e775a79cb38e_6/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_ad3e943d-dd12-4ba2-b6cf-e775a79cb38e_7/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:10.330000+00:00"
+      "deployed_at": "2026-11-23T19:16:04.431000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-model-governance",
+        "version": 6,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "59c1633baa25df8795e2a74e2c286f53836cc9e8a15a535d62c51284673ac648",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-model-governance/v6/index.ts",
+            "name": "index.ts",
+            "sha256": "823efae0a3b6b3ae9787d00a389899d845ebf88848ed9b6c5f0285429d9511b6",
+            "bytes": 9685
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-model-governance/v6/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/refresh-model-governance/v6",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_ad3e943d-dd12-4ba2-b6cf-e775a79cb38e_6/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:10.330000+00:00"
+      }
     },
     {
       "slug": "refresh-nba-player-prop-clv",
@@ -2612,37 +2940,78 @@
     },
     {
       "slug": "refresh-player-prop-clv",
-      "version": 7,
+      "version": 8,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "9797e230ad6f8024100087250bea4b5f12fa0cb0739eeefc7149ea58038f08df",
+      "bundle_sha256": "3f59ba97debe2d11ccec4f50751dd530927e40cff0707755e294bd43edbcc318",
       "entrypoint": "index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-player-prop-clv/v7/index.ts",
+          "path": "supabase/functions/refresh-player-prop-clv/index.ts",
           "name": "index.ts",
-          "sha256": "a957979d0ab355bbfa034c8aedb647897e463ddac7faa1487b6adc1377c74395",
-          "bytes": 14208
+          "sha256": "431f6d25d7bb7141a4f6a639bc157a1c91b7db34e046299c7c885b3bc8cc02d5",
+          "bytes": 14524
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-player-prop-clv/v7/service-role-key.mjs",
+          "path": "supabase/functions/refresh-player-prop-clv/service-role-auth.mjs",
+          "name": "service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/functions/refresh-player-prop-clv/service-role-key.mjs",
           "name": "service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/refresh-player-prop-clv/v7",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/functions/refresh-player-prop-clv",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5ed86710-1106-4498-965d-ab482ea82208_7/source/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5ed86710-1106-4498-965d-ab482ea82208_8/source/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained"
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:08:00.661000+00:00"
+      "deployed_at": "2026-11-23T19:16:06.596000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-player-prop-clv",
+        "version": 7,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "9797e230ad6f8024100087250bea4b5f12fa0cb0739eeefc7149ea58038f08df",
+        "entrypoint": "index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-player-prop-clv/v7/index.ts",
+            "name": "index.ts",
+            "sha256": "a957979d0ab355bbfa034c8aedb647897e463ddac7faa1487b6adc1377c74395",
+            "bytes": 14208
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-player-prop-clv/v7/service-role-key.mjs",
+            "name": "service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/refresh-player-prop-clv/v7",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_5ed86710-1106-4498-965d-ab482ea82208_7/source/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:08:00.661000+00:00"
+      }
     },
     {
       "slug": "refresh-sharp-disagreement-shadow",
@@ -2721,43 +3090,91 @@
     },
     {
       "slug": "refresh-sharp-sources",
-      "version": 10,
+      "version": 11,
       "status": "ACTIVE",
       "verify_jwt": true,
-      "bundle_sha256": "f3e2929bd787505fc6637b304c389205c78db5b89cb9d20e34a2a4ac8d043782",
+      "bundle_sha256": "99216c06d0f289a1e52f8b2437ff655acffd23f370ea25afdb32ac6deb4b365e",
       "entrypoint": "refresh-sharp-sources/index.ts",
       "files": [
         {
-          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/refresh-sharp-sources/index.ts",
+          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v11/refresh-sharp-sources/index.ts",
           "name": "refresh-sharp-sources/index.ts",
-          "sha256": "2e6858a67daaa41464bb2db625ee9343de1a31d0796f00ff42c63d13c471ab91",
-          "bytes": 16217
+          "sha256": "b3d6dd276139eeea42a9ce292289ba3eb7735094c1786baa6b4b096e70c336c4",
+          "bytes": 16533
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/refresh-sharp-sources/service-role-key.mjs",
+          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v11/refresh-sharp-sources/service-role-auth.mjs",
+          "name": "refresh-sharp-sources/service-role-auth.mjs",
+          "sha256": "5767d307ed0ba93c53f611dd5ecf4b7a29b63016dc348dd245eda5044bcf4ca8",
+          "bytes": 801
+        },
+        {
+          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v11/refresh-sharp-sources/service-role-key.mjs",
           "name": "refresh-sharp-sources/service-role-key.mjs",
           "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
           "bytes": 374
         },
         {
-          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/_shared/source-fetch.mjs",
+          "path": "supabase/deployed-snapshots/refresh-sharp-sources/v11/_shared/source-fetch.mjs",
           "name": "_shared/source-fetch.mjs",
           "sha256": "c8640f2b96e3ef08841933dee4508618a9fb238c82a773e32b4937d5b48e9985",
           "bytes": 650
         }
       ],
-      "sourceRoot": "supabase/deployed-snapshots/refresh-sharp-sources/v10",
-      "observedOn": "2026-11-23T18:25:23.179571+00:00",
+      "sourceRoot": "supabase/deployed-snapshots/refresh-sharp-sources/v11",
+      "observedOn": "2026-11-23T19:18:14.572245+00:00",
       "snapshotSourceParityVerified": true,
-      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_e295aa7f-f572-47c5-ba89-174a5861156b_10/source/refresh-sharp-sources/index.ts",
+      "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_e295aa7f-f572-47c5-ba89-174a5861156b_11/source/refresh-sharp-sources/index.ts",
       "sourceRecovery": {
-        "status": "OBSERVED_SOURCE_RECOVERED",
-        "source": "Supabase get_edge_function",
-        "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
-        "behaviorApprovedByRecovery": false
+        "observedOn": "2026-11-23T19:18:14.572245+00:00",
+        "localSourceParityVerified": true,
+        "source": "Independently reviewed service-role repair deployed and fetched back byte-for-byte",
+        "previousSnapshotRetained": true,
+        "scope": "service-role guard; observed dormant callers and gateway verification retained",
+        "layoutNote": "The complete current nested bundle is retained under its own versioned snapshot, including the unchanged shared dependency. Canonical source bytes were also verified; cross-function source-root permissions were not broadened."
       },
       "appliedToProduction": true,
-      "deployed_at": "2026-11-10T17:07:21.221000+00:00"
+      "deployed_at": "2026-11-23T19:16:09.129000+00:00",
+      "previousDeployment": {
+        "slug": "refresh-sharp-sources",
+        "version": 10,
+        "status": "ACTIVE",
+        "verify_jwt": true,
+        "bundle_sha256": "f3e2929bd787505fc6637b304c389205c78db5b89cb9d20e34a2a4ac8d043782",
+        "entrypoint": "refresh-sharp-sources/index.ts",
+        "files": [
+          {
+            "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/refresh-sharp-sources/index.ts",
+            "name": "refresh-sharp-sources/index.ts",
+            "sha256": "2e6858a67daaa41464bb2db625ee9343de1a31d0796f00ff42c63d13c471ab91",
+            "bytes": 16217
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/refresh-sharp-sources/service-role-key.mjs",
+            "name": "refresh-sharp-sources/service-role-key.mjs",
+            "sha256": "49421acce8f99faf6f7c61a024abff54f891deb39b0cde01f01424472431098d",
+            "bytes": 374
+          },
+          {
+            "path": "supabase/deployed-snapshots/refresh-sharp-sources/v10/_shared/source-fetch.mjs",
+            "name": "_shared/source-fetch.mjs",
+            "sha256": "c8640f2b96e3ef08841933dee4508618a9fb238c82a773e32b4937d5b48e9985",
+            "bytes": 650
+          }
+        ],
+        "sourceRoot": "supabase/deployed-snapshots/refresh-sharp-sources/v10",
+        "observedOn": "2026-11-23T18:25:23.179571+00:00",
+        "snapshotSourceParityVerified": true,
+        "hostedEntrypointPath": "/tmp/user_fn_yeoxroijaptomomshdii_e295aa7f-f572-47c5-ba89-174a5861156b_10/source/refresh-sharp-sources/index.ts",
+        "sourceRecovery": {
+          "status": "OBSERVED_SOURCE_RECOVERED",
+          "source": "Supabase get_edge_function",
+          "policy": "NO_REDEPLOY_WITHOUT_REVIEW",
+          "behaviorApprovedByRecovery": false
+        },
+        "appliedToProduction": true,
+        "deployed_at": "2026-11-10T17:07:21.221000+00:00"
+      }
     },
     {
       "slug": "service-auth-health",
@@ -3088,27 +3505,37 @@
       "deployed_at": "2026-11-01T15:38:12.811000+00:00"
     }
   ],
-  "final_verified_at": "2026-11-23T19:09:40.598682+00:00",
+  "final_verified_at": "2026-11-23T19:18:14.572245+00:00",
   "authority_verification": {
     "status": "OBSERVED_FUNCTION_SOURCES_MATCH",
     "active_functions": 68,
     "metadata_and_bundle_sha_match": true,
     "repository_total_edge_functions": 68,
-    "deployed_snapshot_bundles": 67,
-    "deployed_snapshot_files": 195,
+    "deployed_snapshot_bundles": 68,
+    "deployed_snapshot_files": 199,
     "behavior_approval": "NOT_GRANTED_BY_SOURCE_RECOVERY",
     "schema_security_cron_parity": "NOT_REBASELINED",
     "reviewed_deployments": [
       "capture-market-snapshot version 9",
+      "capture-model-audit version 13",
       "capture-nba-player-props version 8",
       "capture-nfl-player-props version 7",
       "capture-pitchmix-features version 10",
+      "capture-player-props version 9",
+      "capture-sharp-clv version 7",
+      "evaluate-sharp-gate version 8",
       "github-ml-training-export version 11",
       "grade-model-audit version 7",
       "grade-nba-player-props version 8",
+      "ingest-sharp-board version 7",
       "provider-health-status version 11",
+      "refresh-mlb-verification-gate version 11",
+      "refresh-mlb-weather-park version 9",
+      "refresh-model-governance version 7",
       "refresh-nba-player-prop-clv version 8",
-      "refresh-sharp-disagreement-shadow version 8"
+      "refresh-player-prop-clv version 8",
+      "refresh-sharp-disagreement-shadow version 8",
+      "refresh-sharp-sources version 11"
     ]
   },
   "historical_authority_verification": {
