@@ -25,7 +25,8 @@ export async function propsResponse({now=null,key=process.env.SPORTS_ODDS_API_KE
    cache={status:result.cacheStatus,fetchedAt:new Date(result.fetchedAt).toISOString()};
    return {events:result.payload.data,observedAt:cache.fetchedAt,nextCursor:result.payload.nextCursor??null};
   }});
-  return {status:200,body:{...body,bookCoverage:propsBookCoverage(body.events,requestedBooks,now??Date.now()),source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0}};
+  const evaluatedAt=now??Date.now();
+  return {status:200,body:withNbaPropReadiness({...body,bookCoverage:propsBookCoverage(body.events,requestedBooks,evaluatedAt),source:'SportsGameOdds',scope:'NBA DraftKings points/rebounds/assists; up to 32 events within 48 hours; pagination coverage reported',cache:{...cache,fetchedAt:body.generatedAt},productionEligible:false,productionWeight:0},evaluatedAt)};
  }catch{return unavailable();}
 }
 export async function nbaResearchResponse({loadQuotes=researchPropsResponse,loadExplanation=explanationSnapshot,...options}={}){

@@ -66,11 +66,11 @@ This includes a real-handler integration test using the actual provider-protecti
 
 The full Node suite also passed **533 tests, zero failures** before the last two diagnostic regressions were added. The integrating repair must record its final full-suite count after all agents' changes are complete. `git diff --check` was clean after the final focused run.
 
-## Production verification limits
+## Production verification and limits
 
-No authenticated production feed request was made during this scoped repair. Actual production token configuration, SportsGameOdds account entitlement, current PrizePicks quote availability and current provider quota therefore remain unverified here. Fixture success is not evidence of live quote availability.
+The initial scoped implementation used controlled fixtures and made no authenticated production feed request. After PR #79 deployed, the integrating agent captured the actual public research response: 10 NBA events and 911 player-market records, with provider roster identity and readiness metadata. Its book coverage reported **552 available, fresh PrizePicks DFS quote sides and zero comparable executable price sides**. This is evidence that the configured SportsGameOdds account returned those research lines at that observation time. It does not establish entry payouts, individual-pick prices, model probabilities or a cleared play.
 
-After deployment, verify the public research response's readiness fields and the private diagnostic's authorization behavior. If an authorized live diagnostic returns no quotes, an access denial or quota exhaustion, retain that exact state as the operational result. Do not describe it as a restored live feed without returned, timely provider evidence.
+The separate private diagnostic returned **HTTP 503 `MONITOR_AUTH_UNAVAILABLE`**. Its production monitor token is not configured, so the authenticated diagnostic's live upstream path remains unverified. Public research coverage and private diagnostic readiness are different operational results. Do not describe the private diagnostic as fully enabled, or the returned DFS lines as executable betting prices. These production captures remain outside the repository; no provider credential is included in this report.
 
 Confirmed rotations, player-specific injury clearance, independently validated prop distributions and calibration are still missing inputs. This repair makes those blockers explicit and connected to the live response; it does not clear player-prop BUY decisions.
 
@@ -83,3 +83,31 @@ The replay now requires one `nba-final-observation-v1` archive reference per phy
 Missing, invalid, duplicate or conflicting evidence blocks the cohort with `BLOCKED_TEMPORAL_EVIDENCE`, zero evaluated games and null accuracy/return metrics. This avoids silently evaluating an altered subset while claiming complete history. The existing ESPN parser and daily collector do not supply original archived final observations, so their nonempty legacy inputs now produce the explicit blocked state. Empty history remains `INSUFFICIENT_HOLDOUT`. Earlier version-1 replay metrics must not be described as proven free of future-result leakage.
 
 The version-2 report records eligible historical event IDs and the latest admitted final-observation time for each forecast. Production eligibility stays false, production weight stays zero, and automatic BUY remains disabled. Fifteen focused tests passed, including overlap-score invariance, the exact time boundary, missing/mismatched evidence, duplicate physical games, strict score types, and existing baseline/daily behavior. Synthetic receipt times are used only in test fixtures; no production evidence or completion times were created.
+
+## Follow-up: canonical NBA page metadata
+
+Post-deployment inspection found a distinct UI integration defect. `/nba.html` requests the default `/api/nbaprops` feed, not its `view=research` branch. The captured default response generated at `2026-11-23T17:43:05.616Z` contained 10 events, 347 player-market records and 675 book quote sides. All 347 records retained provider event/player/team bindings and historical explanation context, but the default adapter omitted event matchup names, `prop.identityStatus` and prop readiness. The page also recognized only the older ESPN `ROSTER_MATCHED` label and printed an absent `quoteState` as “Unknown.” Switching to the research route alone would not fix those renderer defects.
+
+The follow-up keeps the default DraftKings points/rebounds/assists feed, its existing 48-hour window, two-page maximum, 16-event page limit, shared provider protection and original timestamps. It adds source-provided matchup and player names, provider roster identity from the existing exact event binding, and the same conservative readiness contract already present on research responses. Missing source names remain explicitly unavailable; a player ID is not relabeled as a person's name. Existing historical context enrichment remains intact.
+
+The page now recognizes `PROVIDER_ROSTER_MATCHED` without attributing that identity to ESPN or claiming injury clearance. Its visible explanation and deep-dive disclosure receive the original readiness summary and missing-evidence reason codes. Player prediction, production eligibility and production weight remain null/false/zero as applicable.
+
+Quote diagnostics use the existing `assessPropQuote` implementation. A comparison needs an explicitly available quote and opposite side at the same book and line, with valid prices and current original timestamps. An omitted provider availability flag no longer becomes `true`. Suspended and unconfirmed sides remain visible for diagnosis, while stale, future, missing and different-line prices cannot produce a comparable pair. The page labels the assessment time and provides a refresh control, so its snapshot checks are not presented as a continuously updated execution guarantee. DFS and exchange observations keep their execution terms separate.
+
+Review also reproduced two integrity defects in this same default adapter. A `false` or `0` pagination cursor incorrectly marked coverage complete, and JavaScript coercion accepted `[2.5]` as a line or `[-166]` as a price. The adapter now applies the research path's strict cursor completion rules and length bound. Price and line parsing accepts finite numbers or decimal strings; arrays, booleans, objects and blank values cannot manufacture a bookmaker observation. Both fixes retain the existing request budget.
+
+The exact captured default response has SHA-256 `c2e061e9127ed3f5eec5d1ded2a3269289d339e4ce54f3af447430361dc94c2f`. It and the larger research capture remain outside git. The committed minimal fixture reconstructs the relevant provider event, roster and quote shape; it is not a new live data capture.
+
+### Follow-up verification
+
+Seven new regressions executed the actual inline `/nba.html` renderer with a minimal DOM and the real quote-check and deep-dive builders. All seven failed before the patch. They cover both default and research response shapes, source names and identity, explicit availability, stale/future/missing/different-line prices, later reassessment, missing names or invalid roster binding, and preservation of historical context plus readiness reasons. Three additional regressions failed before correcting default-feed cursor handling and numeric coercion, bringing the new file to ten tests.
+
+The following command passed **40 focused tests, zero failures**:
+
+```sh
+node --test tests/node/nba-prop-display.test.mjs tests/node/nba-api-restoration.test.mjs tests/node/nba-prop-coverage.test.mjs tests/node/nba-paired-quote-diagnostics.test.mjs tests/node/nba-prop-readiness.test.mjs tests/node/deep-dive-integration.test.mjs tests/node/nba-explanation-snapshot.test.mjs
+```
+
+The integrating agent's final complete Node run passed **561 tests, zero failures**. Independent review found no blockers and separately passed 28 focused checks. The reviewer reconstructed all 347 captured default records through the repaired API adapter using exact matched research metadata, restored each record's existing captured context by exact identity, and exercised every page-renderer batch. All 347 had named matchups, recognized provider identity, readiness disclosures and preserved contexts; all eight suspended sides remained noncomparable. The actual research capture rendered all 911 records with its supplied names, identities and readiness. A six-minute-later assessment reduced comparable default quote sides from 646 to zero without changing source timestamps.
+
+The API and HTML must deploy together: an old response genuinely lacks names and readiness, so the new renderer correctly cannot reconstruct those absent source facts. Production deployment and the final live browser check are performed by the integrating agent; fixture and capture-replay success alone do not claim that the follow-up is already live. Code and tests were frozen after independent approval.

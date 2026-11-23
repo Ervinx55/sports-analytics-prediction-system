@@ -1,6 +1,13 @@
 // Bounded quote collection. Exhaust the event cursor instead of dropping game nine.
 export const NBA_PROP_PAGE_SIZE=16;
 const MAX_PAGES=2;
+const sourceName=value=>typeof value==='string'&&value.trim()?value.trim():null;
+const teamName=team=>sourceName(team?.names?.long)||sourceName(team?.names?.medium);
+const sourceNumber=value=>{
+ if(typeof value==='number')return Number.isFinite(value)?value:null;
+ if(typeof value!=='string'||!/^[-+]?(?:\d+\.?\d*|\.\d+)$/.test(value.trim()))return null;
+ const result=Number(value);return Number.isFinite(result)?result:null;
+};
 export async function directSgoProps({page,clock}){
  const now=clock(),patterns=['points','rebounds','assists'].flatMap(m=>['over','under'].map(s=>`${m}-PLAYER_ID-game-ou-${s}`));
  const params={leagueID:'NBA',type:'match',oddIDs:patterns.join(','),bookmakerID:'draftkings',oddsAvailable:'true',finalized:'false',startsAfter:now,startsBefore:new Date(Date.parse(now)+48*3600000).toISOString(),limit:String(NBA_PROP_PAGE_SIZE)};
@@ -12,8 +19,8 @@ export async function directSgoProps({page,clock}){
   catch(error){if(!pagesFetched)throw error;reasons.push('PAGE_UNAVAILABLE');break;}
   pagesFetched++;timestamps.push(result.observedAt);
   for(const e of result.events)if(e?.eventID&&!rawEvents.has(e.eventID))rawEvents.set(e.eventID,e);
-  if(!result.nextCursor){eventsComplete=true;break;}
-  if(typeof result.nextCursor!=='string'||seenCursors.has(result.nextCursor)){reasons.push('INVALID_CURSOR');break;}
+  if(result.nextCursor===null||result.nextCursor===undefined||result.nextCursor===''){eventsComplete=true;break;}
+  if(typeof result.nextCursor!=='string'||result.nextCursor.length>2048||seenCursors.has(result.nextCursor)){reasons.push('INVALID_CURSOR');break;}
   cursor=result.nextCursor;seenCursors.add(cursor);
   if(i===MAX_PAGES-1)reasons.push('PAGE_LIMIT_REACHED');
  }
@@ -25,18 +32,19 @@ export async function directSgoProps({page,clock}){
    const playerID=o.playerID||o.statEntityID,side=o.sideID,market=o.statID;
    if(!['points','rebounds','assists'].includes(market)||!['over','under'].includes(side)||o.periodID!=='game'||o.betTypeID!=='ou'||o.oddID!==`${market}-${playerID}-game-ou-${side}`||e.players?.[playerID]?.playerID!==playerID)continue;
    const b=o.byBookmaker?.draftkings;
-   if(!b||b.overUnder==null||b.overUnder===''||b.odds==null||b.odds==='')continue;
-   const line=Number(b.overUnder),odds=Number(b.odds);
-   if(!Number.isFinite(line)||line<0||!Number.isFinite(odds)||Math.abs(odds)<100)continue;
+   if(!b)continue;
+   const line=sourceNumber(b.overUnder),odds=sourceNumber(b.odds);
+   if(line===null||line<0||odds===null||Math.abs(odds)<100)continue;
    const key=JSON.stringify([playerID,market,line]);
-   if(!props.has(key))props.set(key,{playerID,playerName:e.players[playerID].name||playerID,statID:market});
-   // Keep suspended sides for diagnostics; consumers still reject unavailable prices.
-   props.get(key)[side]={books:{draftkings:{line,odds,available:b.available!==false,updatedAt:b.lastUpdatedAt??null}}};
+   if(!props.has(key))props.set(key,{playerID,playerName:sourceName(e.players[playerID].name),statID:market});
+   // Keep suspended or unconfirmed sides for diagnostics. Missing availability
+   // is not affirmative evidence that the book is offering this price.
+   props.get(key)[side]={books:{draftkings:{line,odds,available:b.available===true,updatedAt:b.lastUpdatedAt??null}}};
   }
-  events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,players:[...props.values()].map(prop=>{
+  events.push({eventID:'sgo:'+e.eventID,provider:'SportsGameOdds',startsAt:e.status.startsAt,matchup:{home:{name:teamName(e.teams?.home)},away:{name:teamName(e.teams?.away)}},players:[...props.values()].map(prop=>{
    const teamId=e.players[prop.playerID].teamID,teams=[e.teams?.home?.teamID,e.teams?.away?.teamID];
    const valid=teams.every(t=>typeof t==='string'&&t.endsWith('_NBA'))&&teams[0]!==teams[1]&&teams.includes(teamId);
-   return {prop,...(valid?{explanationBinding:{contract:'sgo-event-roster-v1',eventID:'sgo:'+e.eventID,playerID:prop.playerID,startsAt:e.status.startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}}:{})};
+   return {prop:{...prop,identityStatus:valid?'PROVIDER_ROSTER_MATCHED':'UNVERIFIED'},...(valid?{explanationBinding:{contract:'sgo-event-roster-v1',eventID:'sgo:'+e.eventID,playerID:prop.playerID,startsAt:e.status.startsAt,teamId,opponentTeamId:teams.find(t=>t!==teamId)}}:{})};
   })});
  }
  const generatedAt=timestamps.sort((a,b)=>Date.parse(a)-Date.parse(b))[0];
