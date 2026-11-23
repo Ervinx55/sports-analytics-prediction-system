@@ -55,6 +55,17 @@ do not erase valid quotes. NFL estimates require the same event start time as
 their quotes, so a rescheduled game cannot inherit a forecast for the previous
 kickoff identity.
 
+## Historical replay timing
+
+The separate NBA score-only replay admitted results using game start times,
+which allowed an overlapping game's eventual final score into an earlier
+forecast. Version 2 requires archive metadata for the exact final result and
+admits it only when its observed time is strictly before the forecast.
+Missing, conflicting or invalid observations produce an explicit blocked state
+and null accuracy metrics. Current historical feeds do not supply those
+original archives; no retrospective capture times were fabricated. The
+follow-up passed independent review and 15 focused regression tests.
+
 ## Journal and official results
 
 The seven November 22 hosted journal migrations are recovered as deployment
@@ -95,7 +106,7 @@ differences are recorded explicitly rather than accepted as a clean baseline.
 
 ## Validation and release record
 
-The final integrated local suite passed **544 Node tests** and **84 Python
+The final integrated local suite passed **551 Node tests** and **84 Python
 tests**. The frozen journal migration and CLI additionally passed independent
 verification of **10 PostgreSQL integrity tests** and **6 CLI tests**. Source
 secret scanning and `git diff --check` were clean.
@@ -111,8 +122,11 @@ for the service role. The post-deployment security check reported only the
 expected informational no-policy finding for these private service tables;
 see [the Supabase explanation](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy).
 
-Application deployment and remote test results are recorded in the repair pull
-request and its checks. Local browser execution could not be completed:
+The initial repair passed GitHub Actions run **45227170091**, including both
+browser checks, and Vercel confirmed its preview deployment. The additional
+replay repair requires fresh checks on its own commit before merging.
+Application deployment and subsequent remote test results are recorded in the
+repair pull request and its checks. Local browser execution could not be completed:
 the required Playwright browser was absent, and its standard download returned
 HTTP 403. The existing GitHub Actions browser checks remain part of the release
 verification. The SQL regression suite is now included in the main test

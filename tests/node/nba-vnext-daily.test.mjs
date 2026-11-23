@@ -2,6 +2,17 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {backtestNbaBaseline} from "../../sharp-service/lib/nba-vnext-backtest.js";
 import {collectDaily} from "../../scripts/edge-lab/daily-nba-vnext.mjs";
+import {createHash} from 'node:crypto';
+
+// Synthetic archived-final receipts for this fixture only. Production replay
+// must never estimate an observation time by adding a duration to tipoff.
+function archivedFinal(game,observedAt){
+ const snapshot={eventId:game.eventId,startsAt:game.startsAt,home:game.home,away:game.away,
+  homeScore:game.homeScore,awayScore:game.awayScore,completed:true};
+ return {...game,finalObservation:{contract:'nba-final-observation-v1',...snapshot,observedAt,
+  sourceUrl:`https://scores.example.test/nba/${game.eventId}.json`,
+  sourceSha256:createHash('sha256').update(JSON.stringify(snapshot)).digest('hex')}};
+}
 
 test("NBA walk-forward forecasts never use same-game or future scores",()=>{
  const games=[];
@@ -9,8 +20,9 @@ test("NBA walk-forward forecasts never use same-game or future scores",()=>{
  let id=0;
  for(let d=1;d<=28;d++){
   const a=teams[d%teams.length],b=teams[(d+1)%teams.length];
-  games.push({eventId:String(++id),startsAt:"2026-10-"+String(d).padStart(2,"0")+"T20:00:00Z",
-    home:a,away:b,homeScore:110+(d%7),awayScore:103+(d%6),completed:true});
+  games.push(archivedFinal({eventId:String(++id),startsAt:"2026-10-"+String(d).padStart(2,"0")+"T20:00:00Z",
+    home:a,away:b,homeScore:110+(d%7),awayScore:103+(d%6),completed:true},
+    "2026-10-"+String(d).padStart(2,"0")+"T23:00:00Z"));
  }
  const one=backtestNbaBaseline({games,minimumEvaluated:1});
  assert.equal(one.marketBaselineBrier,null);
@@ -22,6 +34,7 @@ test("NBA walk-forward forecasts never use same-game or future scores",()=>{
  // Alter only the last outcome: earlier forecasts cannot change.
  const altered=structuredClone(games);
  altered.at(-1).homeScore=50;altered.at(-1).awayScore=180;
+ altered[altered.length-1]=archivedFinal(altered.at(-1),altered.at(-1).finalObservation.observedAt);
  const two=backtestNbaBaseline({games:altered,minimumEvaluated:1});
  for(let i=0;i<Math.min(one.records.length,two.records.length);i++){
   assert.equal(one.records[i].predictedHomeWinProbability,two.records[i].predictedHomeWinProbability);
