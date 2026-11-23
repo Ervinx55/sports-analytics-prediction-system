@@ -1,2 +1,7 @@
 # Reconstruction manifests hash exact bytes; keep source identical on Windows and CI.
 * text=auto eol=lf
+
+# Production recovery hashes original bytes, including mixed/CRLF line endings.
+supabase/deployed-snapshots/** -text
+supabase/migrations/*.sql -text
+supabase/functions/** -text

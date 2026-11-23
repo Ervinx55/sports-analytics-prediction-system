@@ -1,0 +1,1980 @@
+[
+  {
+    "eventID": "6bCSQNHQ4MP3F2yjTYXS",
+    "teamID": "HOUSTON_ROCKETS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600091/box-score",
+    "sourceSha256": "e1bc85a8d2e69d61b1ada62b6ef35d0aba8f16ba8ff9e559fed9ed1263d5c28e",
+    "officialGameID": "0022600091",
+    "fields": {
+      "fieldGoalsAttempted": [
+        89,
+        88
+      ]
+    }
+  },
+  {
+    "eventID": "6bCSQNHQ4MP3F2yjTYXS",
+    "teamID": "HOUSTON_ROCKETS_NBA",
+    "playerID": "MARCUS_SMART_1_NBA",
+    "name": "Marcus Smart",
+    "source": "https://www.nba.com/game/0022600091/box-score",
+    "sourceSha256": "e1bc85a8d2e69d61b1ada62b6ef35d0aba8f16ba8ff9e559fed9ed1263d5c28e",
+    "officialGameID": "0022600091",
+    "fields": {
+      "fieldGoalsAttempted": [
+        7,
+        6
+      ],
+      "twoPointersAttempted": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "6bCSQNHQ4MP3F2yjTYXS",
+    "teamID": "DALLAS_MAVERICKS_NBA",
+    "playerID": "MARCUS_SASSER_1_NBA",
+    "name": "Marcus Sasser",
+    "source": "https://www.nba.com/game/0022600091/box-score",
+    "sourceSha256": "e1bc85a8d2e69d61b1ada62b6ef35d0aba8f16ba8ff9e559fed9ed1263d5c28e",
+    "officialGameID": "0022600091",
+    "fields": {
+      "rebounds": [
+        2,
+        1
+      ],
+      "defensiveRebounds": [
+        2,
+        1
+      ],
+      "points+rebounds+assists": [
+        20,
+        19
+      ],
+      "points+rebounds": [
+        19,
+        18
+      ],
+      "rebounds+assists": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "CVYYBlBYKsJV9vpizMEh",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "JADEN_MCDANIELS_1_NBA",
+    "name": "Jaden McDaniels",
+    "source": "https://www.nba.com/game/0022600096/box-score",
+    "sourceSha256": "66cd743e7fa048f6ba6be6f3dd5906b08cfe7bea0bcfb0757583270d997a2687",
+    "officialGameID": "0022600096",
+    "fields": {
+      "assists": [
+        4,
+        3
+      ],
+      "points+rebounds+assists": [
+        25,
+        24
+      ],
+      "points+assists": [
+        19,
+        18
+      ],
+      "rebounds+assists": [
+        10,
+        9
+      ]
+    }
+  },
+  {
+    "eventID": "CVYYBlBYKsJV9vpizMEh",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "AYO_DOSUNMU_1_NBA",
+    "name": "Ayo Dosunmu",
+    "source": "https://www.nba.com/game/0022600096/box-score",
+    "sourceSha256": "66cd743e7fa048f6ba6be6f3dd5906b08cfe7bea0bcfb0757583270d997a2687",
+    "officialGameID": "0022600096",
+    "fields": {
+      "assists": [
+        9,
+        10
+      ],
+      "points+rebounds+assists": [
+        30,
+        31
+      ],
+      "points+assists": [
+        23,
+        24
+      ],
+      "rebounds+assists": [
+        16,
+        17
+      ]
+    }
+  },
+  {
+    "eventID": "RKtR8DvU8w8HiDypokvi",
+    "teamID": "INDIANA_PACERS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600095/box-score",
+    "sourceSha256": "f21ee3827dc7d9892ab9864ba46f8ff832140c1718f10d528a7d330d6758d5f0",
+    "officialGameID": "0022600095",
+    "fields": {
+      "rebounds": [
+        41,
+        42
+      ],
+      "fieldGoalsAttempted": [
+        87,
+        88
+      ],
+      "offensiveRebounds": [
+        12,
+        13
+      ]
+    }
+  },
+  {
+    "eventID": "RKtR8DvU8w8HiDypokvi",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "OBI_TOPPIN_1_NBA",
+    "name": "Obi Toppin",
+    "source": "https://www.nba.com/game/0022600095/box-score",
+    "sourceSha256": "f21ee3827dc7d9892ab9864ba46f8ff832140c1718f10d528a7d330d6758d5f0",
+    "officialGameID": "0022600095",
+    "fields": {
+      "rebounds": [
+        4,
+        5
+      ],
+      "fieldGoalsAttempted": [
+        9,
+        10
+      ],
+      "offensiveRebounds": [
+        1,
+        2
+      ],
+      "points+rebounds+assists": [
+        18,
+        19
+      ],
+      "points+rebounds": [
+        17,
+        18
+      ],
+      "rebounds+assists": [
+        5,
+        6
+      ],
+      "twoPointersAttempted": [
+        7,
+        8
+      ]
+    }
+  },
+  {
+    "eventID": "jFCPZ9O8e1HHudRiFj33",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "side": "away",
+    "source": "https://www.nba.com/game/0022600008/box-score",
+    "sourceSha256": "f1204eb3db461d1afd4319d3def96ff3b4d4c8b929ccd2a5ccbe82e6e75e7cf5",
+    "officialGameID": "0022600008",
+    "fields": {
+      "fieldGoalsAttempted": [
+        81,
+        80
+      ]
+    }
+  },
+  {
+    "eventID": "jFCPZ9O8e1HHudRiFj33",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "KARLANTHONY_TOWNS_1_NBA",
+    "name": "Karl-Anthony Towns",
+    "source": "https://www.nba.com/game/0022600008/box-score",
+    "sourceSha256": "f1204eb3db461d1afd4319d3def96ff3b4d4c8b929ccd2a5ccbe82e6e75e7cf5",
+    "officialGameID": "0022600008",
+    "fields": {
+      "steals": [
+        1,
+        0
+      ],
+      "blocks+steals": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "jFCPZ9O8e1HHudRiFj33",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "JOSH_HART_1_NBA",
+    "name": "Josh Hart",
+    "source": "https://www.nba.com/game/0022600008/box-score",
+    "sourceSha256": "f1204eb3db461d1afd4319d3def96ff3b4d4c8b929ccd2a5ccbe82e6e75e7cf5",
+    "officialGameID": "0022600008",
+    "fields": {
+      "steals": [
+        2,
+        3
+      ],
+      "blocks+steals": [
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "eventID": "jFCPZ9O8e1HHudRiFj33",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "JORDAN_CLARKSON_1_NBA",
+    "name": "Jordan Clarkson",
+    "source": "https://www.nba.com/game/0022600008/box-score",
+    "sourceSha256": "f1204eb3db461d1afd4319d3def96ff3b4d4c8b929ccd2a5ccbe82e6e75e7cf5",
+    "officialGameID": "0022600008",
+    "fields": {
+      "fieldGoalsAttempted": [
+        1,
+        0
+      ],
+      "twoPointersAttempted": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "9YrDob9Dm5fS4Su0BXZ9",
+    "teamID": "GOLDEN_STATE_WARRIORS_NBA",
+    "playerID": "DRAYMOND_GREEN_1_NBA",
+    "name": "Draymond Green",
+    "source": "https://www.nba.com/game/0022600101/box-score",
+    "sourceSha256": "0fdcc9ce7b6f855730cbdb73f306760bfc956f46ecefc7fc7a6ff3a426aece40",
+    "officialGameID": "0022600101",
+    "fields": {
+      "rebounds": [
+        4,
+        5
+      ],
+      "offensiveRebounds": [
+        0,
+        1
+      ],
+      "points+rebounds+assists": [
+        15,
+        16
+      ],
+      "points+rebounds": [
+        9,
+        10
+      ],
+      "rebounds+assists": [
+        10,
+        11
+      ]
+    }
+  },
+  {
+    "eventID": "w3GoLHzOVA5WywJcVMcR",
+    "teamID": "PHOENIX_SUNS_NBA",
+    "playerID": "JALEN_GREEN_1_NBA",
+    "name": "Jalen Green",
+    "source": "https://www.nba.com/game/0022600111/box-score",
+    "sourceSha256": "355cafdbcd54d4bd0c029f0ad31b8f8b159ae7451398fa8d6d3b0938f3fd2d81",
+    "officialGameID": "0022600111",
+    "fields": {
+      "steals": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "w3GoLHzOVA5WywJcVMcR",
+    "teamID": "PHOENIX_SUNS_NBA",
+    "playerID": "MILES_BRIDGES_1_NBA",
+    "name": "Miles Bridges",
+    "source": "https://www.nba.com/game/0022600111/box-score",
+    "sourceSha256": "355cafdbcd54d4bd0c029f0ad31b8f8b159ae7451398fa8d6d3b0938f3fd2d81",
+    "officialGameID": "0022600111",
+    "fields": {
+      "steals": [
+        1,
+        0
+      ],
+      "blocks+steals": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "JZC1ktwuNXAP7pdIul89",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600115/box-score",
+    "sourceSha256": "3414692a0e5abfbd13fcaa3a8d6e345d7718f197881f6c0594145be746666ff6",
+    "officialGameID": "0022600115",
+    "fields": {
+      "steals": [
+        9,
+        10
+      ]
+    }
+  },
+  {
+    "eventID": "JZC1ktwuNXAP7pdIul89",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "JOAN_BERINGER_1_NBA",
+    "name": "Joan Beringer",
+    "source": "https://www.nba.com/game/0022600115/box-score",
+    "sourceSha256": "3414692a0e5abfbd13fcaa3a8d6e345d7718f197881f6c0594145be746666ff6",
+    "officialGameID": "0022600115",
+    "fields": {
+      "steals": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "q3Lqe7grENUm4nXjrFRp",
+    "teamID": "LA_CLIPPERS_NBA",
+    "playerID": "KRIS_DUNN_1_NBA",
+    "name": "Kris Dunn",
+    "source": "https://www.nba.com/game/0022600116/box-score",
+    "sourceSha256": "036683ba1620dae106e72ac96fcc684f6be0a179a36d087dfd8d96cfdc246809",
+    "officialGameID": "0022600116",
+    "fields": {
+      "fieldGoalsAttempted": [
+        8,
+        7
+      ],
+      "threePointersAttempted": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "q3Lqe7grENUm4nXjrFRp",
+    "teamID": "LA_CLIPPERS_NBA",
+    "playerID": "KEATON_WAGLER_1_NBA",
+    "name": "Keaton Wagler",
+    "source": "https://www.nba.com/game/0022600116/box-score",
+    "sourceSha256": "036683ba1620dae106e72ac96fcc684f6be0a179a36d087dfd8d96cfdc246809",
+    "officialGameID": "0022600116",
+    "fields": {
+      "fieldGoalsAttempted": [
+        6,
+        7
+      ],
+      "threePointersAttempted": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "eventID": "8G8Zcws9ZpYrEyvqTRIK",
+    "teamID": "WASHINGTON_WIZARDS_NBA",
+    "playerID": "TRAE_YOUNG_1_NBA",
+    "name": "Trae Young",
+    "source": "https://www.nba.com/game/0022600119/box-score",
+    "sourceSha256": "672527588abbb4e5b04390f29214f1a32b21fc569be0064ccb31adb90a0c8bdb",
+    "officialGameID": "0022600119",
+    "fields": {
+      "points": [
+        20,
+        22
+      ],
+      "points+rebounds+assists": [
+        36,
+        38
+      ],
+      "points+rebounds": [
+        26,
+        28
+      ],
+      "points+assists": [
+        30,
+        32
+      ]
+    }
+  },
+  {
+    "eventID": "rUjWV08soeK4AjGkuLBG",
+    "teamID": "BOSTON_CELTICS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600128/box-score",
+    "sourceSha256": "2b2cc8d548ce2b4242daf12f048e5a9a8fd3b5d2a4d38351c475102eff5f62c4",
+    "officialGameID": "0022600128",
+    "fields": {
+      "assists": [
+        31,
+        32
+      ]
+    }
+  },
+  {
+    "eventID": "rUjWV08soeK4AjGkuLBG",
+    "teamID": "BOSTON_CELTICS_NBA",
+    "playerID": "DERRICK_WHITE_1_NBA",
+    "name": "Derrick White",
+    "source": "https://www.nba.com/game/0022600128/box-score",
+    "sourceSha256": "2b2cc8d548ce2b4242daf12f048e5a9a8fd3b5d2a4d38351c475102eff5f62c4",
+    "officialGameID": "0022600128",
+    "fields": {
+      "assists": [
+        6,
+        7
+      ],
+      "points+rebounds+assists": [
+        27,
+        28
+      ],
+      "points+assists": [
+        22,
+        23
+      ],
+      "rebounds+assists": [
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "eventID": "rUjWV08soeK4AjGkuLBG",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "DAYRON_SHARPE_1_NBA",
+    "name": "Day'Ron Sharpe",
+    "source": "https://www.nba.com/game/0022600128/box-score",
+    "sourceSha256": "2b2cc8d548ce2b4242daf12f048e5a9a8fd3b5d2a4d38351c475102eff5f62c4",
+    "officialGameID": "0022600128",
+    "fields": {
+      "blocks": [
+        2,
+        1
+      ],
+      "blocks+steals": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "rUjWV08soeK4AjGkuLBG",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "NOAH_CLOWNEY_1_NBA",
+    "name": "Noah Clowney",
+    "source": "https://www.nba.com/game/0022600128/box-score",
+    "sourceSha256": "2b2cc8d548ce2b4242daf12f048e5a9a8fd3b5d2a4d38351c475102eff5f62c4",
+    "officialGameID": "0022600128",
+    "fields": {
+      "blocks": [
+        1,
+        2
+      ],
+      "blocks+steals": [
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "nluHRog9os3byvlgmEWZ",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "KARLANTHONY_TOWNS_1_NBA",
+    "name": "Karl-Anthony Towns",
+    "source": "https://www.nba.com/game/0022600129/box-score",
+    "sourceSha256": "32a5a13fa44318d8271031ed9eb9570112ea75c0164a5449240342f9c44b91c0",
+    "officialGameID": "0022600129",
+    "fields": {
+      "plusMinus": [
+        -3,
+        -4
+      ]
+    }
+  },
+  {
+    "eventID": "nluHRog9os3byvlgmEWZ",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "ANDRE_DRUMMOND_1_NBA",
+    "name": "Andre Drummond",
+    "source": "https://www.nba.com/game/0022600129/box-score",
+    "sourceSha256": "32a5a13fa44318d8271031ed9eb9570112ea75c0164a5449240342f9c44b91c0",
+    "officialGameID": "0022600129",
+    "fields": {
+      "plusMinus": [
+        15,
+        16
+      ]
+    }
+  },
+  {
+    "eventID": "jG7R4zImb4TtrIhNvcY5",
+    "teamID": "MILWAUKEE_BUCKS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600138/box-score",
+    "sourceSha256": "f853fe751ab14eb0a281e2ba06e43d810a49f12be22c4569a53b9f5fd0975dd3",
+    "officialGameID": "0022600138",
+    "fields": {
+      "rebounds": [
+        40,
+        41
+      ],
+      "fieldGoalsAttempted": [
+        92,
+        93
+      ],
+      "offensiveRebounds": [
+        14,
+        15
+      ]
+    }
+  },
+  {
+    "eventID": "jG7R4zImb4TtrIhNvcY5",
+    "teamID": "MILWAUKEE_BUCKS_NBA",
+    "playerID": "AJ_GREEN_1_NBA",
+    "name": "AJ Green",
+    "source": "https://www.nba.com/game/0022600138/box-score",
+    "sourceSha256": "f853fe751ab14eb0a281e2ba06e43d810a49f12be22c4569a53b9f5fd0975dd3",
+    "officialGameID": "0022600138",
+    "fields": {
+      "fieldGoalsAttempted": [
+        5,
+        6
+      ],
+      "twoPointersAttempted": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "jG7R4zImb4TtrIhNvcY5",
+    "teamID": "MILWAUKEE_BUCKS_NBA",
+    "playerID": "BRAYDEN_BURRIES_1_NBA",
+    "name": "Brayden Burries",
+    "source": "https://www.nba.com/game/0022600138/box-score",
+    "sourceSha256": "f853fe751ab14eb0a281e2ba06e43d810a49f12be22c4569a53b9f5fd0975dd3",
+    "officialGameID": "0022600138",
+    "fields": {
+      "rebounds": [
+        5,
+        6
+      ],
+      "offensiveRebounds": [
+        2,
+        3
+      ],
+      "points+rebounds+assists": [
+        16,
+        17
+      ],
+      "points+rebounds": [
+        15,
+        16
+      ],
+      "rebounds+assists": [
+        6,
+        7
+      ]
+    }
+  },
+  {
+    "eventID": "pQsF6kYuDrEQXgaXnmGI",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "LAMELO_BALL_1_NBA",
+    "name": "LaMelo Ball",
+    "source": "https://www.nba.com/game/0022600139/box-score",
+    "sourceSha256": "c038cf6b1405b82677255916ba5ef12aabc920a8143dc71dff37829542d2844f",
+    "officialGameID": "0022600139",
+    "fields": {
+      "rebounds": [
+        4,
+        3
+      ],
+      "defensiveRebounds": [
+        4,
+        3
+      ],
+      "points+rebounds+assists": [
+        20,
+        19
+      ],
+      "points+rebounds": [
+        12,
+        11
+      ],
+      "rebounds+assists": [
+        12,
+        11
+      ]
+    }
+  },
+  {
+    "eventID": "pQsF6kYuDrEQXgaXnmGI",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "JOAN_BERINGER_1_NBA",
+    "name": "Joan Beringer",
+    "source": "https://www.nba.com/game/0022600139/box-score",
+    "sourceSha256": "c038cf6b1405b82677255916ba5ef12aabc920a8143dc71dff37829542d2844f",
+    "officialGameID": "0022600139",
+    "fields": {
+      "rebounds": [
+        9,
+        10
+      ],
+      "defensiveRebounds": [
+        7,
+        8
+      ],
+      "points+rebounds+assists": [
+        18,
+        19
+      ],
+      "points+rebounds": [
+        16,
+        17
+      ],
+      "rebounds+assists": [
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "eventID": "LRhY8kYfHreD6OVlzYzs",
+    "teamID": "NEW_ORLEANS_PELICANS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600145/box-score",
+    "sourceSha256": "48378ab1d677e167546bcc26a8a5047e6ae6b099d731cb99507f80e11e90f290",
+    "officialGameID": "0022600145",
+    "fields": {
+      "fieldGoalsAttempted": [
+        84,
+        85
+      ],
+      "turnovers": [
+        21,
+        20
+      ]
+    }
+  },
+  {
+    "eventID": "LRhY8kYfHreD6OVlzYzs",
+    "teamID": "NEW_ORLEANS_PELICANS_NBA",
+    "playerID": "SADDIQ_BEY_1_NBA",
+    "name": "Saddiq Bey",
+    "source": "https://www.nba.com/game/0022600145/box-score",
+    "sourceSha256": "48378ab1d677e167546bcc26a8a5047e6ae6b099d731cb99507f80e11e90f290",
+    "officialGameID": "0022600145",
+    "fields": {
+      "fieldGoalsAttempted": [
+        6,
+        7
+      ],
+      "turnovers": [
+        2,
+        1
+      ],
+      "twoPointersAttempted": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "eventID": "LRhY8kYfHreD6OVlzYzs",
+    "teamID": "SACRAMENTO_KINGS_NBA",
+    "side": "away",
+    "source": "https://www.nba.com/game/0022600145/box-score",
+    "sourceSha256": "48378ab1d677e167546bcc26a8a5047e6ae6b099d731cb99507f80e11e90f290",
+    "officialGameID": "0022600145",
+    "fields": {
+      "rebounds": [
+        39,
+        40
+      ],
+      "blocks": [
+        1,
+        2
+      ],
+      "steals": [
+        12,
+        11
+      ],
+      "defensiveRebounds": [
+        32,
+        33
+      ]
+    }
+  },
+  {
+    "eventID": "LRhY8kYfHreD6OVlzYzs",
+    "teamID": "SACRAMENTO_KINGS_NBA",
+    "playerID": "ZACH_LAVINE_1_NBA",
+    "name": "Zach LaVine",
+    "source": "https://www.nba.com/game/0022600145/box-score",
+    "sourceSha256": "48378ab1d677e167546bcc26a8a5047e6ae6b099d731cb99507f80e11e90f290",
+    "officialGameID": "0022600145",
+    "fields": {
+      "blocks": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "eventID": "LRhY8kYfHreD6OVlzYzs",
+    "teamID": "SACRAMENTO_KINGS_NBA",
+    "playerID": "EMANUEL_SHARP_1_NBA",
+    "name": "Emanuel Sharp",
+    "source": "https://www.nba.com/game/0022600145/box-score",
+    "sourceSha256": "48378ab1d677e167546bcc26a8a5047e6ae6b099d731cb99507f80e11e90f290",
+    "officialGameID": "0022600145",
+    "fields": {
+      "rebounds": [
+        0,
+        1
+      ],
+      "defensiveRebounds": [
+        0,
+        1
+      ],
+      "points+rebounds+assists": [
+        0,
+        1
+      ],
+      "points+rebounds": [
+        0,
+        1
+      ],
+      "rebounds+assists": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "FjHFKxqlkH6IXJHtOvyC",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "KEON_ELLIS_1_NBA",
+    "name": "Keon Ellis",
+    "source": "https://www.nba.com/game/0022600017/box-score",
+    "sourceSha256": "50a2d4faef94711a5e2266bc760e4e875e746426a0cc7c36a4fd865c7be836d1",
+    "officialGameID": "0022600017",
+    "fields": {
+      "rebounds": [
+        2,
+        1
+      ],
+      "offensiveRebounds": [
+        1,
+        0
+      ],
+      "points+rebounds+assists": [
+        9,
+        8
+      ],
+      "points+rebounds": [
+        8,
+        7
+      ],
+      "rebounds+assists": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "FjHFKxqlkH6IXJHtOvyC",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "NOAH_CLOWNEY_1_NBA",
+    "name": "Noah Clowney",
+    "source": "https://www.nba.com/game/0022600017/box-score",
+    "sourceSha256": "50a2d4faef94711a5e2266bc760e4e875e746426a0cc7c36a4fd865c7be836d1",
+    "officialGameID": "0022600017",
+    "fields": {
+      "rebounds": [
+        8,
+        9
+      ],
+      "offensiveRebounds": [
+        1,
+        2
+      ],
+      "points+rebounds+assists": [
+        12,
+        13
+      ],
+      "points+rebounds": [
+        11,
+        12
+      ],
+      "rebounds+assists": [
+        9,
+        10
+      ]
+    }
+  },
+  {
+    "eventID": "vQ0Du8GGuc71OPAZhgRG",
+    "teamID": "ORLANDO_MAGIC_NBA",
+    "side": "away",
+    "source": "https://www.nba.com/game/0022600019/box-score",
+    "sourceSha256": "82b2d522229bc59210fee0c732d7562772c4dc4c46b3065064b919694dcdb7ef",
+    "officialGameID": "0022600019",
+    "fields": {
+      "threePointersAttempted": [
+        33,
+        34
+      ]
+    }
+  },
+  {
+    "eventID": "vQ0Du8GGuc71OPAZhgRG",
+    "teamID": "ORLANDO_MAGIC_NBA",
+    "playerID": "FRANZ_WAGNER_1_NBA",
+    "name": "Franz Wagner",
+    "source": "https://www.nba.com/game/0022600019/box-score",
+    "sourceSha256": "82b2d522229bc59210fee0c732d7562772c4dc4c46b3065064b919694dcdb7ef",
+    "officialGameID": "0022600019",
+    "fields": {
+      "threePointersAttempted": [
+        6,
+        7
+      ],
+      "twoPointersAttempted": [
+        12,
+        11
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        47,
+        48
+      ],
+      "assists": [
+        39,
+        38
+      ],
+      "fieldGoalsAttempted": [
+        92,
+        93
+      ],
+      "offensiveRebounds": [
+        14,
+        15
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "GIANNIS_ANTETOKOUNMPO_1_NBA",
+    "name": "Giannis Antetokounmpo",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        17,
+        18
+      ],
+      "assists": [
+        11,
+        10
+      ],
+      "fieldGoalsAttempted": [
+        18,
+        19
+      ],
+      "offensiveRebounds": [
+        5,
+        6
+      ],
+      "points+rebounds": [
+        48,
+        49
+      ],
+      "points+assists": [
+        42,
+        41
+      ],
+      "twoPointersAttempted": [
+        16,
+        17
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "KLAY_THOMPSON_1_NBA",
+    "name": "Klay Thompson",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "points": [
+        28,
+        25
+      ],
+      "points+rebounds+assists": [
+        31,
+        28
+      ],
+      "points+rebounds": [
+        28,
+        25
+      ],
+      "points+assists": [
+        31,
+        28
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "NIKOLA_JOVIC_1_NBA",
+    "name": "Nikola Jovi\u0107",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        5,
+        4
+      ],
+      "defensiveRebounds": [
+        4,
+        3
+      ],
+      "points+rebounds+assists": [
+        8,
+        7
+      ],
+      "points+rebounds": [
+        5,
+        4
+      ],
+      "rebounds+assists": [
+        8,
+        7
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "RYAN_CONWELL_1_NBA",
+    "name": "Ryan Conwell",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "turnovers": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "NICK_RICHARDS_1_NBA",
+    "name": "Nick Richards",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "turnovers": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "MIAMI_HEAT_NBA",
+    "playerID": "SIMONE_FONTECCHIO_1_NBA",
+    "name": "Simone Fontecchio",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        0,
+        1
+      ],
+      "defensiveRebounds": [
+        0,
+        1
+      ],
+      "points+rebounds+assists": [
+        3,
+        4
+      ],
+      "points+rebounds": [
+        3,
+        4
+      ],
+      "rebounds+assists": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "INDIANA_PACERS_NBA",
+    "side": "away",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "assists": [
+        27,
+        28
+      ],
+      "blocks": [
+        2,
+        1
+      ],
+      "threePointersAttempted": [
+        36,
+        37
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "KELLY_OUBRE_JR_1_NBA",
+    "name": "Kelly Oubre Jr.",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "blocks": [
+        1,
+        0
+      ],
+      "blocks+steals": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "QUENTON_JACKSON_1_NBA",
+    "name": "Quenton Jackson",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        3,
+        4
+      ],
+      "defensiveRebounds": [
+        2,
+        3
+      ],
+      "points+rebounds+assists": [
+        28,
+        29
+      ],
+      "points+rebounds": [
+        27,
+        28
+      ],
+      "rebounds+assists": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "JALEN_SLAWSON_1_NBA",
+    "name": "Jalen Slawson",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "rebounds": [
+        5,
+        4
+      ],
+      "defensiveRebounds": [
+        4,
+        3
+      ],
+      "points+rebounds+assists": [
+        10,
+        9
+      ],
+      "points+rebounds": [
+        9,
+        8
+      ],
+      "rebounds+assists": [
+        6,
+        5
+      ]
+    }
+  },
+  {
+    "eventID": "SWomIewpa37aIHC7Wbya",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "BRADEN_SMITH_1_NBA",
+    "name": "Braden Smith",
+    "source": "https://www.nba.com/game/0022600020/box-score",
+    "sourceSha256": "8c0045a1ddef7a40b81352bc947c6f36118805c6e62c1c12662514301b61eecf",
+    "officialGameID": "0022600020",
+    "fields": {
+      "assists": [
+        0,
+        1
+      ],
+      "threePointersAttempted": [
+        1,
+        2
+      ],
+      "points+rebounds+assists": [
+        1,
+        2
+      ],
+      "points+assists": [
+        1,
+        2
+      ],
+      "rebounds+assists": [
+        0,
+        1
+      ],
+      "twoPointersAttempted": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "TwyKa2hLx8ubxbDgqJYA",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600022/box-score",
+    "sourceSha256": "cc6b0a736a3071d1dcdc5563ad761455e3202f1a033a23d266559df617c32fa2",
+    "officialGameID": "0022600022",
+    "fields": {
+      "fieldGoalsAttempted": [
+        96,
+        95
+      ],
+      "threePointersAttempted": [
+        43,
+        42
+      ]
+    }
+  },
+  {
+    "eventID": "TwyKa2hLx8ubxbDgqJYA",
+    "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+    "playerID": "LAMELO_BALL_1_NBA",
+    "name": "LaMelo Ball",
+    "source": "https://www.nba.com/game/0022600022/box-score",
+    "sourceSha256": "cc6b0a736a3071d1dcdc5563ad761455e3202f1a033a23d266559df617c32fa2",
+    "officialGameID": "0022600022",
+    "fields": {
+      "fieldGoalsAttempted": [
+        20,
+        19
+      ],
+      "threePointersAttempted": [
+        15,
+        14
+      ]
+    }
+  },
+  {
+    "eventID": "lU9nMgCzBskmDIzCWDby",
+    "teamID": "HOUSTON_ROCKETS_NBA",
+    "playerID": "BRUCE_THORNTON_1_NBA",
+    "name": "Bruce Thornton",
+    "source": "https://www.nba.com/game/0022600153/box-score",
+    "sourceSha256": "27acbb6d79130fbfc999b81ab63ccc2c395b910e00440ed9d0b0f75fa5a8e1b0",
+    "officialGameID": "0022600153",
+    "fields": {
+      "fieldGoalsAttempted": [
+        3,
+        4
+      ],
+      "twoPointersAttempted": [
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "eventID": "lU9nMgCzBskmDIzCWDby",
+    "teamID": "HOUSTON_ROCKETS_NBA",
+    "playerID": "JAESEAN_TATE_1_NBA",
+    "name": "Jae'Sean Tate",
+    "source": "https://www.nba.com/game/0022600153/box-score",
+    "sourceSha256": "27acbb6d79130fbfc999b81ab63ccc2c395b910e00440ed9d0b0f75fa5a8e1b0",
+    "officialGameID": "0022600153",
+    "fields": {
+      "fieldGoalsAttempted": [
+        4,
+        3
+      ],
+      "twoPointersAttempted": [
+        4,
+        3
+      ]
+    }
+  },
+  {
+    "eventID": "2Di3i9y9aQ0E79QYVI6n",
+    "teamID": "ORLANDO_MAGIC_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600154/box-score",
+    "sourceSha256": "cda81c8961e03c1319d6a075b022effe8fe15d117197196ececc5c4b9ec6b525",
+    "officialGameID": "0022600154",
+    "fields": {
+      "assists": [
+        23,
+        24
+      ],
+      "fieldGoalsAttempted": [
+        80,
+        81
+      ],
+      "fieldGoalsMade": [
+        33,
+        34
+      ],
+      "threePointersMade": [
+        13,
+        14
+      ],
+      "threePointersAttempted": [
+        38,
+        39
+      ]
+    }
+  },
+  {
+    "eventID": "2Di3i9y9aQ0E79QYVI6n",
+    "teamID": "ORLANDO_MAGIC_NBA",
+    "playerID": "TRISTAN_DA_SILVA_1_NBA",
+    "name": "Tristan da Silva",
+    "source": "https://www.nba.com/game/0022600154/box-score",
+    "sourceSha256": "cda81c8961e03c1319d6a075b022effe8fe15d117197196ececc5c4b9ec6b525",
+    "officialGameID": "0022600154",
+    "fields": {
+      "points": [
+        20,
+        23
+      ],
+      "fieldGoalsAttempted": [
+        13,
+        14
+      ],
+      "fieldGoalsMade": [
+        8,
+        9
+      ],
+      "threePointersMade": [
+        4,
+        5
+      ],
+      "threePointersAttempted": [
+        7,
+        8
+      ],
+      "points+rebounds+assists": [
+        32,
+        35
+      ],
+      "points+rebounds": [
+        30,
+        33
+      ],
+      "points+assists": [
+        22,
+        25
+      ]
+    }
+  },
+  {
+    "eventID": "2Di3i9y9aQ0E79QYVI6n",
+    "teamID": "BOSTON_CELTICS_NBA",
+    "playerID": "PAYTON_PRITCHARD_1_NBA",
+    "name": "Payton Pritchard",
+    "source": "https://www.nba.com/game/0022600154/box-score",
+    "sourceSha256": "cda81c8961e03c1319d6a075b022effe8fe15d117197196ececc5c4b9ec6b525",
+    "officialGameID": "0022600154",
+    "fields": {
+      "rebounds": [
+        6,
+        7
+      ],
+      "defensiveRebounds": [
+        2,
+        3
+      ],
+      "points+rebounds+assists": [
+        16,
+        17
+      ],
+      "points+rebounds": [
+        13,
+        14
+      ],
+      "rebounds+assists": [
+        9,
+        10
+      ]
+    }
+  },
+  {
+    "eventID": "2Di3i9y9aQ0E79QYVI6n",
+    "teamID": "BOSTON_CELTICS_NBA",
+    "playerID": "NEEMIAS_QUETA_1_NBA",
+    "name": "Neemias Queta",
+    "source": "https://www.nba.com/game/0022600154/box-score",
+    "sourceSha256": "cda81c8961e03c1319d6a075b022effe8fe15d117197196ececc5c4b9ec6b525",
+    "officialGameID": "0022600154",
+    "fields": {
+      "rebounds": [
+        9,
+        8
+      ],
+      "defensiveRebounds": [
+        7,
+        6
+      ],
+      "points+rebounds+assists": [
+        18,
+        17
+      ],
+      "points+rebounds": [
+        17,
+        16
+      ],
+      "rebounds+assists": [
+        10,
+        9
+      ]
+    }
+  },
+  {
+    "eventID": "VFlfBUxippPN99LBUVl9",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "ANDREW_NEMBHARD_1_NBA",
+    "name": "Andrew Nembhard",
+    "source": "https://www.nba.com/game/0022600155/box-score",
+    "sourceSha256": "94706cf952cd825e108327b407a8c3f02c4701260486b8b5a98875a5ba18807a",
+    "officialGameID": "0022600155",
+    "fields": {
+      "blocks": [
+        1,
+        0
+      ],
+      "blocks+steals": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "VFlfBUxippPN99LBUVl9",
+    "teamID": "INDIANA_PACERS_NBA",
+    "playerID": "KELLY_OUBRE_JR_1_NBA",
+    "name": "Kelly Oubre Jr.",
+    "source": "https://www.nba.com/game/0022600155/box-score",
+    "sourceSha256": "94706cf952cd825e108327b407a8c3f02c4701260486b8b5a98875a5ba18807a",
+    "officialGameID": "0022600155",
+    "fields": {
+      "blocks": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "3RNJpmr3kk5EPsuzzgwI",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "DAYRON_SHARPE_1_NBA",
+    "name": "Day'Ron Sharpe",
+    "source": "https://www.nba.com/game/0022600176/box-score",
+    "sourceSha256": "1001ed1a2a511aa5e4ceeda210c8e118e1ca3eaa22f4150f68129e951417c4fe",
+    "officialGameID": "0022600176",
+    "fields": {
+      "points": [
+        6,
+        5
+      ],
+      "points+rebounds+assists": [
+        19,
+        18
+      ],
+      "points+rebounds": [
+        11,
+        10
+      ],
+      "points+assists": [
+        14,
+        13
+      ]
+    }
+  },
+  {
+    "eventID": "7mhQN16pLsaHgcUAHEpG",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "JOSE_ALVARADO_1_NBA",
+    "name": "Jose Alvarado",
+    "source": "https://www.nba.com/game/0022600177/box-score",
+    "sourceSha256": "4fad0ff5222814eb91770760933ab6f5572cb1f7327705580be5cc445dc41596",
+    "officialGameID": "0022600177",
+    "fields": {
+      "secondsPlayed": [
+        2268,
+        548.0
+      ]
+    }
+  },
+  {
+    "eventID": "7mhQN16pLsaHgcUAHEpG",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "DALTON_KNECHT_1_NBA",
+    "name": "Dalton Knecht",
+    "source": "https://www.nba.com/game/0022600177/box-score",
+    "sourceSha256": "4fad0ff5222814eb91770760933ab6f5572cb1f7327705580be5cc445dc41596",
+    "officialGameID": "0022600177",
+    "fields": {
+      "secondsPlayed": [
+        268,
+        988.0
+      ]
+    }
+  },
+  {
+    "eventID": "7mhQN16pLsaHgcUAHEpG",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "JAMES_WISEMAN_1_NBA",
+    "name": "James Wiseman",
+    "source": "https://www.nba.com/game/0022600177/box-score",
+    "sourceSha256": "4fad0ff5222814eb91770760933ab6f5572cb1f7327705580be5cc445dc41596",
+    "officialGameID": "0022600177",
+    "fields": {
+      "secondsPlayed": [
+        2345,
+        625.0
+      ]
+    }
+  },
+  {
+    "eventID": "7mhQN16pLsaHgcUAHEpG",
+    "teamID": "NEW_YORK_KNICKS_NBA",
+    "playerID": "PACOME_DADIET_1_NBA",
+    "name": "Pacome Dadiet",
+    "source": "https://www.nba.com/game/0022600177/box-score",
+    "sourceSha256": "4fad0ff5222814eb91770760933ab6f5572cb1f7327705580be5cc445dc41596",
+    "officialGameID": "0022600177",
+    "fields": {
+      "secondsPlayed": [
+        2268,
+        548.0
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "fieldGoalsAttempted": [
+        88,
+        89
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+    "playerID": "MICAH_PEAVY_1_NBA",
+    "name": "Micah Peavy",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "fieldGoalsAttempted": [
+        5,
+        6
+      ],
+      "twoPointersAttempted": [
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "CLEVELAND_CAVALIERS_NBA",
+    "playerID": "EVAN_MOBLEY_1_NBA",
+    "name": "Evan Mobley",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "assists": [
+        2,
+        3
+      ],
+      "blocks": [
+        3,
+        2
+      ],
+      "points+rebounds+assists": [
+        28,
+        29
+      ],
+      "points+assists": [
+        18,
+        19
+      ],
+      "rebounds+assists": [
+        12,
+        13
+      ],
+      "blocks+steals": [
+        3,
+        2
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "CLEVELAND_CAVALIERS_NBA",
+    "playerID": "JAMES_HARDEN_1_NBA",
+    "name": "James Harden",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "steals": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "CLEVELAND_CAVALIERS_NBA",
+    "playerID": "TYRESE_PROCTOR_1_NBA",
+    "name": "Tyrese Proctor",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "steals": [
+        1,
+        0
+      ],
+      "blocks+steals": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "GqDpw8Z3lOA3FviOWmjb",
+    "teamID": "CLEVELAND_CAVALIERS_NBA",
+    "playerID": "CRAIG_PORTER_1_NBA",
+    "name": "Craig Porter",
+    "source": "https://www.nba.com/game/0022600180/box-score",
+    "sourceSha256": "21292a37916fbde87879c7bf166e74df864ad9826055b2751265323f42627498",
+    "officialGameID": "0022600180",
+    "fields": {
+      "blocks": [
+        0,
+        1
+      ],
+      "blocks+steals": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "CQNL3A3h6mu0wQjOr7Ir",
+    "teamID": "LOS_ANGELES_LAKERS_NBA",
+    "playerID": "LAWSON_LOVERING_1_NBA",
+    "name": "Lawson Lovering",
+    "source": "https://www.nba.com/game/0022600185/box-score",
+    "sourceSha256": "b91ac619973cff9a28e4108181652bb00efae0ab6c23de5db212421e89ebcdf8",
+    "officialGameID": "0022600185",
+    "fields": {
+      "assists": [
+        1,
+        0
+      ],
+      "points+rebounds+assists": [
+        1,
+        0
+      ],
+      "points+assists": [
+        1,
+        0
+      ],
+      "rebounds+assists": [
+        1,
+        0
+      ]
+    }
+  },
+  {
+    "eventID": "anJDBtNRUr4jldrV3R1M",
+    "teamID": "NEW_ORLEANS_PELICANS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600031/box-score",
+    "sourceSha256": "8f3c7a7e44d483acc6d5baa935d8b1d36363e14f8aae7fc4e829ef9799371558",
+    "officialGameID": "0022600031",
+    "fields": {
+      "assists": [
+        26,
+        25
+      ]
+    }
+  },
+  {
+    "eventID": "anJDBtNRUr4jldrV3R1M",
+    "teamID": "NEW_ORLEANS_PELICANS_NBA",
+    "playerID": "JEREMIAH_FEARS_1_NBA",
+    "name": "Jeremiah Fears",
+    "source": "https://www.nba.com/game/0022600031/box-score",
+    "sourceSha256": "8f3c7a7e44d483acc6d5baa935d8b1d36363e14f8aae7fc4e829ef9799371558",
+    "officialGameID": "0022600031",
+    "fields": {
+      "points": [
+        26,
+        24
+      ],
+      "points+rebounds+assists": [
+        36,
+        34
+      ],
+      "points+rebounds": [
+        31,
+        29
+      ],
+      "points+assists": [
+        31,
+        29
+      ]
+    }
+  },
+  {
+    "eventID": "anJDBtNRUr4jldrV3R1M",
+    "teamID": "NEW_ORLEANS_PELICANS_NBA",
+    "playerID": "TREY_MURPHY_III_1_NBA",
+    "name": "Trey Murphy III",
+    "source": "https://www.nba.com/game/0022600031/box-score",
+    "sourceSha256": "8f3c7a7e44d483acc6d5baa935d8b1d36363e14f8aae7fc4e829ef9799371558",
+    "officialGameID": "0022600031",
+    "fields": {
+      "assists": [
+        6,
+        5
+      ],
+      "points+rebounds+assists": [
+        20,
+        19
+      ],
+      "points+assists": [
+        16,
+        15
+      ],
+      "rebounds+assists": [
+        10,
+        9
+      ]
+    }
+  },
+  {
+    "eventID": "bRzGhnGNUuusvecp0h4q",
+    "teamID": "MILWAUKEE_BUCKS_NBA",
+    "playerID": "AJ_GREEN_1_NBA",
+    "name": "AJ Green",
+    "source": "https://www.nba.com/game/0022600030/box-score",
+    "sourceSha256": "2f89ad2e7e4a57cd4b9107c8826b318204e986b09559280ce459d005c1981e97",
+    "officialGameID": "0022600030",
+    "fields": {
+      "rebounds": [
+        2,
+        1
+      ],
+      "defensiveRebounds": [
+        2,
+        1
+      ],
+      "points+rebounds+assists": [
+        14,
+        13
+      ],
+      "points+rebounds": [
+        14,
+        13
+      ],
+      "rebounds+assists": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "bRzGhnGNUuusvecp0h4q",
+    "teamID": "TORONTO_RAPTORS_NBA",
+    "side": "away",
+    "source": "https://www.nba.com/game/0022600030/box-score",
+    "sourceSha256": "2f89ad2e7e4a57cd4b9107c8826b318204e986b09559280ce459d005c1981e97",
+    "officialGameID": "0022600030",
+    "fields": {
+      "fieldGoalsAttempted": [
+        94,
+        93
+      ]
+    }
+  },
+  {
+    "eventID": "bRzGhnGNUuusvecp0h4q",
+    "teamID": "TORONTO_RAPTORS_NBA",
+    "playerID": "JAKOB_POELTL_1_NBA",
+    "name": "Jakob Poeltl",
+    "source": "https://www.nba.com/game/0022600030/box-score",
+    "sourceSha256": "2f89ad2e7e4a57cd4b9107c8826b318204e986b09559280ce459d005c1981e97",
+    "officialGameID": "0022600030",
+    "fields": {
+      "assists": [
+        1,
+        2
+      ],
+      "points+rebounds+assists": [
+        31,
+        32
+      ],
+      "points+assists": [
+        20,
+        21
+      ],
+      "rebounds+assists": [
+        12,
+        13
+      ]
+    }
+  },
+  {
+    "eventID": "bRzGhnGNUuusvecp0h4q",
+    "teamID": "TORONTO_RAPTORS_NBA",
+    "playerID": "RJ_BARRETT_1_NBA",
+    "name": "RJ Barrett",
+    "source": "https://www.nba.com/game/0022600030/box-score",
+    "sourceSha256": "2f89ad2e7e4a57cd4b9107c8826b318204e986b09559280ce459d005c1981e97",
+    "officialGameID": "0022600030",
+    "fields": {
+      "assists": [
+        5,
+        4
+      ],
+      "fieldGoalsAttempted": [
+        22,
+        21
+      ],
+      "points+rebounds+assists": [
+        39,
+        38
+      ],
+      "points+assists": [
+        32,
+        31
+      ],
+      "rebounds+assists": [
+        12,
+        11
+      ],
+      "twoPointersAttempted": [
+        18,
+        17
+      ]
+    }
+  },
+  {
+    "eventID": "wo0J93uNtMlFfJktdtmC",
+    "teamID": "ATLANTA_HAWKS_NBA",
+    "side": "home",
+    "source": "https://www.nba.com/game/0022600190/box-score",
+    "sourceSha256": "3879fc03ec3075a22d7d4a4e70578a3309a78710e96385686b44017417a8e6f6",
+    "officialGameID": "0022600190",
+    "fields": {
+      "blocks": [
+        10,
+        9
+      ]
+    }
+  },
+  {
+    "eventID": "wo0J93uNtMlFfJktdtmC",
+    "teamID": "ATLANTA_HAWKS_NBA",
+    "playerID": "ONYEKA_OKONGWU_1_NBA",
+    "name": "Onyeka Okongwu",
+    "source": "https://www.nba.com/game/0022600190/box-score",
+    "sourceSha256": "3879fc03ec3075a22d7d4a4e70578a3309a78710e96385686b44017417a8e6f6",
+    "officialGameID": "0022600190",
+    "fields": {
+      "blocks": [
+        4,
+        3
+      ],
+      "blocks+steals": [
+        4,
+        3
+      ]
+    }
+  },
+  {
+    "eventID": "wo0J93uNtMlFfJktdtmC",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "JULIUS_RANDLE_1_NBA",
+    "name": "Julius Randle",
+    "source": "https://www.nba.com/game/0022600190/box-score",
+    "sourceSha256": "3879fc03ec3075a22d7d4a4e70578a3309a78710e96385686b44017417a8e6f6",
+    "officialGameID": "0022600190",
+    "fields": {
+      "rebounds": [
+        7,
+        6
+      ],
+      "offensiveRebounds": [
+        4,
+        3
+      ],
+      "steals": [
+        2,
+        1
+      ],
+      "points+rebounds+assists": [
+        34,
+        33
+      ],
+      "points+rebounds": [
+        26,
+        25
+      ],
+      "rebounds+assists": [
+        15,
+        14
+      ],
+      "blocks+steals": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "eventID": "wo0J93uNtMlFfJktdtmC",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "NOLAN_TRAORE_1_NBA",
+    "name": "Nolan Traore",
+    "source": "https://www.nba.com/game/0022600190/box-score",
+    "sourceSha256": "3879fc03ec3075a22d7d4a4e70578a3309a78710e96385686b44017417a8e6f6",
+    "officialGameID": "0022600190",
+    "fields": {
+      "steals": [
+        4,
+        5
+      ],
+      "blocks+steals": [
+        4,
+        5
+      ]
+    }
+  },
+  {
+    "eventID": "wo0J93uNtMlFfJktdtmC",
+    "teamID": "BROOKLYN_NETS_NBA",
+    "playerID": "DANIEL_WOLF_1_NBA",
+    "name": "Danny Wolf",
+    "source": "https://www.nba.com/game/0022600190/box-score",
+    "sourceSha256": "3879fc03ec3075a22d7d4a4e70578a3309a78710e96385686b44017417a8e6f6",
+    "officialGameID": "0022600190",
+    "fields": {
+      "rebounds": [
+        9,
+        10
+      ],
+      "offensiveRebounds": [
+        2,
+        3
+      ],
+      "points+rebounds+assists": [
+        21,
+        22
+      ],
+      "points+rebounds": [
+        20,
+        21
+      ],
+      "rebounds+assists": [
+        10,
+        11
+      ]
+    }
+  }
+]

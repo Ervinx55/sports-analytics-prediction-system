@@ -7,6 +7,7 @@ on:
     paths:
       - "ml/**"
       - "data/ml/**"
+      - "supabase/functions/github-ml-training-export/**"
       - "requirements-ml.txt"
       - ".github/workflows/ml-shadow.yml"
   schedule:

@@ -1,0 +1,4122 @@
+[
+  {
+    "eventID": "BatjxOF2DaH8OiuRUNkM",
+    "bdlGameID": 21717926,
+    "officialGameID": "0022600088",
+    "startsAt": "2026-10-21T23:30:00.000Z",
+    "home": "TORONTO_RAPTORS_NBA",
+    "away": "CHICAGO_BULLS_NBA",
+    "source": "https://www.nba.com/game/0022600088/box-score",
+    "sourceSha256": "775c488cc13af63f06e9d3846e758d6e29b6e6812a390c6f45b82cde21ffecb1",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SCOTTIE_BARNES_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Scottie Barnes",
+        "fields": {
+          "secondsPlayed": [
+            1563,
+            1561
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JALEN_SMITH_1_NBA",
+        "teamID": "CHICAGO_BULLS_NBA",
+        "name": "Jalen Smith",
+        "fields": {
+          "secondsPlayed": [
+            1139,
+            1138
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 380,
+        "teamID": "CHICAGO_BULLS_NBA",
+        "name": "Norman Powell",
+        "fields": {
+          "stl": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091903404,
+        "teamID": "CHICAGO_BULLS_NBA",
+        "name": "Tobe Awaka",
+        "fields": {
+          "stl": [
+            0,
+            1
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "9c16fd2b4244d6722c6aaa633b6bca5237a23957e258fcdd90fe65b07646ff63"
+  },
+  {
+    "eventID": "UfWz6F6eK3jsT34vG1to",
+    "bdlGameID": 21717858,
+    "officialGameID": "0022600004",
+    "startsAt": "2026-10-21T23:30:00.000Z",
+    "home": "MIAMI_HEAT_NBA",
+    "away": "MINNESOTA_TIMBERWOLVES_NBA",
+    "source": "https://www.nba.com/game/0022600004/box-score",
+    "sourceSha256": "a9d8852340b05eb7ce77a0ca479931011f43a3f497e820b9ead98c1598a62667",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KLAY_THOMPSON_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Klay Thompson",
+        "fields": {
+          "fouls": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "MIAMI_HEAT_NBA",
+        "fields": {
+          "fouls": [
+            27,
+            28
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JADEN_MCDANIELS_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Jaden McDaniels",
+        "fields": {
+          "turnovers": [
+            3,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17553979,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Jonathan Kuminga",
+        "fields": {
+          "min": [
+            "29:56",
+            "29:30"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 176,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Rudy Gobert",
+        "fields": {
+          "min": [
+            "32:48",
+            "33:29"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547238,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Anthony Edwards",
+        "fields": {
+          "min": [
+            "33:24",
+            "32:36"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ANTHONY_EDWARDS_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Anthony Edwards",
+        "fields": {
+          "turnovers": [
+            3,
+            4
+          ],
+          "fieldGoalsMade": [
+            15,
+            16
+          ],
+          "fieldGoalsAttempted": [
+            28,
+            29
+          ],
+          "twoPointersMade": [
+            6,
+            7
+          ],
+          "twoPointersAttempted": [
+            11,
+            12
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057271099,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Joan Beringer",
+        "fields": {
+          "min": [
+            "14:13",
+            "13:32"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "fields": {
+          "fieldGoalsAttempted": [
+            97,
+            98
+          ],
+          "twoPointersAttempted": [
+            47,
+            48
+          ],
+          "twoPointersMade": [
+            24,
+            25
+          ],
+          "fieldGoalsMade": [
+            45,
+            46
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "13bd8156ff18408a53144befeb00c1232b3d18d4d0f8731eabcb9a0c0af924c0"
+  },
+  {
+    "eventID": "BK1ZzGsAVaYZHhmheidv",
+    "bdlGameID": 21717930,
+    "officialGameID": "0022600092",
+    "startsAt": "2026-10-22T02:00:00.000Z",
+    "home": "PORTLAND_TRAIL_BLAZERS_NBA",
+    "away": "PHOENIX_SUNS_NBA",
+    "source": "https://www.nba.com/game/0022600092/box-score",
+    "sourceSha256": "bc9f16dc5bd7dc0930067bbd43a825e144a98a38ca2a65040f6e7b1971693f00",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56677817,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Sidy Cissoko",
+        "fields": {
+          "min": [
+            "25:04",
+            "25:05"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SIDY_CISSOKO_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Sidy Cissoko",
+        "fields": {
+          "secondsPlayed": [
+            1504,
+            1505
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 4197387,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Vít Krejčí",
+        "fields": {
+          "min": [
+            "15:29",
+            "15:30"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "VIT_KREJCI_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Vít Krejci",
+        "fields": {
+          "secondsPlayed": [
+            929,
+            930
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "HANSEN_YANG_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Yang Hansen",
+        "fields": {
+          "rebounds": [
+            2,
+            3
+          ],
+          "defensiveRebounds": [
+            1,
+            2
+          ],
+          "points+rebounds": [
+            7,
+            8
+          ],
+          "points+rebounds+assists": [
+            7,
+            8
+          ],
+          "rebounds+assists": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAYSON_KENT_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Jayson Kent",
+        "fields": {
+          "rebounds": [
+            2,
+            1
+          ],
+          "defensiveRebounds": [
+            1,
+            0
+          ],
+          "points+rebounds": [
+            2,
+            1
+          ],
+          "points+rebounds+assists": [
+            2,
+            1
+          ],
+          "rebounds+assists": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 57,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Devin Booker",
+        "fields": {
+          "min": [
+            "29:26",
+            "29:27"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DEVIN_BOOKER_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Devin Booker",
+        "fields": {
+          "secondsPlayed": [
+            1766,
+            1767
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028036515,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Oso Ighodaro",
+        "fields": {
+          "min": [
+            "14:36",
+            "14:37"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "OSO_IGHODARO_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Oso Ighodaro",
+        "fields": {
+          "secondsPlayed": [
+            876,
+            877
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028025723,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Ryan Dunn",
+        "fields": {
+          "reb": [
+            2,
+            3
+          ],
+          "dreb": [
+            1,
+            2
+          ],
+          "min": [
+            "14:13",
+            "14:14"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RYAN_DUNN_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Ryan Dunn",
+        "fields": {
+          "rebounds": [
+            2,
+            3
+          ],
+          "defensiveRebounds": [
+            1,
+            2
+          ],
+          "secondsPlayed": [
+            853,
+            854
+          ],
+          "points+rebounds": [
+            5,
+            6
+          ],
+          "points+rebounds+assists": [
+            5,
+            6
+          ],
+          "rebounds+assists": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56783340,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Duop Reath",
+        "fields": {
+          "min": [
+            "8:46",
+            "8:47"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RASHEER_FLEMING_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Rasheer Fleming",
+        "fields": {
+          "threePointersAttempted": [
+            3,
+            4
+          ],
+          "twoPointersAttempted": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 44477062,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Jamaree Bouyea",
+        "fields": {
+          "reb": [
+            2,
+            1
+          ],
+          "dreb": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAMAREE_BOUYEA_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Jamaree Bouyea",
+        "fields": {
+          "rebounds": [
+            2,
+            1
+          ],
+          "defensiveRebounds": [
+            2,
+            1
+          ],
+          "points+rebounds": [
+            5,
+            4
+          ],
+          "points+rebounds+assists": [
+            7,
+            6
+          ],
+          "rebounds+assists": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "fields": {
+          "twoPointersAttempted": [
+            53,
+            52
+          ],
+          "threePointersAttempted": [
+            31,
+            32
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "ccba26d9d68f06d6ded975ac7855b589902808de02ae8cb61cf5b3d924a70828"
+  },
+  {
+    "eventID": "0s4zUVLTEweoeYkcZiVJ",
+    "bdlGameID": 21717939,
+    "officialGameID": "0022600097",
+    "startsAt": "2026-10-23T23:00:00.000Z",
+    "home": "WASHINGTON_WIZARDS_NBA",
+    "away": "TORONTO_RAPTORS_NBA",
+    "source": "https://www.nba.com/game/0022600097/box-score",
+    "sourceSha256": "877ad62815c93c7d494a83c56cd5683850b59dcd189bf57c8e1a882cc4e466f6",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028026060,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Kyshawn George",
+        "fields": {
+          "min": [
+            "26:12",
+            "26:13"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KYSHAWN_GEORGE_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Kyshawn George",
+        "fields": {
+          "secondsPlayed": [
+            1572,
+            1573
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56677844,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Bilal Coulibaly",
+        "fields": {
+          "min": [
+            "26:06",
+            "26:07"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "BILAL_COULIBALY_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Bilal Coulibaly",
+        "fields": {
+          "secondsPlayed": [
+            1566,
+            1567
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17896036,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Tre Mann",
+        "fields": {
+          "min": [
+            "0:58",
+            "0:59"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TRE_MANN_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Tre Mann",
+        "fields": {
+          "secondsPlayed": [
+            58,
+            59
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028203324,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Reece Beekman",
+        "fields": {
+          "min": [
+            "0:58",
+            "0:59"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "REECE_BEEKMAN_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Reece Beekman",
+        "fields": {
+          "secondsPlayed": [
+            58,
+            59
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057279594,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Will Riley",
+        "fields": {
+          "min": [
+            "0:58",
+            "0:59"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "WILL_RILEY_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Will Riley",
+        "fields": {
+          "secondsPlayed": [
+            58,
+            59
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091465991,
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Felix Okpara",
+        "fields": {
+          "min": [
+            "0:58",
+            "0:59"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "FELIX_OKPARA_1_NBA",
+        "teamID": "WASHINGTON_WIZARDS_NBA",
+        "name": "Felix Okpara",
+        "fields": {
+          "secondsPlayed": [
+            58,
+            59
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 274,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Kawhi Leonard",
+        "fields": {
+          "min": [
+            "27:41",
+            "27:42"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KAWHI_LEONARD_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Kawhi Leonard",
+        "fields": {
+          "secondsPlayed": [
+            1661,
+            1662
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 373,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Jakob Poeltl",
+        "fields": {
+          "min": [
+            "26:56",
+            "26:57"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAKOB_POELTL_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Jakob Poeltl",
+        "fields": {
+          "secondsPlayed": [
+            1616,
+            1617
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666423,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "RJ Barrett",
+        "fields": {
+          "min": [
+            "33:55",
+            "33:56"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RJ_BARRETT_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "RJ Barrett",
+        "fields": {
+          "secondsPlayed": [
+            2035,
+            2036
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547269,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Immanuel Quickley",
+        "fields": {
+          "min": [
+            "29:05",
+            "29:06"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "IMMANUEL_QUICKLEY_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Immanuel Quickley",
+        "fields": {
+          "secondsPlayed": [
+            1745,
+            1746
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057268940,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Collin Murray-Boyles",
+        "fields": {
+          "min": [
+            "17:34",
+            "17:35"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "COLLIN_MURRAYBOYLES_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Collin Murray-Boyles",
+        "fields": {
+          "secondsPlayed": [
+            1054,
+            1055
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028038426,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Jamal Shead",
+        "fields": {
+          "min": [
+            "24:29",
+            "24:30"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAMAL_SHEAD_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Jamal Shead",
+        "fields": {
+          "secondsPlayed": [
+            1469,
+            1470
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091350801,
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Allen Graves",
+        "fields": {
+          "min": [
+            "6:22",
+            "6:23"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ALLEN_GRAVES_1_NBA",
+        "teamID": "TORONTO_RAPTORS_NBA",
+        "name": "Allen Graves",
+        "fields": {
+          "secondsPlayed": [
+            382,
+            383
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "9792eaa63a87fbb1f6201a10e7d23c82eb1fa734617d95363d1e8282f65884b2"
+  },
+  {
+    "eventID": "0pXdNImEofTORlk8slfV",
+    "bdlGameID": 21717945,
+    "officialGameID": "0022600103",
+    "startsAt": "2026-10-24T02:00:00.000Z",
+    "home": "SACRAMENTO_KINGS_NBA",
+    "away": "PORTLAND_TRAIL_BLAZERS_NBA",
+    "source": "https://www.nba.com/game/0022600103/box-score",
+    "sourceSha256": "8447c7866ec1030120710e2a9d61bfcc1010c9edcfe7ba315c8344c954b69c43",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DEANDRE_HUNTER_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "De'Andre Hunter",
+        "fields": {
+          "secondsPlayed": [
+            1576,
+            1486
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 268,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Zach LaVine",
+        "fields": {
+          "fg3a": [
+            9,
+            10
+          ],
+          "min": [
+            "39:07",
+            "39:08"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ZACH_LAVINE_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Zach LaVine",
+        "fields": {
+          "threePointersAttempted": [
+            9,
+            10
+          ],
+          "secondsPlayed": [
+            2347,
+            2348
+          ],
+          "twoPointersAttempted": [
+            6,
+            5
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091466685,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Emanuel Sharp",
+        "fields": {
+          "min": [
+            "14:27",
+            "14:28"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "EMANUEL_SHARP_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Emanuel Sharp",
+        "fields": {
+          "secondsPlayed": [
+            867,
+            868
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "PRECIOUS_ACHIUWA_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Precious Achiuwa",
+        "fields": {
+          "secondsPlayed": [
+            1473,
+            1563
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "fields": {
+          "twoPointersAttempted": [
+            60,
+            59
+          ],
+          "threePointersAttempted": [
+            31,
+            32
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DENI_AVDIJA_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Deni Avdija",
+        "fields": {
+          "rebounds": [
+            6,
+            7
+          ],
+          "defensiveRebounds": [
+            5,
+            6
+          ],
+          "secondsPlayed": [
+            2349,
+            2259
+          ],
+          "points+rebounds": [
+            32,
+            33
+          ],
+          "points+rebounds+assists": [
+            38,
+            39
+          ],
+          "rebounds+assists": [
+            12,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56677850,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Toumani Camara",
+        "fields": {
+          "reb": [
+            3,
+            2
+          ],
+          "oreb": [
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TOUMANI_CAMARA_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Toumani Camara",
+        "fields": {
+          "rebounds": [
+            3,
+            2
+          ],
+          "offensiveRebounds": [
+            1,
+            0
+          ],
+          "points+rebounds": [
+            22,
+            21
+          ],
+          "points+rebounds+assists": [
+            23,
+            22
+          ],
+          "rebounds+assists": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028025344,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Donovan Clingan",
+        "fields": {
+          "reb": [
+            10,
+            11
+          ],
+          "oreb": [
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DONOVAN_CLINGAN_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Donovan Clingan",
+        "fields": {
+          "rebounds": [
+            10,
+            11
+          ],
+          "blocks": [
+            2,
+            3
+          ],
+          "offensiveRebounds": [
+            4,
+            5
+          ],
+          "secondsPlayed": [
+            1141,
+            1231
+          ],
+          "points+rebounds": [
+            18,
+            19
+          ],
+          "points+rebounds+assists": [
+            21,
+            22
+          ],
+          "rebounds+assists": [
+            13,
+            14
+          ],
+          "blocks+steals": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 278,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Damian Lillard",
+        "fields": {
+          "min": [
+            "32:43",
+            "32:44"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DAMIAN_LILLARD_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Damian Lillard",
+        "fields": {
+          "secondsPlayed": [
+            1963,
+            1964
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666786,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Ja Morant",
+        "fields": {
+          "min": [
+            "26:52",
+            "26:53"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JA_MORANT_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Ja Morant",
+        "fields": {
+          "secondsPlayed": [
+            1612,
+            1613
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JRUE_HOLIDAY_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Jrue Holiday",
+        "fields": {
+          "rebounds": [
+            2,
+            1
+          ],
+          "defensiveRebounds": [
+            2,
+            1
+          ],
+          "points+rebounds": [
+            14,
+            13
+          ],
+          "points+rebounds+assists": [
+            22,
+            21
+          ],
+          "rebounds+assists": [
+            10,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56677747,
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Scoot Henderson",
+        "fields": {
+          "min": [
+            "20:32",
+            "20:33"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SCOOT_HENDERSON_1_NBA",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "name": "Scoot Henderson",
+        "fields": {
+          "secondsPlayed": [
+            1232,
+            1233
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "PORTLAND_TRAIL_BLAZERS_NBA",
+        "fields": {
+          "blocks+steals": [
+            12,
+            13
+          ],
+          "blocks": [
+            4,
+            5
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "4b8d9e67bd1106cc10aac97598a90ad1fc821fcd2fccd76564667235aacb7f1d"
+  },
+  {
+    "eventID": "3FhoL4fWeJCxyAvslcWs",
+    "bdlGameID": 21717946,
+    "officialGameID": "0022600104",
+    "startsAt": "2026-10-24T22:00:00.000Z",
+    "home": "CHARLOTTE_HORNETS_NBA",
+    "away": "MIAMI_HEAT_NBA",
+    "source": "https://www.nba.com/game/0022600104/box-score",
+    "sourceSha256": "a3dd62ca39984ce59bc4aff19f31438b796947dc03eb88af0cfb77e7ec9efb08",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057384156,
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Sion James",
+        "fields": {
+          "min": [
+            "26:01",
+            "26:02"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SION_JAMES_1_NBA",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Sion James",
+        "fields": {
+          "secondsPlayed": [
+            1561,
+            1562
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017725,
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Moussa Diabaté",
+        "fields": {
+          "ast": [
+            2,
+            1
+          ],
+          "min": [
+            "22:05",
+            "22:06"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MOUSSA_DIABATE_1_NBA",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Moussa Diabate",
+        "fields": {
+          "assists": [
+            2,
+            1
+          ],
+          "secondsPlayed": [
+            1325,
+            1326
+          ],
+          "points+assists": [
+            6,
+            5
+          ],
+          "points+rebounds+assists": [
+            11,
+            10
+          ],
+          "rebounds+assists": [
+            7,
+            6
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "BRANDON_MILLER_1_NBA",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Brandon Miller",
+        "fields": {
+          "rebounds": [
+            7,
+            8
+          ],
+          "turnovers": [
+            4,
+            5
+          ],
+          "defensiveRebounds": [
+            6,
+            7
+          ],
+          "points+rebounds": [
+            41,
+            42
+          ],
+          "points+rebounds+assists": [
+            45,
+            46
+          ],
+          "rebounds+assists": [
+            11,
+            12
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 409,
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Dennis Schröder",
+        "fields": {
+          "ast": [
+            4,
+            5
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DENNIS_SCHRODER_1_NBA",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Dennis Schröder",
+        "fields": {
+          "assists": [
+            4,
+            5
+          ],
+          "threePointersAttempted": [
+            8,
+            7
+          ],
+          "secondsPlayed": [
+            2273,
+            2274
+          ],
+          "twoPointersAttempted": [
+            10,
+            11
+          ],
+          "points+assists": [
+            29,
+            30
+          ],
+          "points+rebounds+assists": [
+            35,
+            36
+          ],
+          "rebounds+assists": [
+            10,
+            11
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057384362,
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Ryan Kalkbrenner",
+        "fields": {
+          "min": [
+            "22:38",
+            "22:39"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 8,
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Grayson Allen",
+        "fields": {
+          "min": [
+            "34:05",
+            "34:06"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "GRAYSON_ALLEN_1_NBA",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "name": "Grayson Allen",
+        "fields": {
+          "points": [
+            21,
+            20
+          ],
+          "secondsPlayed": [
+            2045,
+            2046
+          ],
+          "points+rebounds": [
+            24,
+            23
+          ],
+          "points+assists": [
+            26,
+            25
+          ],
+          "points+rebounds+assists": [
+            29,
+            28
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "CHARLOTTE_HORNETS_NBA",
+        "fields": {
+          "turnovers": [
+            15,
+            16
+          ],
+          "twoPointersAttempted": [
+            44,
+            45
+          ],
+          "rebounds": [
+            45,
+            46
+          ],
+          "rebounds+assists": [
+            67,
+            68
+          ],
+          "threePointersAttempted": [
+            44,
+            43
+          ],
+          "points+rebounds+assists": [
+            182,
+            183
+          ],
+          "defensiveRebounds": [
+            35,
+            36
+          ],
+          "points+rebounds": [
+            160,
+            161
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17553994,
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Davion Mitchell",
+        "fields": {
+          "min": [
+            "37:02",
+            "37:03"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DAVION_MITCHELL_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Davion Mitchell",
+        "fields": {
+          "secondsPlayed": [
+            2222,
+            2223
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TIM_HARDAWAY_JR_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Tim Hardaway Jr.",
+        "fields": {
+          "blocks": [
+            1,
+            2
+          ],
+          "blocks+steals": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "MIAMI_HEAT_NBA",
+        "fields": {
+          "blocks+steals": [
+            13,
+            14
+          ],
+          "blocks": [
+            4,
+            5
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "994ef82e59b4d4eb39e38fe5a4153b006b39cb9862a54686a343531152ee7f02"
+  },
+  {
+    "eventID": "PQnA4dhmn6e3Hb5uCMqL",
+    "bdlGameID": 21717948,
+    "officialGameID": "0022600106",
+    "startsAt": "2026-10-24T23:30:00.000Z",
+    "home": "PHILADELPHIA_76ERS_NBA",
+    "away": "MILWAUKEE_BUCKS_NBA",
+    "source": "https://www.nba.com/game/0022600106/box-score",
+    "sourceSha256": "71e94c201097e38690ce7065ead89d962b1ec7cf767483d2f898400e221a5131",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666940,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Dean Wade",
+        "fields": {
+          "min": [
+            "28:03",
+            "28:04"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DEAN_WADE_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Dean Wade",
+        "fields": {
+          "secondsPlayed": [
+            1683,
+            1684
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057261935,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "VJ Edgecombe",
+        "fields": {
+          "min": [
+            "29:55",
+            "29:56"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "VJ_EDGECOMBE_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "VJ Edgecombe",
+        "fields": {
+          "secondsPlayed": [
+            1795,
+            1796
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 419,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Anfernee Simons",
+        "fields": {
+          "min": [
+            "20:20",
+            "20:21"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ANFERNEE_SIMONS_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Anfernee Simons",
+        "fields": {
+          "secondsPlayed": [
+            1220,
+            1221
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028034846,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Adem Bona",
+        "fields": {
+          "min": [
+            "9:40",
+            "9:41"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ADEM_BONA_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Adem Bona",
+        "fields": {
+          "secondsPlayed": [
+            580,
+            581
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028214238,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Justin Edwards",
+        "fields": {
+          "min": [
+            "0:29",
+            "0:30"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JUSTIN_EDWARDS_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Justin Edwards",
+        "fields": {
+          "secondsPlayed": [
+            29,
+            30
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057847330,
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Caleb Love",
+        "fields": {
+          "min": [
+            "0:29",
+            "0:30"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CALEB_LOVE_1_NBA",
+        "teamID": "PHILADELPHIA_76ERS_NBA",
+        "name": "Caleb Love",
+        "fields": {
+          "secondsPlayed": [
+            29,
+            30
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 265,
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Kyle Kuzma",
+        "fields": {
+          "min": [
+            "35:00",
+            "35:01"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KYLE_KUZMA_1_NBA",
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Kyle Kuzma",
+        "fields": {
+          "secondsPlayed": [
+            2100,
+            2101
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RYAN_ROLLINS_1_NBA",
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Ryan Rollins",
+        "fields": {
+          "assists": [
+            3,
+            4
+          ],
+          "points+assists": [
+            18,
+            19
+          ],
+          "points+rebounds+assists": [
+            22,
+            23
+          ],
+          "rebounds+assists": [
+            7,
+            8
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "AJ_GREEN_1_NBA",
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "AJ Green",
+        "fields": {
+          "assists": [
+            1,
+            0
+          ],
+          "points+assists": [
+            12,
+            11
+          ],
+          "points+rebounds+assists": [
+            15,
+            14
+          ],
+          "rebounds+assists": [
+            4,
+            3
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "c7b036b9bef60a8ba7753dcca6d3be5893fc31db08a8f934b01035e622ebedd5"
+  },
+  {
+    "eventID": "EQ8yKN5p6eQFzxzRFVE4",
+    "bdlGameID": 21717961,
+    "officialGameID": "0022600118",
+    "startsAt": "2026-10-26T01:00:00.000Z",
+    "home": "SACRAMENTO_KINGS_NBA",
+    "away": "MEMPHIS_GRIZZLIES_NBA",
+    "source": "https://www.nba.com/game/0022600118/box-score",
+    "sourceSha256": "3589b18b0e60cdb1d439a53df633779459df19df0d896fb839f7a689818dfa5c",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666656,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "De'Andre Hunter",
+        "fields": {
+          "reb": [
+            6,
+            5
+          ],
+          "dreb": [
+            3,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DEANDRE_HUNTER_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "De'Andre Hunter",
+        "fields": {
+          "rebounds": [
+            6,
+            5
+          ],
+          "defensiveRebounds": [
+            3,
+            2
+          ],
+          "points+rebounds": [
+            13,
+            12
+          ],
+          "points+rebounds+assists": [
+            14,
+            13
+          ],
+          "rebounds+assists": [
+            7,
+            6
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 406,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Domantas Sabonis",
+        "fields": {
+          "turnover": [
+            4,
+            3
+          ],
+          "fga": [
+            8,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DOMANTAS_SABONIS_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Domantas Sabonis",
+        "fields": {
+          "turnovers": [
+            4,
+            3
+          ],
+          "fieldGoalsAttempted": [
+            8,
+            9
+          ],
+          "twoPointersAttempted": [
+            8,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 268,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Zach LaVine",
+        "fields": {
+          "turnover": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ZACH_LAVINE_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Zach LaVine",
+        "fields": {
+          "turnovers": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091466685,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Emanuel Sharp",
+        "fields": {
+          "turnover": [
+            1,
+            0
+          ],
+          "min": [
+            "14:13",
+            "14:14"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "EMANUEL_SHARP_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Emanuel Sharp",
+        "fields": {
+          "turnovers": [
+            1,
+            0
+          ],
+          "secondsPlayed": [
+            853,
+            854
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 324,
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Malik Monk",
+        "fields": {
+          "reb": [
+            1,
+            2
+          ],
+          "dreb": [
+            0,
+            1
+          ],
+          "min": [
+            "12:12",
+            "12:13"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MALIK_MONK_1_NBA",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "name": "Malik Monk",
+        "fields": {
+          "rebounds": [
+            1,
+            2
+          ],
+          "defensiveRebounds": [
+            0,
+            1
+          ],
+          "secondsPlayed": [
+            732,
+            733
+          ],
+          "points+rebounds": [
+            7,
+            8
+          ],
+          "points+rebounds+assists": [
+            9,
+            10
+          ],
+          "rebounds+assists": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "SACRAMENTO_KINGS_NBA",
+        "fields": {
+          "turnovers": [
+            14,
+            13
+          ],
+          "fieldGoalsAttempted": [
+            94,
+            95
+          ],
+          "twoPointersAttempted": [
+            61,
+            62
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028039105,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Jaylen Wells",
+        "fields": {
+          "reb": [
+            5,
+            7
+          ],
+          "oreb": [
+            2,
+            3
+          ],
+          "dreb": [
+            3,
+            4
+          ],
+          "min": [
+            "32:47",
+            "32:48"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAYLEN_WELLS_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Jaylen Wells",
+        "fields": {
+          "rebounds": [
+            5,
+            7
+          ],
+          "offensiveRebounds": [
+            2,
+            3
+          ],
+          "defensiveRebounds": [
+            3,
+            4
+          ],
+          "secondsPlayed": [
+            1967,
+            1968
+          ],
+          "points+rebounds": [
+            21,
+            23
+          ],
+          "points+rebounds+assists": [
+            24,
+            26
+          ],
+          "rebounds+assists": [
+            8,
+            10
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091339280,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cameron Boozer",
+        "fields": {
+          "fga": [
+            20,
+            21
+          ],
+          "fg3a": [
+            7,
+            8
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CAMERON_BOOZER_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cameron Boozer",
+        "fields": {
+          "points": [
+            16,
+            14
+          ],
+          "fieldGoalsMade": [
+            6,
+            5
+          ],
+          "threePointersAttempted": [
+            7,
+            8
+          ],
+          "twoPointersMade": [
+            4,
+            3
+          ],
+          "twoPointersAttempted": [
+            14,
+            13
+          ],
+          "points+rebounds": [
+            27,
+            25
+          ],
+          "points+assists": [
+            20,
+            18
+          ],
+          "points+rebounds+assists": [
+            31,
+            29
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547267,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Isaiah Stewart",
+        "fields": {
+          "stl": [
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ISAIAH_STEWART_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Isaiah Stewart",
+        "fields": {
+          "steals": [
+            1,
+            0
+          ],
+          "blocks+steals": [
+            3,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057266649,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cedric Coward",
+        "fields": {
+          "fga": [
+            12,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CEDRIC_COWARD_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cedric Coward",
+        "fields": {
+          "points": [
+            15,
+            17
+          ],
+          "assists": [
+            2,
+            1
+          ],
+          "fieldGoalsMade": [
+            6,
+            7
+          ],
+          "fieldGoalsAttempted": [
+            11,
+            13
+          ],
+          "twoPointersMade": [
+            3,
+            4
+          ],
+          "twoPointersAttempted": [
+            6,
+            8
+          ],
+          "points+rebounds": [
+            26,
+            28
+          ],
+          "points+assists": [
+            17,
+            18
+          ],
+          "points+rebounds+assists": [
+            28,
+            29
+          ],
+          "rebounds+assists": [
+            13,
+            12
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TY_JEROME_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Ty Jerome",
+        "fields": {
+          "assists": [
+            6,
+            7
+          ],
+          "points+assists": [
+            37,
+            38
+          ],
+          "points+rebounds+assists": [
+            41,
+            42
+          ],
+          "rebounds+assists": [
+            10,
+            11
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028048549,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cam Spencer",
+        "fields": {
+          "stl": [
+            0,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CAM_SPENCER_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Cam Spencer",
+        "fields": {
+          "steals": [
+            0,
+            1
+          ],
+          "blocks+steals": [
+            0,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 182,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Jerami Grant",
+        "fields": {
+          "reb": [
+            5,
+            6
+          ],
+          "stl": [
+            1,
+            0
+          ],
+          "blk": [
+            2,
+            3
+          ],
+          "fga": [
+            8,
+            7
+          ],
+          "dreb": [
+            3,
+            4
+          ],
+          "min": [
+            "22:22",
+            "22:23"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JERAMI_GRANT_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Jerami Grant",
+        "fields": {
+          "rebounds": [
+            5,
+            6
+          ],
+          "steals": [
+            1,
+            0
+          ],
+          "blocks": [
+            2,
+            3
+          ],
+          "fieldGoalsAttempted": [
+            8,
+            7
+          ],
+          "defensiveRebounds": [
+            3,
+            4
+          ],
+          "secondsPlayed": [
+            1342,
+            1343
+          ],
+          "twoPointersAttempted": [
+            5,
+            4
+          ],
+          "points+rebounds": [
+            10,
+            11
+          ],
+          "points+rebounds+assists": [
+            13,
+            14
+          ],
+          "rebounds+assists": [
+            8,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017656,
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Scotty Pippen Jr.",
+        "fields": {
+          "reb": [
+            2,
+            1
+          ],
+          "dreb": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SCOTTY_PIPPEN_JR_1_NBA",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "name": "Scotty Pippen Jr.",
+        "fields": {
+          "rebounds": [
+            2,
+            1
+          ],
+          "defensiveRebounds": [
+            2,
+            1
+          ],
+          "points+rebounds": [
+            8,
+            7
+          ],
+          "points+rebounds+assists": [
+            10,
+            9
+          ],
+          "rebounds+assists": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "MEMPHIS_GRIZZLIES_NBA",
+        "fields": {
+          "blocks": [
+            6,
+            7
+          ],
+          "fieldGoalsAttempted": [
+            95,
+            96
+          ],
+          "rebounds": [
+            54,
+            56
+          ],
+          "offensiveRebounds": [
+            18,
+            19
+          ],
+          "steals": [
+            6,
+            5
+          ],
+          "rebounds+assists": [
+            78,
+            80
+          ],
+          "threePointersAttempted": [
+            40,
+            41
+          ],
+          "points+rebounds+assists": [
+            201,
+            203
+          ],
+          "defensiveRebounds": [
+            36,
+            37
+          ],
+          "points+rebounds": [
+            177,
+            179
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "193740e0fabd8cffcb8121e49c6ab006bb2113cf326158e21f6736b20015937a"
+  },
+  {
+    "eventID": "esdpKX8UceAcDAF2okWV",
+    "bdlGameID": 21717963,
+    "officialGameID": "0022600120",
+    "startsAt": "2026-10-26T23:00:00.000Z",
+    "home": "CLEVELAND_CAVALIERS_NBA",
+    "away": "MINNESOTA_TIMBERWOLVES_NBA",
+    "source": "https://www.nba.com/game/0022600120/box-score",
+    "sourceSha256": "ba7965d5419afc26454ca9e02e804e926d3da1d968579ccfc9f2a987f38e59f0",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017721,
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Peyton Watson",
+        "fields": {
+          "min": [
+            "37:19",
+            "37:20"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "PEYTON_WATSON_1_NBA",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Peyton Watson",
+        "fields": {
+          "secondsPlayed": [
+            2239,
+            2240
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "EVAN_MOBLEY_1_NBA",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Evan Mobley",
+        "fields": {
+          "rebounds": [
+            9,
+            10
+          ],
+          "blocks": [
+            1,
+            2
+          ],
+          "freeThrowsAttempted": [
+            7,
+            6
+          ],
+          "defensiveRebounds": [
+            5,
+            6
+          ],
+          "points+rebounds": [
+            27,
+            28
+          ],
+          "points+rebounds+assists": [
+            30,
+            31
+          ],
+          "rebounds+assists": [
+            12,
+            13
+          ],
+          "blocks+steals": [
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DONOVAN_MITCHELL_1_NBA",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Donovan Mitchell",
+        "fields": {
+          "turnovers": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAMES_HARDEN_1_NBA",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "James Harden",
+        "fields": {
+          "rebounds": [
+            4,
+            5
+          ],
+          "turnovers": [
+            2,
+            3
+          ],
+          "defensiveRebounds": [
+            3,
+            4
+          ],
+          "points+rebounds": [
+            23,
+            24
+          ],
+          "points+rebounds+assists": [
+            32,
+            33
+          ],
+          "rebounds+assists": [
+            13,
+            14
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547299,
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Sam Merrill",
+        "fields": {
+          "min": [
+            "30:37",
+            "30:38"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "SAM_MERRILL_1_NBA",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Sam Merrill",
+        "fields": {
+          "steals": [
+            2,
+            1
+          ],
+          "fouls": [
+            4,
+            5
+          ],
+          "secondsPlayed": [
+            1837,
+            1838
+          ],
+          "blocks+steals": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091467074,
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "name": "Meleek Thomas",
+        "fields": {
+          "min": [
+            "19:07",
+            "19:08"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "CLEVELAND_CAVALIERS_NBA",
+        "fields": {
+          "turnovers": [
+            10,
+            12
+          ],
+          "blocks": [
+            8,
+            9
+          ],
+          "fouls": [
+            23,
+            24
+          ],
+          "rebounds": [
+            48,
+            50
+          ],
+          "steals": [
+            11,
+            10
+          ],
+          "freeThrowsAttempted": [
+            24,
+            23
+          ],
+          "rebounds+assists": [
+            78,
+            80
+          ],
+          "points+rebounds+assists": [
+            205,
+            207
+          ],
+          "defensiveRebounds": [
+            35,
+            37
+          ],
+          "points+rebounds": [
+            175,
+            177
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JONATHAN_KUMINGA_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Jonathan Kuminga",
+        "fields": {
+          "rebounds": [
+            9,
+            10
+          ],
+          "freeThrowsAttempted": [
+            3,
+            4
+          ],
+          "offensiveRebounds": [
+            2,
+            3
+          ],
+          "fouls": [
+            1,
+            2
+          ],
+          "points+rebounds": [
+            19,
+            20
+          ],
+          "points+rebounds+assists": [
+            20,
+            21
+          ],
+          "rebounds+assists": [
+            10,
+            11
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JADEN_MCDANIELS_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Jaden McDaniels",
+        "fields": {
+          "plusMinus": [
+            6,
+            5
+          ],
+          "secondsPlayed": [
+            2320,
+            2198
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 176,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Rudy Gobert",
+        "fields": {
+          "min": [
+            "35:37",
+            "35:38"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RUDY_GOBERT_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Rudy Gobert",
+        "fields": {
+          "rebounds": [
+            19,
+            20
+          ],
+          "steals": [
+            0,
+            1
+          ],
+          "fieldGoalsAttempted": [
+            8,
+            9
+          ],
+          "offensiveRebounds": [
+            7,
+            8
+          ],
+          "secondsPlayed": [
+            2137,
+            2138
+          ],
+          "twoPointersAttempted": [
+            6,
+            7
+          ],
+          "points+rebounds": [
+            24,
+            25
+          ],
+          "points+rebounds+assists": [
+            26,
+            27
+          ],
+          "rebounds+assists": [
+            21,
+            22
+          ],
+          "blocks+steals": [
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ANTHONY_EDWARDS_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Anthony Edwards",
+        "fields": {
+          "steals": [
+            1,
+            2
+          ],
+          "turnovers": [
+            5,
+            4
+          ],
+          "fieldGoalsAttempted": [
+            33,
+            34
+          ],
+          "twoPointersAttempted": [
+            18,
+            19
+          ],
+          "blocks+steals": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17895983,
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Ayo Dosunmu",
+        "fields": {
+          "min": [
+            "25:53",
+            "25:54"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "AYO_DOSUNMU_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Ayo Dosunmu",
+        "fields": {
+          "plusMinus": [
+            -3,
+            -2
+          ],
+          "secondsPlayed": [
+            1431,
+            1554
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "BONES_HYLAND_1_NBA",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "name": "Bones Hyland",
+        "fields": {
+          "secondsPlayed": [
+            285,
+            286
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "MINNESOTA_TIMBERWOLVES_NBA",
+        "fields": {
+          "blocks+steals": [
+            12,
+            14
+          ],
+          "turnovers": [
+            18,
+            17
+          ],
+          "fieldGoalsAttempted": [
+            100,
+            102
+          ],
+          "fouls": [
+            21,
+            22
+          ],
+          "twoPointersAttempted": [
+            60,
+            62
+          ],
+          "rebounds": [
+            52,
+            54
+          ],
+          "offensiveRebounds": [
+            15,
+            17
+          ],
+          "steals": [
+            5,
+            7
+          ],
+          "freeThrowsAttempted": [
+            22,
+            23
+          ],
+          "rebounds+assists": [
+            77,
+            79
+          ],
+          "points+rebounds+assists": [
+            202,
+            204
+          ],
+          "points+rebounds": [
+            177,
+            179
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "40b163ff471d6d090c0be5632c42110abafc4b52fcd99fbe82be2cd69832f17b"
+  },
+  {
+    "eventID": "U4p86iACMrQFsKkBauNA",
+    "bdlGameID": 21717965,
+    "officialGameID": "0022600122",
+    "startsAt": "2026-10-26T23:30:00.000Z",
+    "home": "MIAMI_HEAT_NBA",
+    "away": "DALLAS_MAVERICKS_NBA",
+    "source": "https://www.nba.com/game/0022600122/box-score",
+    "sourceSha256": "3d3c794fa58a4aff2d68301e27ea3bdfbbb2aea41b8e0fbf2e32798be2f6620a",
+    "identityCorrections": [
+      {
+        "action": "correct_team",
+        "playerID": "KLAY_THOMPSON_1_NBA",
+        "before": "DALLAS_MAVERICKS_NBA",
+        "after": "MIAMI_HEAT_NBA",
+        "name": "Klay Thompson",
+        "officialPersonID": 202691,
+        "bdlPlayerID": 443
+      }
+    ],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ANDREW_WIGGINS_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Andrew Wiggins",
+        "fields": {
+          "blocks": [
+            1,
+            0
+          ],
+          "turnovers": [
+            2,
+            1
+          ],
+          "blocks+steals": [
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "GIANNIS_ANTETOKOUNMPO_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Giannis Antetokounmpo",
+        "fields": {
+          "rebounds": [
+            16,
+            14
+          ],
+          "defensiveRebounds": [
+            12,
+            10
+          ],
+          "points+rebounds": [
+            45,
+            43
+          ],
+          "points+rebounds+assists": [
+            56,
+            54
+          ],
+          "rebounds+assists": [
+            27,
+            25
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 443,
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Klay Thompson",
+        "fields": {
+          "min": [
+            "15:28",
+            "15:29"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KLAY_THOMPSON_1_NBA",
+        "teamID": "MIAMI_HEAT_NBA",
+        "name": "Klay Thompson",
+        "fields": {
+          "secondsPlayed": [
+            928,
+            929
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "home",
+        "teamID": "MIAMI_HEAT_NBA",
+        "fields": {
+          "blocks+steals": [
+            15,
+            14
+          ],
+          "turnovers": [
+            15,
+            14
+          ],
+          "blocks": [
+            6,
+            5
+          ],
+          "rebounds": [
+            44,
+            42
+          ],
+          "rebounds+assists": [
+            70,
+            68
+          ],
+          "points+rebounds+assists": [
+            179,
+            177
+          ],
+          "defensiveRebounds": [
+            34,
+            32
+          ],
+          "points+rebounds": [
+            153,
+            151
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "C_FLAGG_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Cooper Flagg",
+        "fields": {
+          "blocks": [
+            2,
+            3
+          ],
+          "blocks+steals": [
+            7,
+            8
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "DANIEL_GAFFORD_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Daniel Gafford",
+        "fields": {
+          "rebounds": [
+            8,
+            9
+          ],
+          "blocks": [
+            3,
+            2
+          ],
+          "defensiveRebounds": [
+            5,
+            6
+          ],
+          "points+rebounds": [
+            16,
+            17
+          ],
+          "points+rebounds+assists": [
+            19,
+            20
+          ],
+          "rebounds+assists": [
+            11,
+            12
+          ],
+          "blocks+steals": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KYRIE_IRVING_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Kyrie Irving",
+        "fields": {
+          "threePointersAttempted": [
+            10,
+            11
+          ],
+          "twoPointersAttempted": [
+            7,
+            6
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028028244,
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Zaccharie Risacher",
+        "fields": {
+          "min": [
+            "29:44",
+            "29:45"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "ZACCHARIE_RISACHER_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Zaccharie Risacher",
+        "fields": {
+          "rebounds": [
+            9,
+            8
+          ],
+          "defensiveRebounds": [
+            7,
+            6
+          ],
+          "secondsPlayed": [
+            1784,
+            1785
+          ],
+          "points+rebounds": [
+            15,
+            14
+          ],
+          "points+rebounds+assists": [
+            16,
+            15
+          ],
+          "rebounds+assists": [
+            10,
+            9
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "side": "away",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "fields": {
+          "twoPointersAttempted": [
+            49,
+            48
+          ],
+          "threePointersAttempted": [
+            45,
+            46
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "ca68e41f8965513e2ceb727953c6e201c077653d8f758540aa65c81b3dc69c1b"
+  },
+  {
+    "eventID": "Dk3koXoncNVgfZYn5TH6",
+    "bdlGameID": 21717967,
+    "officialGameID": "0022600124",
+    "startsAt": "2026-10-27T00:00:00.000Z",
+    "home": "OKLAHOMA_CITY_THUNDER_NBA",
+    "away": "PHOENIX_SUNS_NBA",
+    "source": "https://www.nba.com/game/0022600124/box-score",
+    "sourceSha256": "ff1f336db750246d4a055989d986da97e4e096a19a5f6337838c68c045f97b3f",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028037477,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Ajay Mitchell",
+        "fields": {
+          "min": [
+            "25:28",
+            "25:29"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "AJAY_MITCHELL_1_NBA",
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Ajay Mitchell",
+        "fields": {
+          "secondsPlayed": [
+            1528,
+            1529
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 201,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Isaiah Hartenstein",
+        "fields": {
+          "plus_minus": [
+            -2,
+            -1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091353486,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Bennett Stirtz",
+        "fields": {
+          "plus_minus": [
+            2,
+            1
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091351965,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Aday Mara",
+        "fields": {
+          "plus_minus": [
+            14,
+            13
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091904395,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Josh Dix",
+        "fields": {
+          "plus_minus": [
+            -8,
+            -7
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1057268513,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Khaman Maluach",
+        "fields": {
+          "plus_minus": [
+            -3,
+            -2
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17895966,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Jalen Green",
+        "fields": {
+          "plus_minus": [
+            -11,
+            -10
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 57,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Devin Booker",
+        "fields": {
+          "plus_minus": [
+            -12,
+            -11
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017727,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Collin Gillespie",
+        "fields": {
+          "plus_minus": [
+            -15,
+            -16
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 18678058,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Jordan Goodwin",
+        "fields": {
+          "min": [
+            "17:28",
+            "17:29"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JORDAN_GOODWIN_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Jordan Goodwin",
+        "fields": {
+          "secondsPlayed": [
+            1048,
+            1049
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 254,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Luke Kennard",
+        "fields": {
+          "plus_minus": [
+            -5,
+            -6
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028025723,
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Ryan Dunn",
+        "fields": {
+          "plus_minus": [
+            6,
+            5
+          ],
+          "min": [
+            "13:31",
+            "13:32"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "RYAN_DUNN_1_NBA",
+        "teamID": "PHOENIX_SUNS_NBA",
+        "name": "Ryan Dunn",
+        "fields": {
+          "secondsPlayed": [
+            811,
+            812
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "13e57953a6e9c4e4958046c0bdfd010485c0af8742edbb743250e2f0c9eba512"
+  },
+  {
+    "eventID": "K4LhWzNf5pgRJ5gARYEa",
+    "bdlGameID": 21717966,
+    "officialGameID": "0022600123",
+    "startsAt": "2026-10-27T00:00:00.000Z",
+    "home": "MILWAUKEE_BUCKS_NBA",
+    "away": "INDIANA_PACERS_NBA",
+    "source": "https://www.nba.com/game/0022600123/box-score",
+    "sourceSha256": "9eaf19c14ba83b4b5fd5d6100743e5a2c7d537f98083cb4f51e900e86243d58c",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAIME_JAQUEZ_JR_1_NBA",
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Jaime Jaquez Jr.",
+        "fields": {
+          "secondsPlayed": [
+            1478,
+            1479
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 265,
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Kyle Kuzma",
+        "fields": {
+          "min": [
+            "29:28",
+            "29:29"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MYLES_TURNER_1_NBA",
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Myles Turner",
+        "fields": {
+          "secondsPlayed": [
+            1699,
+            1698
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666633,
+        "teamID": "MILWAUKEE_BUCKS_NBA",
+        "name": "Tyler Herro",
+        "fields": {
+          "min": [
+            "32:27",
+            "32:28"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547250,
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Aaron Nesmith",
+        "fields": {
+          "min": [
+            "20:49",
+            "20:50"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "AARON_NESMITH_1_NBA",
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Aaron Nesmith",
+        "fields": {
+          "secondsPlayed": [
+            1249,
+            1250
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 416,
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Pascal Siakam",
+        "fields": {
+          "min": [
+            "36:31",
+            "36:32"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 360,
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Kelly Oubre Jr.",
+        "fields": {
+          "min": [
+            "23:11",
+            "23:12"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KELLY_OUBRE_JR_1_NBA",
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Kelly Oubre Jr.",
+        "fields": {
+          "secondsPlayed": [
+            1391,
+            1392
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547245,
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Tyrese Haliburton",
+        "fields": {
+          "min": [
+            "34:58",
+            "34:59"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "OBI_TOPPIN_1_NBA",
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Obi Toppin",
+        "fields": {
+          "secondsPlayed": [
+            1395,
+            1394
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 44477085,
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Quenton Jackson",
+        "fields": {
+          "min": [
+            "27:00",
+            "27:01"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "QUENTON_JACKSON_1_NBA",
+        "teamID": "INDIANA_PACERS_NBA",
+        "name": "Quenton Jackson",
+        "fields": {
+          "secondsPlayed": [
+            1622,
+            1621
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "41a48c634545fbb1df88abf0ab3154c83a81a46fe9fe4d4a1469e2fca282ed4f"
+  },
+  {
+    "eventID": "UToSAuvJM1apdys0zLQd",
+    "bdlGameID": 21717968,
+    "officialGameID": "0022600125",
+    "startsAt": "2026-10-27T00:30:00.000Z",
+    "home": "HOUSTON_ROCKETS_NBA",
+    "away": "ATLANTA_HAWKS_NBA",
+    "source": "https://www.nba.com/game/0022600125/box-score",
+    "sourceSha256": "35f71a8c98e7210751b5ea7f9b62eb47d570bab736ef1aec7b51fe0cee7162d3",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 458,
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Fred VanVleet",
+        "fields": {
+          "reb": [
+            4,
+            3
+          ],
+          "oreb": [
+            1,
+            0
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "FRED_VANVLEET_1_NBA",
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Fred VanVleet",
+        "fields": {
+          "rebounds": [
+            4,
+            3
+          ],
+          "offensiveRebounds": [
+            1,
+            0
+          ],
+          "points+rebounds": [
+            9,
+            8
+          ],
+          "points+rebounds+assists": [
+            14,
+            13
+          ],
+          "rebounds+assists": [
+            9,
+            8
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017695,
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Tari Eason",
+        "fields": {
+          "reb": [
+            8,
+            9
+          ],
+          "oreb": [
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TARI_EASON_1_NBA",
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Tari Eason",
+        "fields": {
+          "rebounds": [
+            8,
+            9
+          ],
+          "offensiveRebounds": [
+            1,
+            2
+          ],
+          "points+rebounds": [
+            21,
+            22
+          ],
+          "points+rebounds+assists": [
+            23,
+            24
+          ],
+          "rebounds+assists": [
+            10,
+            11
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028028519,
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Reed Sheppard",
+        "fields": {
+          "min": [
+            "24:16",
+            "24:17"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "REED_SHEPPARD_1_NBA",
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Reed Sheppard",
+        "fields": {
+          "secondsPlayed": [
+            1456,
+            1457
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 3547301,
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Jae'Sean Tate",
+        "fields": {
+          "min": [
+            "1:26",
+            "1:27"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JAESEAN_TATE_1_NBA",
+        "teamID": "HOUSTON_ROCKETS_NBA",
+        "name": "Jae'Sean Tate",
+        "fields": {
+          "secondsPlayed": [
+            86,
+            87
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JALEN_JOHNSON_1_NBA",
+        "teamID": "ATLANTA_HAWKS_NBA",
+        "name": "Jalen Johnson",
+        "fields": {
+          "assists": [
+            4,
+            3
+          ],
+          "steals": [
+            2,
+            1
+          ],
+          "points+assists": [
+            25,
+            24
+          ],
+          "points+rebounds+assists": [
+            34,
+            33
+          ],
+          "rebounds+assists": [
+            13,
+            12
+          ],
+          "blocks+steals": [
+            4,
+            3
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CJ_MCCOLLUM_1_NBA",
+        "teamID": "ATLANTA_HAWKS_NBA",
+        "name": "CJ McCollum",
+        "fields": {
+          "steals": [
+            3,
+            4
+          ],
+          "blocks+steals": [
+            3,
+            4
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KINGSTON_FLEMINGS_1_NBA",
+        "teamID": "ATLANTA_HAWKS_NBA",
+        "name": "Kingston Flemings",
+        "fields": {
+          "assists": [
+            3,
+            4
+          ],
+          "points+assists": [
+            9,
+            10
+          ],
+          "points+rebounds+assists": [
+            10,
+            11
+          ],
+          "rebounds+assists": [
+            4,
+            5
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "adef5a9852c678ff9c64888d8766b95abce0bd23537c6a26100a257c9778fe7d"
+  },
+  {
+    "eventID": "0EnJsxeRoj5sV5LsdUsH",
+    "bdlGameID": 21717980,
+    "officialGameID": "0022600137",
+    "startsAt": "2026-10-29T00:00:00.000Z",
+    "home": "CHICAGO_BULLS_NBA",
+    "away": "NEW_YORK_KNICKS_NBA",
+    "source": "https://www.nba.com/game/0022600137/box-score",
+    "sourceSha256": "f1e643fc547cb2daa7e3d5c31fb7de2ad728b6c2fc8f42c0f2bfd1b62a9b10bf",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 18,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "OG Anunoby",
+        "fields": {
+          "min": [
+            "30:46",
+            "30:47"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "OG_ANUNOBY_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "OG Anunoby",
+        "fields": {
+          "secondsPlayed": [
+            1846,
+            1847
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 447,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Karl-Anthony Towns",
+        "fields": {
+          "min": [
+            "28:26",
+            "28:27"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KARLANTHONY_TOWNS_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Karl-Anthony Towns",
+        "fields": {
+          "secondsPlayed": [
+            1706,
+            1707
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 61,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Mikal Bridges",
+        "fields": {
+          "min": [
+            "13:01",
+            "13:02"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MIKAL_BRIDGES_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Mikal Bridges",
+        "fields": {
+          "secondsPlayed": [
+            781,
+            782
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 73,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Jalen Brunson",
+        "fields": {
+          "min": [
+            "35:19",
+            "35:20"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JALEN_BRUNSON_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Jalen Brunson",
+        "fields": {
+          "secondsPlayed": [
+            2119,
+            2120
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 414,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Landry Shamet",
+        "fields": {
+          "min": [
+            "32:21",
+            "32:22"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "LANDRY_SHAMET_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Landry Shamet",
+        "fields": {
+          "secondsPlayed": [
+            1941,
+            1942
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 17896033,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Miles McBride",
+        "fields": {
+          "min": [
+            "14:02",
+            "14:03"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MILES_MCBRIDE_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Miles McBride",
+        "fields": {
+          "secondsPlayed": [
+            842,
+            843
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1028036898,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Tyler Kolek",
+        "fields": {
+          "min": [
+            "18:22",
+            "18:23"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "TYLER_KOLEK_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Tyler Kolek",
+        "fields": {
+          "secondsPlayed": [
+            1102,
+            1103
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 100,
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Jordan Clarkson",
+        "fields": {
+          "min": [
+            "16:45",
+            "16:46"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JORDAN_CLARKSON_1_NBA",
+        "teamID": "NEW_YORK_KNICKS_NBA",
+        "name": "Jordan Clarkson",
+        "fields": {
+          "secondsPlayed": [
+            1005,
+            1006
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "31b62ef049f7005490b10248d1fb9394950ec020cbfd07b8957f26ec5c7628f2"
+  },
+  {
+    "eventID": "NaF7pEWPWlzf9fKdgfF5",
+    "bdlGameID": 21717985,
+    "officialGameID": "0022600142",
+    "startsAt": "2026-10-29T01:30:00.000Z",
+    "home": "DALLAS_MAVERICKS_NBA",
+    "away": "OKLAHOMA_CITY_THUNDER_NBA",
+    "source": "https://www.nba.com/game/0022600142/box-score",
+    "sourceSha256": "d4853becb8f7c0caabffd3eb11af8e38e3bc3fd296d942a29b0b22cd88b8fc24",
+    "identityCorrections": [],
+    "corrections": [
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666950,
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "P.J. Washington",
+        "fields": {
+          "min": [
+            "26:33",
+            "26:34"
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 38017697,
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Max Christie",
+        "fields": {
+          "min": [
+            "21:47",
+            "21:48"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "MAX_CHRISTIE_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Max Christie",
+        "fields": {
+          "secondsPlayed": [
+            1307,
+            1308
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 56677792,
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Marcus Sasser",
+        "fields": {
+          "plus_minus": [
+            13,
+            11
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 666747,
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Caleb Martin",
+        "fields": {
+          "plus_minus": [
+            6,
+            8
+          ],
+          "min": [
+            "13:48",
+            "13:49"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "CALEB_MARTIN_1_NBA",
+        "teamID": "DALLAS_MAVERICKS_NBA",
+        "name": "Caleb Martin",
+        "fields": {
+          "secondsPlayed": [
+            828,
+            829
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 480,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Kenrich Williams",
+        "fields": {
+          "min": [
+            "16:37",
+            "16:38"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "KENRICH_WILLIAMS_1_NBA",
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Kenrich Williams",
+        "fields": {
+          "secondsPlayed": [
+            997,
+            998
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091904395,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Josh Dix",
+        "fields": {
+          "min": [
+            "24:02",
+            "24:03"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "JOSH_DIX_1_NBA",
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Josh Dix",
+        "fields": {
+          "secondsPlayed": [
+            1442,
+            1443
+          ]
+        }
+      },
+      {
+        "provider": "BALLDONTLIE",
+        "playerID": 1091353486,
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Bennett Stirtz",
+        "fields": {
+          "min": [
+            "28:21",
+            "28:22"
+          ]
+        }
+      },
+      {
+        "provider": "SportsGameOdds",
+        "playerID": "BENNETT_STIRTZ_1_NBA",
+        "teamID": "OKLAHOMA_CITY_THUNDER_NBA",
+        "name": "Bennett Stirtz",
+        "fields": {
+          "secondsPlayed": [
+            1701,
+            1702
+          ]
+        }
+      }
+    ],
+    "sourceFingerprint": "281fa2b645dd7c7052534dbb74beb846a4c4aa2135612f959e47ecbd78762865"
+  },
+  {
+    "eventID": "9PQa56YfM8RaMtAsnTF5",
+    "bdlGameID": 21718013,
+    "officialGameID": "0022600159",
+    "startsAt": "2026-11-03T00:30:00.000Z",
+    "home": "CHARLOTTE_HORNETS_NBA",
+    "away": "DETROIT_PISTONS_NBA",
+    "source": "https://www.nba.com/game/0022600159/box-score",
+    "sourceSha256": "62eff7dfd684c904862c9d87ad2a7faecad3b8abae35f63d7faa2596145fcea6",
+    "identityCorrections": [
+      {
+        "action": "exclude_misattributed_native_identity",
+        "playerID": "MASON_JONES_1_NBA",
+        "teamID": "DETROIT_PISTONS_NBA",
+        "name": "Isaac Jones",
+        "officialPersonID": 1642403,
+        "bdlPlayerID": 1028205331,
+        "originalPlayer": {
+          "playerID": "MASON_JONES_1_NBA",
+          "name": "Mason Jones",
+          "firstName": "Mason",
+          "lastName": "Jones",
+          "teamID": "DETROIT_PISTONS_NBA"
+        },
+        "originalStats": {
+          "points": 2,
+          "minutesPlayed": 6,
+          "secondsPlayed": 360,
+          "fieldGoalsMade": 1,
+          "fieldGoalsAttempted": 1,
+          "fieldGoalPercent": 100,
+          "freeThrowsMade": 0,
+          "freeThrowsAttempted": 0,
+          "freeThrowPercent": 0,
+          "threePointersMade": 0,
+          "threePointersAttempted": 0,
+          "threePointerPercent": 0,
+          "offensiveRebounds": 2,
+          "defensiveRebounds": 3,
+          "rebounds": 5,
+          "assists": 0,
+          "fouls": 0,
+          "steals": 0,
+          "turnovers": 1,
+          "blocks": 2,
+          "plusMinus": 3,
+          "twoPointersAttempted": 0,
+          "twoPointersMade": 0,
+          "points+rebounds+assists": 7,
+          "points+rebounds": 7,
+          "points+assists": 2,
+          "rebounds+assists": 5,
+          "blocks+steals": 2,
+          "doubleDouble": 0,
+          "tripleDouble": 0
+        }
+      }
+    ],
+    "corrections": [],
+    "sourceFingerprint": "c07181b7ed7c5568d49faca9bde8918cea4702e02c7fa9a27c8b1d9c62baed12"
+  }
+]

@@ -51,19 +51,102 @@ def _tracked_recovery_files(root: Path) -> Iterable[Path]:
                 yield path
 
 
-def _function_dirs(root: Path) -> list[Path]:
-    base = root / "supabase" / "functions"
-    if not base.exists():
-        return []
-    return sorted(p for p in base.iterdir() if p.is_dir() and not p.name.startswith("_"))
+def _function_slugs(root: Path) -> set[str]:
+    canonical = root / "supabase" / "functions"
+    snapshots = root / "supabase" / "deployed-snapshots"
+    slugs = {
+        path.name for path in canonical.iterdir()
+        if path.is_dir() and not path.name.startswith("_")
+    } if canonical.is_dir() else set()
+    if snapshots.is_dir():
+        slugs.update(path.name for path in snapshots.iterdir() if path.is_dir())
+    return slugs
+
+
+def _valid_function_slug(value) -> bool:
+    return (
+        isinstance(value, str) and bool(value.strip()) and value == value.strip()
+        and value not in (".", "..") and Path(value).name == value and "\\" not in value
+    )
+
+
+def _snapshot_source_roots(slug: str, observation: dict, location: str, errors: list[str]) -> tuple[Path, ...]:
+    version = observation.get("version")
+    if not isinstance(version, int) or isinstance(version, bool) or version < 1:
+        errors.append(f"{location}: version must be a positive integer")
+        return ()
+    return (Path("supabase/deployed-snapshots") / slug / f"v{version}",)
+
+
+def _validate_source_file(
+    root: Path, entry: dict, location: str, errors: list[str], *, require_hash: bool = True,
+    source_roots: tuple[Path, ...] | None = None,
+) -> None:
+    path_value = entry.get("path")
+    if not isinstance(path_value, str) or not path_value.strip():
+        errors.append(f"{location}: path must be a nonempty relative string")
+        return
+    relative = Path(path_value)
+    if relative.is_absolute() or ".." in relative.parts:
+        errors.append(f"{location}: path must be contained and relative: {path_value}")
+        return
+    try:
+        path = (root / relative).resolve()
+    except (OSError, RuntimeError):
+        errors.append(f"{location}: cannot resolve path {path_value}")
+        return
+    if not path.is_relative_to(root):
+        errors.append(f"{location}: path escapes repository: {path_value}")
+        return
+    if source_roots is not None and not any(
+        relative.is_relative_to(base) and path.is_relative_to(root / base)
+        for base in source_roots
+    ):
+        errors.append(f"{location}: path does not match function source identity: {path_value}")
+        return
+    if not path.is_file():
+        errors.append(f"{location}: missing file or not a file: {path_value}")
+        return
+    expected_hash = entry.get("sha256")
+    if expected_hash is None and not require_hash:
+        return
+    if not isinstance(expected_hash, str) or re.fullmatch(r"[a-f0-9]{64}", expected_hash) is None:
+        errors.append(f"{location}: sha256 must be 64 lowercase hexadecimal characters: {path_value}")
+        return
+    try:
+        actual_hash = _sha256(path)
+    except OSError:
+        errors.append(f"{location}: cannot read file {path_value}")
+        return
+    if actual_hash != expected_hash:
+        errors.append(f"{location}: sha256 mismatch {path_value}")
+
+
+def _validate_source_files(
+    root: Path, files, location: str, errors: list[str], source_roots: tuple[Path, ...],
+) -> None:
+    if not isinstance(files, list) or not files:
+        errors.append(f"{location}: files must be a nonempty list")
+        return
+    for index, entry in enumerate(files):
+        if not isinstance(entry, dict):
+            errors.append(f"{location}: files[{index}] must be an object")
+            continue
+        _validate_source_file(
+            root, entry, f"{location}.files[{index}]", errors, source_roots=source_roots,
+        )
 
 
 def check_secrets(root: Path) -> list[str]:
+    root = root.resolve()
     errors: list[str] = []
     for path in _tracked_recovery_files(root):
         try:
+            if not path.resolve().is_relative_to(root):
+                errors.append(f"source file escapes repository: {path.relative_to(root)}")
+                continue
             text = path.read_text(errors="ignore")
-        except OSError as exc:
+        except (OSError, RuntimeError) as exc:
             errors.append(f"cannot read {path}: {exc}")
             continue
         for pattern in SECRET_PATTERNS:
@@ -74,6 +157,7 @@ def check_secrets(root: Path) -> list[str]:
 
 
 def validate_repository(root: Path) -> list[str]:
+    root = root.resolve()
     errors: list[str] = []
     supabase = root / "supabase"
     manifests_dir = supabase / "manifests"
@@ -106,11 +190,25 @@ def validate_repository(root: Path) -> list[str]:
 
     edge_manifest = manifests.get("edge-functions.json", {})
     edge_items = edge_manifest.get("items", [])
-    function_dirs = _function_dirs(root)
-    if isinstance(edge_items, list) and len(edge_items) != len(function_dirs):
-        errors.append(
-            f"edge function manifest count {len(edge_items)} != directories {len(function_dirs)}"
-        )
+    if isinstance(edge_items, list):
+        slugs: set[str] = set()
+        for item in edge_items:
+            if not isinstance(item, dict):
+                continue  # The manifest-entry shape error is reported below.
+            slug = item.get("slug")
+            if not _valid_function_slug(slug):
+                errors.append("edge-functions.json: slug must be a nonempty string")
+                continue
+            if slug in slugs:
+                errors.append(f"edge-functions.json: duplicate function slug: {slug}")
+            slugs.add(slug)
+        directory_slugs = _function_slugs(root)
+        missing = sorted(directory_slugs - slugs)
+        unexpected = sorted(slugs - directory_slugs)
+        if missing:
+            errors.append("edge-functions.json: missing function identities: " + ", ".join(missing))
+        if unexpected:
+            errors.append("edge-functions.json: function identities without source directories: " + ", ".join(unexpected))
 
     for manifest_name in ("migrations.json", "edge-functions.json"):
         items = manifests.get(manifest_name, {}).get("items", [])
@@ -121,13 +219,34 @@ def validate_repository(root: Path) -> list[str]:
                 errors.append(f"{manifest_name}: item must be an object")
                 continue
             path_value = item.get("path")
-            expected_hash = item.get("sha256")
             if path_value:
-                path = root / str(path_value)
-                if not path.exists():
-                    errors.append(f"{manifest_name}: missing path {path_value}")
-                elif expected_hash and _sha256(path) != expected_hash:
-                    errors.append(f"{manifest_name}: sha256 mismatch {path_value}")
+                _validate_source_file(root, item, manifest_name, errors, require_hash=False)
+            if manifest_name == "edge-functions.json":
+                slug = item.get("slug")
+                if not _valid_function_slug(slug):
+                    continue  # The identity error is already reported above.
+                location = f"edge-functions.json:{slug}"
+                canonical = Path("supabase/functions") / slug
+                if item.get("status") == "LOCAL_SOURCE":
+                    source_roots = (canonical,)
+                elif item.get("status") == "ACTIVE":
+                    source_roots = _snapshot_source_roots(slug, item, location, errors)
+                    recovery = item.get("sourceRecovery")
+                    if isinstance(recovery, dict) and recovery.get("localSourceParityVerified") is True:
+                        source_roots += (canonical,)
+                else:
+                    errors.append(f"{location}: status must be ACTIVE or LOCAL_SOURCE")
+                    source_roots = ()
+                _validate_source_files(root, item.get("files"), location, errors, source_roots)
+                if "deploymentObservation" in item:
+                    observation = item["deploymentObservation"]
+                    if not isinstance(observation, dict):
+                        errors.append(f"{location}: deploymentObservation must be an object")
+                    else:
+                        _validate_source_files(
+                            root, observation.get("files"), f"{location}.deploymentObservation", errors,
+                            _snapshot_source_roots(slug, observation, f"{location}.deploymentObservation", errors),
+                        )
 
     errors.extend(check_secrets(root))
     return errors

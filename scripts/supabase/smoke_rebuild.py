@@ -170,8 +170,9 @@ def check_functions(errors: list[str]) -> bool:
     manifest = json.loads(
         (ROOT / "supabase" / "manifests" / "edge-functions.json").read_text()
     )
-    if len(manifest.get("items", [])) != 49:
-        errors.append("edge function manifest does not contain 49 functions")
+    items = manifest.get("items")
+    if not isinstance(items, list) or not items:
+        errors.append("edge function manifest must contain a nonempty items list")
         return False
     return True
 
