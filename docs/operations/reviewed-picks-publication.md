@@ -93,6 +93,21 @@ control so a slow automated-model request cannot prevent review refreshes.
 
 The NFL menu shortcut is `/nfl.html#reviewed-picks`.
 
+## Reviewed games on the Games page
+
+`/research.html?kind=games&sport=NBA#reviewed-games` displays the selected sport's
+published moneyline, spread, and total reviews above the game-market research.
+The section reads the same journal feed as the combined reviewed-picks board;
+do not create a second journal record just to display a pick on Games. Supported
+first-half and other period reviews retain their exact period labels. Player
+props do not appear in this section or contribute to its upcoming BUY count.
+
+Changing sports disposes the previous review request and clears its cards before
+loading the selected sport. Alt Lines and unsupported provider leagues hide the
+review section. Its own refresh control remains available while market quotes
+are loading. The NBA combined board and NFL review-history page keep their
+existing scope and date windows.
+
 ## Verification
 
 Run the reviewed-pick API/view tests, existing NBA display tests, and normal CI.
