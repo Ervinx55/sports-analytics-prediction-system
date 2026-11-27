@@ -1,4 +1,5 @@
 import nbaLiveHandler from '../handlers/nba-live-decisions.js';
+import reviewedPicksHandler from '../handlers/reviewed-picks.js';
 import winnerHandler from '../handlers/winner-forecasts.js';
 import cfbHandler from '../handlers/cfb-forecasts.js';
 import {currentDecisionCard,sportPropCard} from '../current-card.js';
@@ -96,6 +97,7 @@ function settled(result) {
 }
 
 export default async function handler(req, res) {
+  if(req.query?.reviewedPicks==='1')return reviewedPicksHandler(req,res);
   if(req.query?.winnerCapture==='1')return winnerHandler(req,res);
   if(req.query?.cfb==='1')return cfbHandler(req,res);
   if(req.query?.nbaLive==='1')return nbaLiveHandler(req,res);
