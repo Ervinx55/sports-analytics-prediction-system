@@ -2,7 +2,8 @@
 
 The NBA homepage has two distinct sources. **Today's reviewed picks** reads the
 manual recommendation journal. **Automated model decisions** reads the existing
-approval-backed NBA service. A manual recommendation never creates a model
+approval-backed NBA service. The NFL page also displays **NFL reviewed picks**
+above its automated model research. A manual recommendation never creates a model
 approval, model probability, current quote, or wager record.
 
 ## Publish the existing review
@@ -64,6 +65,33 @@ The endpoint fails unavailable on incomplete or malformed upstream reads. It doe
 not weaken the automated NBA approval or price-freshness checks. The header's
 refresh control refreshes both sources; publishing a journal record does not
 require a frontend deployment after this reader is installed.
+
+## Reported NFL history with missing original details
+
+When the user requests an earlier selection be retained but its original book,
+price, or issue time cannot be recovered, record the known identity and line as
+`REPORTED_SELECTION`. Keep unknown values null. Use the actual capture time;
+never substitute the capture time for the original review time. Add
+`historyOnly: true` and the user's reported original decision in
+`publication.reportedDecision`. This narrowly scoped NFL history format is
+displayed as a reported prior selection and never counts as an upcoming BUY.
+An ordinary BUY still requires the complete original review fields.
+
+A known later price-related update can be attached as
+`publication.reviewUpdate: { decision, issuedAt, note }`. Its decision must be
+AVOID, WATCH, PASS, or REVERSED, its timestamp cannot be after capture, and its note
+must explain the changed terms. The update does not rewrite the original line or
+claim that the original recommendation was rejected at every price. Keep raw
+conversation evidence private; only the explicitly published update is returned.
+
+NFL reviews use a bounded Chicago calendar window: six previous dates, today,
+and six upcoming dates. Cards include the game date and remain visible after
+kickoff while their game date is inside this window. No result or settlement is
+inferred from a scheduled start. NBA keeps its current-day window. Both windows
+age on the client even when a refresh fails. The NFL section has its own refresh
+control so a slow automated-model request cannot prevent review refreshes.
+
+The NFL menu shortcut is `/nfl.html#reviewed-picks`.
 
 ## Verification
 
