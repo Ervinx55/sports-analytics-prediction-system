@@ -2,12 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {mountReviewedPicks} from '../../sharp-service/reviewed-picks.js';
+import * as reviewedPicks from '../../sharp-service/reviewed-picks.js';
 
 const now=Date.parse('2026-11-27T18:00:00Z'),stamp=new Date(now).toISOString();
 const pick=(patch={})=>({id:'review-1',sport:'NBA',eventId:'fixture-event',startsAt:new Date(now+3600000).toISOString(),playerId:'DERRICK_WHITE_1_NBA',playerName:'Derrick White',marketType:'rebounds',marketScope:'FULL_GAME',side:'OVER',line:3.5,book:'draftkings',odds:123,decision:'BUY',issuedAt:new Date(now-600000).toISOString(),recordedAt:new Date(now-60000).toISOString(),sourceLabel:'Manual review',matchup:'ATL vs BOS',priceLimit:100,reviewNote:'Original reviewed selection.',...patch});
 const feed=(picks=[pick()],patch={})=>({contract:'edge-reviewed-picks-v1',generatedAt:stamp,date:'2026-11-27',dateWindow:{fromDate:'2026-11-27',toDate:'2026-11-27'},timezone:'America/Chicago',sport:'NBA',picks,...patch});
 const reported=(patch={})=>pick({sport:'NFL',playerId:'BO_NIX_1_NFL',playerName:'Bo Nix',marketType:'passing_yards',side:'UNDER',line:214.5,startsAt:'2026-11-26T19:00:00Z',book:null,odds:null,issuedAt:null,decision:'REPORTED_SELECTION',historyOnly:true,reportedDecision:'BUY',sourceLabel:'Reported selection',priceLimit:null,matchup:'Denver at Las Vegas',reviewNote:'Original selection reported; exact original price and time were not recovered.',reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-120000).toISOString(),note:'Later review avoided the lower 199.5–202.5 passing-yard lines. This does not establish a withdrawal of the original 214.5 line.'},...patch});
 const nflFeed=(picks=[reported()],patch={})=>feed(picks,{sport:'NFL',dateWindow:{fromDate:'2026-11-21',toDate:'2026-12-03'},...patch});
+const gamePick=(patch={})=>pick({id:'game-1',playerId:null,playerName:null,marketType:'spread',marketScope:'FULL_GAME',side:'AWAY',line:-9.5,book:'betmgm',odds:-110,priceLimit:-110,matchup:'Denver Nuggets at Utah Jazz',...patch});
 const descendants=node=>node.children.flatMap(child=>[child,...descendants(child)]);
 class Element{
  constructor(tag,document){this.tag=tag;this.ownerDocument=document;this.children=[];this.attributes={};this.dataset={};this.listeners={};this.open=false;this.hidden=false;this._text='';}
@@ -27,11 +29,11 @@ class Element{
  querySelectorAll(selector){const selectors=selector.split(',').map(value=>value.trim());return descendants(this).filter(node=>selectors.some(value=>value[0]==='['?node.hasAttribute(value.slice(1,-1)):value[0]==='.'?node.className?.split(' ').includes(value.slice(1)):node.tag===value));}
  querySelector(selector){return this.querySelectorAll(selector)[0]??null;}
 }
-async function widget(initial,{clock=now,sport='NBA'}={}){
+async function widget(initial,{clock=now,sport='NBA',kind='all'}={}){
  let time=clock,response={body:initial,ok:true},calls=0;const timers=[],requests=[];
  const document={activeElement:null},mount=new Element('section',document),refreshButton=new Element('button',document);
  mount.id='reviewed-picks';mount.setAttribute('data-reviewed-sport',sport);refreshButton.id='refresh';document.createElement=tag=>new Element(tag,document);document.getElementById=id=>id==='refresh'?refreshButton:null;
- const controller=mountReviewedPicks({mount,document,now:()=>time,fetchImpl:async(url,options)=>{calls++;requests.push({url,options});if(response.error)throw Error('Synthetic refresh error');return {ok:response.ok,json:async()=>response.body};},setIntervalImpl:(fn,ms)=>{timers.push({fn,ms});return timers.length;},clearIntervalImpl:()=>{},setTimeoutImpl:()=>0,clearTimeoutImpl:()=>{}});
+ const controller=mountReviewedPicks({mount,document,kind,now:()=>time,fetchImpl:async(url,options)=>{calls++;requests.push({url,options});if(response.error)throw Error('Synthetic refresh error');return {ok:response.ok,json:async()=>response.body};},setIntervalImpl:(fn,ms)=>{timers.push({fn,ms});return timers.length;},clearIntervalImpl:()=>{},setTimeoutImpl:()=>0,clearTimeoutImpl:()=>{}});
  await new Promise(resolve=>setImmediate(resolve));
  return {mount,document,requests,timers,refreshButton,
   get rows(){return mount.querySelectorAll('[data-reviewed-pick]');},get text(){return mount.textContent;},get count(){return mount.querySelector('.reviewed-active-count').textContent;},get calls(){return calls;},
@@ -61,8 +63,81 @@ test('manual cards do not manufacture model probabilities or automatic approval'
 
 test('published team reviews use the matchup subject without inventing a player',async()=>{
  const view=await widget(feed([pick({playerId:null,playerName:null,marketType:'moneyline',side:'HOME',line:null})]));
- assert.equal(view.rows.length,1);assert.match(view.rows[0].querySelector('summary').textContent,/ATL vs BOS/);assert.match(view.text,/Home moneyline/);
+ assert.equal(view.rows.length,1);assert.match(view.rows[0].querySelector('summary').textContent,/ATL vs BOS/);assert.match(view.text,/Home moneyline · Full game/);
  assert.doesNotMatch(view.text,/Name unavailable/);assert.equal(view.mount.querySelectorAll('.target-player-portrait').length,0);
+});
+
+test('Games reviews include team moneyline, spread and total across periods but count only upcoming game BUYs',async()=>{
+ const rows=[pick(),gamePick({id:'full-spread'}),gamePick({id:'half-spread',marketScope:'FIRST_HALF',line:-4.5}),gamePick({id:'moneyline',marketType:'moneyline',side:'HOME',line:null}),gamePick({id:'total',marketType:'total',side:'UNDER',line:232.5,decision:'WATCH'}),gamePick({id:'started',startsAt:new Date(now-1000).toISOString()})];
+ const source=feed(rows),before=JSON.stringify(source),view=await widget(source,{kind:'games'});
+ assert.equal(view.rows.length,5);assert.match(view.count,/3 upcoming BUYs/);
+ assert.deepEqual(new Set(view.rows.map(row=>row.getAttribute('data-reviewed-pick'))),new Set(['full-spread','half-spread','moneyline','total','started']));
+ assert.match(view.text,/NBA reviewed games/);assert.doesNotMatch(view.text,/Derrick White/);
+ assert.match(view.text,/Denver Nuggets -9\.5 · Full game/);assert.match(view.text,/Denver Nuggets -4\.5 · First half/);
+ assert.match(view.text,/Utah Jazz moneyline · Full game/);assert.match(view.text,/Under 232\.5 total · Full game/);
+ assert.equal(view.mount.querySelectorAll('.target-player-portrait').length,0);assert.equal(JSON.stringify(source),before);
+ await view.manualRefresh(source);assert.equal(view.rows.length,5,'refresh cannot duplicate the same journal pick');
+ assert.match(view.count,/3 upcoming BUYs/);view.tick(now+3600000);
+ await view.refresh(feed(rows,{generatedAt:new Date(now+3600000).toISOString()}));assert.match(view.count,/0 upcoming BUYs/);
+});
+
+test('game labels preserve positive spreads and use a neutral side fallback for an ambiguous matchup',async()=>{
+ const view=await widget(feed([gamePick({id:'home',matchup:'Los Angeles Lakers @ San Antonio Spurs',side:'HOME',line:6.5,marketScope:'FIRST_HALF'}),gamePick({id:'unknown',matchup:'A game without ordered team names',line:-3.5})]),{kind:'games'});
+ assert.match(view.text,/San Antonio Spurs \+6\.5 · First half/);
+ assert.match(view.text,/Away -3\.5 · Full game/);assert.doesNotMatch(view.text,/Name unavailable/);
+});
+
+test('combined NBA reviewed picks still contain both props and team selections',async()=>{
+ const view=await widget(feed([pick(),gamePick()]));
+ assert.equal(view.rows.length,2);assert.match(view.count,/2 upcoming BUYs/);
+ assert.match(view.text,/Derrick White/);assert.match(view.text,/Denver Nuggets -9\.5 · Full game/);
+ assert.match(view.text,/Today’s reviewed picks/);
+});
+
+test('Games reviews have an independent refresh while quote loading disables the main refresh',async()=>{
+ const source=feed([gamePick()]),view=await widget(source,{kind:'games'}),button=view.mount.querySelector('[data-reviewed-refresh]');
+ assert.ok(button);assert.match(button.getAttribute('aria-label'),/Refresh NBA reviewed games/);
+ view.refreshButton.disabled=true;await view.reviewRefresh(source);assert.equal(view.calls,2);assert.equal(view.rows.length,1);
+});
+
+test('Games controller mounts once per sport and hides unsupported leagues or props without stale rows',()=>{
+ const document={activeElement:null},mount=new Element('section',document),calls=[],destroyed=[];
+ const controller=reviewedPicks.mountReviewedGames({document,mount,mountPicks:options=>{
+  assert.equal(mount.children.length,0);assert.equal(mount.textContent,'','previous sport is cleared before the new request');
+  calls.push(options);mount.append(Object.assign(new Element('article',document),{textContent:options.sport}));
+  return {destroy(){destroyed.push(options.sport);}};
+ }});
+ controller.update({sport:'NBA',kind:'games'});controller.update({sport:'NBA',kind:'games',status:'ready'});
+ assert.equal(calls.length,1);assert.equal(calls[0].kind,'games');assert.equal(mount.hidden,false);
+ controller.update({sport:'NFL',kind:'games'});assert.equal(calls.length,2);assert.deepEqual(destroyed,['NBA']);assert.equal(mount.textContent,'NFL');
+ controller.update({sport:'EPL',kind:'games'});assert.equal(mount.hidden,true);assert.equal(mount.children.length,0);assert.deepEqual(destroyed,['NBA','NFL']);
+ controller.update({sport:'NBA',kind:'props'});assert.equal(calls.length,2);assert.equal(mount.hidden,true);
+ controller.update({sport:'NBA',kind:'games'});assert.equal(calls.length,3);controller.destroy();assert.equal(mount.hidden,true);assert.equal(mount.children.length,0);
+});
+
+test('late reviewed responses cannot restore a previous sport after switching Games context',async()=>{
+ const document={activeElement:null},mount=new Element('section',document),refreshButton=new Element('button',document),requests=[],cleared=[];
+ document.createElement=tag=>new Element(tag,document);document.getElementById=id=>id==='refresh'?refreshButton:null;
+ const controller=reviewedPicks.mountReviewedGames({document,mount,now:()=>now,fetchImpl:(url,options)=>new Promise(resolve=>requests.push({url,options,resolve})),setIntervalImpl:(_fn,ms)=>ms,clearIntervalImpl:id=>cleared.push(id),setTimeoutImpl:()=>0,clearTimeoutImpl:()=>{}});
+ const respond=async(request,body)=>{request.resolve({ok:true,json:async()=>body});await new Promise(resolve=>setImmediate(resolve));};
+ controller.update({sport:'NBA',kind:'games'});await respond(requests[0],feed([gamePick()]));assert.match(mount.textContent,/Denver Nuggets/);
+ controller.update({sport:'NFL',kind:'games'});assert.doesNotMatch(mount.textContent,/Denver Nuggets/);assert.equal(mount.querySelectorAll('[data-reviewed-pick]').length,0);
+ assert.equal(requests[0].options.signal.aborted,true);assert.ok(cleared.includes(60000)&&cleared.includes(1000));
+ assert.equal(requests[1].url,'/api/dashboard?reviewedPicks=1&sport=NFL');
+ controller.update({sport:'NHL',kind:'games'});assert.equal(requests[1].options.signal.aborted,true);
+ await respond(requests[1],nflFeed([gamePick({sport:'NFL',matchup:'Old NFL away at Old NFL home'})]));assert.doesNotMatch(mount.textContent,/Old NFL/);
+ await respond(requests[2],feed([gamePick({sport:'NHL',matchup:'NHL away at NHL home'})],{sport:'NHL'}));assert.match(mount.textContent,/NHL away/);assert.equal(mount.querySelectorAll('[data-reviewed-pick]').length,1);
+ controller.update({sport:'EPL',kind:'games'});assert.equal(mount.hidden,true);assert.equal(mount.children.length,0);
+ assert.equal(refreshButton.listeners.click.length,0,'disposed boards remove their header refresh listener');
+});
+
+test('Games page places an explicitly controlled reviews mount before research without automatic mounting',()=>{
+ const html=readFileSync(new URL('../../sharp-service/research.html',import.meta.url),'utf8'),js=readFileSync(new URL('../../sharp-service/research.js',import.meta.url),'utf8');
+ assert.match(html,/<section id="reviewed-games"[^>]*hidden/);
+ assert.ok(html.indexOf('id="reviewed-games"')<html.indexOf('id="research-board"'));
+ assert.doesNotMatch(html,/data-reviewed-picks-mount/,'the shared module must not auto-mount with an incorrect sport');
+ assert.match(js,/import\s*\{mountReviewedGames\}\s*from '\.\/reviewed-picks\.js'/);
+ assert.match(js,/reviewedGames\.update\(state\)/);
 });
 
 test('a started game keeps the review visible and removes its upcoming BUY count',async()=>{

@@ -62,8 +62,28 @@ const games={fetchedAt:stamp,source:'SportsGameOdds',providerObservations:[{leag
  markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:stamp}}}]))}
  }]};
 
+// A fixed midday clock keeps the NBA reviewed-game fixture inside today's CT
+// window even when CI runs near midnight. These are synthetic journal records.
+const gameNow=Date.parse(reviewedDay(now)+'T18:00:00Z'),gameStamp=new Date(gameNow).toISOString(),gameStart=new Date(gameNow+3600000).toISOString();
+const reviewedGame={id:'102752',sport:'NBA',eventId:'sgo:denver-games-fixture',startsAt:gameStart,playerId:null,playerName:null,
+ marketType:'spread',marketScope:'FULL_GAME',side:'AWAY',line:-9.5,book:'betmgm',odds:-110,priceLimit:-110,
+ decision:'BUY',issuedAt:new Date(gameNow-60000).toISOString(),recordedAt:gameStamp,sourceLabel:'Manual review',
+ historyOnly:false,reportedDecision:null,matchup:'Denver Nuggets at Utah Jazz',reviewNote:'Synthetic reviewed-game fixture.'};
+const reviewedProp={...reviewedGame,id:'prop-fixture',playerId:'JADEN_MCDANIELS_1_NBA',playerName:'Jaden McDaniels',marketType:'points',side:'OVER',line:19.5};
+const gameReviews=(sport,picks=[])=>({contract:'edge-reviewed-picks-v1',sport,generatedAt:gameStamp,date:reviewedDay(gameNow),dateWindow:reviewedDateWindow(sport,gameNow),timezone:'America/Chicago',picks});
+const nbaGameReviews=gameReviews('NBA',[reviewedGame,reviewedProp]);
+const nflGameReviews=gameReviews('NFL',[
+ {...reviewedGame,id:'nfl-game',sport:'NFL',matchup:'Buffalo Bills at Kansas City Chiefs',line:3.5},
+ {...reviewedProp,id:'nfl-prop',sport:'NFL',playerId:'BO_NIX_1_NFL',playerName:'Bo Nix',marketType:'passing_yards',line:214.5}
+]);
+const gameQuotes=sport=>({fetchedAt:gameStamp,source:'SportsGameOdds',providerObservations:[{league:sport,provider:'SportsGameOdds',fetchedAt:gameStamp}],events:sport==='EPL'?[]:[{
+ eventID:sport+'-games-fixture',league:sport,startsAt:gameStart,status:{},matchup:sport==='NBA'?{away:{id:'DEN',name:'Denver Nuggets'},home:{id:'UTA',name:'Utah Jazz'}}:{away:{id:'BUF',name:'Buffalo Bills'},home:{id:'KC',name:'Kansas City Chiefs'}},
+ markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:gameStamp}}}]))}
+}]});
+
 let browser;
-const errors=[],unexpectedRequests=[];
+let testingReviewedGames=false,holdGameQuotes=false,releaseGameQuotes;
+const errors=[],unexpectedRequests=[],reviewRequests=[];
 try{
  browser=await chromium.launch({headless:true,...(process.env.EDGE_LAB_CHROMIUM?{executablePath:process.env.EDGE_LAB_CHROMIUM}:{})});
  const page=await browser.newPage({viewport:{width:1280,height:900}});
@@ -78,10 +98,19 @@ try{
    let data;
    if(url.pathname==='/api/edge-vnext')data=url.searchParams.get('mode')==='nba'?nba:url.searchParams.get('mode')==='board'?board:null;
    else if(url.pathname==='/api/nflmodel')data=nfl;
-   else if(url.pathname==='/api/dashboard'&&url.searchParams.get('reviewedPicks')==='1'&&url.searchParams.get('sport')==='NFL')data=nflReviews;
+   else if(url.pathname==='/api/dashboard'&&url.searchParams.get('reviewedPicks')==='1'){
+    const sport=url.searchParams.get('sport');reviewRequests.push(sport);
+    if(testingReviewedGames&&sport==='NBA')data=nbaGameReviews;
+    else if(sport==='NFL')data=testingReviewedGames?nflGameReviews:nflReviews;
+    else if(sport==='NCAAF')data={contract:'edge-reviewed-picks-v1',sport,generatedAt:stamp,date:reviewedDay(now),dateWindow:reviewedDateWindow(sport,now),timezone:'America/Chicago',picks:[]};
+   }
    else if(url.pathname==='/api/dashboard'&&url.searchParams.get('cfb')==='1')data=cfb;
    else if(url.pathname==='/api/board'){
-    assert.equal(url.searchParams.get('leagues'),'NCAAF');data=games;
+    const sport=url.searchParams.get('leagues');
+    if(testingReviewedGames&&['NBA','NFL','EPL'].includes(sport)){
+     if(sport==='NBA'&&holdGameQuotes)await new Promise(resolve=>{releaseGameQuotes=resolve;});
+     data=gameQuotes(sport);
+    }else{assert.equal(sport,'NCAAF');data=games;}
    }
    if(!data){unexpectedRequests.push(url.href);return route.fulfill({status:500,json:{error:'Unexpected fixture endpoint'}});}
    return route.fulfill({json:data});
@@ -215,6 +244,42 @@ try{
  assert.match(await page.locator('#nbaRows .team-scoring').first().innerText(),/Unavailable/i);
  assert.match(await missing.innerText(),/62\.5%/);assert.match(await missing.innerText(),/37\.5%/);
  assert.match(await missing.innerText(),/EXPERIMENTAL_NOT_VALIDATED/);
+
+ // Games exposes the same reviewed journal record, scoped independently from
+ // research quotes and player reviews, including during a slow quote refresh.
+ testingReviewedGames=true;await page.addInitScript(epoch=>{Date.now=()=>epoch;},gameNow);
+ await page.setViewportSize({width:390,height:844});
+ await page.goto(origin+'/research.html?kind=games&sport=NBA');
+ const gameReviewSection=page.locator('#reviewed-games'),denverReview=gameReviewSection.locator('[data-reviewed-pick="102752"]');
+ await denverReview.waitFor();await page.locator('#cards > .research-market').first().waitFor();
+ assert.equal(await gameReviewSection.locator('[data-reviewed-pick]').count(),1);
+ assert.match(await denverReview.locator(':scope > summary').innerText(),/Denver Nuggets -9\.5 · Full game/);
+ assert.match(await denverReview.locator(':scope > summary').innerText(),/BetMGM · Recorded -110/);
+ assert.match(await denverReview.locator(':scope > summary').innerText(),/REVIEWED BUY/);
+ assert.equal(await gameReviewSection.locator('.reviewed-active-count').innerText(),'1 upcoming BUYs');
+ assert.doesNotMatch(await gameReviewSection.innerText(),/Jaden McDaniels/);
+ const reviewBox=await gameReviewSection.boundingBox(),quoteBox=await page.locator('#research-board').boundingBox();
+ assert.ok(reviewBox.y+reviewBox.height<=quoteBox.y,'reviewed game BUY must be above research quotes');
+ await denverReview.locator(':scope > summary').click();
+ assert.match(await denverReview.innerText(),/Price limit: -110 or better/);await noOverflow('Reviewed NBA Games 390');
+ await screenshot('reviewed-games-390');
+ holdGameQuotes=true;await page.locator('#refresh').click();await page.waitForFunction(()=>document.querySelector('#refresh').disabled);
+ const requestCount=reviewRequests.length;
+ await gameReviewSection.getByRole('button',{name:'Refresh NBA reviewed games',exact:true}).click();
+ await gameReviewSection.locator('[data-reviewed-refresh][aria-busy="false"]').waitFor();
+ assert.ok(reviewRequests.length>requestCount);assert.equal(await gameReviewSection.locator('[data-reviewed-pick]').count(),1);
+ assert.equal(await denverReview.getAttribute('open'),'');
+ holdGameQuotes=false;assert.equal(typeof releaseGameQuotes,'function');releaseGameQuotes();
+ await page.waitForFunction(()=>!document.querySelector('#refresh').disabled);
+ await page.locator('[data-sport="NFL"]').click();await gameReviewSection.locator('[data-reviewed-pick="nfl-game"]').waitFor();
+ assert.equal(await gameReviewSection.locator('[data-reviewed-pick]').count(),1);
+ assert.match(await gameReviewSection.innerText(),/Buffalo Bills \+3\.5 · Full game/);
+ assert.doesNotMatch(await gameReviewSection.innerText(),/Denver Nuggets|Jaden McDaniels|Bo Nix/);await noOverflow('Reviewed NFL Games 390');
+ await page.locator('[data-sport="NBA"]').click();await denverReview.waitFor();assert.equal(await gameReviewSection.locator('[data-reviewed-pick]').count(),1);
+ const beforeUnsupported=reviewRequests.length;
+ await page.goto(origin+'/research.html?kind=games&sport=EPL');await page.waitForFunction(()=>!document.querySelector('#refresh').disabled);
+ assert.equal(await page.locator('#reviewed-games').isVisible(),false);assert.equal(await page.locator('#reviewed-games [data-reviewed-pick]').count(),0);
+ assert.equal(reviewRequests.length,beforeUnsupported,'unsupported game leagues cannot call the reviewed-picks feed');
  assert.deepEqual(errors,[]);assert.deepEqual(unexpectedRequests,[]);
- console.log('PASS: team scoring on NBA/NFL Probability Lab, NFL cards and CFB cards/details at desktop and 390px; reported NFL history and refresh; PF/PA, recent samples, zero versus missing, escaped literals, no overflow, unchanged probabilities and research-only states. All requests mocked.');
+ console.log('PASS: team scoring on NBA/NFL Probability Lab, NFL cards and CFB cards/details at desktop and 390px; reported NFL history; reviewed Games BUYs, game-only counts, sport switching, independent refresh and unsupported leagues; no overflow, unchanged probabilities and research-only states. All requests mocked.');
 }finally{await browser?.close();}

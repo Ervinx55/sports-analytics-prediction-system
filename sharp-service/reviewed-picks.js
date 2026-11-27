@@ -19,7 +19,20 @@ const decisionLabel=value=>({SELECT_RESEARCH:'RESEARCH',SELECT_RESEARCH_PRICE_CO
 const title=value=>String(value??'').toLowerCase().replaceAll('_',' ').replace(/^./,letter=>letter.toUpperCase());
 const teamMarket=pick=>['moneyline','spread','total'].includes(pick.marketType)&&pick.playerId==null;
 const matchupLabel=pick=>typeof pick.matchup==='string'?text(pick.matchup):pick.matchup?.away&&pick.matchup?.home?`${pick.matchup.away} vs ${pick.matchup.home}`:null;
-const selection=pick=>`${title(pick.side)}${finite(pick.line)?' '+pick.line:''} ${marketLabel(pick.marketType)}${pick.marketScope==='FULL_GAME'?'':' · '+title(pick.marketScope)}`;
+function selectedTeam(pick){
+ // Only "at"/@ establishes away then home; an arbitrary "vs" label does not.
+ const teams=typeof pick.matchup==='string'?pick.matchup.split(/\s+(?:at|@)\s+/i):[pick.matchup?.away,pick.matchup?.home];
+ return teams.length===2&&teams.every(text)?text(teams[pick.side==='AWAY'?0:1]):title(pick.side);
+}
+function selection(pick){
+ if(teamMarket(pick)){
+  const period=' · '+title(pick.marketScope);
+  if(pick.marketType==='moneyline')return selectedTeam(pick)+' moneyline'+period;
+  if(pick.marketType==='spread')return `${selectedTeam(pick)} ${pick.line>0?'+':''}${pick.line}${period}`;
+  return `${title(pick.side)} ${pick.line} total${period}`;
+ }
+ return `${title(pick.side)}${finite(pick.line)?' '+pick.line:''} ${marketLabel(pick.marketType)}${pick.marketScope==='FULL_GAME'?'':' · '+title(pick.marketScope)}`;
+}
 const recordedPrice=pick=>pick.historyOnly===true&&!text(pick.book)&&pick.odds===null?'Original book and price unavailable':
  pick.historyOnly===true?`${text(pick.book)?bookLabel(pick.book):'Original book unavailable'} · ${pick.odds===null?'Original price unavailable':'Recorded '+odds(pick.odds)}`:
  `${bookLabel(pick.book)} · Recorded ${odds(pick.odds)}`;
@@ -51,26 +64,29 @@ function validateFeed(body,now,sport){
 // the review status was updated; it never verifies the availability of a price.
 export function mountReviewedPicks({
  document:doc=globalThis.document,mount=doc?.querySelector('[data-reviewed-picks-mount]'),
+ sport:requestedSport,kind='all',
  now=()=>Date.now(),fetchImpl=globalThis.fetch,
  setIntervalImpl=globalThis.setInterval,clearIntervalImpl=globalThis.clearInterval,
  setTimeoutImpl=globalThis.setTimeout,clearTimeoutImpl=globalThis.clearTimeout
 }={}){
  if(!mount)return null;
- const sport=(text(mount.getAttribute('data-reviewed-sport'))||'NBA').toUpperCase();if(!sports.has(sport))return null;
- const heading=sport==='NBA'?'Today’s reviewed picks':sport+' reviewed picks';
+ const sport=(text(requestedSport)||text(mount.getAttribute('data-reviewed-sport'))||'NBA').toUpperCase();if(!sports.has(sport))return null;
+ const gamesOnly=kind==='games',sportLabel=sport==='NCAAF'?'CFB':sport;
+ const heading=gamesOnly?sportLabel+' reviewed games':sport==='NBA'?'Today’s reviewed picks':sport+' reviewed picks';
  const add=(parent,tag,value,className)=>{const node=doc.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;parent.append(node);return node;};
- mount.className='reviewed-picks-board';mount.setAttribute('aria-labelledby','reviewed-picks-title');mount.replaceChildren();
- const head=add(mount,'div',undefined,'target-board-head reviewed-board-head');add(head,'h2',heading).id='reviewed-picks-title';
- const actions=sport==='NFL'?add(head,'div',undefined,'reviewed-board-actions'):head,count=add(actions,'span','Count unavailable','reviewed-active-count');
- const reviewRefresh=sport==='NFL'?add(actions,'button',undefined,'edge-icon-button'):null;
- if(reviewRefresh){reviewRefresh.type='button';reviewRefresh.setAttribute('data-reviewed-refresh','');reviewRefresh.setAttribute('aria-label','Refresh '+sport+' reviewed picks');reviewRefresh.title='Refresh '+sport+' reviewed picks';const refreshIcon=add(reviewRefresh,'img');refreshIcon.src='/assets/icons/refresh.svg';refreshIcon.alt='';}
+ const titleId=(mount.id||'reviewed-picks')+'-title';
+ mount.className='reviewed-picks-board';mount.setAttribute('aria-labelledby',titleId);mount.replaceChildren();
+ const head=add(mount,'div',undefined,'target-board-head reviewed-board-head');add(head,'h2',heading).id=titleId;
+ const ownRefresh=gamesOnly||sport==='NFL',actions=ownRefresh?add(head,'div',undefined,'reviewed-board-actions'):head,count=add(actions,'span','Count unavailable','reviewed-active-count');
+ const reviewRefresh=ownRefresh?add(actions,'button',undefined,'edge-icon-button'):null;
+ if(reviewRefresh){reviewRefresh.type='button';reviewRefresh.setAttribute('data-reviewed-refresh','');reviewRefresh.setAttribute('aria-label','Refresh '+sportLabel+' reviewed '+(gamesOnly?'games':'picks'));reviewRefresh.title='Refresh '+sportLabel+' reviewed '+(gamesOnly?'games':'picks');const refreshIcon=add(reviewRefresh,'img');refreshIcon.src='/assets/icons/refresh.svg';refreshIcon.alt='';}
  const windowNote=sport==='NFL'?add(mount,'p','','reviewed-window-note'):null;
  const list=add(mount,'div',undefined,'live-cards reviewed-picks-list');
  const status=add(mount,'p','Loading published reviews…','reviewed-feed-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  add(mount,'p',sport==='NFL'?'Reported history is separate from current reviewed BUYs. Prices are recorded, where available.':'Manual review · Recorded prices; check the current price with the book.','board-note');
  let data=null,failed=false,pending=null,disposed=false,lastFingerprint='';
  const expanded=new Set();
- const windowPicks=time=>{const window=reviewedDateWindow(sport,time);return (data?.picks??[]).filter(pick=>{const date=day(timestamp(pick.startsAt));return date&&date>=window.fromDate&&date<=window.toDate;}).sort((a,b)=>timestamp(a.startsAt)-timestamp(b.startsAt)||a.id.localeCompare(b.id));};
+ const windowPicks=time=>{const window=reviewedDateWindow(sport,time);return (data?.picks??[]).filter(pick=>{const date=day(timestamp(pick.startsAt));return (!gamesOnly||teamMarket(pick))&&date&&date>=window.fromDate&&date<=window.toDate;}).sort((a,b)=>timestamp(a.startsAt)-timestamp(b.startsAt)||a.id.localeCompare(b.id));};
  const fresh=time=>Boolean(data&&!failed&&data.date===day(time)&&time-timestamp(data.generatedAt)>=0&&time-timestamp(data.generatedAt)<=STALE_MS);
  const fingerprint=time=>JSON.stringify([day(time),fresh(time),failed,windowPicks(time).map(pick=>[pick.id,timestamp(pick.startsAt)<=time])]);
  function disclosure(parent,key,className){const node=add(parent,'details',undefined,className);node.setAttribute('data-reviewed-disclosure',key);node.open=expanded.has(key);return node;}
@@ -87,7 +103,7 @@ export function mountReviewedPicks({
   else if(data&&!current)status.textContent='Review status needs a refresh. Saved reviews are shown; current review status is unavailable.';
   else if(data)status.textContent='Review status updated '+formatCentralTime(data.generatedAt)+'.';
   else status.textContent='Loading published reviews…';
-  if(!picks.length)add(list,'p',current?(sport==='NFL'?'No published NFL reviews in this date window.':'No published reviews for today.'):failed||data?heading+' are unavailable. Use refresh to try again.':'Loading published reviews…','empty');
+  if(!picks.length)add(list,'p',current?(gamesOnly?`No published ${sportLabel} game reviews ${sport==='NFL'?'in this date window':'for today'}.`:sport==='NFL'?'No published NFL reviews in this date window.':'No published reviews for today.'):failed||data?heading+' are unavailable. Use refresh to try again.':'Loading published reviews…','empty');
   for(const pick of picks){
    const history=pick.historyOnly===true,started=timestamp(pick.startsAt)<=time,buy=!history&&current&&!started&&pick.decision==='BUY';
    const badge=history?'Reported prior '+pick.reportedDecision:started?'GAME STARTED':!current?'SAVED REVIEW':pick.decision==='BUY'?'REVIEWED BUY':'REVIEWED '+decisionLabel(pick.decision);
@@ -144,6 +160,24 @@ export function mountReviewedPicks({
  render();refresh();
  const poll=setIntervalImpl(refresh,60000),clock=setIntervalImpl(()=>{if(!disposed&&fingerprint(now())!==lastFingerprint)render();},1000);
  return {refresh,destroy(){disposed=true;pending?.abort();clearIntervalImpl(poll);clearIntervalImpl(clock);refreshButton?.removeEventListener('click',refresh);reviewRefresh?.removeEventListener('click',refresh);}};
+}
+
+// The research page controls this mount explicitly: importing the shared widget
+// must not start an NBA request before the selected sport and view are known.
+export function mountReviewedGames({document:doc=globalThis.document,mount=doc?.getElementById('reviewed-games'),mountPicks=mountReviewedPicks,...options}={}){
+ let instance=null,currentSport=null,disposed=false;
+ const clear=()=>{instance?.destroy();instance=null;currentSport=null;if(mount){mount.hidden=true;mount.replaceChildren();}};
+ return {
+  update(state={}){
+   if(disposed||!mount)return;
+   const sport=text(state.sport)?.toUpperCase();
+   if(state.kind!=='games'||!sports.has(sport)){clear();return;}
+   if(instance&&currentSport===sport)return;
+   clear();mount.hidden=false;currentSport=sport;
+   instance=mountPicks({...options,document:doc,mount,sport,kind:'games'});
+  },
+  destroy(){disposed=true;clear();}
+ };
 }
 
 if(typeof document!=='undefined')mountReviewedPicks();

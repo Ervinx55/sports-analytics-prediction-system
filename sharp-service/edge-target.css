@@ -269,11 +269,11 @@ body.el-theme.edge-shell-page {
 .el-theme .board-note { margin: 7px 0 0; font-size: 11px; color: #afafaf; }
 .el-theme .reviewed-picks-board { margin: 20px 0 24px; scroll-margin-top: 16px; }
 .el-theme .reviewed-board-head { height: auto; min-height: 32px; flex-wrap: wrap; gap: 4px 12px; }
-.el-nfl .reviewed-board-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
+.el-theme .reviewed-board-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
 .el-theme .reviewed-active-count { color: #afafaf; font-size: 12px; white-space: nowrap; }
 .el-nfl .reviewed-active-count { font-size: 14px; white-space: normal; line-height: 1.45; }
 .el-nfl .reviewed-window-note { margin: -2px 0 12px; color: #afafaf; font-size: 14px; line-height: 1.5; }
-.el-nfl .reviewed-row-date, .el-nfl .reviewed-row-context { display: block; margin-top: 5px; color: #afafaf; font-size: 14px; line-height: 1.45; }
+.el-theme .reviewed-row-date, .el-theme .reviewed-row-context { display: block; margin-top: 5px; color: #afafaf; font-size: 14px; line-height: 1.45; }
 .el-nfl .reviewed-row-update { display: block; margin-top: 6px; color: #d7c9f7; font-size: 14px; line-height: 1.45; }
 .el-nfl .reviewed-card-update { margin: 12px 0; color: #d7c9f7; font-size: 14px; line-height: 1.45; }
 .el-theme .reviewed-row-price { display: block; margin-top: 4px; color: #afafaf; font-size: 12px; line-height: 1.4; }

@@ -7,6 +7,7 @@ import {formatCentralTime,formatProbability,displayPlayerName,shortReason} from 
 import {applyPlayerPortrait} from './player-portraits.js';
 
 import {createResearchLoader} from './research-loader.js';
+import {mountReviewedGames} from './reviewed-picks.js';
 
 import {bookLabel,platformType} from './prop-price-checks.js';
 
@@ -45,6 +46,7 @@ const difference=row=>[row.model,row.market].every(value=>typeof value==='number
 function withinOpenDisclosures(node,root){for(let parent=node.parentElement;parent&&parent!==root;parent=parent.parentElement)if(parent.hidden||(parent.tagName==='DETAILS'&&!parent.open))return false;return true;}
 
 const saved=new Map(),expandedGroups=new Set(),viewedQuotes=new Set();let shortlist=false,shown=24,selected=null;
+const reviewedGames=mountReviewedGames();
 
 const loader=createResearchLoader({onChange:state=>{
 
@@ -154,7 +156,8 @@ function quoteOption(parent,row,comparisons){
  const save=button(actions,saved.has(row.id)?'Remove saved':'Shortlist +',()=>{if(saved.has(row.id))saved.delete(row.id);else if(row.available!==false&&!row.quoteConflict)saved.set(row.id,structuredClone(row));render();});save.dataset.focusKey='save:'+row.id;save.disabled=row.available===false&&!saved.has(row.id);save.setAttribute('title',`${saved.has(row.id)?'Remove saved':'Shortlist'} ${row.player} ${row.side} ${row.line??''} ${label(row.marketType)} at ${bookLabel(row.book)}`);
 }
 function render(){
- const state=loader.state,all=sourceRows(),comparisons=comparisonIndex();
+ const state=loader.state;reviewedGames.update(state);
+ const all=sourceRows(),comparisons=comparisonIndex();
  const rows=filterResearch(all,{query:$('query').value,book:$('book').value,market:$('market').value,freshness:$('freshness').value,side:$('side').value,game:$('game').value,status:$('research-status').value}).filter(row=>!$('best-prices').checked||comparisons.get(row.id)?.best);
  const allGroups=groupResearchRows(all),groups=sortResearchGroups(groupResearchRows(rows),$('sort').value);
  $('refresh').disabled=state.status==='loading';$('count').textContent=state.status==='ready'?allGroups.length:'—';$('modeled').textContent=state.status==='ready'?allGroups.filter(g=>g.rows.some(r=>r.model!==null&&r.available!==false)).length:'—';$('fresh').textContent=state.status==='ready'?allGroups.filter(g=>g.rows.some(r=>r.freshness==='CURRENT'&&r.available!==false)).length:'—';$('saved-count').textContent=saved.size;
