@@ -21,13 +21,14 @@
   </div></header>
   <div id="edge-shell-menu" class="edge-menu" hidden><nav data-edge-menu-links class="edge-menu-links" aria-label="Edge Lab menu"></nav></div>
   <nav class="edge-sport-nav" aria-label="Sport"><a href="/nba.html" data-edge-sport-link="NBA" aria-current="page">NBA</a><a href="/nfl.html" data-edge-sport-link="NFL">NFL</a><a href="/research.html?kind=games&amp;sport=NHL" data-edge-sport-link="NHL">NHL</a><a href="/research.html?kind=games&amp;sport=NCAAF" data-edge-sport-link="NCAAF">CFB</a></nav>
-  <div data-edge-status-mount data-edge-status-sport="NBA"></div>
   <nav class="edge-view-nav" aria-label="Board view"><a href="/research.html?kind=games&amp;sport=NBA">Games</a><a href="/nba.html" aria-current="page">Props</a><a href="/research.html?kind=props&amp;sport=NBA">Alt Lines</a><a href="/dashboard#plays">Parlays</a></nav>
 </div>
+<section id="reviewed-picks" data-reviewed-picks-mount aria-label="Today’s reviewed picks"></section>
+<div data-edge-status-mount data-edge-status-sport="NBA"></div>
 <div data-nba-live-mount></div>
 <section aria-labelledby="team-title"><div class="section-head"><div><h2 id="team-title">Team markets</h2><p class="muted">Model versus exact-book, same-line market probability. Difference is in percentage points (pp).</p></div></div><div id="team-status" class="status" role="status" aria-live="polite">Loading team estimates…</div><div id="team-metrics" class="metrics" hidden></div><div id="team-cards" class="cards"></div><button id="more-team" type="button" hidden></button><h3 class="subhead">Modeled, without a current paired quote</h3><div id="unpriced-cards" class="cards"></div><h3 class="subhead">Unavailable event estimates</h3><div id="unavailable-cards" class="cards"></div></section>
 <details class="quote-observations"><summary>Market quotes & matchup research</summary><section aria-labelledby="props-title"><div class="section-head"><div><h2 id="props-title">Player prop observations</h2><p class="muted">One card per player and market, with individual books and lines. Quotes do not clear a play.</p></div></div><div class="board-filters"><label>Find a player<input id="props-query" type="search" placeholder="Player, team, or market"></label></div><div id="props-status" class="status" role="status" aria-live="polite">Loading player markets…</div><div id="props-metrics" class="metrics" hidden></div><div id="props-cards" class="cards"></div><button id="more-props" type="button" hidden></button></section></details>
-</main><script type="module">
+</main><script type="module" src="/reviewed-picks.js"></script><script type="module">
 import {appendDeepDive,preserveDeepDives} from "./deep-dive.js";
 import {appendDecision} from "./decision-display.js";
 import {assessPropQuote} from "./prop-price-checks.js";

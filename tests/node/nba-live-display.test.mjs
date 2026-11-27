@@ -262,6 +262,43 @@ test('status tiles count current decisions without inventing a WATCH recommendat
  assert.deepEqual(counts(),{BUY:'1',WATCH:'—',AVOID:'1'});
  view.tick(now+30000);assert.deepEqual(counts(),{BUY:'0',WATCH:'—',AVOID:'0'});
  await view.refresh(data,{error:true});assert.deepEqual(counts(),{BUY:'—',WATCH:'—',AVOID:'—'});
+ assert.match(view.text,/Automated model decisions/);
+});
+
+test('default first page includes a later current BUY and marks it in the collapsed row',async()=>{
+ const earlier=Array.from({length:20},(_,i)=>row({eventID:'earlier-'+i,playerID:'EARLIER_PLAYER_'+i+'_1_NBA',startsAt:new Date(now+(i+1)*60000).toISOString()}));
+ const later=cleared({eventID:'later-game',playerID:'LATER_PLAYER_1_NBA',playerName:'Later Player',startsAt:new Date(now+7200000).toISOString()});
+ const view=await widget(body([...earlier,later]));
+ assert.equal(view.cards.length,20);assert.equal(heading(view.cards[0]),'Later Player');
+ assert.match(view.cards[0].querySelector('summary').textContent,/BUY/);assert.equal(view.cards[0].open,false);
+ view.tick(now+30000);assert.doesNotMatch(view.cards[0].querySelector('summary').textContent,/BUY/);
+});
+
+test('a BUY arriving on an alternate selection moves its player market onto the first page',async()=>{
+ const earlier=Array.from({length:20},(_,i)=>row({eventID:'early-'+i,playerID:'EARLIER_PLAYER_'+i+'_1_NBA',startsAt:new Date(now+(i+1)*60000).toISOString()}));
+ const later={eventID:'later-game',playerID:'LATER_PLAYER_1_NBA',playerName:'Later Player',startsAt:new Date(now+7200000).toISOString()};
+ const prior=row(later),view=await widget(body([...earlier,prior]));
+ assert.equal(view.cards.some(card=>heading(card)==='Later Player'),false);
+ const alternate=cleared({...later,line:6.5,book:'fanduel'});
+ await view.refresh(body([...earlier,prior,alternate]));
+ assert.equal(heading(view.cards[0]),'Later Player');assert.match(view.cards[0].querySelector('summary').textContent,/BUY/);
+ assert.equal(view.cards[0].querySelectorAll('.prop-selection').length,2);
+ await view.refresh(body([...earlier,prior,{...alternate,status:'PASS',productionEligible:false,available:false}]));
+ assert.equal(view.cards.some(card=>heading(card)==='Later Player'),false);
+ assert.doesNotMatch(view.cards.map(card=>card.querySelector('summary').textContent).join(' '),/BUY/);
+});
+
+test('an opened BUY remains reachable when expiry moves it past the first page',async()=>{
+ const earlier=Array.from({length:20},(_,i)=>row({eventID:'early-'+i,playerID:'EARLIER_PLAYER_'+i+'_1_NBA',startsAt:new Date(now+(i+1)*60000).toISOString()}));
+ const later=cleared({eventID:'later-game',playerID:'LATER_PLAYER_1_NBA',playerName:'Later Player',startsAt:new Date(now+7200000).toISOString()});
+ const view=await widget(body([...earlier,later]));view.cards[0].open=true;
+ const detail=identity(view.cards[0]);detail.open=true;detail.querySelector('summary').focus();
+ view.tick(now+30000);
+ const retained=view.cards.find(card=>heading(card)==='Later Player');assert.ok(retained);
+ assert.equal(retained.open,true);assert.equal(identity(retained).open,true);
+ assert.equal(view.document.activeElement,identity(retained).querySelector('summary'));
+ assert.equal(retained.querySelector('.badge').textContent,'UNVERIFIED');assert.doesNotMatch(retained.querySelector('summary').textContent,/BUY/);
+ view.filter('Player or game','Nobody Here');assert.equal(view.cards.length,0);
 });
 
 test('selection portraits follow exact player identity and fall back when supplied names conflict',async()=>{

@@ -21,7 +21,9 @@ function gameLabel(row,name){
 export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName,scopeOf}){
  const add=(parent,tag,value,className)=>{const node=document.createElement(tag);if(value!==undefined)node.textContent=value;if(className)node.className=className;parent.append(node);return node;};
  const section=document.createElement('section');section.id='nba-live-decisions';section.className='live-board';section.setAttribute('aria-label','NBA prop decisions');
- const counts=add(document.querySelector('[data-edge-status-mount]')||section,'div',undefined,'edge-status-grid');
+ const countMount=document.querySelector('[data-edge-status-mount]')||section;
+ add(countMount,'p','Automated model decisions','automated-count-caption');
+ const counts=add(countMount,'div',undefined,'edge-status-grid');
  const countNodes={};for(const title of ['BUY','WATCH','AVOID']){const tile=add(counts,'div',undefined,'edge-status-tile '+title.toLowerCase());add(tile,'small',title);countNodes[title]=add(tile,'strong','—');if(title==='WATCH')tile.setAttribute('title','Watch decisions are not supplied by this feed. Unverified records are not watch recommendations.');}
  const head=add(section,'div',undefined,'target-board-head');add(head,'h2','NBA Player Props');
  const filterToggle=add(head,'button',undefined,'edge-icon-button');filterToggle.type='button';filterToggle.setAttribute('aria-label','Filter player props');filterToggle.setAttribute('aria-expanded','false');filterToggle.setAttribute('aria-controls','nba-prop-filters');const filterIcon=add(filterToggle,'img');filterIcon.src='/assets/icons/filter.svg';filterIcon.alt='';
@@ -33,7 +35,7 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
  const state=select('Status',[['','All statuses'],['BUY','BUY'],['AVOID','AVOID'],['UNVERIFIED','Unverified']]);
  const side=select('Side',[['','Both sides'],['OVER','Over'],['UNDER','Under']]);
  const market=select('Market',[['','All markets']]),book=select('Book',[['','All books']]);
- const sort=select('Sort',[['start','Game time'],['name','Player name'],['model','Model probability'],['market','Market probability'],['ev','Expected value'],['edge','Model–market gap']]);
+ const sort=select('Sort',[['start','BUY first, then game time'],['name','Player name'],['model','Model probability'],['market','Market probability'],['ev','Expected value'],['edge','Model–market gap']]);
  const list=add(section,'div',undefined,'cards live-cards');
  const more=add(section,'button','Show more players','more-markets');more.type='button';more.hidden=true;
  const status=add(section,'p','','status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
@@ -92,8 +94,9 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
    for(const record of history){const item=add(historyBox,'details');add(item,'summary',`${modelName(record)} · ${formatCentralTime(record.issuedAt)}`);add(item,'p',`Historical ${record.status==='PLAY'?'BUY (expired)':text(record.status)||'N/A'} · ${odds(record.odds)} · model ${formatProbability(record.modelProbability)}`);if(record.reason)add(item,'p',record.reason);appendDeepDive(item,record,{scope:'nba-history:'+group.key+record.decisionId,presentation:{title:'HISTORICAL — not current',reason:record.reason||'Previous evaluation retained for review.'}});}
   }
  }
- function render(){
+ function render({preserveViewedPage=true}={}){
   const active=document.activeElement,priorSelections=list.querySelectorAll('.prop-selection');
+  const viewedMarkets=new Set(preserveViewedPage?[...list.querySelectorAll('[data-player-market]')].filter(node=>node.open||node.contains(active)).map(node=>node.getAttribute('data-player-market')):[]);
   if(priorSelections.length){viewedSelections.clear();for(const option of priorSelections){const research=option.querySelector('.target-research-details');if(research&&withinOpenDisclosures(option,list)&&(research.open||option.contains(active)))viewedSelections.add(research.getAttribute('data-live-detail'));}}
   for(const element of list.querySelectorAll('[data-live-detail], [data-nba-evaluation]')){const key=element.getAttribute('data-live-detail')??element.getAttribute('data-nba-evaluation');if(element.open)expanded.add(key);else expanded.delete(key);}
   const focusKey=list.contains?.(active)?active?.parentElement?.getAttribute?.('data-live-detail')??active?.parentElement?.getAttribute?.('data-nba-evaluation'):null;
@@ -105,7 +108,8 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
   });
   const cards=groupLiveCards(filtered),allCards=groupLiveCards(all);
   const value=card=>{const key=({model:'modelProbability',market:'marketProbability',ev:'ev'})[sort.value];const values=card.selections.filter(g=>!g.conflicting&&g.representative.available!==false).map(g=>{const rows=g.current.size?[...g.current]:g.latest;if(sort.value==='edge'){const model=agreed(rows,'modelProbability'),market=agreed(rows,'marketProbability');return finite(model)&&finite(market)&&model>=0&&model<=1&&market>=0&&market<=1?model-market:null;}return agreed(rows,key);}).filter(v=>finite(v)&&(!['model','market'].includes(sort.value)||(v>=0&&v<=1)));return values.length?Math.max(...values):-Infinity;};
-  cards.sort((a,b)=>sort.value==='name'?livePlayerName(a.selections.flatMap(g=>g.rows)).name.localeCompare(livePlayerName(b.selections.flatMap(g=>g.rows)).name):sort.value!=='start'?(value(b)-value(a)||String(a.key).localeCompare(b.key)):(Date.parse(a.row.startsAt)||Infinity)-(Date.parse(b.row.startsAt)||Infinity)||String(a.key).localeCompare(b.key));
+  const currentBuy=card=>card.selections.some(group=>group.status==='BUY');
+  cards.sort((a,b)=>sort.value==='name'?livePlayerName(a.selections.flatMap(g=>g.rows)).name.localeCompare(livePlayerName(b.selections.flatMap(g=>g.rows)).name):sort.value!=='start'?(value(b)-value(a)||String(a.key).localeCompare(b.key)):Number(currentBuy(b))-Number(currentBuy(a))||(Date.parse(a.row.startsAt)||Infinity)-(Date.parse(b.row.startsAt)||Infinity)||String(a.key).localeCompare(b.key));
   const buys=all.filter(g=>g.status==='BUY').length;
   countNodes.BUY.textContent=data?String(buys):'—';countNodes.AVOID.textContent=data?String(all.filter(g=>g.status==='AVOID').length):'—';
   status.textContent=!data?`Live decisions unavailable. No current BUY can be verified.`:`${buys} BUY · ${allCards.length} player markets · ${all.length} unique selections`;
@@ -113,10 +117,13 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
   const activeFilters=[state,side,market,book].filter(node=>node.value).length;
   filterSummary.textContent=`Filters & sort${activeFilters?' · '+activeFilters+' active':''}${query||activeFilters?' · '+cards.length+' matched markets':''}`;
   if(data&&!all.length)status.textContent='No live model evaluation records were returned. No BUY cleared.';
-  for(const cardGroup of cards.slice(0,shown)){
+  // A status change may move an open card beyond the first page. Keep that
+  // card reachable while the user is reading it, with its new actual status.
+  const visibleCards=cards.filter((card,index)=>index<shown||viewedMarkets.has(card.key));
+  for(const cardGroup of visibleCards){
    const rows=cardGroup.selections.flatMap(g=>g.rows),name=livePlayerName(rows),row=cardGroup.row;
    const article=disclosure(list,'',cardGroup.key+':market');article.className='player-market-row prop-card';article.setAttribute('data-player-market',cardGroup.key);
-   const summary=article.querySelector('summary');summary.className='player-row-summary';const rowLabel=add(summary,'span',undefined,'player-row-label');add(rowLabel,'h3',name.name,'player-row-heading');add(rowLabel,'span',`${label(row.market)}${scopeOf(row)!=='game'?' · '+label(scopeOf(row)):''}`,'player-row-market');add(summary,'span','Back to players','player-row-back');const arrow=add(summary,'img',undefined,'player-row-chevron');arrow.src='/assets/icons/chevron-right.svg';arrow.alt='';
+   const summary=article.querySelector('summary');summary.className='player-row-summary';const rowLabel=add(summary,'span',undefined,'player-row-label');add(rowLabel,'h3',name.name,'player-row-heading');add(rowLabel,'span',`${label(row.market)}${scopeOf(row)!=='game'?' · '+label(scopeOf(row)):''}`,'player-row-market');if(currentBuy(cardGroup))add(rowLabel,'span','BUY','reviewed-row-status reviewed-buy');add(summary,'span','Back to players','player-row-back');const arrow=add(summary,'img',undefined,'player-row-chevron');arrow.src='/assets/icons/chevron-right.svg';arrow.alt='';
    const contents=add(article,'div',undefined,'player-market-content');
    const ordered=[...cardGroup.selections].sort((a,b)=>Number(b.status==='BUY')-Number(a.status==='BUY')||a.representative.line-b.representative.line||String(a.representative.side).localeCompare(String(b.representative.side))||String(a.representative.book).localeCompare(String(b.representative.book)));
    if(ordered.length)selection(contents,ordered[0],name);
@@ -124,7 +131,7 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
    add(contents,'p',`${rows.length} model evaluation records retained; ${cardGroup.selections.length} unique selections.`,'meta source-count');
   }
   if(!cards.length)add(list,'p',data?'No player markets match these filters.':'Try refreshing the page to reconnect.','empty');
-  more.hidden=shown>=cards.length;more.textContent=`Show more players · ${Math.min(shown,cards.length)} of ${cards.length}`;
+  more.hidden=visibleCards.length>=cards.length;more.textContent=`Show more players · ${visibleCards.length} of ${cards.length}`;
   if(focusKey)for(const detail of list.querySelectorAll('[data-live-detail], [data-nba-evaluation]'))if((detail.getAttribute('data-live-detail')??detail.getAttribute('data-nba-evaluation'))===focusKey){detail.querySelector('summary')?.focus({preventScroll:true});break;}
   lastFingerprint=clearanceFingerprint(all);
  }
@@ -133,7 +140,7 @@ export function mountLiveBoard({groupLiveDecisions,groupLiveCards,livePlayerName
   try{const response=await fetch('/api/dashboard?nbaLive=1',{cache:'no-store',signal:current.signal});const body=await response.json();if(!response.ok||body.contract!=='nba-reviewed-live-v1'||!Array.isArray(body.decisions))throw Error('Unavailable');if(controller===current){data=body;lastSuccess=body.generatedAt;populate();}}
   catch{if(controller===current)data=null;}finally{clearTimeout(timer);if(controller===current)render();}
  }
- for(const control of [search,state,side,market,book,sort])control.addEventListener('input',()=>{shown=20;render();});
+ for(const control of [search,state,side,market,book,sort])control.addEventListener('input',()=>{shown=20;render({preserveViewedPage:false});});
  document.getElementById('refresh')?.addEventListener('click',refresh);
  filterToggle.addEventListener('click',()=>{filters.hidden=!filters.hidden;filterToggle.setAttribute('aria-expanded',String(!filters.hidden));if(!filters.hidden)search.focus();});
  more.addEventListener('click',()=>{shown+=20;render();});
