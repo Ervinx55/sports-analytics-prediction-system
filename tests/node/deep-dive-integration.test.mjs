@@ -15,17 +15,30 @@ test('dashboard explanation follows the same recorded-decision prerequisite as i
  assert.match(recordedDecisionPresentation({status:'PLAY',tracking:{tracked:true,issuedAt:new Date(Date.now()-1000).toISOString()}}).title,/PLAY — recorded/);
  assert.match(recordedDecisionPresentation({model_decision:'PASS'}).title,/PASS/);
 });
+test('disclosure summary matches current and legacy decision presentation labels',()=>{
+ for(const label of ['BUY','AVOID','PLAY','PASS'])assert.match(deepDiveHtml({}, {presentation:{title:label+' — recorded decision'}}),new RegExp('<summary>Why '+label+'\\?'));
+ assert.match(deepDiveHtml({status:'PLAY'}),/<summary>Why not cleared\?/);
+ assert.match(deepDiveHtml({}, {presentation:{title:'HISTORICAL — not current'}}),/<summary>Why not cleared\?/);
+});
 test('every targeted renderer imports the shared disclosure and inline modules parse',()=>{
- for(const path of ['decision-display.js','nba-live.js','nba.html','nfl.html','research.js','dashboard.html']){
-  const source=readFileSync(new URL('../../sharp-service/'+path,import.meta.url),'utf8');assert.match(source,/deep-dive.js/);
+ for(const path of ['decision-display.js','nba-live-view.js','nba.html','nfl.html','research.js','dashboard.html']){
+  const source=readFileSync(new URL('../../sharp-service/'+path,import.meta.url),'utf8');
+  assert.match(source,/^\s*import\b[^;\n]*\bfrom\s+['"]\.\/deep-dive\.js['"]/m,path+' must actually import the disclosure renderer');
   if(path.endsWith('.html'))for(const match of source.matchAll(/<script type="module">([\s\S]*?)<\/script>/g))assert.doesNotThrow(()=>new Function(match[1].replace(/^import .*;$/gm,'')));
  }
+ const controller=readFileSync(new URL('../../sharp-service/nba-live.js',import.meta.url),'utf8');
+ assert.match(controller,/import\(['"]\.\/nba-live-view\.js['"]\)/);
 });
 
 test('NBA page does not override reviewed live decisions with a blanket PASS claim',()=>{
  const html=readFileSync(new URL('../../sharp-service/nba.html',import.meta.url),'utf8');
+ const live=readFileSync(new URL('../../sharp-service/nba-live-view.js',import.meta.url),'utf8');
+ const nav=readFileSync(new URL('../../sharp-service/edge-navigation.js',import.meta.url),'utf8');
  assert.doesNotMatch(html,/Every priced NBA market currently says|There are no cleared NBA plays/);
- assert.match(html,/Current PLAY or PASS decisions appear in the reviewed live section/);
+ assert.match(html,/data-nba-live-mount/);assert.match(html,/src="\/nba-live.js"/);
+ assert.match(live,/BUY requires current approval/);assert.match(live,/Expired or unverified decisions do not clear a play/);
+ assert.match(html,/src="\/edge-navigation\.js"/);
+ assert.match(nav,/\[['"]Overview['"],\s*['"]\/dashboard['"]\]/);
 });
 
 test('direct quote source is shown without inventing a failed health check',()=>{

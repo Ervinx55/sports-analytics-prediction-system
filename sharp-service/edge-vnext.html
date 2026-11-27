@@ -15,7 +15,13 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;border-bottom:1p
 .metric{font-size:27px;font-weight:800} .good{color:var(--green)}.warn{color:var(--amber)}.scroll{overflow-x:auto;container-type:inline-size}
 .team-scoring-row .team-scoring{max-width:calc(100cqw - 16px);position:sticky;left:0}
 a{color:#9bdaff;text-decoration:none}a:hover{text-decoration:underline}
-</style></head><body><main>
+.edge-nav{margin:0 0 22px;padding:8px;background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.edge-nav-links{display:flex;flex-wrap:wrap;gap:6px}.edge-nav a{display:inline-flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px;font-weight:650;text-decoration:none}
+.edge-nav a:hover,.edge-nav a[aria-current=page]{background:#1d3a54;color:var(--text)}.edge-nav :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.edge-nav-toggle{display:none;min-height:44px;width:100%;align-items:center;justify-content:space-between;background:#173049;color:var(--text);font:inherit;font-weight:650;text-align:left}
+@media(max-width:640px){.edge-nav{margin-bottom:18px;padding:6px}.edge-nav-toggle{display:flex}.edge-nav-links{display:none;gap:3px;margin-top:6px}.edge-nav[data-open=true] .edge-nav-links{display:flex;flex-direction:column}.edge-nav a{padding:8px 10px}}
+</style><script type="module" src="/edge-navigation.js"></script>
+</head><body><main>
 <div class="tag">Edge Lab / Research only / No automatic wagers</div>
 <h1>Probability Lab <span style="color:#6cb7da">vNext</span></h1>
 <p>Our model vs. fair market · Alternative thresholds · Kalshi contract math · Combo dependence</p>

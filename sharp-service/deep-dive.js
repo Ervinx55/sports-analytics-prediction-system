@@ -35,7 +35,8 @@ export function buildDeepDive(row={},options={}) {
 const expanded=new Set();
 export function deepDiveHtml(row,options={}) {
  const d=buildDeepDive(row,options),key=selectionKey(row,options.scope);
- return `<details class="el-deep-dive" data-deep-dive="${esc(key)}"${expanded.has(key)?' open':''}><summary>Why ${d.title.startsWith('PLAY')?'PLAY':d.title.startsWith('PASS')?'PASS':'not cleared'}? · Matchup &amp; deep dive</summary><div>${d.sections.map(s=>`<section><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p></section>`).join('')}</div></details>`;
+ const decisionLabel=/^(BUY|AVOID|PLAY|PASS)\b/.exec(d.title)?.[1]||'not cleared';
+ return `<details class="el-deep-dive" data-deep-dive="${esc(key)}"${expanded.has(key)?' open':''}><summary>Why ${decisionLabel}? · Matchup &amp; deep dive</summary><div>${d.sections.map(s=>`<section><h4>${esc(s.title)}</h4><p>${esc(s.text)}</p></section>`).join('')}</div></details>`;
 }
 export function appendDeepDive(parent,row,options={}) {const template=document.createElement('template');template.innerHTML=deepDiveHtml(row,options);parent.append(template.content);}
 // Snapshot synchronously before replacement; toggle events can be delayed by the browser.

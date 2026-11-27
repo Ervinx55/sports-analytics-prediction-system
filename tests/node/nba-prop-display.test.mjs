@@ -6,6 +6,9 @@ import {researchPropsResponse} from '../../sharp-service/lib/nba-research-props.
 import {assessPropQuote} from '../../sharp-service/prop-price-checks.js';
 import {buildDeepDive} from '../../sharp-service/deep-dive.js';
 import {setNbaQuoteNames} from '../../sharp-service/nba-live.js';
+import {normalizeResearch,groupResearchRows,filterResearch} from '../../sharp-service/research-data.js';
+import {displayPlayerName,formatCentralTime,formatProbability,shortReason} from '../../sharp-service/ui-format.js';
+import {bookLabel} from '../../sharp-service/book-catalog.js';
 
 const at='2026-11-23T17:43:05.616Z',now=Date.parse(at);
 const playerID='BRANDON_MILLER_1_NBA';
@@ -35,7 +38,8 @@ const source=html.match(/<script type="module">([\s\S]*?)<\/script>/)[1]
  .replace(/^import .*;$/gm,'')
  .replace(/\$\('refresh'\)\.addEventListener\('click',refresh\);refresh\(\);/,'');
 class Element{
- constructor(tag='div'){this.tag=tag;this.children=[];this._text='';}
+ constructor(tag='div'){this.tag=tag;this.children=[];this._text='';this.value='';}
+ addEventListener(){}
  set textContent(value){this._text=String(value);this.children=[];}
  get textContent(){return this._text+this.children.map(child=>child.textContent).join('\n');}
  append(...children){this.children.push(...children);}
@@ -51,7 +55,7 @@ function render(body,checkedAt=now){
   deep.push(row);const node=new Element('details');
   node.textContent=buildDeepDive(row,options).sections.map(section=>section.text).join('\n');parent.append(node);
  };
- new Function('document','appendDeepDive','preserveDeepDives','appendDecision','assessPropQuote','setNbaQuoteNames','data','now',source+'\nrenderProps(data,now);')(document,appendDeepDive,()=>{},()=>{},assessPropQuote,setNbaQuoteNames,body,checkedAt);
+ new Function('document','appendDeepDive','preserveDeepDives','appendDecision','assessPropQuote','setNbaQuoteNames','normalizeResearch','groupResearchRows','filterResearch','displayPlayerName','formatCentralTime','formatProbability','shortReason','bookLabel','data','now',source+'\nrenderProps(data,now);')(document,appendDeepDive,()=>{},()=>{},assessPropQuote,setNbaQuoteNames,normalizeResearch,groupResearchRows,filterResearch,displayPlayerName,formatCentralTime,formatProbability,shortReason,bookLabel,body,checkedAt);
  return {text:nodes.get('props-cards').textContent,nodes,deep};
 }
 
@@ -126,7 +130,7 @@ test('a later assessment expires the same snapshot without changing source times
  assert.match(view.text,/0 of 2 quote sides comparable/);
  assert.match(view.text,/Quote is over five minutes old/);
  assert.match(view.text,/Quote checks assessed/);
- assert.ok(view.text.includes(new Date(later).toLocaleString()));
+ assert.ok(view.text.includes(formatCentralTime(later,{seconds:true})));
  assert.equal(JSON.stringify(body),before);
 });
 
@@ -135,7 +139,8 @@ test('missing names and a player outside the event roster stay explicit rather t
  delete event.players[playerID].name;event.players[playerID].teamID='OTHER_TEAM_NBA';
  const {body}=await response(event),view=render(body);
  assert.equal(body.events[0].players[0].prop.identityStatus,'UNVERIFIED');
- assert.match(view.text,/Player name unavailable/);
+ assert.match(view.text,/Brandon Miller/);
+ assert.match(view.text,/Display name formatted from provider ID/);
  assert.match(view.text,/Away team unavailable @ Home team unavailable/);
  assert.match(view.text,/Player roster identity is unverified/);
  assert.match(view.text,/PLAYER_EVENT_IDENTITY_UNVERIFIED/);

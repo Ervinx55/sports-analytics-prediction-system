@@ -1,0 +1,145 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {normalizeResearch,latestResearchObservations,groupResearchRows,sortResearchGroups,filterResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
+const now=Date.parse('2026-11-27T17:00:00Z'),stamp=new Date(now-1000).toISOString(),older=new Date(now-60000).toISOString(),start=new Date(now+3600000).toISOString();
+const q=(patch={})=>({line:3.5,odds:-110,available:true,updatedAt:stamp,...patch});
+function body(players){return {contract:'nba-multibook-research-v1',source:'SportsGameOdds',generatedAt:stamp,events:[{eventID:'sgo:test',provider:'SportsGameOdds',startsAt:start,matchup:{away:{name:'Hawks'},home:{name:'Celtics'}},players}]};}
+function player(patch={}){return {prop:{playerID:'DERRICK_WHITE_1_NBA',statID:'rebounds',over:{books:{draftkings:q()}},under:{books:{draftkings:q()}},...patch}};}
+test('provider ID fallback creates readable name without changing roster identity',()=>{
+ const rows=normalizeResearch(body([player()]),'NBA',now);
+ assert.ok(rows.every(row=>row.player==='Derrick White'&&row.nameSource==='provider-id'));
+ assert.ok(rows.every(row=>row.playerID==='DERRICK_WHITE_1_NBA'&&row.identityStatus===''&&row.model===null));
+});
+test('price snapshots collapse before grouping, with history retained and input unchanged',()=>{
+ const first=player({over:{books:{draftkings:q({odds:120,updatedAt:older})}},under:{books:{draftkings:q({updatedAt:older})}}});
+ const latest=player();const data=body([first,latest]),before=structuredClone(data);
+ for(const list of [[first,latest],[latest,first]]){
+  const rows=normalizeResearch(body(list),'NBA',now);assert.equal(rows.length,2);
+  assert.equal(rows.find(row=>row.side==='OVER').odds,-110);
+  assert.equal(rows.find(row=>row.side==='OVER').observationHistory.length,1);
+  assert.equal(groupResearchRows(rows).length,1);
+ }
+ assert.deepEqual(data,before);
+});
+test('newest unavailable observation suppresses old available price in either order',()=>{
+ const old=player({over:{books:{draftkings:q({updatedAt:older})}},under:{books:{draftkings:q({updatedAt:older})}}});
+ const withdrawn=player({over:{books:{draftkings:q({available:false})}}});
+ for(const records of [[old,withdrawn],[withdrawn,old]]){
+  const rows=normalizeResearch(body(records),'NBA',now),over=rows.find(row=>row.side==='OVER'),under=rows.find(row=>row.side==='UNDER');
+  assert.equal(over.available,false);assert.equal(over.status,'UNAVAILABLE');assert.equal(over.market,null);assert.equal(over.model,null);assert.equal(under.market,null);
+  assert.equal(refreshResearchRow(over,now).market,null);
+  assert.equal(filterResearch(rows,{status:'UNAVAILABLE'}).length,1);
+ }
+});
+test('ties with conflicting price facts are visibly unavailable, not chosen by row order',()=>{
+ const one=player(),two=player({over:{books:{draftkings:q({odds:140})}}});
+ for(const records of [[one,two],[two,one]]){
+  const over=normalizeResearch(body(records),'NBA',now).find(row=>row.side==='OVER');
+  assert.equal(over.quoteConflict,true);assert.equal(over.available,false);assert.equal(over.market,null);assert.match(over.reason,/Conflicting/);
+ }
+});
+test('identical duplicate snapshots do not manufacture a quote conflict',()=>{
+ const data=body([player(),player()]),rows=normalizeResearch(data,'NBA',now);
+ assert.equal(rows.length,2);assert.ok(rows.every(row=>!row.quoteConflict&&row.market===.5));
+});
+test('one player market contains both sides, all books and alternate lines',()=>{
+ const rows=normalizeResearch(body([player({over:{books:{draftkings:q(),fanduel:q()}},under:{books:{draftkings:q(),fanduel:q()}}}),player({over:{books:{draftkings:q({line:4.5})}},under:{books:{draftkings:q({line:4.5})}}})]),'NBA',now);
+ const groups=groupResearchRows(rows);assert.equal(rows.length,6);assert.equal(groups.length,1);
+ assert.deepEqual([...new Set(groups[0].rows.map(row=>row.line))],[3.5,4.5]);
+ assert.equal(new Set(groups[0].rows.map(row=>row.id)).size,6);
+});
+test('different period, start time, event and sport never dedupe together',()=>{
+ const base=normalizeResearch(body([player()]),'NBA',now)[0];
+ const rows=[base,{...base,id:'reg',period:'reg'},{...base,id:'start',startsAt:new Date(now+7200000).toISOString()},{...base,id:'event',eventID:'other'},{...base,id:'sport',sport:'NFL'}];
+ assert.equal(latestResearchObservations(rows,now).length,5);assert.equal(groupResearchRows(rows).length,5);
+});
+test('exact period prevents joining an NFL model for another game period',()=>{
+ const data=body([player({period:'reg'})]);data.candidates=[{eventID:'sgo:test',startsAt:start,playerID:'DERRICK_WHITE_1_NBA',statID:'rebounds',side:'OVER',period:'game',line:3.5,book:'draftkings',odds:-110,rawIndependentProbability:.7}];
+ const rows=normalizeResearch(data,'NFL',now);assert.ok(rows.every(row=>row.model===null));
+});
+test('sorting puts missing numerical values after known values without fabricating zero',()=>{
+ const groups=[{key:'none',startsAt:start,player:'A',rows:[{model:null,market:null}]},{key:'zero',startsAt:start,player:'B',rows:[{model:0,market:.5}]},{key:'high',startsAt:start,player:'C',rows:[{model:.7,market:.6}]}];
+ assert.deepEqual(sortResearchGroups(groups,'model').map(g=>g.key),['high','zero','none']);
+ assert.deepEqual(sortResearchGroups(groups,'gap').map(g=>g.key),['high','zero','none']);
+ assert.deepEqual(groups.map(g=>g.key),['none','zero','high']);
+});
+test('search, game and side filters operate on original exact quote rows',()=>{
+ const rows=normalizeResearch(body([player()]),'NBA',now);
+ const filtered=filterResearch(rows,{query:'Derrick White',side:'UNDER',game:'sgo:test',market:'rebounds',book:'draftkings'});
+ assert.equal(filtered.length,1);assert.equal(filtered[0].side,'UNDER');assert.equal(groupResearchRows(filtered).length,1);
+ assert.equal(filterResearch(rows,{game:'another'}).length,0);
+});
+test('unknown identity does not combine unrelated unnamed players',()=>{
+ const data=body([player({playerID:'',playerName:''}),player({playerID:'',playerName:''})]);
+ const rows=normalizeResearch(data,'NBA',now);assert.equal(rows.length,4);assert.equal(groupResearchRows(rows).length,4);
+});
+test('research UI includes exact quote actions, accessible filters and source history disclosure',()=>{
+ const html=readFileSync(new URL('../../sharp-service/research.html',import.meta.url),'utf8');
+ for(const id of ['query','game','side','market','book','sort','research-status'])assert.match(html,new RegExp('id="'+id+'"'));
+ const js=readFileSync(new URL('../../sharp-service/research.js',import.meta.url),'utf8');
+ assert.match(js,/groupResearchRows/);assert.match(js,/dataset\.quoteId=row\.id/);assert.match(js,/observationHistory/);assert.match(js,/save\.disabled=row\.available===false/);
+});
+
+import {normalizeGameResearch,compareResearchPrices} from '../../sharp-service/research-comparison.js';
+function gameEvent(when=stamp,available=true){return {eventID:'game',league:'NBA',startsAt:start,status:{},matchup:{home:{id:'H',name:'Home'},away:{id:'A',name:'Away'}},markets:{moneyline:{home:{oddID:'points-home-game-ml-home',books:{draftkings:{odds:-110,line:null,available,updatedAt:when}}},away:{oddID:'points-away-game-ml-away',books:{draftkings:{odds:-110,line:null,available:true,updatedAt:when}}}}}};}
+function gameData(events){return {source:'SportsGameOdds',fetchedAt:stamp,providerObservations:[{league:'NBA',provider:'SportsGameOdds',fetchedAt:stamp}],events};}
+test('game snapshots retain newest withdrawal and invalidate the old paired outcome',()=>{
+ for(const events of [[gameEvent(older),gameEvent(stamp,false)],[gameEvent(stamp,false),gameEvent(older)]]){
+  const rows=normalizeGameResearch(gameData(events),'NBA',now);assert.equal(rows.length,2);assert.equal(groupResearchRows(rows).length,1);
+  const home=rows.find(row=>row.side==='HOME');assert.equal(home.available,false);assert.equal(home.status,'UNAVAILABLE');assert.equal(home.observationHistory.length,1);
+  assert.ok(rows.every(row=>row.market===null));assert.ok([...compareResearchPrices(rows,now).values()].every(c=>c.eligibleBooks===0));
+ }
+});
+test('game price conflicts at the latest timestamp cannot establish an active price',()=>{
+ const one=gameEvent(),two=gameEvent();two.markets.moneyline.home.books.draftkings.odds=150;
+ const rows=normalizeGameResearch(gameData([one,two]),'NBA',now),home=rows.find(row=>row.side==='HOME');
+ assert.equal(home.available,false);assert.equal(home.quoteConflict,true);assert.equal(home.market,null);assert.equal(rows.find(row=>row.side==='AWAY').market,null);
+});
+test('same named game at another start or period remains a separate market group',()=>{
+ const one=gameEvent(),two=gameEvent();two.startsAt=new Date(now+7200000).toISOString();
+ const rows=normalizeGameResearch(gameData([one,two]),'NBA',now);
+ assert.equal(rows.length,4);assert.equal(new Set(rows.map(row=>row.id)).size,4);assert.equal(groupResearchRows(rows).length,2);
+});
+test('ambiguous book aliases in the newest game observation cannot revive old prices',()=>{
+ const old=gameEvent(older),current=gameEvent();
+ current.markets.moneyline.home.books.DraftKings={...current.markets.moneyline.home.books.draftkings,odds:150};
+ const rows=normalizeGameResearch(gameData([old,current]),'NBA',now),home=rows.find(row=>row.side==='HOME');
+ assert.equal(home.available,false);assert.equal(home.quoteConflict,true);assert.equal(home.market,null);assert.equal(rows.find(row=>row.side==='AWAY').market,null);
+});
+test('cross-book comparison cannot combine identical event IDs at different start times',()=>{
+ const base=normalizeGameResearch(gameData([gameEvent()]),'NBA',now).find(row=>row.side==='HOME');
+ const other={...base,id:'rescheduled',book:'fanduel',startsAt:new Date(now+7200000).toISOString()};
+ const different=compareResearchPrices([base,other],now);
+ assert.equal(different.get(base.id).eligibleBooks,1);assert.equal(different.get(base.id).best,false);assert.equal(different.get(other.id).eligibleBooks,1);
+ const same=compareResearchPrices([base,{...other,startsAt:base.startsAt}],now);
+ assert.equal(same.get(base.id).eligibleBooks,2);assert.equal(same.get(base.id).best,true);
+});
+test('cross-book comparison respects provider event namespaces',()=>{
+ const base=normalizeGameResearch(gameData([gameEvent()]),'NBA',now).find(row=>row.side==='HOME');
+ const other={...base,id:'other-provider',book:'fanduel',provider:'Other Provider'};
+ const result=compareResearchPrices([base,other],now);
+ assert.equal(result.get(base.id).eligibleBooks,1);assert.equal(result.get(base.id).best,false);assert.equal(result.get(other.id).eligibleBooks,1);
+});
+test('normalization preserves provider-specific start and quote identities',()=>{
+ const first={...gameEvent(),provider:'SportsGameOdds'},second={...gameEvent(),provider:'Other Provider'};
+ const data=gameData([first,second]);data.providerObservations.push({league:'NBA',provider:'Other Provider',fetchedAt:stamp});
+ const rows=normalizeGameResearch(data,'NBA',now);
+ assert.equal(rows.length,4);assert.equal(new Set(rows.map(row=>row.id)).size,4);assert.equal(groupResearchRows(rows).length,2);
+ assert.deepEqual([...new Set(rows.map(row=>row.provider))],['SportsGameOdds','Other Provider']);
+});
+test('unnamed prop rows cannot create a cross-book best-price claim',()=>{
+ const base=normalizeResearch(body([player({playerID:'',playerName:''})]),'NBA',now).find(row=>row.side==='OVER');
+ const other={...base,id:'other-book',book:'fanduel'};
+ const result=compareResearchPrices([base,other],now);
+ assert.ok([...result.values()].every(row=>row.best===false&&row.eligibleBooks===0));
+});
+
+test('missing subject identity cannot pair another unnamed player or the row with itself',()=>{
+ const one=player({playerID:'',playerName:'',over:{books:{draftkings:q({odds:100})}},under:undefined});
+ const two=player({playerID:'',playerName:'',over:undefined,under:{books:{draftkings:q({odds:-200})}}});
+ const rows=normalizeResearch(body([one,two]),'NBA',now);
+ assert.equal(rows.length,2);assert.equal(groupResearchRows(rows).length,2);
+ assert.ok(rows.every(row=>row.market===null&&row.oppositeQuote===null&&row.priceCheck.status==='NOT_COMPARABLE'));
+ assert.ok([...compareResearchPrices(rows,now).values()].every(row=>row.eligibleBooks===0&&row.best===false));
+});
