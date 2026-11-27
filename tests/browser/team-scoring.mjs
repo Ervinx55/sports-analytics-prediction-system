@@ -2,6 +2,7 @@ import {readFile,mkdir} from 'node:fs/promises';
 import {resolve,extname,sep} from 'node:path';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
+import {reviewedDateWindow,reviewedDay} from '../../sharp-service/reviewed-picks-contract.js';
 
 const require=createRequire(process.env.EDGE_LAB_BROWSER_PACKAGE||import.meta.url);
 const {chromium}=require('playwright');
@@ -41,6 +42,15 @@ const nfl={generatedAt:stamp,oddsProvider:'Fixture source',productionEligible:fa
   {eventID:'nfl-blocked',startsAt,available:false,matchup:{home:{name:'Blocked home'},away:{name:'Blocked away'}},
    reason:'Conflicting starter evidence.',teamScoringContext:scoring('NFL',{sparse:true})}
  ]};
+const nflReviews={contract:'edge-reviewed-picks-v1',sport:'NFL',generatedAt:stamp,date:reviewedDay(now),
+ dateWindow:reviewedDateWindow('NFL',now),timezone:'America/Chicago',picks:[
+  {id:'history-nix',playerId:'BO_NIX_1_NFL',playerName:'Bo Nix',marketType:'passing_yards',side:'UNDER',line:214.5},
+  {id:'history-warren',playerId:'JAYLEN_WARREN_1_NFL',playerName:'Jaylen Warren',marketType:'receiving_yards',side:'OVER',line:16.5}
+ ].map(pick=>({...pick,sport:'NFL',eventId:'reported-history-fixture',startsAt:priorAt,marketScope:'FULL_GAME',
+  book:null,odds:null,issuedAt:null,recordedAt:stamp,priceLimit:null,decision:'REPORTED_SELECTION',
+  historyOnly:true,reportedDecision:'BUY',sourceLabel:'Reported selection',matchup:'Historical away at Historical home',
+  reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-26*3600000).toISOString(),note:'Later review avoided changed terms; original book and price were not recovered.'}
+ }))};
 const board={generatedAt:stamp,sports:{NFL:{state:'SHADOW'}},rows:[{...nflMarket,eventId:nflMarket.eventID,modelProbability:null,edgePercentagePoints:null,decision:'AVOID'}]};
 const cfbForecast={eventID:'college-game',homeID:'HOME',awayID:'AWAY',homeName,awayName,startsAt,homeProbability:.625,awayProbability:.375,
  period:'game',marketType:'moneyline',modelVersion:'cfb-fixture',inputCutoff:stamp,generatedAt:stamp,homeRating:1550,awayRating:1500,homeAdvantage:35,
@@ -68,6 +78,7 @@ try{
    let data;
    if(url.pathname==='/api/edge-vnext')data=url.searchParams.get('mode')==='nba'?nba:url.searchParams.get('mode')==='board'?board:null;
    else if(url.pathname==='/api/nflmodel')data=nfl;
+   else if(url.pathname==='/api/dashboard'&&url.searchParams.get('reviewedPicks')==='1'&&url.searchParams.get('sport')==='NFL')data=nflReviews;
    else if(url.pathname==='/api/dashboard'&&url.searchParams.get('cfb')==='1')data=cfb;
    else if(url.pathname==='/api/board'){
     assert.equal(url.searchParams.get('leagues'),'NCAAF');data=games;
@@ -148,6 +159,30 @@ try{
   assert.match(await blockedCard.innerText(),/FORECAST UNAVAILABLE/);
   assert.match(await blockedCard.innerText(),/Conflicting starter evidence/);
   assert.equal(await blockedCard.locator('.stats').count(),0,'Context cannot restore a blocked forecast');
+  const reviews=page.locator('#reviewed-picks');
+  await reviews.locator('[data-reviewed-pick="history-warren"]').waitFor();
+  assert.equal(await reviews.locator('[data-reviewed-pick]').count(),2);
+  assert.equal(await reviews.locator('.reviewed-active-count').innerText(),'2 saved reviews · 0 upcoming BUYs');
+  assert.equal(await reviews.locator('.reviewed-buy').count(),0,'Reported history cannot imply current BUY clearance');
+  for(const pick of nflReviews.picks){
+   const row=reviews.locator(`[data-reviewed-pick="${pick.id}"]`);
+   assert.equal(await row.locator('.player-row-heading').innerText(),pick.playerName);
+   assert.match(await row.locator(':scope > summary').innerText(),/Reported prior BUY/);
+   assert.match(await row.locator(':scope > summary').innerText(),/Game started/);
+   assert.match(await row.locator(':scope > summary').innerText(),/Original book and price unavailable/);
+   assert.ok((await row.locator('.player-row-market').innerText()).includes(String(pick.line)));
+  }
+  const savedReview=reviews.locator('[data-reviewed-pick="history-nix"]');
+  await savedReview.locator(':scope > summary').click();
+  await savedReview.locator('.target-research-details > summary').click();
+  assert.match(await savedReview.innerText(),/Original review time unavailable/);
+  assert.match(await savedReview.innerText(),/Later review: AVOID at changed terms/);
+  assert.match(await savedReview.innerText(),/Later review avoided changed terms/);
+  await reviews.getByRole('button',{name:'Refresh NFL reviewed picks',exact:true}).click();
+  await reviews.locator('[data-reviewed-refresh][aria-busy="false"]').waitFor();
+  assert.equal(await savedReview.getAttribute('open'),'');
+  assert.equal(await savedReview.locator('.target-research-details').getAttribute('open'),'');
+  assert.equal(await reviews.locator('.reviewed-active-count').innerText(),'2 saved reviews · 0 upcoming BUYs');
   await noOverflow('NFL '+width);
   await screenshot('nfl-'+width);
 
@@ -181,5 +216,5 @@ try{
  assert.match(await missing.innerText(),/62\.5%/);assert.match(await missing.innerText(),/37\.5%/);
  assert.match(await missing.innerText(),/EXPERIMENTAL_NOT_VALIDATED/);
  assert.deepEqual(errors,[]);assert.deepEqual(unexpectedRequests,[]);
- console.log('PASS: team scoring on NBA/NFL Probability Lab, NFL cards and CFB cards/details at desktop and 390px; PF/PA, recent samples, zero versus missing, escaped literals, no overflow, unchanged probabilities and research-only states. All requests mocked.');
+ console.log('PASS: team scoring on NBA/NFL Probability Lab, NFL cards and CFB cards/details at desktop and 390px; reported NFL history and refresh; PF/PA, recent samples, zero versus missing, escaped literals, no overflow, unchanged probabilities and research-only states. All requests mocked.');
 }finally{await browser?.close();}
