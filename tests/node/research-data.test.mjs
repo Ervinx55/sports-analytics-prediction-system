@@ -7,8 +7,8 @@ test('CFB summary comparison finds exact attached forecast names despite shorter
  assert.equal(filterResearch(rows,{query:'Ohio State Buckeyes',market:'moneyline'}).length,1);
  assert.equal(filterResearch(rows,{query:'Northwestern Wildcats',market:'moneyline'}).length,1);
 });
-const nba={generatedAt:'2026-10-25T17:59:00Z',events:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',matchup:{home:{name:'Home'},away:{name:'Away'}},players:[{prop:{playerName:'Player',statID:'points',over:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'},B:{line:21.5,odds:100,updatedAt:'2026-10-25T17:59:00Z'}}},under:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'}}}}}]}]};
-test('NBA keeps exact book line and side identity without inventing predictions',()=>{const rows=normalizeResearch(nba,'NBA',now);assert.equal(rows.length,3);assert.equal(new Set(rows.map(r=>r.id)).size,3);assert.ok(rows.every(r=>r.model===null&&r.status==='QUOTE ONLY'));assert.equal(rows[0].player,'Player');});
+const nba={generatedAt:'2026-10-25T17:59:00Z',events:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',matchup:{home:{name:'Home'},away:{name:'Away'}},players:[{prop:{playerName:'Fixture Player',statID:'points',over:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'},B:{line:21.5,odds:100,updatedAt:'2026-10-25T17:59:00Z'}}},under:{books:{A:{line:20.5,odds:-110,updatedAt:'2026-10-25T17:59:00Z'}}}}}]}]};
+test('NBA keeps exact book line and side identity without inventing predictions',()=>{const rows=normalizeResearch(nba,'NBA',now);assert.equal(rows.length,3);assert.equal(new Set(rows.map(r=>r.id)).size,3);assert.ok(rows.every(r=>r.model===null&&r.status==='QUOTE ONLY'));assert.equal(rows[0].player,'Fixture Player');});
 test('NFL uses independent probability in shadow, never promotes source PLAY',()=>{const rows=normalizeResearch({generatedAt:nba.generatedAt,candidates:[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerName:'QB',statID:'yards',side:'OVER',line:200.5,bestBook:'A',bestOdds:-110,rawIndependentProbability:.6,modelProbability:.9,marketFairProbability:.52,status:'PLAY',updatedAt:nba.generatedAt}]},'NFL',now);assert.equal(rows[0].model,.6);assert.equal(rows[0].market,.52);assert.equal(rows[0].status,'SHADOW');});
 test('unknown, future and old quote timestamps do not appear fresh',()=>{for(const stamp of [null,'bad','2026-10-25T18:05:00Z','2026-10-25T17:00:00Z']){const data=structuredClone(nba);data.events[0].players[0].prop.over.books.A.updatedAt=stamp;assert.notEqual(normalizeResearch(data,'NBA',now)[0].freshness,'CURRENT');}});
 test('expired events and malformed contracts cannot become recommendations',()=>{const data=structuredClone(nba);data.events[0].startsAt='2026-10-25T17:00:00Z';assert.deepEqual(normalizeResearch(data,'NBA',now),[]);assert.throws(()=>normalizeResearch({error:'failure'},'NBA',now));assert.throws(()=>normalizeResearch({},'NBA',now));});
@@ -17,11 +17,11 @@ test('filters narrow exact quotes and null numeric values remain unavailable',()
 test('NFL retains unmodeled quotes and joins estimates only to exact quote identity',()=>{
  const data=structuredClone(nba);data.candidates=[];
  assert.equal(normalizeResearch(data,'NFL',now).length,3);
- data.candidates=[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerName:'Player',statID:'points',side:'over',line:20.5,book:'A',odds:-110,rawIndependentProbability:.6,marketFairProbability:.5}];
+ data.candidates=[{eventID:'g',startsAt:'2026-10-25T20:00:00Z',playerName:'Fixture Player',statID:'points',side:'over',line:20.5,book:'A',odds:-110,rawIndependentProbability:.6,marketFairProbability:.5}];
  const rows=normalizeResearch(data,'NFL',now);assert.equal(rows.filter(r=>r.model===.6).length,1);assert.equal(rows.find(r=>r.book==='B').model,null);assert.equal(rows.find(r=>r.side==='UNDER').model,null);
 });
 
-test('explicitly unavailable NFL prices cannot be shortlisted as available quotes',()=>{const data=structuredClone(nba);data.candidates=[];data.events[0].players[0].prop.over.books.A.available=false;assert.equal(normalizeResearch(data,'NFL',now).length,2);});
+test('explicitly unavailable NFL prices remain tombstones, never current prices',()=>{const data=structuredClone(nba);data.candidates=[];data.events[0].players[0].prop.over.books.A.available=false;const rows=normalizeResearch(data,'NFL',now);assert.equal(rows.length,3);const withdrawn=rows.find(row=>row.book==='A'&&row.side==='OVER');assert.equal(withdrawn.available,false);assert.equal(withdrawn.status,'UNAVAILABLE');assert.equal(withdrawn.model,null);assert.equal(withdrawn.market,null);});
 
 test('research derives market probability only from a fresh same-book exact-line pair',()=>{
  const rows=normalizeResearch(nba,'NBA',now);

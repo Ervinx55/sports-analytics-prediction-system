@@ -1,5 +1,6 @@
 import {platformType,canonicalBookmaker} from './book-catalog.js';
 import {researchFreshness,assessPropQuote} from './prop-price-checks.js';
+import {latestResearchObservations,researchQuoteKey} from './research-observations.js';
 const number=v=>typeof v==='number'&&Number.isFinite(v)?v:typeof v==='string'&&/^[-+]?(?:\d+\.?\d*|\.\d+)$/.test(v.trim())?Number(v):null;
 const implied=o=>o>0?100/(o+100):-o/(-o+100);
 const shapes={moneyline:{bet:'ml',sides:['home','away']},spread:{bet:'sp',sides:['home','away']},total:{bet:'ou',sides:['over','under']},threeWay:{bet:'ml3way',sides:['home','away','draw']}};
@@ -28,7 +29,8 @@ export function normalizeGameResearch(data,league,now=Date.now()){
   const home=event.matchup?.home,away=event.matchup?.away;
   const fallback=['SharpAPI','The Odds API'].includes(event.provider);
   if(!home?.name||!away?.name||home.name===away.name||(!fallback&&(!home.id||!away.id||home.id===away.id)))continue;
-  const observation=data.providerObservations?.find(p=>p.league===league);
+  const eventProvider=typeof event.provider==='string'&&event.provider.trim()?event.provider:null;
+  const observation=data.providerObservations?.find(p=>p.league===league&&(!eventProvider||p.provider===eventProvider));
   for(const [marketType,shape] of Object.entries(shapes)){
    const market=event.markets?.[marketType];if(!market)continue;
    const parsed=new Map();
@@ -42,35 +44,52 @@ export function normalizeGameResearch(data,league,now=Date.now()){
      if(typeof odd!=='string'||!odd.startsWith(prefix)||!odd.endsWith(suffix))continue;
      period=odd.slice(prefix.length,-suffix.length);if(!['game','reg'].includes(period))continue;
     }
-    const books=new Map(),duplicates=new Set();
+    const books=new Map();
     for(const [native,q] of Object.entries(raw.books??{})){
      const book=canonicalBookmaker(native);if(!book||!q)continue;
-     if(books.has(book)){duplicates.add(book);continue;}
+     if(books.has(book)){const prior=books.get(book);const stamps=[prior.updatedAt,q.updatedAt].map(Date.parse).filter(Number.isFinite);books.set(book,{...prior,available:false,odds:null,quoteConflict:true,updatedAt:stamps.length?new Date(Math.max(...stamps)).toISOString():null});continue;}
      const line=['spread','total'].includes(marketType)?number(q.line):null;
      books.set(book,{side,period,line,odds:number(q.odds),available:q.available,updatedAt:q.updatedAt});
     }
-    for(const book of duplicates)books.delete(book);
+    // Preserve ambiguous aliases as unavailable observations so older snapshots cannot revive them.
     parsed.set(side,books);
    }
    for(const [side,books] of parsed)for(const [book,q] of books){
-    if(q.available!==true)continue;
     const type=platformType(book),outcomeQuotes=shape.sides.map(s=>parsed.get(s)?.get(book)).filter(Boolean);
     const player=side==='home'?home.name:side==='away'?away.name:side==='draw'?'Draw':'Game total';
-    const row={kind:'games',sport:league,sportID:event.sport,league,eventID:String(event.eventID),startsAt:event.startsAt,player,playerID:'',participant:side==='home'?home.id:side==='away'?away.id:side,away:away.name,home:home.name,marketType,period:q.period,outcomeStructure:shape.bet,side:side.toUpperCase(),line:q.line,book,platformType:type,odds:type==='sportsbook'?q.odds:null,indicativeOdds:type==='sportsbook'?null:q.odds,updatedAt:q.updatedAt,generatedAt:observation?.fetchedAt??null,provider:observation?.provider??data.source,priceQuote:q,outcomeQuotes,model:null,status:'QUOTE ONLY',reason:'Game quote comparison only. Use the cleared plays page for model decisions.',productionEligible:false};
-    row.id=JSON.stringify(['games',league,row.eventID,marketType,row.period,row.side,row.line,book]);
+    const row={available:q.available===true,quoteConflict:q.quoteConflict===true,kind:'games',sport:league,sportID:event.sport,league,eventID:String(event.eventID),startsAt:event.startsAt,player,playerID:'',participant:side==='home'?home.id:side==='away'?away.id:side,away:away.name,home:home.name,marketType,period:q.period,outcomeStructure:shape.bet,side:side.toUpperCase(),line:q.line,book,platformType:type,odds:type==='sportsbook'?q.odds:null,indicativeOdds:type==='sportsbook'?null:q.odds,updatedAt:q.updatedAt,generatedAt:observation?.fetchedAt??null,provider:eventProvider??observation?.provider??data.source,priceQuote:q,outcomeQuotes,model:null,status:'QUOTE ONLY',reason:'Game quote comparison only. Use the cleared plays page for model decisions.',productionEligible:false};
+    row.id=JSON.stringify(['games',league,row.provider||'',row.eventID,Date.parse(row.startsAt),marketType,row.period,row.side,row.line,book]);
     row.homeID=home.id;row.awayID=away.id;
     row.priceCheck=assessGameQuote(row,now);row.market=row.priceCheck.marketProbability;row.freshness=row.priceCheck.freshness;rows.push(row);
    }
   }
  }
- return rows;
+ const latest=latestResearchObservations(rows,now),index=new Map(latest.map(row=>[researchQuoteKey(row),row]).filter(([key])=>key!==null));
+ // Refresh every outcome from the latest snapshot, including withdrawn prices.
+ // An old complete pair cannot outlive a newer unavailable side.
+ return latest.map(row=>{
+  const shape=shapes[row.marketType];
+  const outcomes=shape.sides.map(side=>{
+   const participant=side==='home'?row.homeID:side==='away'?row.awayID:side;
+   const line=row.marketType==='spread'&&side!==row.side.toLowerCase()?-row.line:row.line;
+   const match=index.get(researchQuoteKey({...row,side:side.toUpperCase(),participant,playerID:'',player:side==='home'?row.home:side==='away'?row.away:side==='draw'?'Draw':'Game total',line}));
+   return match?.priceQuote?{...match.priceQuote,available:match.available===true&&!match.quoteConflict,side,period:match.period}:null;
+  }).filter(Boolean);
+  const updated={...row,outcomeQuotes:outcomes},priceCheck=assessGameQuote(updated,now);
+  return {...updated,priceCheck,market:row.available===false||row.quoteConflict?null:priceCheck.marketProbability,freshness:priceCheck.freshness};
+ });
 }
 const median=values=>{const a=[...values].sort((a,b)=>a-b),i=Math.floor(a.length/2);return a.length%2?a[i]:(a[i-1]+a[i])/2;};
 // Counts are distinct sources, not statistically independent samples. No model or EV calculation.
 export function compareResearchPrices(rows,now=Date.now()){
  const groups=new Map(),out=new Map(),sharp=new Set(['pinnacle','circa','bookmakereu']);
  for(const row of rows){
-  const key=JSON.stringify([row.kind||'props',row.sport,row.eventID,row.participant||row.playerID||row.player,row.marketType,row.period||'game',row.outcomeStructure||'ou',row.side,row.line]);
+  const exact=researchQuoteKey(row);
+  if(!exact){out.set(row?.id,{best:false,bestOdds:null,eligibleBooks:0,referenceProbability:null,referenceBooks:[],referenceKind:'broader',productionEligible:false});continue;}
+  // Cross-book comparisons differ only by book. Reuse exact quote identity,
+  // including provider namespace and scheduled start, to prevent combining
+  // rescheduled events or identical provider IDs from different sources.
+  const key=JSON.stringify(JSON.parse(exact).slice(0,-1));
   const group=groups.get(key)||[];group.push(row);groups.set(key,group);
  }
  for(const group of groups.values()){

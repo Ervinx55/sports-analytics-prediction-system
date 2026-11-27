@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#08111f" />
+  <meta name="theme-color" content="#1b1b1b" />
   <title>Edge Lab Dashboard</title>
   <style>
     :root{
@@ -111,6 +111,22 @@
     .source .name{font-weight:750;font-size:12px}.ok{color:var(--green)}.badtext{color:var(--red)}
     .footer{margin-top:22px;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
     .loading{animation:pulse 1.25s ease-in-out infinite}@keyframes pulse{50%{opacity:.45}}
+    .dashboard-player-name{font-size:22px;line-height:1.25;font-weight:800;margin:0;overflow-wrap:anywhere}
+    .dashboard-selection{font-size:17px;line-height:1.4;font-weight:750;margin:12px 0 4px}
+    .dashboard-short-reason{color:var(--muted);font-size:13px;line-height:1.5;margin:12px 0 0}
+    .dashboard-counts{display:flex;flex-wrap:wrap;gap:8px 16px;margin:12px 0;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+    .dashboard-summary-link{margin:14px 0;line-height:1.6}
+    .dashboard-filters{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+    .dashboard-filters label{display:grid;gap:7px;font-size:12px;color:var(--muted);min-width:0}
+    .dashboard-filters input,.dashboard-filters select{width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--panel);color:var(--text);font:inherit;font-size:16px}
+    .dashboard-market-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:10px;padding:16px 0;border-top:1px solid var(--line)}
+    .dashboard-market-row>.dashboard-row-metrics,.dashboard-market-row>details{grid-column:1/-1}
+    .dashboard-market-row .prob-compare{max-width:460px}
+    .dashboard-prop-grade,.dashboard-prop-buy{min-width:0}
+    .dashboard-prop-grade .candidate-head>div,.dashboard-prop-buy .candidate-head>div{min-width:0;flex:1}
+    [data-dashboard-detail]{overflow-wrap:anywhere}
+    [data-dashboard-detail]>summary{min-height:44px;display:flex;align-items:center}
+    #propGradeList{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,330px),1fr));gap:12px;align-items:start}
     @media(max-width:760px){
       .app{padding:14px 10px 88px}
       .metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
@@ -125,64 +141,58 @@
       .market-list-row .prob-box .prob-label{font-size:8px;letter-spacing:.55px}
       .market-list-row .prob-box .prob-value{font-size:18px}
       h1{font-size:19px}
+      .dashboard-filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .dashboard-filters label:first-child{grid-column:1/-1}
+      .dashboard-player-name{font-size:22px}
+      .dashboard-prop-buy .candidate-head,.dashboard-prop-grade .candidate-head{flex-wrap:wrap}
     }
   </style>
-<link rel="stylesheet" href="/edge-theme.css"></head>
-<body class="el-theme">
+<link rel="stylesheet" href="/edge-theme.css"><script type="module" src="/edge-navigation.js"></script>
+<link rel="stylesheet" href="/edge-target.css">
+</head>
+<body class="el-theme edge-shell-page edge-dashboard-shell">
 <div class="app">
-  <div class="top">
-    <div class="brand">
-      <div class="logo">EL</div>
-      <div>
-        <h1>Edge Lab</h1>
-        <div class="sub">Sports Analytics Command Center</div>
+  <div class="edge-shell" data-edge-shell data-edge-sport="MLB" data-edge-view="games">
+    <header class="edge-shell-header"><h1 class="edge-wordmark"><a href="/nba.html">EDGE LAB</a></h1><div class="edge-shell-actions">
+      <button class="edge-icon-button edge-refresh-button" id="refreshBtn" type="button" aria-label="Refresh MLB dashboard" title="Refresh MLB dashboard">Refresh</button>
+      <button class="edge-icon-button" type="button" data-edge-menu-toggle aria-controls="edge-shell-menu" aria-expanded="false" aria-label="Open menu" title="Menu"><img src="/assets/icons/menu.svg" alt="" width="24" height="24"></button>
+    </div></header>
+    <div id="edge-shell-menu" class="edge-menu" hidden>
+      <nav data-edge-menu-links class="edge-menu-links" aria-label="Edge Lab menu"></nav>
+      <p class="edge-menu-label">MLB dashboard sections</p>
+      <div class="tabs edge-dashboard-tabs" aria-label="MLB dashboard sections">
+        <button class="tab active" data-tab="today">Overview</button>
+        <button class="tab" data-tab="plays">Plays</button>
+        <button class="tab" data-tab="props">Player Props</button>
+        <button class="tab" data-tab="market">Market</button>
+        <button class="tab" data-tab="sharp">Sharp Gate</button>
+        <button class="tab" data-tab="results">Results</button>
+        <button class="tab" data-tab="calibration">Calibration</button>
+        <button class="tab" data-tab="system">System</button>
       </div>
+      <details class="edge-dashboard-tools"><summary>MLB health, counts &amp; probability guide</summary>
+        <p class="sub" id="refreshCadence">Auto 60s</p>
+        <div class="healthline"><span class="dot" id="healthDot"></span><span id="healthText">Connecting to live system…</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="label">Markets</div><div class="value" id="mActive">—</div><div class="hint">graded today</div></div>
+          <div class="metric"><div class="label">Pending</div><div class="value" id="mReady">—</div><div class="hint">waiting on final input</div></div>
+          <div class="metric"><div class="label">Plays</div><div class="value" id="mFinal">—</div><div class="hint">fully cleared</div></div>
+          <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
+          <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
+        </div>
+        <p class="small"><strong>pp = percentage points.</strong> For example, 61.5% model probability versus 55.3% market probability is +6.2 pp. MODEL is the estimated probability. MARKET is the no-vig probability implied by the exact two-sided market.</p>
+      </details>
     </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span class="sub" id="refreshCadence">Auto 60s</span>
-      <button class="refresh" id="refreshBtn">Refresh</button>
-    </div>
-  </div>
-
-  <div class="healthline">
-    <span class="dot" id="healthDot"></span>
-    <span id="healthText">Connecting to live system…</span>
-  </div>
-
-  <div class="metrics">
-    <div class="metric"><div class="label">Markets</div><div class="value" id="mActive">—</div><div class="hint">graded today</div></div>
-    <div class="metric"><div class="label">Pending</div><div class="value" id="mReady">—</div><div class="hint">waiting on final input</div></div>
-    <div class="metric"><div class="label">Plays</div><div class="value" id="mFinal">—</div><div class="hint">fully cleared</div></div>
-    <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
-    <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
-  </div>
-
-  <div class="card" style="padding:10px 12px;margin-bottom:12px;box-shadow:none">
-    <div style="font-size:12px;line-height:1.5;color:var(--muted)">
-      <strong style="color:var(--text)">pp = percentage points.</strong>
-      Example: 61.5% model probability vs 55.3% market probability = <strong style="color:var(--green)">+6.2 pp</strong>.
-      This is different from a percent change. <strong style="color:var(--cyan)">MODEL</strong> is our estimated probability. <strong style="color:var(--blue)">MARKET</strong> is the no-vig probability implied by the exact two-sided market.
-    </div>
-  </div>
-
-  <nav style="margin:14px 0"><a href="/nfl.html" style="color:var(--cyan);font-weight:700">Open NFL team models and player props →</a></nav>
-  <nav aria-label="Research navigation"><a href="/nba.html">NBA decisions</a> · <a href="/research.html">Prop research &amp; deep dives</a> · <a href="/edge-vnext">Existing research board</a></nav>
-  <div class="tabs">
-    <button class="tab active" data-tab="today">Today</button>
-    <button class="tab" data-tab="plays">Plays</button>
-    <button class="tab" data-tab="props">Player Props</button>
-    <button class="tab" data-tab="market">Market</button>
-    <button class="tab" data-tab="sharp">Sharp Gate</button>
-    <button class="tab" data-tab="results">Results</button>
-    <button class="tab" data-tab="calibration">Calibration</button>
-    <button class="tab" data-tab="system">System</button>
+    <nav class="edge-sport-nav" aria-label="Sport"><a href="/nba.html" data-edge-sport-link="NBA">NBA</a><a href="/nfl.html" data-edge-sport-link="NFL">NFL</a><a href="/research.html?kind=games&amp;sport=NHL" data-edge-sport-link="NHL">NHL</a><a href="/research.html?kind=games&amp;sport=NCAAF" data-edge-sport-link="NCAAF">CFB</a></nav>
+    <p class="edge-shell-context">MLB advanced analytics</p>
+    <nav class="edge-view-nav" aria-label="Board view"><a href="/dashboard" aria-current="page">Games</a><a href="/dashboard#props">Props</a><a href="/research.html?kind=games&amp;sport=MLB">Alt Lines</a><a href="/dashboard#plays">Parlays</a></nav>
   </div>
 
   <section class="section active" id="today">
-    <div class="section-title"><h2>Final Market Card</h2><p id="todayStamp"></p></div>
+    <div class="section-title"><h2>Today at a glance</h2><p id="todayStamp"></p></div>
     <div class="card" style="box-shadow:none">
       <div class="reason" style="margin-top:0">
-        Every listed market resolves to <strong>PLAY</strong>, <strong>PASS</strong>, or <strong>PENDING</strong>. PENDING only means a required input or final sharp check is still outstanding; it cannot remain pending inside the final 20-minute pregame window.
+        Review game summaries here, open <a href="#plays" data-open-tab="plays">BUY selections</a> for cleared cards, or inspect <a href="#props" data-open-tab="props">player prop grades</a>. BUY and AVOID display the recorded PLAY and PASS decisions. Pending means required evidence is still outstanding.
       </div>
     </div>
     <div id="marketCardList"><div class="empty loading">Loading moneylines, totals, and run lines…</div></div>
@@ -190,6 +200,7 @@
 
   <section class="section" id="plays">
     <div class="section-title"><h2>Plays</h2><p>Cleared selections ranked by win likelihood; price and EV shown separately</p></div>
+    <div data-nba-live-mount></div>
 
     <div class="card">
       <div class="candidate-head">
@@ -256,14 +267,15 @@
       </div>
     </div>
 
-    <div class="section-title"><h2>Prop Plays</h2><p>qualified singles only</p></div>
-    <div id="propPlayList"><div class="empty">No prop plays currently qualify.</div></div>
-
-    <div class="section-title"><h2>Pending Props</h2><p>must resolve before final window</p></div>
-    <div id="propPendingList"><div class="empty">No prop markets are pending.</div></div>
-
-    <div class="section-title"><h2>All Prop Grades</h2><p>PLAY / PENDING / PASS</p></div>
+    <div id="propPlayList" class="dashboard-summary-link"></div>
+    <div class="section-title"><h2>Current prop grades</h2><p id="propBoardCount" aria-live="polite"></p></div>
+    <div class="dashboard-filters">
+      <label>Find a player<input id="propSearch" type="search" placeholder="Player, team or market" autocomplete="off" /></label>
+      <label>Decision<select id="propStatus"><option value="all">All decisions</option><option value="PLAY">BUY</option><option value="PENDING">Pending</option><option value="PASS">AVOID</option></select></label>
+      <label>Sort<select id="propSort"><option value="start">Game time</option><option value="model">Model probability</option><option value="market">Market probability</option><option value="ev">Expected value</option><option value="edge">Model–market difference</option></select></label>
+    </div>
     <div id="propGradeList"><div class="empty">No prop grades loaded yet.</div></div>
+    <button id="propShowMore" class="refresh" type="button" hidden>Show more markets</button>
 
     <div class="section-title"><h2>Recent Prop Results</h2><p>automatic postgame grading</p></div>
     <div id="propResultsList"><div class="empty">No graded prop results yet.</div></div>
@@ -436,12 +448,14 @@
 
 <script type="module">
 import {deepDiveHtml,preserveDeepDives} from "./deep-dive.js";
-import {rankByWinProbability} from "./current-card.js";
+import {rankByWinProbability,currentDecisionCard,currentSelectionKey} from "./current-card.js";
+import {displayPlayerName,formatCentralTime,formatProbability} from "./ui-format.js";
   const $ = (id) => document.getElementById(id);
-  const fmtPct = (x, digits=1) => x == null ? "—" : (Number(x)*100).toFixed(digits)+"%";
-  const fmtPP = (x) => x == null ? "—" : (Number(x)>=0?"+":"")+Number(x).toFixed(2)+" pp";
+  const fmtPct = (x) => formatProbability(x);
+  const fmtPP = (x) => typeof x!=="number"||!Number.isFinite(x) ? "N/A" : (x>=0?"+":"")+x.toFixed(2)+" pp";
+  const fmtSignedPercent = (x) => typeof x!=="number"||!Number.isFinite(x) ? "N/A" : (x>=0?"+":"")+x.toFixed(2)+"%";
   const fmtOdds = (x) => x == null ? "—" : (Number(x)>0?"+":"")+Number(x);
-  const fmtTime = (x) => !x ? "—" : new Date(x).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+  const fmtTime = (x) => formatCentralTime(x);
   const probCompare = (model, market) => `
     <div class="prob-compare">
       <div class="prob-box model-prob">
@@ -458,19 +472,70 @@ import {rankByWinProbability} from "./current-card.js";
   let loadingView=false,queuedRefresh=false;
   const currentView=()=>document.querySelector(".tab.active")?.dataset.tab||"today";
 
-  document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
-    document.querySelectorAll(".section").forEach(x => x.classList.remove("active"));
-    btn.classList.add("active");
-    $(btn.dataset.tab).classList.add("active");
-    load(true);
-  }));
+  function selectDashboardTab(view,refresh=true){
+    view=view||'today';
+    const target=[...document.querySelectorAll(".tab")].find(button=>button.dataset.tab===view);
+    if(!target||!$(view))return;
+    const changed=currentView()!==view;
+    document.querySelectorAll(".tab").forEach(button=>{button.classList.toggle("active",button===target);button.setAttribute("aria-selected",String(button===target));});
+    document.querySelectorAll(".section").forEach(section=>section.classList.toggle("active",section.id===view));
+    if(refresh&&changed)load(true);
+  }
+  function navigateDashboardTab(view){
+    const hash=view==='today'?'':'#'+view;
+    if(location.hash!==hash)location.hash=hash;
+    else selectDashboardTab(view);
+  }
+  document.querySelectorAll(".tab").forEach(button=>button.addEventListener("click",()=>navigateDashboardTab(button.dataset.tab)));
+  document.addEventListener("click",event=>{
+    const link=event.target.closest?.("[data-open-tab]");
+    if(!link)return;
+    event.preventDefault();navigateDashboardTab(link.dataset.openTab);
+  });
+  window.addEventListener('hashchange',()=>selectDashboardTab(location.hash.slice(1)));
+  selectDashboardTab(location.hash.slice(1),false);
+  let propBoardLimit=30;
+  const expandedDashboardDetails=new Set();
+  function preserveDashboardDetails(){
+    for(const item of document.querySelectorAll("[data-dashboard-detail]")){
+      if(item.open)expandedDashboardDetails.add(item.dataset.dashboardDetail);
+      else expandedDashboardDetails.delete(item.dataset.dashboardDetail);
+    }
+  }
+  const playerDisplay=p=>displayPlayerName(p.player_name??p.playerName,p.player_id??p.playerID);
+  function propSelection(p){
+    const market=String(p.stat_id??p.statID??p.market_type??p.market??'').replace(/^(pitching|batting)_/,'').replace(/([a-z])([A-Z])/g,'$1 $2').replaceAll('_',' ');
+    if(!market)return p.label||'Prop market';
+    return [p.side?String(p.side).toUpperCase():'',p.line??'',market].filter(value=>value!=='').join(' ');
+  }
+  function conciseReason(row){
+    if(row.status==='PLAY')return 'Cleared by the recorded decision.';
+    const reason=String(row.reason??'');
+    const checks=[[/expired|stale|aging/i,'Stale market evidence'],[/not approved|model approval/i,'Model not approved'],[/injury|availability/i,'Availability unverified'],[/rotation|minutes|lineup|role/i,'Role or lineup unconfirmed'],[/histor|sample/i,'Insufficient historical data'],[/edge|expected value|EV threshold/i,'Value requirements not met']];
+    return checks.find(([pattern])=>pattern.test(reason))?.[1]||(row.status==='PENDING'?'Awaiting required evidence.':'Decision requirements not met.');
+  }
+  function dashboardFreshness(row,kind){const m=row,p=row;return kind==='prop'?freshnessPanel(p):freshnessPanel(m);}
+  function decisionDetails(row,kind,scope){
+    const key=scope+currentSelectionKey(row,{sport:row.sport||'MLB'});
+    const reason=kind==='prop'?propWhy(row):marketWhy(row);
+    return `<details data-dashboard-detail="${esc(key)}"${expandedDashboardDetails.has(key)?' open':''}><summary>Decision details &amp; evidence</summary>
+      <div class="reason">${esc(reason)}</div>
+      ${deepDiveHtml(row,{scope,reason,presentation:{title:row.status==='PLAY'?'PLAY — recorded decision':row.status==='PASS'?'PASS — do not play':'NOT CLEARED — do not play'}})}
+      ${dashboardFreshness(row,kind)}${kind==='prop'?tensorflowShadowPanel(row):''}${fusionPanel(row)}${timingPanel(row)}${kind==='prop'?clvPanel(row):''}
+      <p class="reason"><strong>Statistics used:</strong> ${esc(kind==='prop'?propStats(row):marketStats(row))}</p>
+      ${kind==='prop'?'<p class="pick">Model mean: '+esc(row.model_mean??'N/A')+' · Exact-line books: '+esc(row.exact_line_book_count??'N/A')+' · Data quality: '+esc(row.data_quality??'N/A')+'</p>':'<p class="pick">Playable threshold: '+fmtOdds(row.playable_threshold)+'</p>'}
+      ${kind==='prop'&&playerDisplay(row).source==='provider-id'?'<p class="pick">Display name formatted from the provider ID; roster identity is not verified by this formatting.</p>':''}
+      <p class="pick">Recorded ${fmtTime(row.captured_at)}${row.player_id?' · Provider player ID: '+esc(row.player_id):''}${row.event_id?' · Event: '+esc(row.event_id):''}</p>
+    </details>`;
+  }
+  for(const id of ['propSearch','propStatus','propSort'])$(id).addEventListener('input',()=>{propBoardLimit=30;preserveDashboardDetails();preserveDeepDives(document.body);renderPropGradeBoard(DATA?.playerProps||{});});
+  $('propShowMore').addEventListener('click',()=>{propBoardLimit+=30;preserveDashboardDetails();preserveDeepDives(document.body);renderPropGradeBoard(DATA?.playerProps||{});});
 
   function statusBadge(c){
     const s = c.status || c.verification_status || c.model_decision || "UNKNOWN";
-    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">PLAY</span>';
+    if(s==="PLAY" || s==="FINAL_PLAY") return '<span class="badge play">BUY</span>';
     if(s==="PENDING" || s==="READY_FOR_SHARP_CHECK") return '<span class="badge watch">PENDING</span>';
-    if(s==="PASS") return '<span class="badge pass">PASS</span>';
+    if(s==="PASS") return '<span class="badge pass">AVOID</span>';
     return '<span class="badge neutral">'+esc(s)+'</span>';
   }
 
@@ -708,11 +773,12 @@ import {rankByWinProbability} from "./current-card.js";
   function propWhy(p){
     const status=p?.status||"PASS";
     const reason=String(p?.reason||"").trim();
-    const edge=Number(p?.edge_pct_points);
-    const ev=Number(p?.ev_pct);
-    const dq=Number(p?.data_quality);
-    const exact=Number(p?.exact_line_book_count);
-    const paired=Number(p?.paired_books);
+    const numeric=value=>typeof value==="number"&&Number.isFinite(value)?value:NaN;
+    const edge=numeric(p?.edge_pct_points);
+    const ev=numeric(p?.ev_pct);
+    const dq=numeric(p?.data_quality);
+    const exact=numeric(p?.exact_line_book_count);
+    const paired=numeric(p?.paired_books);
     const parts=[];
 
     if(status==="PLAY"){
@@ -886,56 +952,24 @@ import {rankByWinProbability} from "./current-card.js";
 
     const groups=new Map();
     for(const m of rows){
-      const key=m.event_id||((m.away_team||"")+"|"+(m.home_team||""));
+      const key=JSON.stringify([m.sport,m.event_id??[m.away_team,m.home_team],m.starts_at]);
       if(!groups.has(key)) groups.set(key,[]);
       groups.get(key).push(m);
     }
 
-    const statusRank={PLAY:0,PENDING:1,PASS:2};
-    const typeRank={moneyline:0,spread:1,total:2};
-
     $("marketCardList").innerHTML=[...groups.values()].map(group=>{
-      group.sort((a,b)=>
-        (statusRank[a.status]??9)-(statusRank[b.status]??9) ||
-        (typeRank[a.market_type]??9)-(typeRank[b.market_type]??9)
-      );
-      const g=group[0];
-      return `
-        <div class="card">
-          <div class="candidate-head">
-            <div>
-              <div class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</div>
-              <div class="pick">${fmtTime(g.starts_at)}</div>
-            </div>
-            <span class="badge neutral">${group.length} MARKETS</span>
-          </div>
-          <div style="margin-top:10px">
-            ${group.map(m=>`
-              <div class="market-list-row">
-                <div>
-                  <div class="main">${esc(m.market_label)}</div>
-                  <div class="small">${esc(String(m.market_type||"").toUpperCase())} · ${esc(m.best_book||"—")} ${fmtOdds(m.best_odds)}</div>
-                  <div class="why ${whyClass(m.status)}">${esc(marketWhy(m))}</div>
-${deepDiveHtml(m,{scope:"dashboard-1",reason:marketWhy(m),presentation:{title:m.status==="PLAY"?"PLAY — recorded decision":m.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-                  ${freshnessPanel(m)}
-                  ${fusionPanel(m)}
-                  ${timingPanel(m)}
-                  <div class="small" style="margin-top:6px"><strong>STATS USED:</strong> ${esc(marketStats(m))}</div>
-                </div>
-                <div class="market-decision-panel">
-                  <div class="market-decision-box">
-                    <div class="small">Decision</div>
-                    ${statusBadge(m)}
-                  </div>
-                  ${probCompare(m.model_probability,m.market_fair_probability)}
-                  <div class="small" style="margin-top:8px;text-align:center">
-                    Edge <strong class="${Number(m.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(m.edge_pct_points)}</strong>
-                    · EV <strong class="${Number(m.ev_pct)>=0?"positive":"negative"}">${m.ev_pct==null?"—":(Number(m.ev_pct)>=0?"+":"")+Number(m.ev_pct).toFixed(2)+"%"}</strong>
-                  </div>
-                </div>
-              </div>`).join("")}
-          </div>
-        </div>`;
+      const g=group[0],buys=group.filter(row=>row.status==='PLAY').length,pending=group.filter(row=>row.status==='PENDING').length;
+      return `<article class="card dashboard-game-summary">
+        <div class="candidate-head"><div><h3 class="match">${esc(g.away_team)} @ ${esc(g.home_team)}</h3><div class="pick">${fmtTime(g.starts_at)}</div></div><span class="badge neutral">${group.length} MARKETS</span></div>
+        <div class="dashboard-counts"><span>${buys} BUY</span><span>${pending} pending</span><span>${group.filter(row=>row.status==='PASS').length} AVOID</span></div>
+        ${buys?'<a href="#plays" data-open-tab="plays">View cleared selections →</a>':''}
+        <details><summary>Review exact markets</summary>
+        ${group.map(m=>`<div class="dashboard-market-row"><div><strong>${esc(m.market_label)}</strong><div class="pick">${esc(m.best_book||'Book unavailable')} · ${fmtOdds(m.best_odds)}</div></div>${statusBadge(m)}
+          <div class="dashboard-row-metrics">${probCompare(m.model_probability,m.market_fair_probability)}<div class="pick">Edge ${fmtPP(m.edge_pct_points)} · EV ${fmtSignedPercent(m.ev_pct)}</div></div>
+          ${m.status==='PLAY'?'<a href="#plays" data-open-tab="plays">Open BUY card</a>':decisionDetails(m,'team','overview')}
+        </div>`).join('')}
+        </details>
+      </article>`;
     }).join("");
   }
 
@@ -1015,7 +1049,7 @@ ${deepDiveHtml(c,{scope:"candidates",reason:(c.blockers||[]).join("; ")})}
 
   function renderPlays(card, parlayCorrelation){
     const singles=[...(card?.plays||[])];
-    $("singleCountBadge").textContent=singles.length+" QUALIFIED";
+    $("singleCountBadge").textContent=card?.availability==='UNAVAILABLE'?'UNAVAILABLE':singles.length+" QUALIFIED";
     const ranked=rankByWinProbability(singles);
 
     if(!ranked.length){
@@ -1036,13 +1070,8 @@ ${deepDiveHtml(c,{scope:"candidates",reason:(c.blockers||[]).join("; ")})}
             <div class="stat"><div class="k">Edge (pp)</div><div class="v">${fmtPP(g.edge_pct_points)}</div></div>
             <div class="stat"><div class="k">Modeled EV</div><div class="v ${Number(g.ev_pct)>=0?"positive":"negative"}">${g.ev_pct==null?"—":(Number(g.ev_pct)>=0?"+":"")+Number(g.ev_pct).toFixed(2)+"%"}</div></div>
           </div>
-          <div class="why play">${esc(marketWhy(g))}</div>
-${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.status==="PLAY"?"PLAY — recorded decision":g.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-          ${freshnessPanel(g)}
-          ${fusionPanel(g)}
-          ${timingPanel(g)}
-          <div class="reason"><strong>STATS USED:</strong> ${esc(marketStats(g))}</div>
-          <div class="reason"><strong>Playable threshold:</strong> ${fmtOdds(g.playable_threshold)}</div>
+          <p class="dashboard-short-reason">${esc(conciseReason(g))}</p>
+          ${decisionDetails(g,'team','team-buys')}
         </div>`).join("");
     }
 
@@ -1079,7 +1108,7 @@ ${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.
   function renderPropPlaysInPlays(card){
     const props=rankByWinProbability(card?.plays||[]);
 
-    $("playsPropCountBadge").textContent=props.length+" QUALIFIED";
+    $("playsPropCountBadge").textContent=card?.availability==='UNAVAILABLE'?'UNAVAILABLE':props.length+" QUALIFIED";
 
     if(!props.length){
       $("playsPropList").innerHTML='<div class="empty">'+esc(card?.reason||'No current player-prop BUYs are cleared.')+'</div>'+(card?.researchUrl?'<a href="'+esc(card.researchUrl)+'">Open '+esc(card.sport)+' decisions and research</a>':'');
@@ -1087,29 +1116,15 @@ ${deepDiveHtml(g,{scope:"dashboard-2",reason:marketWhy(g),presentation:{title:g.
     }
 
     $("playsPropList").innerHTML=props.map((p,i)=>`
-      <div class="card" style="box-shadow:none;margin:8px 0;border-color:rgba(170,140,255,.42)">
-        <div class="candidate-head">
-          <div>
-            <div class="match">#${i+1} · ${esc(p.label)}</div>
-            <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
-          </div>
-          <span class="badge play">PROP BUY</span>
-        </div>
-        <div class="grid4">
-          <div class="stat"><div class="k">Play At</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
-          <div class="stat">${probCompare(p.model_probability,p.market_fair_probability)}</div>
-          <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div></div>
-          <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div></div>
-        </div>
-        <div class="why play">${esc(propWhy(p))}</div>
-${deepDiveHtml(p,{scope:"dashboard-3",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-        ${freshnessPanel(p)}
-        ${fusionPanel(p)}
-        ${timingPanel(p)}
-        ${clvPanel(p)}
-        <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
-        <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Data quality:</strong> ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div>
-      </div>`).join("");
+      <article class="card dashboard-prop-buy" style="box-shadow:none;margin:8px 0;border-color:rgba(170,140,255,.42)">
+        <div class="candidate-head"><div><div class="pick">Selection ${i+1}</div><h3 class="dashboard-player-name">${esc(playerDisplay(p).name)}</h3><div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div></div><span class="badge play">BUY</span></div>
+        <p class="dashboard-selection">${esc(propSelection(p))}</p>
+        <div class="pick">${esc(p.best_book||'Book unavailable')} · ${fmtOdds(p.best_odds)}</div>
+        ${probCompare(p.model_probability,p.market_fair_probability)}
+        <div class="dashboard-counts"><span>Edge ${fmtPP(p.edge_pct_points)}</span><span>EV ${fmtSignedPercent(p.ev_pct)}</span></div>
+        <p class="dashboard-short-reason">${esc(conciseReason(p))}</p>
+        ${decisionDetails(p,'prop','prop-buys')}
+      </article>`).join("");
   }
 
   function renderFinalPlays(rows){
@@ -1179,90 +1194,33 @@ ${deepDiveHtml(g,{scope:"final-plays",presentation:{title:g.final_status==="FINA
     }
   }
 
+  function renderPropGradeBoard(card){
+    const query=$('propSearch').value.trim().toLowerCase(),status=$('propStatus').value,sort=$('propSort').value;
+    let rows=(card?.props||[]).filter(row=>(status==='all'||row.status===status)&&(!query||[playerDisplay(row).name,row.label,propSelection(row),row.home_team,row.away_team,row.best_book].filter(Boolean).join(' ').toLowerCase().includes(query)));
+    if(sort==='model')rows=rankByWinProbability(rows);
+    else if(sort==='start')rows.sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at)||playerDisplay(a).name.localeCompare(playerDisplay(b).name));
+    else{const field={market:'market_fair_probability',ev:'ev_pct',edge:'edge_pct_points'}[sort];const numeric=value=>typeof value==='number'&&Number.isFinite(value)&&(sort!=='market'||value>=0&&value<=1)?value:-Infinity;rows.sort((a,b)=>numeric(b[field])-numeric(a[field]));}
+    $('propBoardCount').textContent=card?.availability==='UNAVAILABLE'?'Current selection count unavailable':`${rows.length} unique selections${rows.length>propBoardLimit?' · showing '+propBoardLimit:''}`;
+    $('propShowMore').hidden=rows.length<=propBoardLimit;
+    if(!rows.length){$('propGradeList').innerHTML='<div class="empty">'+esc((query||status!=='all')?'No current markets match these filters.':card?.reason||'No current prop grades are available.')+'</div>';return;}
+    $('propGradeList').innerHTML=rows.slice(0,propBoardLimit).map(p=>`<article class="card dashboard-prop-grade">
+      <div class="candidate-head"><div><h3 class="dashboard-player-name">${esc(playerDisplay(p).name)}</h3><div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div></div>${statusBadge(p)}</div>
+      <p class="dashboard-selection">${esc(propSelection(p))}</p><div class="pick">${esc(p.best_book||'Book unavailable')} · ${fmtOdds(p.best_odds)}</div>
+      ${probCompare(p.model_probability,p.market_fair_probability)}
+      <div class="dashboard-counts"><span>Edge ${fmtPP(p.edge_pct_points)}</span><span>EV ${fmtSignedPercent(p.ev_pct)}</span></div>
+      <p class="dashboard-short-reason">${esc(conciseReason(p))}</p>
+      ${p.status==='PLAY'?'<a href="#plays" data-open-tab="plays">Open full BUY card →</a>':decisionDetails(p,'prop','prop-grade')}
+    </article>`).join('');
+  }
+
   function renderPlayerProps(card){
     const summary=card?.summary||{};
     $("pTotal").textContent=summary.gradedProps??'Unavailable';
     $("pPlay").textContent=summary.play??'Unavailable';
     $("pPending").textContent=summary.pending??'Unavailable';
     $("pPass").textContent=summary.pass??'Unavailable';
-
-    const playRows=card?.plays||[];
-    if(!playRows.length){
-      $("propPlayList").innerHTML='<div class="empty">'+esc(card?.reason||'No current prop BUYs qualify.')+'</div>'+(card?.researchUrl?'<a href="'+esc(card.researchUrl)+'">Open '+esc(card.sport)+' decisions and research</a>':'');
-    } else {
-      $("propPlayList").innerHTML=playRows.slice(0,25).map((p,i)=>`
-        <div class="card" style="border-color:rgba(77,226,208,.45)">
-          <div class="candidate-head">
-            <div>
-              <div class="match">#${i+1} · ${esc(p.label)}</div>
-              <div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div>
-            </div>
-            <span class="badge play">PLAY</span>
-          </div>
-          <div class="grid4">
-            <div class="stat"><div class="k">Price</div><div class="v">${fmtOdds(p.best_odds)}</div><div class="small">${esc(p.best_book||"—")}</div></div>
-            <div class="stat">${probCompare(p.model_probability,p.market_fair_probability)}<div class="small" style="margin-top:5px">Raw independent: ${fmtPct(p.raw_independent_probability)}</div></div>
-            <div class="stat"><div class="k">Edge (pp)</div><div class="v positive">${fmtPP(p.edge_pct_points)}</div><div class="small">vs exact-line no-vig</div></div>
-            <div class="stat"><div class="k">Modeled EV</div><div class="v positive">${p.ev_pct==null?"—":"+"+Number(p.ev_pct).toFixed(2)+"%"}</div><div class="small">DQ ${p.data_quality==null?"—":Number(p.data_quality).toFixed(2)}</div></div>
-          </div>
-          <div class="why play">${esc(propWhy(p))}</div>
-${deepDiveHtml(p,{scope:"dashboard-4",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-          ${freshnessPanel(p)}
-          ${tensorflowShadowPanel(p)}
-          ${fusionPanel(p)}
-        ${timingPanel(p)}
-          ${clvPanel(p)}
-          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
-          <div class="reason"><strong>Model mean:</strong> ${p.model_mean==null?"—":Number(p.model_mean).toFixed(2)} · <strong>Exact-line books:</strong> ${p.exact_line_book_count??"—"}</div>
-        </div>`).join("");
-    }
-
-    const pending=card?.pending||[];
-    if(!pending.length){
-      $("propPendingList").innerHTML='<div class="empty">No prop markets are pending.</div>';
-    } else {
-      $("propPendingList").innerHTML=pending.slice(0,25).map(p=>`
-        <div class="card" style="box-shadow:none">
-          <div class="candidate-head">
-            <div><div class="match">${esc(p.label)}</div><div class="pick">${esc(p.away_team)} @ ${esc(p.home_team)} · ${fmtTime(p.starts_at)}</div></div>
-            <span class="badge watch">PENDING</span>
-          </div>
-          <div class="why pending">${esc(propWhy(p))}</div>
-${deepDiveHtml(p,{scope:"dashboard-5",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-          ${freshnessPanel(p)}
-          ${tensorflowShadowPanel(p)}
-          ${fusionPanel(p)}
-        ${timingPanel(p)}
-          ${clvPanel(p)}
-          <div class="reason"><strong>STATS USED:</strong> ${esc(propStats(p))}</div>
-        </div>`).join("");
-    }
-
-    const rows=card?.props||[];
-    if(!rows.length){
-      $("propGradeList").innerHTML='<div class="empty">No prop grades loaded yet.</div>';
-    } else {
-      $("propGradeList").innerHTML='<div class="card">'+rows.slice(0,80).map(p=>`
-        <div class="list-row">
-          <div>
-            <div class="main">${esc(p.label)}</div>
-            <div class="small">${esc(p.player_name)} · ${esc(String(p.stat_id||"").replace("pitching_","").replace("batting_",""))} · ${esc(p.best_book||"—")} ${fmtOdds(p.best_odds)}</div>
-            <div class="small" style="margin-top:4px">${esc(propWhy(p))}</div>
-${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.status==="PLAY"?"PLAY — recorded decision":p.status==="PASS"?"PASS — do not play":"NOT CLEARED — do not play"}})}
-            ${freshnessPanel(p)}
-            ${tensorflowShadowPanel(p)}
-            ${fusionPanel(p)}
-        ${timingPanel(p)}
-            ${clvPanel(p)}
-            <div class="small" style="margin-top:4px"><strong>STATS:</strong> ${esc(propStats(p))}</div>
-          </div>
-          <div><div class="small">Decision</div>${statusBadge(p)}</div>
-          <div>${probCompare(p.model_probability,p.market_fair_probability)}</div>
-          <div class="hide-mobile"><div class="small">Edge</div><strong class="${Number(p.edge_pct_points)>=0?"positive":"negative"}">${fmtPP(p.edge_pct_points)}</strong></div>
-          <div class="hide-mobile"><div class="small">EV</div><strong class="${Number(p.ev_pct)>=0?"positive":"negative"}">${p.ev_pct==null?"—":(Number(p.ev_pct)>=0?"+":"")+Number(p.ev_pct).toFixed(2)+"%"}</strong></div>
-        </div>`).join("")+'</div>';
-    }
-
+    $("propPlayList").innerHTML=card?.researchUrl?'<a href="'+esc(card.researchUrl)+'">Open '+esc(card.sport)+' decisions and research →</a>':card?.availability==='UNAVAILABLE'?'<p>Current prop decisions are unavailable.</p>':'<a href="#plays" data-open-tab="plays">'+(card?.plays?.length??0)+' cleared prop selections — open BUY cards →</a>';
+    renderPropGradeBoard(card);
     const results=card?.recentResults||[];
     if(!results.length){
       $("propResultsList").innerHTML='<div class="empty">No graded prop results yet. This fills automatically after tracked games finish.</div>';
@@ -1933,15 +1891,18 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
   }
 
   function render(data){
+    preserveDashboardDetails();
     preserveDeepDives(document.body);
+    data={...data,marketCard:currentDecisionCard(data.marketCard,{sport:data.marketCard?.sport||'MLB',available:data.marketCard?.availability!=='UNAVAILABLE'}),
+      playerProps:data.playerProps?.availability==='USE_SPORT_RESEARCH'?data.playerProps:currentDecisionCard(data.playerProps,{sport:data.playerProps?.sport||'MLB',kind:'props',available:data.playerProps?.availability!=='UNAVAILABLE'})};
     DATA=data;
     const s=data.summary||{};
-    $("mActive").textContent=s.gradedMarkets??data.marketCard?.summary?.markets??'Unavailable';
-    $("mReady").textContent=s.pending??data.marketCard?.summary?.pending??'Unavailable';
-    $("mFinal").textContent=s.finalPlays??'Unavailable';
+    $("mActive").textContent=data.marketCard?.summary?.markets??'Unavailable';
+    $("mReady").textContent=data.marketCard?.summary?.pending??'Unavailable';
+    $("mFinal").textContent=data.marketCard?.summary?.play??'Unavailable';
     $("mGrades").textContent=s.grades??0;
     $("mSnaps").textContent=(s.marketSnapshots??0).toLocaleString();
-    $("todayStamp").textContent="Updated "+new Date(data.fetchedAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});
+    $("todayStamp").textContent="Updated "+fmtTime(data.fetchedAt);
     const cadence=Math.max(
       15,
       Math.min(300,Number(data.refreshPolicy?.suggestedSeconds||60))
@@ -2060,7 +2021,9 @@ ${deepDiveHtml(p,{scope:"prop-grades",reason:propWhy(p),presentation:{title:p.st
     }catch(err){
       $("healthDot").classList.add("bad");
       if(DATA){
-        $("healthText").textContent="Live refresh failed — showing last successful data";
+        render(DATA);
+        $("healthDot").classList.add("bad");
+        $("healthText").textContent="Live refresh failed — last successful update "+fmtTime(DATA.fetchedAt);
       }else{
         $("healthText").textContent="Dashboard connection failed";
         $("marketCardList").innerHTML='<div class="empty">'+esc(err.message||err)+'</div>';

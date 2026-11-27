@@ -133,3 +133,81 @@ body.el-theme {
 .el-theme .decision-stamp { font-size:12px; line-height:1.5; color:var(--muted); margin-top:8px; font-weight:500; overflow-wrap:anywhere; }
 .el-dashboard .market-decision-box .badge, .el-dashboard .candidate-head .badge { white-space:normal; text-align:center; font-size:12px; }
 .el-dashboard .market-decision-box { padding:14px 10px; }
+
+/* Shared navigation and compact, readable player-market cards. */
+.el-theme [hidden] { display:none!important; }
+.el-theme .edge-nav { margin:0 0 22px; padding:8px; background:#19191f; border:1px solid var(--line); border-radius:12px; }
+.el-theme .edge-nav-links { display:flex; flex-wrap:wrap; gap:6px; }
+.el-theme .edge-nav-toggle { display:none; width:100%; text-align:left; font-size:14px; padding:10px 12px; border:0; }
+.el-theme .edge-nav a { display:inline-flex; align-items:center; min-height:44px; padding:8px 12px; border-radius:8px; color:var(--muted); text-decoration:none; font-size:13px; font-weight:650; }
+.el-theme .edge-nav a[aria-current=page] { background:#33264c; color:#e6dcff; }
+.el-theme .edge-nav a:hover { background:#282330; color:var(--text); }
+.el-theme .board-note { max-width:76ch; color:var(--muted); font-size:13px; line-height:1.6; }
+.el-theme .live-board { margin:26px 0; }
+.el-theme .live-board>.status { font-size:13px; margin:12px 0 2px; min-height:0; }
+.el-theme .board-updated { margin:0 0 14px; color:var(--muted); font-size:11px; }
+.el-theme .board-search { display:grid; gap:5px; font-size:12px; color:var(--muted); }
+.el-theme .board-search input { width:100%; min-width:0; padding:10px 12px; font-size:16px; }
+.el-theme .board-filter-options { margin:8px 0 16px; }
+.el-theme .board-filter-options>summary { min-height:44px; padding:10px 0; color:#d6c5fa; cursor:pointer; font-size:13px; font-weight:650; }
+.el-theme .board-filter-options .board-filters { margin:4px 0 12px; }
+.el-theme .board-filter-options .board-filters label:first-child { grid-column:auto; }
+.el-theme .nba-page-actions { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+.el-theme .nba-page-actions a { font-size:13px; display:inline-flex; align-items:center; min-height:44px; }
+.el-nba .nba-page-header { padding-bottom:16px; gap:10px; }
+.el-theme .board-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:14px; margin:16px 0; background:#19191f; border:1px solid var(--line); border-radius:12px; }
+.el-theme .board-filters label { display:grid; gap:5px; font-size:11px; color:var(--muted); min-width:0; }
+.el-theme .board-filters label:first-child { grid-column:1/-1; }
+.el-theme .board-filters input,.el-theme .board-filters select { width:100%; max-width:100%; min-width:0; padding:10px; font-size:14px; }
+.el-theme .live-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
+.el-theme .prop-card { min-width:0; padding:18px; overflow-wrap:break-word; }
+.el-theme .prop-card .player-name,.el-theme .prop-card .card-head h3 { font-size:23px; line-height:1.3; font-weight:780; color:var(--text); margin:0; word-break:normal; }
+.el-theme .prop-card .card-head { gap:8px; }
+.el-theme .prop-card .card-head h3 { flex:1; min-width:0; }
+.el-theme .game-meta { font-size:12px; margin:7px 0; line-height:1.55; }
+.el-theme .market-title { font-size:15px; font-weight:650; margin:12px 0; }
+.el-theme .prop-selection { padding:12px; margin:12px 0; background:#15151c; border:1px solid var(--line); border-radius:11px; min-width:0; }
+.el-theme .selection-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+.el-theme .selection-head>strong { font-size:17px; }
+.el-theme .selection-head .badge { font-size:10px; letter-spacing:.3px; padding:5px 8px; border-radius:6px; }
+.el-theme .quote-price { font-size:13px; font-weight:600; color:#d6c7f3; margin:7px 0; }
+.el-theme .prop-selection .compare { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; margin:10px 0; }
+.el-theme .prop-selection .compare>div { padding:8px 4px; border-radius:7px; min-width:0; background:#201e28; }
+.el-theme .prop-selection .compare small { display:block; font-size:10px; line-height:1.4; min-height:28px; }
+.el-theme .prop-selection .compare strong { display:block; font-size:18px; line-height:1.5; font-variant-numeric:tabular-nums; }
+.el-theme .selection-reason { font-size:12px; line-height:1.5; color:var(--muted); margin:8px 0; }
+.el-theme .prop-card details { border-top:1px solid var(--line); margin-top:8px; }
+.el-theme .prop-card summary,.el-theme .quote-observations>summary { min-height:44px; padding:12px 0; font-size:13px; font-weight:650; line-height:1.5; color:#d6c5fa; cursor:pointer; }
+.el-theme .prop-card details p { font-size:12px; line-height:1.6; color:var(--muted); }
+.el-theme .technical-id { overflow-wrap:anywhere; font-size:11px; }
+.el-theme .quote-observations { border:1px solid var(--line); padding:12px 16px; border-radius:14px; margin:26px 0; background:#19191f; }
+.el-theme .quote-observations>summary { font-size:17px; }
+.el-theme .quote-observations section { margin-top:12px; }
+.el-theme .more-markets { margin-top:18px; min-height:44px; }
+@media(max-width:760px) {
+ .el-theme .live-cards { grid-template-columns:1fr; }
+ .el-theme .board-filters { grid-template-columns:repeat(2,minmax(0,1fr)); padding:12px; }
+ .el-theme .edge-nav { margin-bottom:18px; padding:6px; gap:3px; }
+ .el-theme .edge-nav a { font-size:12px; padding:8px 10px; }
+ .el-theme .prop-card { padding:16px; }
+ .el-theme .prop-card .player-name,.el-theme .prop-card .card-head h3 { font-size:22px; }
+ .el-theme .quote-observations { padding:10px 12px; }
+}
+@media(max-width:350px) {
+ .el-theme .prop-selection { padding:10px; }
+ .el-theme .prop-selection .compare { gap:5px; }
+ .el-theme .prop-selection .compare strong { font-size:16px; }
+ .el-theme .prop-card .card-head { flex-wrap:wrap; }
+ .el-theme .prop-card .card-head h3 { flex-basis:100%; }
+}
+@media(max-width:640px) {
+ .el-theme .edge-nav { padding:4px; margin-bottom:14px; }
+ .el-theme .edge-nav-toggle { display:block; }
+ .el-theme .edge-nav-links { display:none; padding:4px; }
+ .el-theme .edge-nav[data-open=true] .edge-nav-links { display:flex; }
+ .el-theme .live-board { margin-top:20px; }
+ .el-nba .nba-page-header h1 { margin-top:0; }
+ .el-nba .nba-page-header .muted { font-size:13px; }
+ .el-nba .nba-page-actions { gap:12px; }
+ .el-nba .nba-page-actions button { font-size:14px; padding:10px 12px; }
+}

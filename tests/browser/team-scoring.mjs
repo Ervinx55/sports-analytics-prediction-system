@@ -159,6 +159,9 @@ try{
   assert.match(await cfbCard.innerText(),/NOT CLEARED/);
   await noOverflow('CFB '+width);
   await screenshot('cfb-'+width);
+  const researchMarket=page.locator('#cards > .research-market').first();
+  await researchMarket.locator(':scope > summary').click();
+  await researchMarket.locator('.target-research-details > summary').first().click();
   await page.locator('#cards').getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
   await checkScoring(page.locator('#detail-body .team-scoring'));
   assert.match(await page.locator('#detail-body').innerText(),/NOT CLEARED/);

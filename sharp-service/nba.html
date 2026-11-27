@@ -3,30 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Edge Lab · NBA Inspection</title>
+<meta name="theme-color" content="#1b1b1b">
+<title>Edge Lab · NBA Players & Games</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;color:#edf4ff;background:#07101d}*{box-sizing:border-box}body{margin:0}main{max-width:1180px;margin:auto;padding:24px 16px}a{color:#55cfff}header,.section-head,.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}h1{margin:8px 0 3px;font-size:28px}h2{font-size:21px;margin:0}h3{font-size:17px;margin:0}.muted,.meta{color:#a9b9cc;font-size:14px;line-height:1.5}.meta{overflow-wrap:anywhere}.notice,.card,.empty{background:#0e1a2c;border:1px solid #223654;border-radius:14px;padding:16px}.notice{margin:20px 0;border-left:4px solid #ffbd4a;line-height:1.6}.notice strong{color:#ffca71}button{font:inherit;background:#132238;color:inherit;border:1px solid #36516e;border-radius:10px;padding:11px 14px;cursor:pointer}button:disabled{opacity:.5;cursor:wait}button:focus-visible,a:focus-visible{outline:3px solid #55cfff;outline-offset:2px}section{margin-top:30px}.section-head{align-items:end;margin-bottom:12px}.section-head p{margin:4px 0 0}.status{min-height:25px;margin:12px 0;color:#a9b9cc}.status.error{color:#ff9297}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}.metric{background:#14243b;border-radius:10px;padding:12px;min-width:0}.metric small{display:block;color:#a9b9cc;font-size:12px}.metric strong{display:block;margin-top:5px;font-size:21px}.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{min-width:0;overflow-wrap:anywhere}.card p{margin:9px 0 0}.badge{font-size:11px;font-weight:800;letter-spacing:.3px;border:1px solid #ffbd4a;color:#ffbd4a;border-radius:100px;padding:5px 9px;white-space:nowrap}.badge.pass{border-color:#ff9297;color:#ff9297}.badge.good{border-color:#4fd18b;color:#4fd18b}.compare{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}.compare div{background:#14243b;padding:10px;border-radius:9px;min-width:0}.compare small{display:block;color:#a9b9cc;font-size:11px}.compare strong{display:block;font-size:20px;margin-top:5px}.compare .model{color:#4de2d0}.compare .market{color:#55a7ff}.quote{margin-top:12px;padding:11px;background:#091727;border:1px solid #29405d;border-radius:10px;font-size:13px;line-height:1.5;overflow-wrap:anywhere}.quote-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:10px}.quote-list div{background:#091727;border:1px solid #29405d;border-radius:9px;padding:9px;font-size:12px;overflow-wrap:anywhere}.empty{color:#a9b9cc;grid-column:1/-1}.subhead{margin:24px 0 10px;font-size:17px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:700px){main{padding:18px 12px}.cards{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.compare strong{font-size:17px}.quote-list{grid-template-columns:1fr}h1{font-size:24px}}@media(max-width:360px){.compare{grid-template-columns:1fr}}
 .cards+button{margin-top:14px}
 </style>
 <link rel="stylesheet" href="/edge-theme.css">
+<script type="module" src="/edge-navigation.js"></script>
+<link rel="stylesheet" href="/edge-target.css">
 </head>
-<body class="el-theme el-nba"><main>
-<header><div><a href="/dashboard">← Edge Lab dashboard</a> · <a href="/nfl.html">NFL models</a><h1>NBA inspection</h1><div class="muted">Upcoming team estimates and provider-observed player markets</div></div><button id="refresh" type="button">Refresh NBA data</button><a href="/research.html">Prop research board</a></header>
-<div class="notice"><strong>Reviewed decisions and research quotes</strong><br>Current PLAY or PASS decisions appear in the reviewed live section. Prop quotes alone do not authorize a play or imply a PASS. Legacy team estimates are not published by this production API.</div>
+<body class="el-theme el-nba edge-shell-page"><main>
+<div class="edge-shell" data-edge-shell data-edge-sport="NBA" data-edge-view="props">
+  <header class="edge-shell-header"><h1 class="edge-wordmark"><a href="/nba.html">EDGE LAB</a></h1><div class="edge-shell-actions">
+    <button id="refresh" class="edge-icon-button" type="button" aria-label="Refresh NBA data" title="Refresh NBA data"><img src="/assets/icons/refresh.svg" alt="" width="24" height="24"></button>
+    <button class="edge-icon-button" type="button" data-edge-menu-toggle aria-controls="edge-shell-menu" aria-expanded="false" aria-label="Open menu" title="Menu"><img src="/assets/icons/menu.svg" alt="" width="24" height="24"></button>
+  </div></header>
+  <div id="edge-shell-menu" class="edge-menu" hidden><nav data-edge-menu-links class="edge-menu-links" aria-label="Edge Lab menu"></nav></div>
+  <nav class="edge-sport-nav" aria-label="Sport"><a href="/nba.html" data-edge-sport-link="NBA" aria-current="page">NBA</a><a href="/nfl.html" data-edge-sport-link="NFL">NFL</a><a href="/research.html?kind=games&amp;sport=NHL" data-edge-sport-link="NHL">NHL</a><a href="/research.html?kind=games&amp;sport=NCAAF" data-edge-sport-link="NCAAF">CFB</a></nav>
+  <div data-edge-status-mount data-edge-status-sport="NBA"></div>
+  <nav class="edge-view-nav" aria-label="Board view"><a href="/research.html?kind=games&amp;sport=NBA">Games</a><a href="/nba.html" aria-current="page">Props</a><a href="/research.html?kind=props&amp;sport=NBA">Alt Lines</a><a href="/dashboard#plays">Parlays</a></nav>
+</div>
+<div data-nba-live-mount></div>
 <section aria-labelledby="team-title"><div class="section-head"><div><h2 id="team-title">Team markets</h2><p class="muted">Model versus exact-book, same-line market probability. Difference is in percentage points (pp).</p></div></div><div id="team-status" class="status" role="status" aria-live="polite">Loading team estimates…</div><div id="team-metrics" class="metrics" hidden></div><div id="team-cards" class="cards"></div><button id="more-team" type="button" hidden></button><h3 class="subhead">Modeled, without a current paired quote</h3><div id="unpriced-cards" class="cards"></div><h3 class="subhead">Unavailable event estimates</h3><div id="unavailable-cards" class="cards"></div></section>
-<section aria-labelledby="props-title"><div class="section-head"><div><h2 id="props-title">Player prop observations</h2><p class="muted">Bookmaker lines and odds only. No player prediction or candidate is available.</p></div></div><div id="props-status" class="status" role="status" aria-live="polite">Loading player markets…</div><div id="props-metrics" class="metrics" hidden></div><div id="props-cards" class="cards"></div><button id="more-props" type="button" hidden></button></section>
+<details class="quote-observations"><summary>Market quotes & matchup research</summary><section aria-labelledby="props-title"><div class="section-head"><div><h2 id="props-title">Player prop observations</h2><p class="muted">One card per player and market, with individual books and lines. Quotes do not clear a play.</p></div></div><div class="board-filters"><label>Find a player<input id="props-query" type="search" placeholder="Player, team, or market"></label></div><div id="props-status" class="status" role="status" aria-live="polite">Loading player markets…</div><div id="props-metrics" class="metrics" hidden></div><div id="props-cards" class="cards"></div><button id="more-props" type="button" hidden></button></section></details>
 </main><script type="module">
 import {appendDeepDive,preserveDeepDives} from "./deep-dive.js";
 import {appendDecision} from "./decision-display.js";
 import {assessPropQuote} from "./prop-price-checks.js";
 import {setNbaQuoteNames} from "./nba-live.js";
+import {normalizeResearch,groupResearchRows,filterResearch} from "./research-data.js";
+import {displayPlayerName,formatCentralTime,formatProbability,shortReason} from "./ui-format.js";
+import {bookLabel} from "./book-catalog.js";
 const $ = id => document.getElementById(id);
 const el = (tag, className, value) => { const node=document.createElement(tag); if(className) node.className=className; if(value!==undefined) node.textContent=String(value); return node; };
 const add = (parent, tag, className, value) => { const node=el(tag,className,value); parent.append(node); return node; };
 const number = value => value===null || value===undefined || value==='' ? null : Number.isFinite(Number(value)) ? Number(value) : null;
 const probability = value => { const n=number(value); return n!==null && n>=0 && n<=1 ? `${(n*100).toFixed(1)}%` : 'Unavailable'; };
 const pp = value => { const n=number(value); return n===null ? 'Unavailable' : `${n>=0?'+':''}${n.toFixed(1)} pp`; };
-const date = value => { const time=Date.parse(value); return Number.isFinite(time) ? new Date(time).toLocaleString() : 'Start time unavailable'; };
+const date = value => formatCentralTime(value,{seconds:true});
 const odds = value => { const n=number(value); return n===null ? 'unavailable' : `${n>0?'+':''}${n}`; };
 const line = value => { const n=number(value); return n===null ? 'none' : `${n>0?'+':''}${n}`; };
 const label = value => String(value??'').replaceAll('_',' ').replaceAll('+',' + ') || 'Unknown';
@@ -76,32 +91,47 @@ function propQuotes(article,rows){
   if(check.reasons.length)add(row,'p','',check.reasons.join(' '));
  }
 }
+let lastProps=null;
 function renderProps(data,now=Date.now()){
- setNbaQuoteNames(data,now);
- const events=Array.isArray(data.events)?data.events:[];const observations=events.flatMap(event=>(Array.isArray(event.players)?event.players:[]).map(player=>({event,player})));
- $('props-status').textContent=`${events.length} events · ${observations.length} player market records · Provider: ${data.oddsProvider||data.source||'not supplied'} · Quote source status: ${data.sourceHealth?.odds?.status||'Health not supplied'} · Updated ${date(data.generatedAt)}. Prediction unavailable for all.`;
- const metrics=$('props-metrics');metrics.hidden=false;metrics.replaceChildren();metric(metrics,'Events',events.length);metric(metrics,'Player market records',observations.length);metric(metrics,'Predictions available',0);metric(metrics,'Cleared plays',0);
- const target=$('props-cards');if(!batches(target,$('more-props'),observations,({event,player})=>{
-  const prop=player.prop||{},provider=event.provider||data.oddsProvider||data.source||'not supplied';
-  const readiness=player.propReadiness?.contract==='nba-prop-readiness-v1'?player.propReadiness:null;
-  const reason=readiness?.summary||'Player readiness checks have not been supplied. No prop play is cleared.';
+ lastProps=data;setNbaQuoteNames(data,now);
+ const events=Array.isArray(data.events)?data.events:[],rows=normalizeResearch({...data,events},'NBA',now);
+ const observations=groupResearchRows(rows),filtered=groupResearchRows(filterResearch(rows,{query:$('props-query').value||''}));
+ $('props-status').textContent=`${events.length} events · ${observations.length} unique player markets · ${rows.length} quote sides · Provider: ${data.oddsProvider||data.source||'not supplied'} · Quote source status: ${data.sourceHealth?.odds?.status||'Health not supplied'} · Updated ${date(data.generatedAt)}.`;
+ const metrics=$('props-metrics');metrics.hidden=false;metrics.replaceChildren();metric(metrics,'Events',events.length);metric(metrics,'Player markets',observations.length);metric(metrics,'Predictions available',0);metric(metrics,'Matched markets',filtered.length);
+ const target=$('props-cards');if(!batches(target,$('more-props'),filtered,group=>{
+  const first=group.rows[0],name=displayPlayerName(first.player,first.playerID),provider=first.provider||'not supplied';
+  const readiness=first.propReadiness,reason=readiness?.summary||'Player readiness checks have not been supplied. No prop play is cleared.';
   const reasons=Array.isArray(readiness?.reasons)?readiness.reasons:['PROP_READINESS_NOT_SUPPLIED'];
-  const identity=readiness?.identityStatus||prop.identityStatus;
-  const checks=propQuoteChecks(prop,data.generatedAt,now),comparable=checks.filter(row=>row.check.status==='COMPARABLE').length;
-  const stamps=checks.map(row=>Date.parse(row.quote.updatedAt)).filter(time=>Number.isFinite(time)&&time<=now);
-  const latestQuote=stamps.length?new Date(Math.max(...stamps)).toISOString():null;
-  const article=card(target,prop.playerName||'Player name unavailable','PREDICTION UNAVAILABLE','');
-  add(article,'p','meta',`${event.matchup?.away?.name||'Away team unavailable'} @ ${event.matchup?.home?.name||'Home team unavailable'} · ${date(event.startsAt)}`);
-  add(article,'p','',`${prop.marketName||label(prop.statID)} · ${comparable} of ${checks.length} quote sides comparable for price comparison.`);
-  add(article,'p','meta',`Quote checks assessed ${date(new Date(now).toISOString())}. Refresh to recheck prices.`);
-  add(article,'p','meta',`Provider: ${provider} · Latest quote: ${latestQuote?date(latestQuote):'timestamp unavailable'} · Player availability unverified.`);
-  add(article,'p','meta',identity==='PROVIDER_ROSTER_MATCHED'?`Provider roster matched for this matchup (${provider}). Injuries and participation remain unverified.`:identity==='ROSTER_MATCHED'&&prop.verifiedTeam?'Roster matched: '+prop.verifiedTeam+' (ESPN). Injuries and participation remain unverified.':'Player roster identity is unverified.');
-  add(article,'p','meta',reason);
-  appendDeepDive(article,{...prop,eventID:event.eventID,startsAt:event.startsAt,provider,context:player.context||player.opportunity?.context,position:player.context?.position||player.opportunity?.player?.position,propReadiness:readiness,reason,reasons,model:null,modelProbability:null,productionEligible:false,productionWeight:0},{scope:'nba-quotes',presentation:{title:'NOT CLEARED — prediction unavailable',reason:'Bookmaker quotes alone cannot authorize a play.'}});
-  const quotes=add(article,'div','quote-list');propQuotes(quotes,checks);
-  if(!quotes.childElementCount)add(article,'p','meta','No displayable bookmaker quote details.');
- }))empty(target,'No upcoming NBA player quotes were returned. No player predictions or PASS decisions can be inferred.');
+  const checks=group.rows.map(row=>({...row,check:assessPropQuote({book:row.book,quote:row.priceQuote,opposite:row.oppositeQuote,generatedAt:data.generatedAt,now})}));
+  const comparable=checks.filter(row=>row.check.status==='COMPARABLE').length;
+  const article=card(target,name.name,'UNVERIFIED','neutral');article.className+=' prop-card';
+  add(article,'p','meta',`${first.away||'Away team unavailable'} @ ${first.home||'Home team unavailable'} · ${date(first.startsAt)}`);
+  add(article,'p','market-title',`${label(first.marketType)}${first.period!=='game'?' · '+label(first.period):''}`);
+  add(article,'p','selection-reason',shortReason(reasons,'Prediction unavailable'));
+  function showQuote(parent,row){
+   const box=add(parent,'div','prop-selection'),head=add(box,'div','selection-head');
+   add(head,'strong','',`${label(row.side)} ${row.line??'N/A'}`);
+   add(box,'p','quote-price',`${bookLabel(row.book)} · ${row.available===false?'Unavailable':row.platformType==='sportsbook'?odds(row.odds):'Entry terms required'}`);
+   compare(box,'N/A',formatProbability(row.check.marketProbability),'N/A');
+   if(row.available===false||row.check.status!=='COMPARABLE')add(box,'p','meta',row.available===false?'Latest quote unavailable':row.check.freshness==='STALE'?'Stale quote':row.check.summary);
+  }
+  for(const row of checks.slice(0,2))showQuote(article,row);
+  if(checks.length>2){const more=add(article,'details','');add(more,'summary','',`${checks.length-2} more quotes · books & alternate lines`);for(const row of checks.slice(2))showQuote(more,row);}
+  const details=add(article,'details','quote-evidence');add(details,'summary','','Research & matchup details');
+  add(details,'p','meta',`PREDICTION UNAVAILABLE · ${comparable} of ${checks.length} quote sides comparable for price comparison.`);
+  add(details,'p','meta',`Quote checks assessed ${date(new Date(now).toISOString())}. Refresh to recheck prices.`);
+  add(details,'p','meta',`Provider: ${provider} · Player availability unverified.`);
+  add(details,'p','meta',first.identityStatus==='PROVIDER_ROSTER_MATCHED'?`Provider roster matched for this matchup (${provider}). Injuries and participation remain unverified.`:first.identityStatus==='ROSTER_MATCHED'&&first.verifiedTeam?'Roster matched: '+first.verifiedTeam+' (ESPN). Injuries and participation remain unverified.':'Player roster identity is unverified.');
+  if(first.nameSource==='provider-id')add(details,'p','meta','Display name formatted from provider ID; this does not verify roster identity.');
+  add(details,'p','meta',reason);
+  add(details,'p','meta technical-id',`Provider player ID: ${first.playerID||'N/A'} · Event: ${first.eventID||'N/A'}`);
+  appendDeepDive(details,{...first,playerName:name.name,context:first.context,propReadiness:readiness,reason,reasons,model:null,modelProbability:null,productionEligible:false,productionWeight:0},{scope:'nba-quotes',presentation:{title:'NOT CLEARED — prediction unavailable',reason:'Bookmaker quotes alone cannot authorize a play.'}});
+  for(const row of checks){add(details,'p','meta',`${label(row.side)} ${row.line??'N/A'} · ${bookLabel(row.book)} · observed ${date(row.updatedAt)} · ${row.check.summary}`);if(row.check.reasons.length)add(details,'p','meta',row.check.reasons.join(' '));}
+  const history=group.rows.flatMap(row=>row.observationHistory||[]);
+  if(history.length){const older=add(details,'details','');add(older,'summary','',`History · ${history.length} older observations`);for(const row of history)add(older,'p','meta',`${label(row.side)} ${row.line??'N/A'} · ${bookLabel(row.book)} · recorded ${odds(row.odds)} · ${date(row.updatedAt)}`);}
+ }))empty(target,rows.length?'No player markets match your search.':'No upcoming NBA player quotes were returned. No player predictions or PASS decisions can be inferred.');
 }
+
 async function request(path,section,signal){
  const status=$(section+'-status');status.className='status';status.textContent=`Loading NBA ${section==='team'?'team estimates':'player quotes'}…`;
  try{const response=await fetch(path,{signal,cache:'no-store',headers:{accept:'application/json'}});const data=await response.json();if(signal.aborted)return;if(!response.ok||data.error)throw new Error(data.error||`HTTP ${response.status}`);if(section==='team')renderTeam(data);else renderProps(data);}
@@ -109,5 +139,6 @@ async function request(path,section,signal){
 }
 let controller;
 async function refresh(){controller?.abort();controller=new AbortController();const current=controller;const button=$('refresh');button.disabled=true;const timer=setTimeout(()=>current.abort(),45000);try{await Promise.all([Promise.resolve().then(()=>{$('team-title').closest('section').hidden=true;$('team-status').textContent='Legacy team estimates are not published by this production API. Reviewed player decisions and current quotes are shown on this page.';}),request('/api/nbaprops','props',current.signal)]);}finally{clearTimeout(timer);if(controller===current)button.disabled=false;}}
+$('props-query').addEventListener('input',()=>{if(lastProps)renderProps(lastProps);});
 $('refresh').addEventListener('click',refresh);refresh();
 </script><script type="module" src="/nba-live.js"></script></body></html>

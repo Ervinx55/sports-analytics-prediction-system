@@ -28,9 +28,11 @@ test('six suspended opposite quotes survive normalization and two absent book pr
  assert.equal(props.filter(p=>p.under?.books.draftkings.available===false).length,6);
  assert.equal(props.filter(p=>!p.under?.books.draftkings).length,2);
  const rows=normalizeResearch(body,'NBA',now);
- assert.equal(rows.length,8);
- assert.ok(rows.every(r=>r.side==='OVER'&&r.market===null&&r.model===null));
- const readiness=describeQuoteReadiness(body,rows,now);
+ assert.equal(rows.length,14);
+ assert.equal(rows.filter(r=>r.available===false).length,6);
+ assert.ok(rows.every(r=>r.market===null&&r.model===null));
+ assert.equal(rows.filter(r=>r.side==='OVER').length,8);
+ const readiness=describeQuoteReadiness(body,rows.filter(r=>r.available!==false),now);
  assert.deepEqual(readiness.reasons,{OPPOSITE_QUOTE_UNAVAILABLE:6,OPPOSITE_QUOTE_MISSING:2});
  assert.equal(readiness.ready,0);assert.equal(readiness.blocked,8);
 });
@@ -66,8 +68,9 @@ test('exact hosted fallback patch changes diagnostics only and preserves all oth
  assert.deepEqual(patched.audit.changedFiles,[quotePath]);
  const {directSgoProps:hosted}=await import('data:text/javascript;base64,'+Buffer.from(patched.files[0].content).toString('base64'));
  const body=await hosted({clock:()=>at,page:async()=>({events:[event([...Array.from({length:6},()=>({draftkings:price({available:false})})),{},{}])],observedAt:at})});
- const rows=normalizeResearch(body,'NBA',now),readiness=describeQuoteReadiness(body,rows,now);
- assert.equal(rows.length,8);assert.ok(rows.every(r=>r.market===null));
+ const rows=normalizeResearch(body,'NBA',now),readiness=describeQuoteReadiness(body,rows.filter(r=>r.available!==false),now);
+ assert.equal(rows.length,14);
+ assert.equal(rows.filter(r=>r.available===false).length,6);assert.ok(rows.every(r=>r.market===null));
  assert.deepEqual(readiness.reasons,{OPPOSITE_QUOTE_UNAVAILABLE:6,OPPOSITE_QUOTE_MISSING:2});
  assert.equal(readiness.ready,0);
  assert.throws(()=>patchQuoteDiagnosticsSource(source+'\n'),/SOURCE_CHANGED/);

@@ -3,3 +3,74 @@
 .decision-summary{margin:18px 0;padding:16px;border:1px solid #a58bdf;border-radius:12px;background:#211b30}.decision-summary h3{font-size:18px}.decision-summary p{margin-bottom:0}.context-fact{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:12px}.context-fact h3{font-size:15px;margin-bottom:6px}.context-fact strong{font-size:21px;display:block}.context-fact p{margin:8px 0;font-size:14px;line-height:1.6}.context-fact small{display:block}.source-details{margin-top:24px;border-top:1px solid var(--line);padding-top:16px;font-size:13px;overflow-wrap:anywhere}.source-details summary{cursor:pointer;font-weight:700;padding:8px 0}.source-details h4{margin-bottom:4px}.source-details p{color:var(--muted)}.detail-section p{line-height:1.7}
 .platform-coverage{margin:24px 0}.platform-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:12px}.platform-item{padding:16px;border:1px solid var(--line);border-radius:12px;background:#1b1922;min-width:0}.platform-item h3{font-size:16px;margin-bottom:8px}.platform-item strong{font-size:14px;color:#d3b7ff}.platform-item p,.price-readiness{font-size:13px;line-height:1.6;color:#c9bfdc}.payout-worksheet{border:1px solid #80649e;border-radius:12px;padding:16px;margin:20px 0}.payout-worksheet summary{cursor:pointer;font-weight:700}.payout-worksheet p,.payout-worksheet li{font-size:13px;line-height:1.6}.payout-form{display:grid;gap:14px}.payout-form label{display:grid;gap:6px;font-size:13px}.payout-form input,.payout-form select{max-width:100%;min-width:0;width:100%}.payout-form fieldset{display:grid;gap:10px;border:1px solid var(--line);border-radius:8px;min-width:0}.payout-form .worksheet-confirmation{display:flex;gap:10px;align-items:flex-start}.worksheet-confirmation input{width:auto;flex:none;margin-top:5px}.worksheet-result{overflow-wrap:anywhere}.price-readiness{padding:10px 12px;border-left:3px solid #b68bf6;background:#211b30;border-radius:6px}
 .price-comparison{border:1px solid #79628e;background:#241d30;border-radius:10px;padding:12px;margin:14px 0}.price-comparison strong{color:#d4b5ff;font-size:14px}.price-comparison p{font-size:13px;margin:7px 0}.price-comparison small{display:block;font-size:11px}.best-filter{display:flex;align-items:center;gap:9px;font-size:13px;flex-wrap:wrap}.best-filter input{width:auto}.platform-coverage summary,#other-league summary{cursor:pointer;padding:12px 0;font-weight:600}#league-form{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:12px 0}#league-form input{min-width:0;max-width:100%}.sportbar button[aria-pressed=true]{border-color:#bf95ff}.platform-grid{margin-top:12px}
+
+/* Compact player-market groups. Each line/book/side keeps its own quote facts. */
+.el-research .research-market { padding:18px; }
+.el-research .research-market .card-head { align-items:flex-start; flex-wrap:nowrap; gap:10px; }
+.el-research .research-market .player-name { flex:1; min-width:0; font-size:22px; font-weight:780; line-height:1.3; word-break:normal; overflow-wrap:break-word; letter-spacing:-.35px; }
+.el-research .research-market .badge { flex:none; margin-top:4px; font-size:9px; padding:5px 7px; }
+.el-research .research-market .match { margin:8px 0 14px; line-height:1.55; }
+.el-research .market-title { margin:0; font-size:16px; font-weight:700; }
+.el-research .group-summary { margin:4px 0 14px; color:var(--muted); font-size:12px; line-height:1.5; }
+.el-research .group-quotes { display:grid; gap:10px; }
+.el-research .quote-option { margin:0; padding:12px; background:#15151c; border:1px solid var(--line); border-radius:10px; min-width:0; }
+.el-research .quote-option-head { display:flex; align-items:baseline; justify-content:space-between; gap:6px 12px; flex-wrap:wrap; }
+.el-research .quote-option .selection { font-size:17px; margin:0; }
+.el-research .quote-option .quote { font-size:12px; font-weight:600; margin:0; }
+.el-research .quote-option .comparison { gap:8px; padding:10px 0; margin:8px 0; }
+.el-research .quote-option .comparison small { font-size:10px; line-height:1.4; min-height:28px; }
+.el-research .quote-option .comparison strong { font-size:16px; font-variant-numeric:tabular-nums; }
+.el-research .quote-option .actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:9px; }
+.el-research .quote-option .actions button { font-size:12px; line-height:1.3; padding:9px; min-height:44px; flex:1 1 100px; }
+.el-research .quote-state { display:block; font-size:12px; line-height:1.5; margin:8px 0 0; color:var(--muted); }
+.el-research .quote-option .price-comparison { margin:8px 0; padding:0 10px; font-size:12px; }
+.el-research .quote-option .price-comparison summary { min-height:44px; display:flex; align-items:center; font-weight:650; cursor:pointer; }
+.el-research .quote-option .price-comparison p { font-size:12px; }
+.el-research .more-quotes { border-top:1px solid var(--line); margin-top:12px; }
+.el-research .more-quotes>summary { min-height:48px; padding:12px 0; font-size:13px; line-height:1.5; font-weight:650; cursor:pointer; color:var(--purple); }
+.el-research .group-footnote { display:block; font-size:11px; margin-top:12px; line-height:1.5; }
+.el-research .filters label { min-width:145px; flex:1 1 145px; }
+.el-research .filters input,.el-research .filters select { max-width:100%; min-width:0; width:100%; }
+.el-research .filters .search { flex-basis:100%; }
+.el-research .board-head { scroll-margin-top:18px; }
+.el-research #detail-title { overflow-wrap:break-word; }
+@media(max-width:520px) {
+ .el-research .research-market { padding:15px; }
+ .el-research .research-market .player-name { font-size:22px; }
+ .el-research .filters label { min-width:0; flex:1 1 calc(50% - 6px); width:calc(50% - 6px); }
+ .el-research .filters .search { flex-basis:100%; width:100%; }
+ .el-research .quote-option { padding:10px; }
+ .el-research .quote-option .comparison strong { font-size:16px; }
+ .el-research .sidebar nav { flex-wrap:wrap; overflow:visible; }
+}
+@media(max-width:350px) {
+ .el-research .research-market .card-head { flex-wrap:wrap; }
+ .el-research .research-market .player-name { flex-basis:100%; }
+ .el-research .research-market .badge { margin-top:0; }
+}
+
+/* Secondary controls stay close at hand without burying player cards. */
+.el-research .research-notice { margin:12px 0; padding:12px 14px; }
+.el-research .research-notice h2 { font-size:14px; margin:0; }
+.el-research .research-notice p { font-size:12px; margin:5px 0 0; }
+.el-research .research-notice a { text-decoration:underline; }
+.el-research .research-coverage { margin:10px 0; }
+.el-research .research-coverage>summary { min-height:44px; padding:10px 0; cursor:pointer; font-size:13px; color:var(--purple); }
+.el-research .research-coverage .metrics { margin:10px 0; }
+.el-research .research-coverage .platform-coverage { margin:12px 0; }
+.el-research .board-filter-options .filters { margin:4px 0 10px; }
+.el-research .board-head h2 { margin:10px 0; }
+@media(max-width:950px) {
+ .el-research .sidebar { display:none; }
+}
+@media(max-width:520px) {
+ .el-research header { gap:8px; }
+ .el-research header .eyebrow { margin:2px 0; }
+ .el-research header .muted { margin:8px 0; font-size:13px; }
+ .el-research header button { width:auto; }
+ .el-research .sportbar { margin:12px 0; gap:8px; }
+ .el-research .sportbar span { display:none; }
+ .el-research .board-head { margin-top:10px; gap:8px; }
+ .el-research .board-head h2 { font-size:18px; }
+ .el-research .board-head button { padding:8px 10px; font-size:12px; }
+}

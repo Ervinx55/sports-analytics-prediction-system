@@ -1,0 +1,1204 @@
+{
+  "retrievedAt": "2026-11-27",
+  "providerSource": "https://sports-analytics-prediction-system-tau.vercel.app/api/nbaprops",
+  "officialTeamDirectory": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams?limit=40",
+  "method": "Exact provider IDs from provider-roster-matched rows paired once with unique official ESPN roster full/display names; comparison ignores case, accents, spaces, and punctuation, but never adds or removes name tokens. Runtime lookup uses only these exact provider IDs, never a name search. Unmatched or ambiguous names are excluded.",
+  "presentationOnly": "Portraits do not establish current team membership, availability, identity clearance, or betting status.",
+  "portraits": [
+    {
+      "playerID": "AARON_GORDON_1_NBA",
+      "providerName": "Aaron Gordon",
+      "espnAthleteID": "3064290",
+      "officialName": "Aaron Gordon",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3064290.png"
+    },
+    {
+      "playerID": "AARON_NESMITH_1_NBA",
+      "providerName": "Aaron Nesmith",
+      "espnAthleteID": "4396909",
+      "officialName": "Aaron Nesmith",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4396909.png"
+    },
+    {
+      "playerID": "AARON_WIGGINS_1_NBA",
+      "providerName": "Aaron Wiggins",
+      "espnAthleteID": "4397183",
+      "officialName": "Aaron Wiggins",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397183.png"
+    },
+    {
+      "playerID": "AIRIOUS_BAILEY_1_NBA",
+      "providerName": "Ace Bailey",
+      "espnAthleteID": "4873138",
+      "officialName": "Ace Bailey",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4873138.png"
+    },
+    {
+      "playerID": "ALLEN_GRAVES_1_NBA",
+      "providerName": "Allen Graves",
+      "espnAthleteID": "5149115",
+      "officialName": "Allen Graves",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5149115.png"
+    },
+    {
+      "playerID": "ANDREW_NEMBHARD_1_NBA",
+      "providerName": "Andrew Nembhard",
+      "espnAthleteID": "4395712",
+      "officialName": "Andrew Nembhard",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395712.png"
+    },
+    {
+      "playerID": "ANDREW_WIGGINS_1_NBA",
+      "providerName": "Andrew Wiggins",
+      "espnAthleteID": "3059319",
+      "officialName": "Andrew Wiggins",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3059319.png"
+    },
+    {
+      "playerID": "ANFERNEE_SIMONS_1_NBA",
+      "providerName": "Anfernee Simons",
+      "espnAthleteID": "4351851",
+      "officialName": "Anfernee Simons",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4351851.png"
+    },
+    {
+      "playerID": "AUSAR_THOMPSON_1_NBA",
+      "providerName": "Ausar Thompson",
+      "espnAthleteID": "4684742",
+      "officialName": "Ausar Thompson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4684742.png"
+    },
+    {
+      "playerID": "AUSTIN_REAVES_1_NBA",
+      "providerName": "Austin Reaves",
+      "espnAthleteID": "4066457",
+      "officialName": "Austin Reaves",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066457.png"
+    },
+    {
+      "playerID": "AYO_DOSUNMU_1_NBA",
+      "providerName": "Ayo Dosunmu",
+      "espnAthleteID": "4397002",
+      "officialName": "Ayo Dosunmu",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397002.png"
+    },
+    {
+      "playerID": "BAM_ADEBAYO_1_NBA",
+      "providerName": "Bam Adebayo",
+      "espnAthleteID": "4066261",
+      "officialName": "Bam Adebayo",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066261.png"
+    },
+    {
+      "playerID": "BAYLOR_SCHEIERMAN_1_NBA",
+      "providerName": "Baylor Scheierman",
+      "espnAthleteID": "4593841",
+      "officialName": "Baylor Scheierman",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4593841.png"
+    },
+    {
+      "playerID": "BOBBY_PORTIS_1_NBA",
+      "providerName": "Bobby Portis",
+      "espnAthleteID": "3064482",
+      "officialName": "Bobby Portis",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3064482.png"
+    },
+    {
+      "playerID": "BONES_HYLAND_1_NBA",
+      "providerName": "Bones Hyland",
+      "espnAthleteID": "4592492",
+      "officialName": "Bones Hyland",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4592492.png"
+    },
+    {
+      "playerID": "BRANDIN_PODZIEMSKI_1_NBA",
+      "providerName": "Brandin Podziemski",
+      "espnAthleteID": "4709138",
+      "officialName": "Brandin Podziemski",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4709138.png"
+    },
+    {
+      "playerID": "BRANDON_INGRAM_1_NBA",
+      "providerName": "Brandon Ingram",
+      "espnAthleteID": "3913176",
+      "officialName": "Brandon Ingram",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3913176.png"
+    },
+    {
+      "playerID": "BRAYDEN_BURRIES_1_NBA",
+      "providerName": "Brayden Burries",
+      "espnAthleteID": "5082206",
+      "officialName": "Brayden Burries",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5082206.png"
+    },
+    {
+      "playerID": "BRICE_SENSABAUGH_1_NBA",
+      "providerName": "Brice Sensabaugh",
+      "espnAthleteID": "5105839",
+      "officialName": "Brice Sensabaugh",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5105839.png"
+    },
+    {
+      "playerID": "BROOK_LOPEZ_1_NBA",
+      "providerName": "Brook Lopez",
+      "espnAthleteID": "3448",
+      "officialName": "Brook Lopez",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3448.png"
+    },
+    {
+      "playerID": "CALEB_MARTIN_1_NBA",
+      "providerName": "Caleb Martin",
+      "espnAthleteID": "3138160",
+      "officialName": "Caleb Martin",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3138160.png"
+    },
+    {
+      "playerID": "CAMERON_JOHNSON_1_NBA",
+      "providerName": "Cameron Johnson",
+      "espnAthleteID": "3138196",
+      "officialName": "Cameron Johnson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3138196.png"
+    },
+    {
+      "playerID": "CAM_SPENCER_1_NBA",
+      "providerName": "Cam Spencer",
+      "espnAthleteID": "4433083",
+      "officialName": "Cam Spencer",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4433083.png"
+    },
+    {
+      "playerID": "CEDRIC_COWARD_1_NBA",
+      "providerName": "Cedric Coward",
+      "espnAthleteID": "4903027",
+      "officialName": "Cedric Coward",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4903027.png"
+    },
+    {
+      "playerID": "CHARLES_BASSEY_1_NBA",
+      "providerName": "Charles Bassey",
+      "espnAthleteID": "4397886",
+      "officialName": "Charles Bassey",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397886.png"
+    },
+    {
+      "playerID": "CHRISTIAN_BRAUN_1_NBA",
+      "providerName": "Christian Braun",
+      "espnAthleteID": "4431767",
+      "officialName": "Christian Braun",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4431767.png"
+    },
+    {
+      "playerID": "COLLIN_GILLESPIE_1_NBA",
+      "providerName": "Collin Gillespie",
+      "espnAthleteID": "4278585",
+      "officialName": "Collin Gillespie",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278585.png"
+    },
+    {
+      "playerID": "COLLIN_MURRAYBOYLES_1_NBA",
+      "providerName": "Collin Murray-Boyles",
+      "espnAthleteID": "5093267",
+      "officialName": "Collin Murray-Boyles",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5093267.png"
+    },
+    {
+      "playerID": "COLLIN_SEXTON_1_NBA",
+      "providerName": "Collin Sexton",
+      "espnAthleteID": "4277811",
+      "officialName": "Collin Sexton",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4277811.png"
+    },
+    {
+      "playerID": "C_FLAGG_1_NBA",
+      "providerName": "Cooper Flagg",
+      "espnAthleteID": "5041939",
+      "officialName": "Cooper Flagg",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5041939.png"
+    },
+    {
+      "playerID": "DAMIAN_LILLARD_1_NBA",
+      "providerName": "Damian Lillard",
+      "espnAthleteID": "6606",
+      "officialName": "Damian Lillard",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/6606.png"
+    },
+    {
+      "playerID": "DANIEL_GAFFORD_1_NBA",
+      "providerName": "Daniel Gafford",
+      "espnAthleteID": "4278049",
+      "officialName": "Daniel Gafford",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278049.png"
+    },
+    {
+      "playerID": "DANIEL_WOLF_1_NBA",
+      "providerName": "Danny Wolf",
+      "espnAthleteID": "5107173",
+      "officialName": "Danny Wolf",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5107173.png"
+    },
+    {
+      "playerID": "DANISS_JENKINS_1_NBA",
+      "providerName": "Daniss Jenkins",
+      "espnAthleteID": "5107199",
+      "officialName": "Daniss Jenkins",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5107199.png"
+    },
+    {
+      "playerID": "DARIUS_GARLAND_1_NBA",
+      "providerName": "Darius Garland",
+      "espnAthleteID": "4396907",
+      "officialName": "Darius Garland",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4396907.png"
+    },
+    {
+      "playerID": "DARRYN_PETERSON_1_NBA",
+      "providerName": "Darryn Peterson",
+      "espnAthleteID": "5041955",
+      "officialName": "Darryn Peterson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5041955.png"
+    },
+    {
+      "playerID": "DAVION_MITCHELL_1_NBA",
+      "providerName": "Davion Mitchell",
+      "espnAthleteID": "4278053",
+      "officialName": "Davion Mitchell",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278053.png"
+    },
+    {
+      "playerID": "DAYRON_SHARPE_1_NBA",
+      "providerName": "Day'Ron Sharpe",
+      "espnAthleteID": "4432194",
+      "officialName": "Day'Ron Sharpe",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432194.png"
+    },
+    {
+      "playerID": "DEAARON_FOX_1_NBA",
+      "providerName": "De'Aaron Fox",
+      "espnAthleteID": "4066259",
+      "officialName": "De'Aaron Fox",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/24/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066259.png"
+    },
+    {
+      "playerID": "DEANTHONY_MELTON_1_NBA",
+      "providerName": "De'Anthony Melton",
+      "espnAthleteID": "4066436",
+      "officialName": "De'Anthony Melton",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066436.png"
+    },
+    {
+      "playerID": "DEAN_WADE_1_NBA",
+      "providerName": "Dean Wade",
+      "espnAthleteID": "3912848",
+      "officialName": "Dean Wade",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3912848.png"
+    },
+    {
+      "playerID": "DEMAR_DEROZAN_1_NBA",
+      "providerName": "DeMar DeRozan",
+      "espnAthleteID": "3978",
+      "officialName": "DeMar DeRozan",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3978.png"
+    },
+    {
+      "playerID": "DENI_AVDIJA_1_NBA",
+      "providerName": "Deni Avdija",
+      "espnAthleteID": "4683021",
+      "officialName": "Deni Avdija",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4683021.png"
+    },
+    {
+      "playerID": "DERIK_QUEEN_1_NBA",
+      "providerName": "Derik Queen",
+      "espnAthleteID": "4869780",
+      "officialName": "Derik Queen",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4869780.png"
+    },
+    {
+      "playerID": "DERRICK_JONES_JR_1_NBA",
+      "providerName": "Derrick Jones Jr.",
+      "espnAthleteID": "3936099",
+      "officialName": "Derrick Jones Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3936099.png"
+    },
+    {
+      "playerID": "DERRICK_WHITE_1_NBA",
+      "providerName": "Derrick White",
+      "espnAthleteID": "3078576",
+      "officialName": "Derrick White",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3078576.png",
+      "bundledPath": "/assets/players/derrick-white.png"
+    },
+    {
+      "playerID": "DEVIN_BOOKER_1_NBA",
+      "providerName": "Devin Booker",
+      "espnAthleteID": "3136193",
+      "officialName": "Devin Booker",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3136193.png"
+    },
+    {
+      "playerID": "DEVIN_VASSELL_1_NBA",
+      "providerName": "Devin Vassell",
+      "espnAthleteID": "4395630",
+      "officialName": "Devin Vassell",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/24/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395630.png"
+    },
+    {
+      "playerID": "DILLON_BROOKS_1_NBA",
+      "providerName": "Dillon Brooks",
+      "espnAthleteID": "3155526",
+      "officialName": "Dillon Brooks",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3155526.png"
+    },
+    {
+      "playerID": "DONOVAN_CLINGAN_1_NBA",
+      "providerName": "Donovan Clingan",
+      "espnAthleteID": "5105565",
+      "officialName": "Donovan Clingan",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5105565.png"
+    },
+    {
+      "playerID": "DRAYMOND_GREEN_1_NBA",
+      "providerName": "Draymond Green",
+      "espnAthleteID": "6589",
+      "officialName": "Draymond Green",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/6589.png"
+    },
+    {
+      "playerID": "DYSON_DANIELS_1_NBA",
+      "providerName": "Dyson Daniels",
+      "espnAthleteID": "4869342",
+      "officialName": "Dyson Daniels",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4869342.png"
+    },
+    {
+      "playerID": "EGOR_DEMIN_1_NBA",
+      "providerName": "Egor Demin",
+      "espnAthleteID": "5175643",
+      "officialName": "Egor Demin",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5175643.png"
+    },
+    {
+      "playerID": "GIANNIS_ANTETOKOUNMPO_1_NBA",
+      "providerName": "Giannis Antetokounmpo",
+      "espnAthleteID": "3032977",
+      "officialName": "Giannis Antetokounmpo",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3032977.png"
+    },
+    {
+      "playerID": "GUI_SANTOS_1_NBA",
+      "providerName": "Gui Santos",
+      "espnAthleteID": "4997536",
+      "officialName": "Gui Santos",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4997536.png"
+    },
+    {
+      "playerID": "IMMANUEL_QUICKLEY_1_NBA",
+      "providerName": "Immanuel Quickley",
+      "espnAthleteID": "4395724",
+      "officialName": "Immanuel Quickley",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395724.png"
+    },
+    {
+      "playerID": "ISAIAH_JOE_1_NBA",
+      "providerName": "Isaiah Joe",
+      "espnAthleteID": "4395702",
+      "officialName": "Isaiah Joe",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395702.png"
+    },
+    {
+      "playerID": "IVICA_ZUBAC_1_NBA",
+      "providerName": "Ivica Zubac",
+      "espnAthleteID": "4017837",
+      "officialName": "Ivica Zubac",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4017837.png"
+    },
+    {
+      "playerID": "JADEN_MCDANIELS_1_NBA",
+      "providerName": "Jaden McDaniels",
+      "espnAthleteID": "4431671",
+      "officialName": "Jaden McDaniels",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4431671.png"
+    },
+    {
+      "playerID": "JAIME_JAQUEZ_JR_1_NBA",
+      "providerName": "Jaime Jaquez Jr.",
+      "espnAthleteID": "4432848",
+      "officialName": "Jaime Jaquez Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432848.png"
+    },
+    {
+      "playerID": "JAKE_LARAVIA_1_NBA",
+      "providerName": "Jake LaRavia",
+      "espnAthleteID": "4592691",
+      "officialName": "Jake LaRavia",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4592691.png"
+    },
+    {
+      "playerID": "JAKOBE_WALTER_1_NBA",
+      "providerName": "Ja'Kobe Walter",
+      "espnAthleteID": "4684272",
+      "officialName": "Ja'Kobe Walter",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4684272.png"
+    },
+    {
+      "playerID": "JAKOB_POELTL_1_NBA",
+      "providerName": "Jakob Poeltl",
+      "espnAthleteID": "3134908",
+      "officialName": "Jakob Poeltl",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3134908.png"
+    },
+    {
+      "playerID": "JALEN_BRUNSON_1_NBA",
+      "providerName": "Jalen Brunson",
+      "espnAthleteID": "3934672",
+      "officialName": "Jalen Brunson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3934672.png"
+    },
+    {
+      "playerID": "JALEN_GREEN_1_NBA",
+      "providerName": "Jalen Green",
+      "espnAthleteID": "4437244",
+      "officialName": "Jalen Green",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4437244.png"
+    },
+    {
+      "playerID": "JALEN_JOHNSON_1_NBA",
+      "providerName": "Jalen Johnson",
+      "espnAthleteID": "4701230",
+      "officialName": "Jalen Johnson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4701230.png"
+    },
+    {
+      "playerID": "JAMAL_MURRAY_1_NBA",
+      "providerName": "Jamal Murray",
+      "espnAthleteID": "3936299",
+      "officialName": "Jamal Murray",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3936299.png"
+    },
+    {
+      "playerID": "JAMAL_SHEAD_1_NBA",
+      "providerName": "Jamal Shead",
+      "espnAthleteID": "4432241",
+      "officialName": "Jamal Shead",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432241.png"
+    },
+    {
+      "playerID": "JAVONTE_GREEN_1_NBA",
+      "providerName": "Javonte Green",
+      "espnAthleteID": "2596112",
+      "officialName": "Javonte Green",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/2596112.png"
+    },
+    {
+      "playerID": "JAXSON_HAYES_1_NBA",
+      "providerName": "Jaxson Hayes",
+      "espnAthleteID": "4397077",
+      "officialName": "Jaxson Hayes",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397077.png"
+    },
+    {
+      "playerID": "JAYLEN_WELLS_1_NBA",
+      "providerName": "Jaylen Wells",
+      "espnAthleteID": "5112087",
+      "officialName": "Jaylen Wells",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5112087.png"
+    },
+    {
+      "playerID": "JAYSON_TATUM_1_NBA",
+      "providerName": "Jayson Tatum",
+      "espnAthleteID": "4065648",
+      "officialName": "Jayson Tatum",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4065648.png",
+      "bundledPath": "/assets/players/jayson-tatum.png"
+    },
+    {
+      "playerID": "JEREMIAH_FEARS_1_NBA",
+      "providerName": "Jeremiah Fears",
+      "espnAthleteID": "5144091",
+      "officialName": "Jeremiah Fears",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5144091.png"
+    },
+    {
+      "playerID": "JOAN_BERINGER_1_NBA",
+      "providerName": "Joan Beringer",
+      "espnAthleteID": "5279133",
+      "officialName": "Joan Beringer",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5279133.png"
+    },
+    {
+      "playerID": "JOEL_EMBIID_1_NBA",
+      "providerName": "Joel Embiid",
+      "espnAthleteID": "3059318",
+      "officialName": "Joel Embiid",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3059318.png"
+    },
+    {
+      "playerID": "JOHN_COLLINS_1_NBA",
+      "providerName": "John Collins",
+      "espnAthleteID": "3908845",
+      "officialName": "John Collins",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3908845.png"
+    },
+    {
+      "playerID": "JONATHAN_KUMINGA_1_NBA",
+      "providerName": "Jonathan Kuminga",
+      "espnAthleteID": "4433247",
+      "officialName": "Jonathan Kuminga",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4433247.png"
+    },
+    {
+      "playerID": "JORDAN_GOODWIN_1_NBA",
+      "providerName": "Jordan Goodwin",
+      "espnAthleteID": "4278402",
+      "officialName": "Jordan Goodwin",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278402.png"
+    },
+    {
+      "playerID": "JORDAN_POOLE_1_NBA",
+      "providerName": "Jordan Poole",
+      "espnAthleteID": "4277956",
+      "officialName": "Jordan Poole",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4277956.png"
+    },
+    {
+      "playerID": "JOSH_GREEN_1_NBA",
+      "providerName": "Josh Green",
+      "espnAthleteID": "4432811",
+      "officialName": "Josh Green",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432811.png"
+    },
+    {
+      "playerID": "JOSH_HART_1_NBA",
+      "providerName": "Josh Hart",
+      "espnAthleteID": "3062679",
+      "officialName": "Josh Hart",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3062679.png"
+    },
+    {
+      "playerID": "JRUE_HOLIDAY_1_NBA",
+      "providerName": "Jrue Holiday",
+      "espnAthleteID": "3995",
+      "officialName": "Jrue Holiday",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3995.png"
+    },
+    {
+      "playerID": "JULIAN_CHAMPAGNIE_1_NBA",
+      "providerName": "Julian Champagnie",
+      "espnAthleteID": "4592479",
+      "officialName": "Julian Champagnie",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/24/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4592479.png"
+    },
+    {
+      "playerID": "JULIUS_RANDLE_1_NBA",
+      "providerName": "Julius Randle",
+      "espnAthleteID": "3064514",
+      "officialName": "Julius Randle",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3064514.png"
+    },
+    {
+      "playerID": "JUSUF_NURKIC_1_NBA",
+      "providerName": "Jusuf Nurkic",
+      "espnAthleteID": "3102530",
+      "officialName": "Jusuf Nurkic",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3102530.png"
+    },
+    {
+      "playerID": "KARLANTHONY_TOWNS_1_NBA",
+      "providerName": "Karl-Anthony Towns",
+      "espnAthleteID": "3136195",
+      "officialName": "Karl-Anthony Towns",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3136195.png"
+    },
+    {
+      "playerID": "KELEL_WARE_1_NBA",
+      "providerName": "Kel'el Ware",
+      "espnAthleteID": "5105623",
+      "officialName": "Kel'el Ware",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5105623.png"
+    },
+    {
+      "playerID": "KELLY_OUBRE_JR_1_NBA",
+      "providerName": "Kelly Oubre Jr.",
+      "espnAthleteID": "3133603",
+      "officialName": "Kelly Oubre Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3133603.png"
+    },
+    {
+      "playerID": "KENTAVIOUS_CALDWELLPOPE_1_NBA",
+      "providerName": "Kentavious Caldwell-Pope",
+      "espnAthleteID": "2581018",
+      "officialName": "Kentavious Caldwell-Pope",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/2581018.png"
+    },
+    {
+      "playerID": "KEVIN_HUERTER_1_NBA",
+      "providerName": "Kevin Huerter",
+      "espnAthleteID": "4066372",
+      "officialName": "Kevin Huerter",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066372.png"
+    },
+    {
+      "playerID": "KEYONTE_GEORGE_1_NBA",
+      "providerName": "Keyonte George",
+      "espnAthleteID": "4433627",
+      "officialName": "Keyonte George",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/26/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4433627.png"
+    },
+    {
+      "playerID": "KINGSTON_FLEMINGS_1_NBA",
+      "providerName": "Kingston Flemings",
+      "espnAthleteID": "5149077",
+      "officialName": "Kingston Flemings",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5149077.png"
+    },
+    {
+      "playerID": "KLAY_THOMPSON_1_NBA",
+      "providerName": "Klay Thompson",
+      "espnAthleteID": "6475",
+      "officialName": "Klay Thompson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/6475.png"
+    },
+    {
+      "playerID": "KRIS_DUNN_1_NBA",
+      "providerName": "Kris Dunn",
+      "espnAthleteID": "2991139",
+      "officialName": "Kris Dunn",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/2991139.png"
+    },
+    {
+      "playerID": "KRIS_MURRAY_1_NBA",
+      "providerName": "Kris Murray",
+      "espnAthleteID": "4594326",
+      "officialName": "Kris Murray",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4594326.png"
+    },
+    {
+      "playerID": "KYLE_KUZMA_1_NBA",
+      "providerName": "Kyle Kuzma",
+      "espnAthleteID": "3134907",
+      "officialName": "Kyle Kuzma",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3134907.png"
+    },
+    {
+      "playerID": "KYRIE_IRVING_1_NBA",
+      "providerName": "Kyrie Irving",
+      "espnAthleteID": "6442",
+      "officialName": "Kyrie Irving",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/6442.png"
+    },
+    {
+      "playerID": "LAMELO_BALL_1_NBA",
+      "providerName": "LaMelo Ball",
+      "espnAthleteID": "4432816",
+      "officialName": "LaMelo Ball",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432816.png"
+    },
+    {
+      "playerID": "LANDRY_SHAMET_1_NBA",
+      "providerName": "Landry Shamet",
+      "espnAthleteID": "3914044",
+      "officialName": "Landry Shamet",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3914044.png"
+    },
+    {
+      "playerID": "LEBRON_JAMES_1_NBA",
+      "providerName": "LeBron James",
+      "espnAthleteID": "1966",
+      "officialName": "LeBron James",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/1966.png"
+    },
+    {
+      "playerID": "LUGUENTZ_DORT_1_NBA",
+      "providerName": "Luguentz Dort",
+      "espnAthleteID": "4397020",
+      "officialName": "Luguentz Dort",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397020.png"
+    },
+    {
+      "playerID": "LUKA_DONCIC_1_NBA",
+      "providerName": "Luka Dončić",
+      "espnAthleteID": "3945274",
+      "officialName": "Luka Doncic",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3945274.png"
+    },
+    {
+      "playerID": "MATISSE_THYBULLE_1_NBA",
+      "providerName": "Matisse Thybulle",
+      "espnAthleteID": "3907498",
+      "officialName": "Matisse Thybulle",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3907498.png"
+    },
+    {
+      "playerID": "MAX_STRUS_1_NBA",
+      "providerName": "Max Strus",
+      "espnAthleteID": "4065778",
+      "officialName": "Max Strus",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4065778.png"
+    },
+    {
+      "playerID": "MICHAEL_PORTER_JR_1_NBA",
+      "providerName": "Michael Porter Jr.",
+      "espnAthleteID": "4278104",
+      "officialName": "Michael Porter Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278104.png"
+    },
+    {
+      "playerID": "MIKAL_BRIDGES_1_NBA",
+      "providerName": "Mikal Bridges",
+      "espnAthleteID": "3147657",
+      "officialName": "Mikal Bridges",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/18/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3147657.png"
+    },
+    {
+      "playerID": "MIKEL_BROWN_JR_1_NBA",
+      "providerName": "Mikel Brown Jr.",
+      "espnAthleteID": "5101761",
+      "officialName": "Mikel Brown Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5101761.png"
+    },
+    {
+      "playerID": "MILES_BRIDGES_1_NBA",
+      "providerName": "Miles Bridges",
+      "espnAthleteID": "4066383",
+      "officialName": "Miles Bridges",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066383.png"
+    },
+    {
+      "playerID": "MYLES_TURNER_1_NBA",
+      "providerName": "Myles Turner",
+      "espnAthleteID": "3133628",
+      "officialName": "Myles Turner",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3133628.png"
+    },
+    {
+      "playerID": "NAJI_MARSHALL_1_NBA",
+      "providerName": "Naji Marshall",
+      "espnAthleteID": "4278594",
+      "officialName": "Naji Marshall",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278594.png"
+    },
+    {
+      "playerID": "NATE_AMENT_1_NBA",
+      "providerName": "Nate Ament",
+      "espnAthleteID": "5164559",
+      "officialName": "Nate Ament",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5164559.png"
+    },
+    {
+      "playerID": "NEEMIAS_QUETA_1_NBA",
+      "providerName": "Neemias Queta",
+      "espnAthleteID": "4397424",
+      "officialName": "Neemias Queta",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397424.png"
+    },
+    {
+      "playerID": "NICKEIL_ALEXANDERWALKER_1_NBA",
+      "providerName": "Nickeil Alexander-Walker",
+      "espnAthleteID": "4278039",
+      "officialName": "Nickeil Alexander-Walker",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278039.png"
+    },
+    {
+      "playerID": "NIKOLA_JOKIC_1_NBA",
+      "providerName": "Nikola Jokić",
+      "espnAthleteID": "3112335",
+      "officialName": "Nikola Jokic",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3112335.png"
+    },
+    {
+      "playerID": "NOAH_CLOWNEY_1_NBA",
+      "providerName": "Noah Clowney",
+      "espnAthleteID": "4712896",
+      "officialName": "Noah Clowney",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/17/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4712896.png"
+    },
+    {
+      "playerID": "OBI_TOPPIN_1_NBA",
+      "providerName": "Obi Toppin",
+      "espnAthleteID": "4278355",
+      "officialName": "Obi Toppin",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278355.png"
+    },
+    {
+      "playerID": "ONYEKA_OKONGWU_1_NBA",
+      "providerName": "Onyeka Okongwu",
+      "espnAthleteID": "4431680",
+      "officialName": "Onyeka Okongwu",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/1/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4431680.png"
+    },
+    {
+      "playerID": "OSO_IGHODARO_1_NBA",
+      "providerName": "Oso Ighodaro",
+      "espnAthleteID": "4601023",
+      "officialName": "Oso Ighodaro",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/21/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4601023.png"
+    },
+    {
+      "playerID": "PASCAL_SIAKAM_1_NBA",
+      "providerName": "Pascal Siakam",
+      "espnAthleteID": "3149673",
+      "officialName": "Pascal Siakam",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/11/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3149673.png"
+    },
+    {
+      "playerID": "PAUL_GEORGE_1_NBA",
+      "providerName": "Paul George",
+      "espnAthleteID": "4251",
+      "officialName": "Paul George",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4251.png"
+    },
+    {
+      "playerID": "PAUL_REED_1_NBA",
+      "providerName": "Paul Reed",
+      "espnAthleteID": "4278562",
+      "officialName": "Paul Reed",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/8/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4278562.png"
+    },
+    {
+      "playerID": "PAYTON_PRITCHARD_1_NBA",
+      "providerName": "Payton Pritchard",
+      "espnAthleteID": "4066354",
+      "officialName": "Payton Pritchard",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066354.png",
+      "bundledPath": "/assets/players/payton-pritchard.png"
+    },
+    {
+      "playerID": "PELLE_LARSSON_1_NBA",
+      "providerName": "Pelle Larsson",
+      "espnAthleteID": "4601025",
+      "officialName": "Pelle Larsson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/14/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4601025.png"
+    },
+    {
+      "playerID": "QUENTIN_GRIMES_1_NBA",
+      "providerName": "Quentin Grimes",
+      "espnAthleteID": "4397014",
+      "officialName": "Quentin Grimes",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397014.png"
+    },
+    {
+      "playerID": "RUDY_GOBERT_1_NBA",
+      "providerName": "Rudy Gobert",
+      "espnAthleteID": "3032976",
+      "officialName": "Rudy Gobert",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3032976.png"
+    },
+    {
+      "playerID": "RUI_HACHIMURA_1_NBA",
+      "providerName": "Rui Hachimura",
+      "espnAthleteID": "4066648",
+      "officialName": "Rui Hachimura",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/12/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4066648.png"
+    },
+    {
+      "playerID": "RYAN_ROLLINS_1_NBA",
+      "providerName": "Ryan Rollins",
+      "espnAthleteID": "4591725",
+      "officialName": "Ryan Rollins",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4591725.png"
+    },
+    {
+      "playerID": "SADDIQ_BEY_1_NBA",
+      "providerName": "Saddiq Bey",
+      "espnAthleteID": "4397136",
+      "officialName": "Saddiq Bey",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397136.png"
+    },
+    {
+      "playerID": "SAM_HAUSER_1_NBA",
+      "providerName": "Sam Hauser",
+      "espnAthleteID": "4065804",
+      "officialName": "Sam Hauser",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/bos/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4065804.png"
+    },
+    {
+      "playerID": "SCOOT_HENDERSON_1_NBA",
+      "providerName": "Scoot Henderson",
+      "espnAthleteID": "4683678",
+      "officialName": "Scoot Henderson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4683678.png"
+    },
+    {
+      "playerID": "SCOTTIE_BARNES_1_NBA",
+      "providerName": "Scottie Barnes",
+      "espnAthleteID": "4433134",
+      "officialName": "Scottie Barnes",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/28/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4433134.png"
+    },
+    {
+      "playerID": "SIDY_CISSOKO_1_NBA",
+      "providerName": "Sidy Cissoko",
+      "espnAthleteID": "5081727",
+      "officialName": "Sidy Cissoko",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5081727.png"
+    },
+    {
+      "playerID": "SPENCER_JONES_1_NBA",
+      "providerName": "Spencer Jones",
+      "espnAthleteID": "4592427",
+      "officialName": "Spencer Jones",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/7/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4592427.png"
+    },
+    {
+      "playerID": "STEPHON_CASTLE_1_NBA",
+      "providerName": "Stephon Castle",
+      "espnAthleteID": "4845367",
+      "officialName": "Stephon Castle",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/24/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4845367.png"
+    },
+    {
+      "playerID": "TERRENCE_SHANNON_1_NBA",
+      "providerName": "Terrence Shannon Jr.",
+      "espnAthleteID": "4432847",
+      "officialName": "Terrence Shannon Jr.",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4432847.png"
+    },
+    {
+      "playerID": "TOUMANI_CAMARA_1_NBA",
+      "providerName": "Toumani Camara",
+      "espnAthleteID": "4431736",
+      "officialName": "Toumani Camara",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/22/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4431736.png"
+    },
+    {
+      "playerID": "TREY_LYLES_1_NBA",
+      "providerName": "Trey Lyles",
+      "espnAthleteID": "3136196",
+      "officialName": "Trey Lyles",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/16/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/3136196.png"
+    },
+    {
+      "playerID": "TREY_MURPHY_III_1_NBA",
+      "providerName": "Trey Murphy III",
+      "espnAthleteID": "4397688",
+      "officialName": "Trey Murphy III",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4397688.png"
+    },
+    {
+      "playerID": "TYLER_HERRO_1_NBA",
+      "providerName": "Tyler Herro",
+      "espnAthleteID": "4395725",
+      "officialName": "Tyler Herro",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/15/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395725.png"
+    },
+    {
+      "playerID": "TYRESE_MAXEY_1_NBA",
+      "providerName": "Tyrese Maxey",
+      "espnAthleteID": "4431678",
+      "officialName": "Tyrese Maxey",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4431678.png"
+    },
+    {
+      "playerID": "TY_JEROME_1_NBA",
+      "providerName": "Ty Jerome",
+      "espnAthleteID": "4065733",
+      "officialName": "Ty Jerome",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4065733.png"
+    },
+    {
+      "playerID": "VICTOR_WEMBANYAMA_1_NBA",
+      "providerName": "Victor Wembanyama",
+      "espnAthleteID": "5104157",
+      "officialName": "Victor Wembanyama",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/24/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5104157.png"
+    },
+    {
+      "playerID": "VJ_EDGECOMBE_1_NBA",
+      "providerName": "VJ Edgecombe",
+      "espnAthleteID": "5124612",
+      "officialName": "VJ Edgecombe",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/20/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5124612.png"
+    },
+    {
+      "playerID": "WALKER_KESSLER_1_NBA",
+      "providerName": "Walker Kessler",
+      "espnAthleteID": "4433136",
+      "officialName": "Walker Kessler",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/13/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4433136.png"
+    },
+    {
+      "playerID": "YAXEL_LENDEBORG_1_NBA",
+      "providerName": "Yaxel Lendeborg",
+      "espnAthleteID": "5175737",
+      "officialName": "Yaxel Lendeborg",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/9/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5175737.png"
+    },
+    {
+      "playerID": "YVES_MISSI_1_NBA",
+      "providerName": "Yves Missi",
+      "espnAthleteID": "5061589",
+      "officialName": "Yves Missi",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5061589.png"
+    },
+    {
+      "playerID": "ZACCHARIE_RISACHER_1_NBA",
+      "providerName": "Zaccharie Risacher",
+      "espnAthleteID": "5211175",
+      "officialName": "Zaccharie Risacher",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/6/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/5211175.png"
+    },
+    {
+      "playerID": "ZACH_EDEY_1_NBA",
+      "providerName": "Zach Edey",
+      "espnAthleteID": "4600663",
+      "officialName": "Zach Edey",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/29/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4600663.png"
+    },
+    {
+      "playerID": "ZION_WILLIAMSON_1_NBA",
+      "providerName": "Zion Williamson",
+      "espnAthleteID": "4395628",
+      "officialName": "Zion Williamson",
+      "officialRosterSource": "https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/3/roster",
+      "portraitSource": "https://a.espncdn.com/i/headshots/nba/players/full/4395628.png"
+    }
+  ]
+}
