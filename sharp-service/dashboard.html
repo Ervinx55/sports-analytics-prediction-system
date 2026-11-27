@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#08111f" />
+  <meta name="theme-color" content="#1b1b1b" />
   <title>Edge Lab Dashboard</title>
   <style>
     :root{
@@ -148,55 +148,44 @@
     }
   </style>
 <link rel="stylesheet" href="/edge-theme.css"><script type="module" src="/edge-navigation.js"></script>
+<link rel="stylesheet" href="/edge-target.css">
 </head>
-<body class="el-theme">
+<body class="el-theme edge-shell-page edge-dashboard-shell">
 <div class="app">
-  <div class="top">
-    <div class="brand">
-      <div class="logo">EL</div>
-      <div>
-        <h1>Edge Lab</h1>
-        <div class="sub">Sports Analytics Command Center</div>
+  <div class="edge-shell" data-edge-shell data-edge-sport="MLB" data-edge-view="games">
+    <header class="edge-shell-header"><h1 class="edge-wordmark"><a href="/nba.html">EDGE LAB</a></h1><div class="edge-shell-actions">
+      <button class="edge-icon-button edge-refresh-button" id="refreshBtn" type="button" aria-label="Refresh MLB dashboard" title="Refresh MLB dashboard">Refresh</button>
+      <button class="edge-icon-button" type="button" data-edge-menu-toggle aria-controls="edge-shell-menu" aria-expanded="false" aria-label="Open menu" title="Menu"><img src="/assets/icons/menu.svg" alt="" width="24" height="24"></button>
+    </div></header>
+    <div id="edge-shell-menu" class="edge-menu" hidden>
+      <nav data-edge-menu-links class="edge-menu-links" aria-label="Edge Lab menu"></nav>
+      <p class="edge-menu-label">MLB dashboard sections</p>
+      <div class="tabs edge-dashboard-tabs" aria-label="MLB dashboard sections">
+        <button class="tab active" data-tab="today">Overview</button>
+        <button class="tab" data-tab="plays">Plays</button>
+        <button class="tab" data-tab="props">Player Props</button>
+        <button class="tab" data-tab="market">Market</button>
+        <button class="tab" data-tab="sharp">Sharp Gate</button>
+        <button class="tab" data-tab="results">Results</button>
+        <button class="tab" data-tab="calibration">Calibration</button>
+        <button class="tab" data-tab="system">System</button>
       </div>
+      <details class="edge-dashboard-tools"><summary>MLB health, counts &amp; probability guide</summary>
+        <p class="sub" id="refreshCadence">Auto 60s</p>
+        <div class="healthline"><span class="dot" id="healthDot"></span><span id="healthText">Connecting to live system…</span></div>
+        <div class="metrics">
+          <div class="metric"><div class="label">Markets</div><div class="value" id="mActive">—</div><div class="hint">graded today</div></div>
+          <div class="metric"><div class="label">Pending</div><div class="value" id="mReady">—</div><div class="hint">waiting on final input</div></div>
+          <div class="metric"><div class="label">Plays</div><div class="value" id="mFinal">—</div><div class="hint">fully cleared</div></div>
+          <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
+          <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
+        </div>
+        <p class="small"><strong>pp = percentage points.</strong> For example, 61.5% model probability versus 55.3% market probability is +6.2 pp. MODEL is the estimated probability. MARKET is the no-vig probability implied by the exact two-sided market.</p>
+      </details>
     </div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <span class="sub" id="refreshCadence">Auto 60s</span>
-      <button class="refresh" id="refreshBtn">Refresh</button>
-    </div>
-  </div>
-
-  <div class="healthline">
-    <span class="dot" id="healthDot"></span>
-    <span id="healthText">Connecting to live system…</span>
-  </div>
-
-  <div class="metrics">
-    <div class="metric"><div class="label">Markets</div><div class="value" id="mActive">—</div><div class="hint">graded today</div></div>
-    <div class="metric"><div class="label">Pending</div><div class="value" id="mReady">—</div><div class="hint">waiting on final input</div></div>
-    <div class="metric"><div class="label">Plays</div><div class="value" id="mFinal">—</div><div class="hint">fully cleared</div></div>
-    <div class="metric"><div class="label">Grades</div><div class="value" id="mGrades">—</div><div class="hint">completed audits</div></div>
-    <div class="metric"><div class="label">Snapshots</div><div class="value" id="mSnaps">—</div><div class="hint">market history rows</div></div>
-  </div>
-
-  <div class="card" style="padding:10px 12px;margin-bottom:12px;box-shadow:none">
-    <div style="font-size:12px;line-height:1.5;color:var(--muted)">
-      <strong style="color:var(--text)">pp = percentage points.</strong>
-      Example: 61.5% model probability vs 55.3% market probability = <strong style="color:var(--green)">+6.2 pp</strong>.
-      This is different from a percent change. <strong style="color:var(--cyan)">MODEL</strong> is our estimated probability. <strong style="color:var(--blue)">MARKET</strong> is the no-vig probability implied by the exact two-sided market.
-    </div>
-  </div>
-
-  <nav style="margin:14px 0"><a href="/nfl.html" style="color:var(--cyan);font-weight:700">Open NFL team models and player props →</a></nav>
-  <nav aria-label="Research navigation"><a href="/nba.html">NBA decisions</a> · <a href="/research.html">Prop research &amp; deep dives</a> · <a href="/edge-vnext">Existing research board</a></nav>
-  <div class="tabs">
-    <button class="tab active" data-tab="today">Overview</button>
-    <button class="tab" data-tab="plays">Plays</button>
-    <button class="tab" data-tab="props">Player Props</button>
-    <button class="tab" data-tab="market">Market</button>
-    <button class="tab" data-tab="sharp">Sharp Gate</button>
-    <button class="tab" data-tab="results">Results</button>
-    <button class="tab" data-tab="calibration">Calibration</button>
-    <button class="tab" data-tab="system">System</button>
+    <nav class="edge-sport-nav" aria-label="Sport"><a href="/nba.html" data-edge-sport-link="NBA">NBA</a><a href="/nfl.html" data-edge-sport-link="NFL">NFL</a><a href="/research.html?kind=games&amp;sport=NHL" data-edge-sport-link="NHL">NHL</a><a href="/research.html?kind=games&amp;sport=NCAAF" data-edge-sport-link="NCAAF">CFB</a></nav>
+    <p class="edge-shell-context">MLB advanced analytics</p>
+    <nav class="edge-view-nav" aria-label="Board view"><a href="/dashboard" aria-current="page">Games</a><a href="/dashboard#props">Props</a><a href="/research.html?kind=games&amp;sport=MLB">Alt Lines</a><a href="/dashboard#plays">Parlays</a></nav>
   </div>
 
   <section class="section active" id="today">

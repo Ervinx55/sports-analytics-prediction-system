@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {formatCentralTime} from '../../sharp-service/ui-format.js';
 import {normalizeResearch,latestResearchObservations,groupResearchRows,sortResearchGroups,filterResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
 const now=Date.parse('2026-11-27T17:00:00Z'),stamp=new Date(now-1000).toISOString(),older=new Date(now-60000).toISOString(),start=new Date(now+3600000).toISOString();
 const q=(patch={})=>({line:3.5,odds:-110,available:true,updatedAt:stamp,...patch});
@@ -76,9 +77,28 @@ test('unknown identity does not combine unrelated unnamed players',()=>{
 });
 test('research UI includes exact quote actions, accessible filters and source history disclosure',()=>{
  const html=readFileSync(new URL('../../sharp-service/research.html',import.meta.url),'utf8');
- for(const id of ['query','game','side','market','book','sort','research-status'])assert.match(html,new RegExp('id="'+id+'"'));
+ const panel=html.slice(html.indexOf('id="research-filters"'),html.indexOf('<section id="shortlist-review"'));
+ for(const id of ['query','game','side','market','book','sort','research-status','shortlist-toggle','best-prices'])assert.match(panel,new RegExp('id="'+id+'"'));
+ assert.match(html,/<button id="research-filter-toggle"[^>]*aria-controls="research-filters"[^>]*aria-expanded="false"/);
+ assert.match(panel,/^id="research-filters"[^>]* hidden>/);
+ assert.ok(html.indexOf('id="cards"')<html.indexOf('id="status"'),'Live status follows the compact player list');
+ assert.ok(html.indexOf('id="cards"')<html.indexOf('class="research-coverage"'),'Coverage follows the compact player list');
+ assert.match(html,/<p id="status" role="status" aria-live="polite">/);
  const js=readFileSync(new URL('../../sharp-service/research.js',import.meta.url),'utf8');
  assert.match(js,/groupResearchRows/);assert.match(js,/dataset\.quoteId=row\.id/);assert.match(js,/observationHistory/);assert.match(js,/save\.disabled=row\.available===false/);
+});
+
+test('research card times distinguish future Central dates and follow Chicago midnight',()=>{
+ const source=readFileSync(new URL('../../sharp-service/research.js',import.meta.url),'utf8');
+ const clock=source.slice(source.indexOf('const centralClock='),source.indexOf('\nfunction icon('));
+ const tipoff=new Function('date',clock+'\nreturn tipoff;')(formatCentralTime);
+ assert.equal(tipoff('2026-11-28T01:00:00Z',now),'7:00 PM CT');
+ assert.equal(tipoff('2026-11-29T01:00:00Z',now),'Nov 28 · 7:00 PM CT');
+ const evening=Date.parse('2026-11-28T00:15:00Z');
+ assert.equal(tipoff('2026-11-28T05:30:00Z',evening),'11:30 PM CT');
+ assert.equal(tipoff('2026-11-28T06:30:00Z',evening),'Nov 28 · 12:30 AM CT');
+ assert.equal(tipoff(null,now),'N/A');
+ assert.equal(tipoff('2026-11-28T01:00:00',now),'N/A');
 });
 
 import {normalizeGameResearch,compareResearchPrices} from '../../sharp-service/research-comparison.js';

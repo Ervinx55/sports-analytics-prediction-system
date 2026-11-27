@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {buildDeepDive} from '../../sharp-service/deep-dive.js';
 import {formatCentralTime,formatProbability,formatNumber,shortReason} from '../../sharp-service/ui-format.js';
 import {bookLabel} from '../../sharp-service/prop-price-checks.js';
+import {applyPlayerPortrait,PLAYER_PORTRAIT_FALLBACK} from '../../sharp-service/player-portraits.js';
 import {setNbaQuoteNames,groupLiveDecisions,groupLiveCards,livePlayerName,scopeOf} from '../../sharp-service/nba-live.js';
 import handler from '../../sharp-service/handlers/nba-live-decisions.js';
 
@@ -23,7 +24,8 @@ function names(){
 }
 const descendants=node=>node.children.flatMap(child=>[child,...descendants(child)]);
 class Element{
- constructor(tag='div',ownerDocument){this.tag=tag;this.children=[];this._text='';this.attributes={};this.listeners={};this.ownerDocument=ownerDocument;this.open=false;this.hidden=false;}
+ constructor(tag='div',ownerDocument){this.tag=tag;this.children=[];this._text='';this.attributes={};this.dataset={};this.listeners={};this.ownerDocument=ownerDocument;this.open=false;this.hidden=false;}
+ get tagName(){return this.tag.toUpperCase();}
  set textContent(value){this._text=String(value);this.replaceChildren();}
  get textContent(){return this._text+this.children.map(child=>child.textContent).join('\n');}
  get value(){return this._value??(this.tag==='select'?this.children[0]?.value??'':'');}
@@ -46,12 +48,13 @@ const source=readFileSync(new URL('../../sharp-service/nba-live-view.js',import.
 async function widget(initial){
  let clock=now,calls=0,response={ok:true,body:initial};const timers=[],deep=[];
  const document={activeElement:null};const main=new Element('main',document);
- document.createElement=tag=>new Element(tag,document);document.querySelector=selector=>selector==='main'?main:null;document.body=main;
+ document.createElement=tag=>new Element(tag,document);document.querySelector=selector=>selector==='main'?main:null;document.getElementById=id=>descendants(main).find(node=>node.id===id)||null;document.body=main;
+ const refreshButton=document.createElement('button');refreshButton.id='refresh';main.append(refreshButton);
  const appendDeepDive=(parent,record,options)=>{deep.push(record);const node=new Element('details',document);node.textContent=buildDeepDive(record,options).sections.map(section=>section.text).join('\n');parent.append(node);};
  class Clock extends Date{static now(){return clock;}}
  setNbaQuoteNames(null,clock);
- const mount=new Function('document','appendDeepDive','preserveDeepDives','formatCentralTime','formatProbability','formatNumber','shortReason','bookLabel','fetch','setInterval','setTimeout','clearTimeout','AbortController','Date',source+'\nreturn mountLiveBoard;')(
-  document,appendDeepDive,()=>{},formatCentralTime,formatProbability,formatNumber,shortReason,bookLabel,
+ const mount=new Function('document','appendDeepDive','preserveDeepDives','formatCentralTime','formatProbability','formatNumber','shortReason','bookLabel','applyPlayerPortrait','fetch','setInterval','setTimeout','clearTimeout','AbortController','Date',source+'\nreturn mountLiveBoard;')(
+  document,appendDeepDive,()=>{},formatCentralTime,formatProbability,formatNumber,shortReason,bookLabel,applyPlayerPortrait,
   async()=>{calls++;if(response.error)throw Error('Synthetic unavailable response');return {ok:response.ok,json:async()=>response.body};},
   (fn,ms)=>{timers.push({fn,ms});},()=>0,()=>{},AbortController,Clock
  );
@@ -59,18 +62,19 @@ async function widget(initial){
  await new Promise(resolve=>setImmediate(resolve));
  return {
   main,deep,document,
-  get cards(){return main.querySelectorAll('article');},get text(){return main.textContent;},get calls(){return calls;},
+  get cards(){return main.querySelectorAll('[data-player-market]');},get text(){return main.textContent;},get calls(){return calls;},
   setNames(data,time=clock){const count=setNbaQuoteNames(data,time);render();return count;},
   tick(time){clock=time;for(const timer of timers)if(timer.ms===1000)timer.fn();},
   control(title){return main.querySelectorAll('label').find(node=>node._text===title)?.children.find(node=>['input','select'].includes(node.tag));},
   filter(title,value){const node=this.control(title);assert.ok(node,`Missing ${title} filter`);node.value=value;node.dispatch('input');},
-  async refresh(next=initial,{ok=true,error=false}={}){response={body:next,ok,error};for(const timer of timers)if(timer.ms===15000)await timer.fn();}
+  async refresh(next=initial,{ok=true,error=false}={}){response={body:next,ok,error};for(const timer of timers)if(timer.ms===15000)await timer.fn();},
+  async manualRefresh(next=initial){response={body:next,ok:true};refreshButton.dispatch('click');await new Promise(resolve=>setImmediate(resolve));}
  };
 }
 const selections=view=>view.main.querySelectorAll('.prop-selection');
 const badges=view=>selections(view).map(node=>node.querySelector('.badge').textContent);
-const heading=card=>card.querySelector('h3').textContent;
-const identity=card=>card.querySelectorAll('[data-live-detail]').find(node=>node.getAttribute('data-live-detail').endsWith(':identity'));
+const heading=card=>card.querySelector('.player-row-heading').textContent;
+const identity=card=>card.querySelector('.target-research-details');
 const cleared=patch=>row({status:'PLAY',productionEligible:true,productionWeight:1,approvalId:'reviewed-approval',reasons:[],reason:'Reviewed service clearance.',issuedAt:stamp,forecastAt:stamp,quoteAt:stamp,oppositeQuoteAt:stamp,validUntil:new Date(now+300000).toISOString(),...patch});
 
 test('widget groups an exact quote and retains both labeled evaluations without mutating source',async()=>{
@@ -87,13 +91,14 @@ test('recognized ID names are readable while identity and raw IDs stay in collap
  assert.equal(heading(card),'Kevin Durant');assert.doesNotMatch(heading(card),/BUY|AVOID|_1_NBA/);
  assert.match(identity(card).textContent,/formatted from provider ID; roster identity is unverified/);
  assert.equal(identity(card).open,false);assert.match(identity(card).textContent,/Provider player ID: KEVIN_DURANT_1_NBA/);
- assert.ok(card.children.filter(node=>node.tag!=='details').every(node=>!node._text.includes('KEVIN_DURANT_1_NBA')));
+ assert.equal(card.open,false);assert.match(card.querySelector('summary').textContent,/Kevin Durant/);
+ assert.doesNotMatch(card.querySelector('summary').textContent,/KEVIN_DURANT_1_NBA|Research estimate|Service decision/);
 });
 
 test('already-fetched exact roster metadata adds names and matchup without another request',async()=>{
  const data=body(),before=JSON.stringify(data),view=await widget(data);
  assert.equal(view.setNames(names(),now),1);assert.equal(heading(view.cards[0]),'Kevin Durant');
- assert.match(view.cards[0].textContent,/Houston Rockets @ LA Clippers/);
+ assert.match(view.cards[0].textContent,/HOU vs LAC/);
  assert.match(identity(view.cards[0]).textContent,/Name from the supplied event records/);
  assert.equal(view.calls,1);assert.equal(JSON.stringify(data),before);
  assert.ok(view.deep.every(record=>record.productionEligible===false&&record.productionWeight===0));
@@ -114,7 +119,7 @@ test('wrong event, start, roster binding or conflicting names cannot enrich a fa
   const view=await widget(body([row()])),data=names();change(data);
   assert.equal(view.setNames(data,now),0);assert.equal(heading(view.cards[0]),'Kevin Durant');
   assert.match(identity(view.cards[0]).textContent,/roster identity is unverified/);
-  assert.doesNotMatch(view.cards[0].textContent,/Houston Rockets @ LA Clippers|Conflicting Name/);
+  assert.doesNotMatch(view.cards[0].textContent,/HOU vs LAC|Conflicting Name/);
  }
 });
 
@@ -124,7 +129,7 @@ test('books, sides and alternate lines share a player market while each selectio
  const view=await widget(data);assert.equal(view.cards.length,1);assert.equal(selections(view).length,4);
  assert.equal(view.deep.length,8);assert.match(view.text,/4 unique selections/);
  const extra=view.cards[0].querySelectorAll('[data-live-detail]').find(node=>node.getAttribute('data-live-detail').endsWith(':extra'));
- assert.ok(extra);assert.equal(extra.open,false);assert.equal(extra.querySelectorAll('.prop-selection').length,2);
+ assert.ok(extra);assert.equal(extra.open,false);assert.equal(extra.querySelectorAll('.prop-selection').length,3);
 });
 
 test('different events, scheduled starts, players, markets and periods remain distinct cards',async()=>{
@@ -177,12 +182,45 @@ test('invalid probability, stale paired evidence and mismatched odds cannot disp
 test('disclosure expansion and keyboard focus survive an expiry repaint',async()=>{
  const view=await widget(body([cleared()]));
  const outer=selections(view)[0].querySelector('[data-live-detail]'),evaluation=outer.querySelector('[data-nba-evaluation]');
- outer.open=true;evaluation.open=true;evaluation.querySelector('summary').focus();
+ view.cards[0].open=true;outer.open=true;evaluation.open=true;evaluation.querySelector('summary').focus();
  const original=view.cards[0];view.tick(now+1000);assert.equal(view.cards[0],original,'ordinary clock ticks should not rebuild cards');
  view.tick(now+30000);
  const refreshed=selections(view)[0].querySelector('[data-live-detail]');
+ assert.equal(view.cards[0].open,true,'the player row stays open across an expiry repaint');
  assert.equal(refreshed.open,true);assert.equal(refreshed.querySelector('[data-nba-evaluation]').open,true);
  assert.equal(view.document.activeElement,refreshed.querySelector('[data-nba-evaluation]').querySelector('summary'));
+});
+
+test('a viewed primary quote stays reachable when BUY ordering moves it into extra selections',async()=>{
+ for(const expanded of [true,false]){
+  const view=await widget(body([row(),row({line:6.5})]));view.cards[0].open=true;
+  const research=selections(view)[0].querySelector('.target-research-details'),key=research.getAttribute('data-live-detail');
+  research.open=expanded;if(!expanded)research.querySelector('summary').focus();
+  await view.refresh(body([row(),cleared({line:6.5})]));
+  const extra=view.cards[0].querySelector('.more-quotes'),moved=extra.querySelectorAll('.target-research-details').find(node=>node.getAttribute('data-live-detail')===key);
+  assert.ok(moved,'the previously primary exact quote moved into the extra list');
+  assert.equal(extra.open,true,'the extra ancestor opens to preserve the reading position');
+  assert.equal(moved.open,expanded,'the quote disclosure itself keeps the user-selected state');
+  if(!expanded)assert.equal(view.document.activeElement,moved.querySelector('summary'));
+ }
+});
+
+test('unviewed quotes and explicitly closed ancestors do not automatically open extra selections',async()=>{
+ for(const state of ['unopened','market-closed','extras-closed']){
+  const initial=body([row(),row({line:6.5})]),view=await widget(initial),card=view.cards[0],extra=card.querySelector('.more-quotes');
+  card.open=state!=='market-closed';
+  if(state==='market-closed'){selections(view)[0].querySelector('.target-research-details').open=true;card.querySelector('summary').focus();}
+  if(state==='extras-closed'){extra.querySelector('.target-research-details').open=true;extra.open=false;extra.querySelector('summary').focus();}
+  await view.refresh(state==='extras-closed'?initial:body([row(),cleared({line:6.5})]));
+  assert.equal(view.cards[0].querySelector('.more-quotes').open,false,state);
+  if(state==='market-closed')assert.equal(view.cards[0].open,false);
+ }
+});
+
+test('the header refresh immediately reloads reviewed decisions without waiting for the polling timer',async()=>{
+ const view=await widget(body([cleared()]));assert.equal(view.calls,1);assert.deepEqual(badges(view),['BUY']);
+ await view.manualRefresh(body([row()]));
+ assert.equal(view.calls,2);assert.deepEqual(badges(view),['AVOID']);
 });
 
 test('an expired model loses its cleared label even when another model keeps the selection BUY',async()=>{
@@ -201,17 +239,39 @@ test('an expired model loses its cleared label even when another model keeps the
 test('search, status, side, market and book filters change visible selections without extra requests',async()=>{
  const view=await widget(body([cleared(),row({side:'OVER'}),row({playerID:'DERRICK_WHITE_1_NBA',playerName:'Derrick White',market:'assists',book:'fanduel'})]));
  const filterOptions=view.main.querySelector('.board-filter-options');
- assert.equal(filterOptions.open,false);assert.equal(filterOptions.contains(view.control('Player or game')),false);
+ const toggle=view.main.querySelectorAll('button').find(node=>node.getAttribute('aria-label')==='Filter player props');
+ assert.ok(toggle);assert.equal(filterOptions.hidden,true);assert.equal(toggle.getAttribute('aria-expanded'),'false');
+ assert.equal(filterOptions.contains(view.control('Player or game')),true);
  assert.equal(filterOptions.contains(view.control('Status')),true);
+ toggle.dispatch('click');assert.equal(filterOptions.hidden,false);assert.equal(toggle.getAttribute('aria-expanded'),'true');assert.equal(view.document.activeElement,view.control('Player or game'));
  view.setNames(names(),now);assert.equal(view.cards.length,2);
  view.filter('Player or game','Houston');assert.equal(view.cards.length,1);assert.equal(heading(view.cards[0]),'Kevin Durant');
  view.filter('Player or game','');view.filter('Status','BUY');assert.deepEqual(badges(view),['BUY']);
- assert.match(filterOptions.querySelector('summary').textContent,/1 active/);
+ assert.match(filterOptions.querySelector('.filter-caption').textContent,/1 active/);
  view.filter('Status','');view.filter('Side','OVER');assert.equal(selections(view).length,1);assert.match(selections(view)[0].textContent,/over 5\.5/i);
  view.filter('Side','');view.filter('Market','assists');assert.equal(heading(view.cards[0]),'Derrick White');
  view.filter('Market','');view.filter('Book','fanduel');assert.equal(heading(view.cards[0]),'Derrick White');
  view.filter('Player or game','Nobody Here');assert.equal(view.cards.length,0);assert.match(view.text,/No player markets match these filters/);
+ toggle.dispatch('click');assert.equal(filterOptions.hidden,true);assert.equal(toggle.getAttribute('aria-expanded'),'false');
  assert.equal(view.calls,1);
+});
+
+test('status tiles count current decisions without inventing a WATCH recommendation',async()=>{
+ const data=body([cleared(),row({playerID:'DERRICK_WHITE_1_NBA',playerName:'Derrick White'})]),view=await widget(data);
+ const counts=()=>Object.fromEntries(view.main.querySelectorAll('.edge-status-tile').map(tile=>[tile.querySelector('small').textContent,tile.querySelector('strong').textContent]));
+ assert.deepEqual(counts(),{BUY:'1',WATCH:'—',AVOID:'1'});
+ view.tick(now+30000);assert.deepEqual(counts(),{BUY:'0',WATCH:'—',AVOID:'0'});
+ await view.refresh(data,{error:true});assert.deepEqual(counts(),{BUY:'—',WATCH:'—',AVOID:'—'});
+});
+
+test('selection portraits follow exact player identity and fall back when supplied names conflict',async()=>{
+ const named=row({playerID:'DERRICK_WHITE_1_NBA',playerName:'Derrick White'}),view=await widget(body([named]));
+ const image=selections(view)[0].querySelector('.target-player-portrait');
+ assert.equal(image.src,'/assets/players/derrick-white.png');assert.equal(image.alt,'Derrick White portrait');
+ const conflict=await widget(body([named,{...named,modelHash:hashes[1],playerName:'Different Person'}]));
+ assert.equal(selections(conflict)[0].querySelector('.target-player-portrait').src,PLAYER_PORTRAIT_FALLBACK);
+ assert.match(identity(conflict.cards[0]).textContent,/Conflicting supplied names/);
+ assert.deepEqual(badges(conflict),['AVOID']);
 });
 
 test('numeric sorting follows displayed agreement and keeps ambiguous or missing metrics last',async()=>{

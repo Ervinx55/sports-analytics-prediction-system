@@ -3,7 +3,8 @@ import {appendTeamScoring} from './team-scoring-view.js';
 import {appendDeepDive,preserveDeepDives} from './deep-dive.js';
 
 import {filterResearch,refreshResearchRow,latestResearchObservations,groupResearchRows,sortResearchGroups} from './research-data.js';
-import {formatCentralTime,formatProbability,displayPlayerName} from './ui-format.js';
+import {formatCentralTime,formatProbability,displayPlayerName,shortReason} from './ui-format.js';
+import {applyPlayerPortrait} from './player-portraits.js';
 
 import {createResearchLoader} from './research-loader.js';
 
@@ -24,13 +25,26 @@ const pct=formatProbability;
 
 const date=formatCentralTime;
 
+const centralClock=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
+const centralDay=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',month:'short',day:'numeric'});
+const centralCalendar=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'numeric',day:'numeric'});
+function tipoff(value,now=Date.now()){
+ if(date(value)==='N/A')return 'N/A';
+ const at=new Date(value),time=centralClock.format(at)+' CT';
+ return centralCalendar.format(at)===centralCalendar.format(now)?time:centralDay.format(at)+' · '+time;
+}
+
+function icon(parent,name,className){const node=add(parent,'img',undefined,className);node.src='/assets/icons/'+name+'.svg';node.alt='';node.setAttribute('aria-hidden','true');node.width=20;node.height=20;return node;}
+
 const odds=value=>typeof value==='number'&&Number.isFinite(value)&&Math.abs(value)>=100?`${value>0?'+':''}${value}`:'N/A';
 
 const priceLabel=row=>row.available===false?'Quote unavailable':row.platformType==='dfs'?'Entry payout required':row.platformType==='exchange'?'Executable contract price unverified':odds(row.odds);
 
 const difference=row=>[row.model,row.market].every(value=>typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=1)?`${((row.model-row.market)*100).toFixed(1)} pp`:'N/A';
 
-const saved=new Map(),expandedGroups=new Set();let shortlist=false,shown=24,selected=null;
+function withinOpenDisclosures(node,root){for(let parent=node.parentElement;parent&&parent!==root;parent=parent.parentElement)if(parent.hidden||(parent.tagName==='DETAILS'&&!parent.open))return false;return true;}
+
+const saved=new Map(),expandedGroups=new Set(),viewedQuotes=new Set();let shortlist=false,shown=24,selected=null;
 
 const loader=createResearchLoader({onChange:state=>{
 
@@ -107,21 +121,35 @@ function renderShortlist(){
 }
 
 function quoteOption(parent,row,comparisons){
- const option=add(parent,'section',undefined,'quote-option');option.dataset.quoteId=row.id;
- const head=add(option,'div',undefined,'quote-option-head');
+ const option=add(parent,'article',undefined,'target-player-card quote-option');option.dataset.quoteId=row.id;
+ const unavailable=row.available===false||row.quoteConflict;
+ const meta=add(option,'div',undefined,'target-card-meta');
+ const match=add(meta,'span',`${row.sport==='NCAAF'?'CFB':row.sport} · ${row.away||'Away unavailable'} vs ${row.home||'Home unavailable'} · ${tipoff(row.startsAt)}`,'target-card-game');match.title=date(row.startsAt);
+ add(meta,'span',unavailable?'UNAVAILABLE':'NOT CLEARED','badge '+(unavailable?'unavailable':'neutral'));
+ const identity=add(option,'div',undefined,'target-player-identity'+(row.kind==='games'?' is-game':''));
+ if(row.kind!=='games'){const portrait=add(identity,'img',undefined,'target-player-portrait');applyPlayerPortrait(portrait,row.playerID);}
+ const copy=add(identity,'div',undefined,'target-player-copy');
+ const title=row.kind==='games'?`${row.away||'Away'} vs ${row.home||'Home'}`:displayPlayerName(row.player,row.playerID).name;
+ add(copy,'h3',title,'player-name');
  const side=row.kind==='games'&&['HOME','AWAY'].includes(row.side)?row.player:label(row.side).toLowerCase().replace(/^./,c=>c.toUpperCase());
- add(head,'strong',`${side} ${row.line??(row.kind==='games'?'':'N/A')}`.trim(),'selection');
- add(head,'span',`${bookLabel(row.book)} · ${priceLabel(row)}`,'quote');
- if(row.available===false){add(option,'p',row.quoteConflict?'Conflicting observations · price withheld':'Latest quote unavailable','quote-state');}
+ add(copy,'p',`${side} ${row.line??(row.kind==='games'?'':'N/A')} ${label(row.marketType)}`.replace(/\s+/g,' ').trim(),'selection target-card-selection');
+ add(copy,'p',`${bookLabel(row.book)} · ${unavailable?'Quote unavailable':priceLabel(row)}`,'quote target-card-book');
+ const compare=add(option,'div',undefined,'comparison target-card-metrics');
+ for(const [name,value,explanation] of [['Model',unavailable?'N/A':pct(row.model),'Experimental model chance; not approved for live plays'],['Market',unavailable?'N/A':pct(row.market),'Market-implied chance with margin removed (no vig)'],['Edge',unavailable?'N/A':difference(row),'Model minus market in percentage points; not expected profit']]){const cell=add(compare,'div');const heading=add(cell,'small',name);heading.title=explanation;add(cell,'strong',value);}
+ add(option,'p',unavailable?(row.quoteConflict?'Conflicting observations; current price withheld.':'Latest quote unavailable.'):shortReason(row.reason,'Model approval and availability unverified.'),'target-card-reason');
+ const research=add(option,'details',undefined,'target-research-details');research.dataset.researchGroup='quote:'+row.id;research.open=expandedGroups.has(research.dataset.researchGroup);
+ const summary=add(research,'summary');summary.dataset.focusKey='research:'+row.id;add(summary,'span','Research & matchup details');icon(summary,'chevron-down','target-research-chevron');
+ const content=add(research,'div',undefined,'target-research-content');
+ if(row.reason)add(content,'p',row.reason,'research-decision-reason');
+ add(content,'p',`${date(row.startsAt)} · ${label(row.period||'game')} · Quote observed ${date(row.updatedAt)}`,'quote-state');
+ if(unavailable)add(content,'p',row.quoteConflict?'Conflicting observations · price withheld':'Latest quote unavailable','quote-state');
  else{
-  const compare=add(option,'div',undefined,'comparison');
-  for(const [name,value] of [['Model chance*',pct(row.model)],['Market (no vig)',pct(row.market)],['Gap (pp)',difference(row).replace(' pp','')]]){const cell=add(compare,'div');add(cell,'small',name);add(cell,'strong',value);}
   const comparison=comparisons.get(row.id);
-  if(comparison?.best){const detail=add(option,'details',undefined,'price-comparison');detail.dataset.researchGroup='compare:'+row.id;detail.open=expandedGroups.has(detail.dataset.researchGroup);add(detail,'summary','Best observed price');add(detail,'p',`${comparison.eligibleBooks} comparable books · best observed ${odds(comparison.bestOdds)}`);add(detail,'p',comparison.referenceProbability===null?'Market reference needs more other-book coverage.':`Market reference: ${pct(comparison.referenceProbability)} · ${comparison.referenceBooks.length} other ${comparison.referenceKind==='sharp'?'sharp ':''}books`);}
-  if(['dfs','exchange'].includes(row.platformType))add(option,'small',row.platformType==='dfs'?'Entry payout required · indicative odds are not a bet price.':'Executable contract price and fees unverified.','quote-state');
-  else if(row.freshness!=='CURRENT')add(option,'small',`${row.freshness} quote · ${date(row.updatedAt)}`,'quote-state');
+  if(comparison?.best){const detail=add(content,'details',undefined,'price-comparison');detail.dataset.researchGroup='compare:'+row.id;detail.open=expandedGroups.has(detail.dataset.researchGroup);const bestSummary=add(detail,'summary','Best observed price');bestSummary.dataset.focusKey='compare:'+row.id;add(detail,'p',`${comparison.eligibleBooks} comparable books · best observed ${odds(comparison.bestOdds)}`);add(detail,'p',comparison.referenceProbability===null?'Market reference needs more other-book coverage.':`Market reference: ${pct(comparison.referenceProbability)} · ${comparison.referenceBooks.length} other ${comparison.referenceKind==='sharp'?'sharp ':''}books`);}
+  if(['dfs','exchange'].includes(row.platformType))add(content,'small',row.platformType==='dfs'?'Entry payout required · indicative odds are not a bet price.':'Executable contract price and fees unverified.','quote-state');
+  else if(row.freshness!=='CURRENT')add(content,'small',`${row.freshness} quote · ${date(row.updatedAt)}`,'quote-state');
  }
- const actions=add(option,'div',undefined,'actions');
+ const actions=add(content,'div',undefined,'actions');
  const detail=button(actions,'Why isn’t this cleared?',()=>openDetail(row));detail.dataset.focusKey='detail:'+row.id;
  const save=button(actions,saved.has(row.id)?'Remove saved':'Shortlist +',()=>{if(saved.has(row.id))saved.delete(row.id);else if(row.available!==false&&!row.quoteConflict)saved.set(row.id,structuredClone(row));render();});save.dataset.focusKey='save:'+row.id;save.disabled=row.available===false&&!saved.has(row.id);save.setAttribute('title',`${saved.has(row.id)?'Remove saved':'Shortlist'} ${row.player} ${row.side} ${row.line??''} ${label(row.marketType)} at ${bookLabel(row.book)}`);
 }
@@ -132,26 +160,31 @@ function render(){
  $('refresh').disabled=state.status==='loading';$('count').textContent=state.status==='ready'?allGroups.length:'—';$('modeled').textContent=state.status==='ready'?allGroups.filter(g=>g.rows.some(r=>r.model!==null&&r.available!==false)).length:'—';$('fresh').textContent=state.status==='ready'?allGroups.filter(g=>g.rows.some(r=>r.freshness==='CURRENT'&&r.available!==false)).length:'—';$('saved-count').textContent=saved.size;
  renderCfbSummary(state,all);renderShortlist();
  const isCfb=state.sport==='NCAAF'&&state.kind==='games';$('play-readiness').textContent=isCfb?'CFB predictions · research only':state.kind==='games'?'Game quotes · research only':'Player props · research only';for(const p of $('play-readiness').parentElement.querySelectorAll('p'))p.hidden=state.kind==='games';
+ $('research-board').textContent=`${state.sport==='NCAAF'?'CFB':state.sport} ${state.kind==='games'?'Game Markets':'Player Props'}`;
+ $('reviewed-props-link').href=state.sport==='NFL'?'/nfl.html':'/nba.html';
+ const shell=document.querySelector('[data-edge-shell]');if(shell)shell.dataset.edgeSport=state.sport;
  $('shortlist-toggle').textContent=shortlist?'Back to board':'View shortlist';$('shortlist-toggle').setAttribute('aria-pressed',String(shortlist));
  for(const tab of document.querySelectorAll('[data-sport]')){tab.setAttribute('aria-pressed',String(tab.dataset.sport===state.sport));tab.hidden=state.kind==='props'&&!['NBA','NFL'].includes(tab.dataset.sport);}
  for(const tab of document.querySelectorAll('[data-kind]'))tab.setAttribute('aria-pressed',String(tab.dataset.kind===state.kind));$('other-league').hidden=state.kind!=='games';
  renderCoverage(state,liveRows().filter(r=>Date.parse(r.startsAt)>Date.now()));
  $('status').textContent=(state.message?`${state.message} `:'')+(state.status==='ready'||shortlist?`${groups.length} matching ${shortlist?'shortlisted':'research'} markets · ${rows.length} quote sides · ${state.sport} · Last refresh ${date(state.generatedAt)}`:'');
- const target=$('cards'),focused=document.activeElement?.dataset?.focusKey;
+ const target=$('cards'),active=document.activeElement,focused=active?.dataset?.focusKey;
+ const priorQuotes=target.querySelectorAll('.quote-option');
+ // Retain the last visible reading position through the loader's empty state.
+ // Closed ancestors do not qualify, even if a child disclosure retains `open`.
+ if(priorQuotes.length){viewedQuotes.clear();for(const option of priorQuotes){const research=option.querySelector('.target-research-details');if(withinOpenDisclosures(option,target)&&(research?.open||option.contains(active)))viewedQuotes.add(option.dataset.quoteId);}}
  for(const detail of target.querySelectorAll('[data-research-group]')){if(detail.open)expandedGroups.add(detail.dataset.researchGroup);else expandedGroups.delete(detail.dataset.researchGroup);}
  preserveDeepDives(target);target.replaceChildren();$('more').hidden=groups.length<=shown;
  if(!groups.length){add(target,'div',state.status==='loading'&&!shortlist?'Fetching quotes and research estimates…':state.status==='error'&&!shortlist?'Quotes could not be loaded. This does not mean every market is AVOID.':shortlist?'No upcoming shortlisted markets match these filters. Shortlists are kept only for this page session.':all.length?'No markets match these filters.':'No upcoming quotes were returned. Coverage may be unavailable or outside the provider window.','empty');return;}
  for(const group of groups.slice(0,shown)){
   const sorted=[...group.rows].sort((a,b)=>(a.line??0)-(b.line??0)||bookLabel(a.book).localeCompare(bookLabel(b.book))||(['OVER','HOME'].includes(a.side)?0:1)-(['OVER','HOME'].includes(b.side)?0:1));
-  const row=sorted[0],card=add(target,'article',undefined,'card research-market');card.dataset.marketKey=group.key;
-  const head=add(card,'div',undefined,'card-head'),title=row.kind==='games'?`${row.away||'Away'} @ ${row.home||'Home'}`:displayPlayerName(row.player,row.playerID).name;
-  add(head,'h3',title,'player-name');add(head,'span','NOT CLEARED','badge');
-  add(card,'p',row.kind==='games'?date(row.startsAt):`${row.away||'Away unavailable'} @ ${row.home||'Home unavailable'} · ${date(row.startsAt)}`,'match');
-  add(card,'h4',label(row.marketType).replace(/\b\w/g,c=>c.toUpperCase())+(group.period!=='game'?' · '+label(group.period):''),'market-title');
-  const lines=new Set(sorted.map(r=>r.line)),books=new Set(sorted.map(r=>r.book));add(card,'p',`${books.size} platform${books.size===1?'':'s'} · ${lines.size} line${lines.size===1?'':'s'} · ${row.kind==='games'?'All outcomes and alternate lines':'Over/Under and alternate lines'} grouped together`,'group-summary');
-  const quotes=add(card,'div',undefined,'group-quotes');for(const quote of sorted.slice(0,2))quoteOption(quotes,quote,comparisons);
-  if(sorted.length>2){const more=add(card,'details',undefined,'more-quotes');more.dataset.researchGroup=group.key;more.open=expandedGroups.has(group.key);add(more,'summary',`${sorted.length-2} more quotes · books & alternate lines`);const rest=add(more,'div',undefined,'group-quotes');for(const quote of sorted.slice(2))quoteOption(rest,quote,comparisons);}
-  const stamps=sorted.map(r=>Date.parse(r.updatedAt)).filter(Number.isFinite);add(card,'small',`Latest observation ${stamps.length?date(new Date(Math.max(...stamps)).toISOString()):'N/A'} · ${sorted.some(r=>r.model!==null)?'Experimental estimates':'Prediction unavailable'}`,'group-footnote');
+  const row=sorted[0],card=add(target,'details',undefined,'player-market-row research-market');card.dataset.marketKey=group.key;card.dataset.researchGroup='market:'+group.key;card.open=expandedGroups.has(card.dataset.researchGroup);
+  const head=add(card,'summary',undefined,'player-row-summary');head.dataset.focusKey='market:'+group.key;
+  const heading=add(head,'span',undefined,'player-row-copy'),title=row.kind==='games'?`${row.away||'Away'} @ ${row.home||'Home'}`:displayPlayerName(row.player,row.playerID).name;
+  const name=add(heading,'span',title,'player-row-heading');name.setAttribute('role','heading');name.setAttribute('aria-level','3');
+  add(heading,'span',label(row.marketType).replace(/\b\w/g,c=>c.toUpperCase())+(group.period!=='game'?' · '+label(group.period):''),'player-row-market');add(head,'span',row.kind==='games'?'Back to markets':'Back to players','player-row-back');icon(head,'chevron-right','player-row-chevron');
+  const content=add(card,'div',undefined,'player-market-content');quoteOption(content,row,comparisons);
+  if(sorted.length>1){const more=add(content,'details',undefined,'more-quotes');more.dataset.researchGroup='quotes:'+group.key;more.open=expandedGroups.has(more.dataset.researchGroup)||sorted.slice(1).some(quote=>viewedQuotes.has(quote.id));const summary=add(more,'summary',`${sorted.length-1} more quote${sorted.length===2?'':'s'} · books & alternate lines`);summary.dataset.focusKey='quotes:'+group.key;const lines=new Set(sorted.map(r=>r.line)),books=new Set(sorted.map(r=>r.book));add(more,'p',`${books.size} platform${books.size===1?'':'s'} · ${lines.size} line${lines.size===1?'':'s'} · ${row.kind==='games'?'All outcomes and alternate lines':'Over/Under and alternate lines'} grouped together`,'group-summary');const rest=add(more,'div',undefined,'group-quotes');for(const quote of sorted.slice(1))quoteOption(rest,quote,comparisons);}
  }
  if(focused)for(const action of target.querySelectorAll('[data-focus-key]'))if(action.dataset.focusKey===focused){action.focus({preventScroll:true});break;}
  $('more').textContent=`Show more · ${Math.min(shown,groups.length)} of ${groups.length} markets`;
@@ -317,6 +350,8 @@ for(const tab of document.querySelectorAll('[data-kind]'))tab.onclick=()=>change
 $('league-form').onsubmit=e=>{e.preventDefault();const league=$('league-code').value.trim().toUpperCase();if(/^[A-Z0-9][A-Z0-9_-]{0,39}$/.test(league))changeView(league,'games');};
 
 for(const id of ['query','book','market','freshness','best-prices','side','game','research-status','sort'])$(id).addEventListener(id==='query'?'input':'change',()=>{shown=24;render();});
+
+$('research-filter-toggle').addEventListener('click',()=>{const panel=$('research-filters');panel.hidden=!panel.hidden;$('research-filter-toggle').setAttribute('aria-expanded',String(!panel.hidden));if(!panel.hidden)$('query').focus();});
 
 $('refresh').onclick=()=>loader.load(loader.state.sport,loader.state.kind);$('more').onclick=()=>{shown+=24;render();};$('shortlist-toggle').onclick=()=>{shortlist=!shortlist;shown=24;populate();render();};$('close-detail').onclick=()=>{$('detail').close();selected=null;};$('detail').addEventListener('close',()=>{selected=null;});
 
