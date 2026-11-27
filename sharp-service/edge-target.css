@@ -269,10 +269,20 @@ body.el-theme.edge-shell-page {
 .el-theme .board-note { margin: 7px 0 0; font-size: 11px; color: #afafaf; }
 .el-theme .reviewed-picks-board { margin: 20px 0 24px; scroll-margin-top: 16px; }
 .el-theme .reviewed-board-head { height: auto; min-height: 32px; flex-wrap: wrap; gap: 4px 12px; }
+.el-nfl .reviewed-board-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; max-width: 100%; }
 .el-theme .reviewed-active-count { color: #afafaf; font-size: 12px; white-space: nowrap; }
+.el-nfl .reviewed-active-count { font-size: 14px; white-space: normal; line-height: 1.45; }
+.el-nfl .reviewed-window-note { margin: -2px 0 12px; color: #afafaf; font-size: 14px; line-height: 1.5; }
+.el-nfl .reviewed-row-date, .el-nfl .reviewed-row-context { display: block; margin-top: 5px; color: #afafaf; font-size: 14px; line-height: 1.45; }
+.el-nfl .reviewed-row-update { display: block; margin-top: 6px; color: #d7c9f7; font-size: 14px; line-height: 1.45; }
+.el-nfl .reviewed-card-update { margin: 12px 0; color: #d7c9f7; font-size: 14px; line-height: 1.45; }
 .el-theme .reviewed-row-price { display: block; margin-top: 4px; color: #afafaf; font-size: 12px; line-height: 1.4; }
 .el-theme .reviewed-row-status { display: inline-block; margin-top: 8px; padding: 3px 7px; border-radius: 999px; background: #332a3d; color: #d7c9f7; font-size: 10px; line-height: 1.3; font-weight: 650; letter-spacing: .4px; }
 .el-theme .reviewed-row-status.reviewed-buy { background: #203528; color: #74d98b; }
+.el-nfl .reviewed-row-status, .el-nfl .reviewed-row-price,
+.el-nfl .reviewed-picks-board .reviewed-pick-card .badge,
+.el-nfl .reviewed-pick-card .target-card-game,
+.el-nfl .reviewed-pick-card .target-research-details p { font-size: 14px; }
 .el-theme .reviewed-feed-status { margin: 12px 0 0; color: #afafaf; font-size: 11px; line-height: 1.5; }
 .el-theme .reviewed-pick-card .target-card-meta { flex-wrap: wrap; }
 .el-theme .reviewed-pick-card .target-card-meta .badge { white-space: normal; }

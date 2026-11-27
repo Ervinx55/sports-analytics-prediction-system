@@ -1,6 +1,8 @@
 // The recommendation journal is service-only. This endpoint publishes only
 // explicitly opted-in card fields; it never publishes conversation evidence,
 // tickets, model approvals, or a claim that a recorded price is still available.
+import {reviewedDateWindow,reviewedDay} from '../reviewed-picks-contract.js';
+
 const CONTRACT='edge-reviewed-picks-v1';
 const LIMIT=500;
 const sports=new Set(['NBA','NFL','NHL','MLB','CFB','NCAAF']);
@@ -8,19 +10,22 @@ const decisions=new Set(['BUY','AVOID','PASS','WATCH','REVERSED','SELECT_RESEARC
 const props=new Set(['points','rebounds','assists','threes','points_assists','points_rebounds','rebounds_assists','points_rebounds_assists','pra','rushing_yards','receiving_yards','passing_yards','receptions','passing_attempts','rushing_attempts']);
 const teams=new Set(['moneyline','spread','total']);
 const scopes=new Set(['FULL_GAME','FIRST_HALF','SECOND_HALF','FIRST_QUARTER','SECOND_QUARTER','THIRD_QUARTER','FOURTH_QUARTER']);
+const reportedDecisions=new Set(['BUY','AVOID','WATCH','PASS']);
+const updateDecisions=new Set(['AVOID','WATCH','PASS','REVERSED']);
 const text=(value,max=160)=>typeof value==='string'&&value.trim()&&value.length<=max?value.trim():null;
 const id=value=>typeof value==='number'&&Number.isSafeInteger(value)&&value>0?String(value):typeof value==='string'&&/^[1-9]\d{0,19}$/.test(value)?value:null;
-const timestamp=value=>typeof value==='string'&&/(Z|[+-]\d{2}:\d{2})$/.test(value)&&Number.isFinite(Date.parse(value))?new Date(value).toISOString():null;
+const timestamp=value=>typeof value==='string'&&reviewedDay(value)!==null?new Date(value).toISOString():null;
 const odds=value=>Number.isInteger(value)&&Math.abs(value)>=100&&Math.abs(value)<=100000?value:null;
-const day=value=>new Intl.DateTimeFormat('en-CA',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(value));
+const historyOnly=row=>row?.sport==='NFL'&&row.decision==='REPORTED_SELECTION'&&row.publication?.historyOnly===true;
 const identity=row=>JSON.stringify([row.sport,row.event_id,timestamp(row.starts_at),row.player_id??null,row.market_type,row.market_scope]);
 const newer=(a,b)=>Date.parse(a.recorded_at)-Date.parse(b.recorded_at)||(BigInt(id(a.id))-BigInt(id(b.id))>0n?1:BigInt(id(a.id))===BigInt(id(b.id))?0:-1);
 
-function validRow(row,sport,date,now){
+function validRow(row,sport,dateWindow,now){
  const p=row?.publication,issued=timestamp(row?.issued_at),recorded=timestamp(row?.recorded_at),start=timestamp(row?.starts_at);
+ const history=historyOnly(row),gameDate=reviewedDay(start);
  if(!id(row?.id)||row.sport!==sport||row.record_kind!=='recommendation'||row.provenance!=='conversation'||
-   p?.surface!==CONTRACT||p?.visibility!=='public'||!issued||!recorded||!start||Date.parse(issued)>now||Date.parse(recorded)>now||Date.parse(issued)>Date.parse(recorded)||day(start)!==date||
-   !text(row.event_id)||!scopes.has(row.market_scope)||!decisions.has(row.decision)||!text(row.book)||!odds(row.odds))return false;
+   p?.surface!==CONTRACT||p?.visibility!=='public'||(p.historyOnly===true&&!history)||(history&&!reportedDecisions.has(p.reportedDecision))||(!issued&&!(history&&row.issued_at==null))||!recorded||!start||Date.parse(issued)>now||Date.parse(recorded)>now||Date.parse(issued)>Date.parse(recorded)||gameDate<dateWindow.fromDate||gameDate>dateWindow.toDate||
+   !text(row.event_id)||!scopes.has(row.market_scope)||!decisions.has(row.decision)||(!text(row.book)&&!(history&&row.book==null))||(!odds(row.odds)&&!(history&&row.odds==null)))return false;
  if(props.has(row.market_type))return Boolean(text(row.player_id)&&text(row.player_name)&&['OVER','UNDER'].includes(row.side)&&typeof row.line==='number'&&Number.isFinite(row.line)&&row.line>=0);
  if(!teams.has(row.market_type)||row.player_id)return false;
  if(row.market_type==='moneyline')return ['HOME','AWAY'].includes(row.side)&&row.line==null;
@@ -28,8 +33,15 @@ function validRow(row,sport,date,now){
  return ['OVER','UNDER'].includes(row.side)&&typeof row.line==='number'&&Number.isFinite(row.line)&&row.line>=0;
 }
 
+function reviewUpdate(row,now){
+ const update=row.publication.reviewUpdate,issuedAt=timestamp(update?.issuedAt),note=text(update?.note,500);
+ const original=timestamp(row.issued_at);
+ if(!updateDecisions.has(update?.decision)||!issuedAt||!note||Date.parse(issuedAt)>now||Date.parse(issuedAt)>Date.parse(row.recorded_at)||(original&&Date.parse(issuedAt)<Date.parse(original)))return null;
+ return {decision:update.decision,issuedAt,note};
+}
+
 export function projectReviewedPicks(rows,{sport='NBA',now=Date.now(),amendments=[]}={}){
- const date=day(now),candidates=rows.filter(row=>validRow(row,sport,date,now));
+ const date=reviewedDay(now),dateWindow=reviewedDateWindow(sport,now),candidates=rows.filter(row=>validRow(row,sport,dateWindow,now));
  const byId=new Map(candidates.map(row=>[id(row.id),row])),removed=new Set(),invalid=new Set();
  for(const row of [...candidates,...amendments]){
   const previous=id(row?.previous_decision_id);if(!previous)continue;
@@ -48,11 +60,12 @@ export function projectReviewedPicks(rows,{sport='NBA',now=Date.now(),amendments
  // duplicate BUY could reappear when its latest capture was withdrawn.
  const picks=[...latest.values()].filter(row=>!removed.has(id(row.id))).sort((a,b)=>Date.parse(a.starts_at)-Date.parse(b.starts_at)||newer(b,a)).map(row=>({
   id:id(row.id),sport:row.sport,eventId:row.event_id,startsAt:timestamp(row.starts_at),playerId:row.player_id??null,playerName:row.player_name??null,
-  marketType:row.market_type,marketScope:row.market_scope,side:row.side,line:row.line??null,book:row.book,odds:row.odds,decision:row.decision,
-  issuedAt:timestamp(row.issued_at),recordedAt:timestamp(row.recorded_at),sourceLabel:'Manual review',
-  matchup:text(row.publication.matchup),priceLimit:odds(row.publication.priceLimit),reviewNote:text(row.publication.reviewNote,500)
+  marketType:row.market_type,marketScope:row.market_scope,side:row.side,line:row.line??null,book:row.book??null,odds:row.odds??null,decision:row.decision,
+  issuedAt:timestamp(row.issued_at),recordedAt:timestamp(row.recorded_at),sourceLabel:historyOnly(row)?'Reported selection':'Manual review',
+  historyOnly:historyOnly(row),reportedDecision:historyOnly(row)&&reportedDecisions.has(row.publication.reportedDecision)?row.publication.reportedDecision:null,
+  matchup:text(row.publication.matchup),priceLimit:odds(row.publication.priceLimit),reviewNote:text(row.publication.reviewNote,500),reviewUpdate:reviewUpdate(row,now)
  }));
- return {contract:CONTRACT,generatedAt:new Date(now).toISOString(),date,timezone:'America/Chicago',sport,picks};
+ return {contract:CONTRACT,generatedAt:new Date(now).toISOString(),date,dateWindow,timezone:'America/Chicago',sport,picks};
 }
 
 export default async function handler(req,res){
@@ -62,7 +75,8 @@ export default async function handler(req,res){
  if(!sports.has(sport))return res.status(400).json({error:'Unsupported sport',picks:[]});
  const key=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!key)return res.status(503).json({error:'Reviewed picks unavailable',picks:[]});
- const now=Date.now(),date=day(now),midnight=Date.parse(date+'T00:00:00Z');
+ const now=Date.now(),dateWindow=reviewedDateWindow(sport,now);
+ const firstMidnight=Date.parse(dateWindow.fromDate+'T00:00:00Z'),lastMidnight=Date.parse(dateWindow.toDate+'T00:00:00Z');
  const base=(process.env.SUPABASE_URL||'https://yeoxroijaptomomshdii.supabase.co').replace(/\/$/,'');
  const headers={accept:'application/json',apikey:key};if(key.startsWith('eyJ'))headers.Authorization='Bearer '+key;
  const read=async parameters=>{
@@ -78,8 +92,8 @@ export default async function handler(req,res){
    select:'id,recorded_at,issued_at,sport,event_id,starts_at,player_id,player_name,market_type,market_scope,side,line,odds,book,decision,previous_decision_id,record_kind,provenance,publication:context->publication',
    'context->publication->>visibility':'eq.public','context->publication->>surface':'eq.'+CONTRACT,
    // Chicago midnight is UTC05 or UTC06; a narrow envelope covers both DST
-   // boundaries. The projection applies the exact local date independently.
-   and:`(starts_at.gte.${new Date(midnight+5*3600000).toISOString()},starts_at.lt.${new Date(midnight+30*3600000).toISOString()})`,
+   // boundaries. The projection applies the inclusive calendar dates exactly.
+   and:`(starts_at.gte.${new Date(firstMidnight+5*3600000).toISOString()},starts_at.lt.${new Date(lastMidnight+30*3600000).toISOString()})`,
    order:'recorded_at.desc,id.desc'
   });
   const ids=rows.map(row=>id(row?.id)).filter(Boolean);

@@ -8,18 +8,19 @@
 </head><body class="el-theme el-nfl edge-shell-page"><main>
 <div class="edge-shell" data-edge-shell data-edge-sport="NFL" data-edge-view="games">
   <header class="edge-shell-header"><h1 class="edge-wordmark"><a href="/nba.html">EDGE LAB</a></h1><div class="edge-shell-actions">
-    <button id="refresh" class="edge-icon-button" type="button" aria-label="Refresh NFL models" title="Refresh NFL models"><img src="/assets/icons/refresh.svg" alt="" width="24" height="24"></button>
+    <button id="refresh" class="edge-icon-button" type="button" aria-label="Refresh NFL data" title="Refresh NFL data"><img src="/assets/icons/refresh.svg" alt="" width="24" height="24"></button>
     <button class="edge-icon-button" type="button" data-edge-menu-toggle aria-controls="edge-shell-menu" aria-expanded="false" aria-label="Open menu" title="Menu"><img src="/assets/icons/menu.svg" alt="" width="24" height="24"></button>
   </div></header>
   <div id="edge-shell-menu" class="edge-menu" hidden><nav data-edge-menu-links class="edge-menu-links" aria-label="Edge Lab menu"></nav></div>
   <nav class="edge-sport-nav" aria-label="Sport"><a href="/nba.html" data-edge-sport-link="NBA">NBA</a><a href="/nfl.html" data-edge-sport-link="NFL" aria-current="page">NFL</a><a href="/research.html?kind=games&amp;sport=NHL" data-edge-sport-link="NHL">NHL</a><a href="/research.html?kind=games&amp;sport=NCAAF" data-edge-sport-link="NCAAF">CFB</a></nav>
   <nav class="edge-view-nav" aria-label="Board view"><a href="/nfl.html" aria-current="page">Games</a><a href="/research.html?kind=props&amp;sport=NFL">Props</a><a href="/research.html?kind=games&amp;sport=NFL">Alt Lines</a><a href="/dashboard#plays">Parlays</a></nav>
 </div>
+<section id="reviewed-picks" data-reviewed-picks-mount data-reviewed-sport="NFL" aria-label="NFL reviewed picks"></section>
 <h2 class="edge-page-heading">NFL models</h2>
-<div class="notice"><strong>Research only · no cleared NFL plays</strong><br>Winner and spread probabilities currently come from market prices alone. Totals may blend market prices with an unvalidated model contribution, shown on each card. Player props show the independent research estimate separately. A market favorite is not a validated model prediction. Conflicting or missing starter evidence blocks team forecasts. Live injury adjustments are unavailable. NFL settlement tracking is not connected to this view.</div>
+<div class="notice"><strong>Automated models · research only</strong><br>Winner and spread probabilities currently come from market prices alone. Totals may blend market prices with an unvalidated model contribution, shown on each card. Player props show the independent research estimate separately. A market favorite is not a validated model prediction. Conflicting or missing starter evidence blocks team forecasts. Live injury adjustments are unavailable. NFL settlement tracking is not connected to this view.</div>
 <div class="controls"><select id="kind" aria-label="Market type"><option value="teams">Team markets</option><option value="props">Player props</option></select><input id="search" aria-label="Filter teams or players" placeholder="Filter team, player or market"><select id="game" aria-label="Game"><option value="">All games</option></select></div>
 <div id="status" role="status" aria-live="polite">Loading NFL team models…</div><div id="source" class="muted"></div><div id="cards" class="cards"></div>
-</main><script type="module">
+</main><script type="module" src="/reviewed-picks.js"></script><script type="module">
 import {decisionPresentation,decisionTime} from './decision-display.js';
 import {deepDiveHtml,preserveDeepDives} from './deep-dive.js';
 import {modelRows,marketLabel} from './nfl-view.js';
@@ -33,7 +34,7 @@ function render(){
  const all=modelRows(data,kind),query=$('search').value.toLowerCase(),game=$('game').value;
  const rows=all.filter(r=>(!game||r.eventID===game)&&[r.away,r.home,r.playerName,r.label,r.marketType,r.line,r.statID,r.side].join(' ').replaceAll('_',' ').toLowerCase().includes(query));
  $('status').className='';$('status').textContent=rows.length+' of '+all.length+' upcoming markets and forecast checks · '+(data.generatedAt?'Updated '+new Date(data.generatedAt).toLocaleString():'Update time unavailable');
- $('source').textContent=(data.oddsProvider?'Odds provider: '+data.oddsProvider+'. ':'')+'No NFL recommendations are enabled. Estimates older than 10 minutes are marked stale.';
+ $('source').textContent=(data.oddsProvider?'Odds provider: '+data.oddsProvider+'. ':'')+'No automated NFL recommendations are enabled. Estimates older than 10 minutes are marked stale.';
  if(!all.length){$('cards').innerHTML='<div class="card">No upcoming '+(kind==='teams'?'team markets':'player props')+' were returned. There may be no priced games in the provider window; an empty response does not mean every game was graded PASS.</div>';return;}
  preserveDeepDives($('cards'));
  $('cards').innerHTML=rows.length?rows.map(r=>{

@@ -5,7 +5,9 @@ import {mountReviewedPicks} from '../../sharp-service/reviewed-picks.js';
 
 const now=Date.parse('2026-11-27T18:00:00Z'),stamp=new Date(now).toISOString();
 const pick=(patch={})=>({id:'review-1',sport:'NBA',eventId:'fixture-event',startsAt:new Date(now+3600000).toISOString(),playerId:'DERRICK_WHITE_1_NBA',playerName:'Derrick White',marketType:'rebounds',marketScope:'FULL_GAME',side:'OVER',line:3.5,book:'draftkings',odds:123,decision:'BUY',issuedAt:new Date(now-600000).toISOString(),recordedAt:new Date(now-60000).toISOString(),sourceLabel:'Manual review',matchup:'ATL vs BOS',priceLimit:100,reviewNote:'Original reviewed selection.',...patch});
-const feed=(picks=[pick()],patch={})=>({contract:'edge-reviewed-picks-v1',generatedAt:stamp,date:'2026-11-27',timezone:'America/Chicago',sport:'NBA',picks,...patch});
+const feed=(picks=[pick()],patch={})=>({contract:'edge-reviewed-picks-v1',generatedAt:stamp,date:'2026-11-27',dateWindow:{fromDate:'2026-11-27',toDate:'2026-11-27'},timezone:'America/Chicago',sport:'NBA',picks,...patch});
+const reported=(patch={})=>pick({sport:'NFL',playerId:'BO_NIX_1_NFL',playerName:'Bo Nix',marketType:'passing_yards',side:'UNDER',line:214.5,startsAt:'2026-11-26T19:00:00Z',book:null,odds:null,issuedAt:null,decision:'REPORTED_SELECTION',historyOnly:true,reportedDecision:'BUY',sourceLabel:'Reported selection',priceLimit:null,matchup:'Denver at Las Vegas',reviewNote:'Original selection reported; exact original price and time were not recovered.',reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-120000).toISOString(),note:'Later review avoided the lower 199.5–202.5 passing-yard lines. This does not establish a withdrawal of the original 214.5 line.'},...patch});
+const nflFeed=(picks=[reported()],patch={})=>feed(picks,{sport:'NFL',dateWindow:{fromDate:'2026-11-21',toDate:'2026-12-03'},...patch});
 const descendants=node=>node.children.flatMap(child=>[child,...descendants(child)]);
 class Element{
  constructor(tag,document){this.tag=tag;this.ownerDocument=document;this.children=[];this.attributes={};this.dataset={};this.listeners={};this.open=false;this.hidden=false;this._text='';}
@@ -25,16 +27,17 @@ class Element{
  querySelectorAll(selector){const selectors=selector.split(',').map(value=>value.trim());return descendants(this).filter(node=>selectors.some(value=>value[0]==='['?node.hasAttribute(value.slice(1,-1)):value[0]==='.'?node.className?.split(' ').includes(value.slice(1)):node.tag===value));}
  querySelector(selector){return this.querySelectorAll(selector)[0]??null;}
 }
-async function widget(initial,{clock=now}={}){
+async function widget(initial,{clock=now,sport='NBA'}={}){
  let time=clock,response={body:initial,ok:true},calls=0;const timers=[],requests=[];
  const document={activeElement:null},mount=new Element('section',document),refreshButton=new Element('button',document);
- mount.id='reviewed-picks';refreshButton.id='refresh';document.createElement=tag=>new Element(tag,document);document.getElementById=id=>id==='refresh'?refreshButton:null;
+ mount.id='reviewed-picks';mount.setAttribute('data-reviewed-sport',sport);refreshButton.id='refresh';document.createElement=tag=>new Element(tag,document);document.getElementById=id=>id==='refresh'?refreshButton:null;
  const controller=mountReviewedPicks({mount,document,now:()=>time,fetchImpl:async(url,options)=>{calls++;requests.push({url,options});if(response.error)throw Error('Synthetic refresh error');return {ok:response.ok,json:async()=>response.body};},setIntervalImpl:(fn,ms)=>{timers.push({fn,ms});return timers.length;},clearIntervalImpl:()=>{},setTimeoutImpl:()=>0,clearTimeoutImpl:()=>{}});
  await new Promise(resolve=>setImmediate(resolve));
- return {mount,document,requests,timers,
+ return {mount,document,requests,timers,refreshButton,
   get rows(){return mount.querySelectorAll('[data-reviewed-pick]');},get text(){return mount.textContent;},get count(){return mount.querySelector('.reviewed-active-count').textContent;},get calls(){return calls;},
   async refresh(next=initial,{ok=true,error=false}={}){response={body:next,ok,error};await controller.refresh();},
   async manualRefresh(next=initial){response={body:next,ok:true};refreshButton.dispatch('click');await new Promise(resolve=>setImmediate(resolve));},
+  async reviewRefresh(next=initial){response={body:next,ok:true};mount.querySelector('[data-reviewed-refresh]').dispatch('click');await new Promise(resolve=>setImmediate(resolve));},
   tick(value){time=value;for(const timer of timers)if(timer.ms===1000)timer.fn();}
  };
 }
@@ -134,4 +137,61 @@ test('untrusted text renders as text and cannot inject markup or URLs',async()=>
 test('NBA landing mounts reviewed picks before automated decisions and exposes a menu anchor',()=>{
  const html=readFileSync(new URL('../../sharp-service/nba.html',import.meta.url),'utf8'),nav=readFileSync(new URL('../../sharp-service/edge-navigation.js',import.meta.url),'utf8');
  assert.match(html,/id="reviewed-picks"[^>]*data-reviewed-picks-mount/);assert.ok(html.indexOf('data-reviewed-picks-mount')<html.indexOf('data-nba-live-mount'));assert.match(html,/src="\/reviewed-picks\.js"/);assert.match(nav,/\/nba\.html#reviewed-picks/);
+});
+
+test('NFL history displays a reported prior BUY with missing original terms and a separate later review',async()=>{
+ const source=nflFeed(),before=JSON.stringify(source),view=await widget(source,{sport:'NFL'});
+ assert.equal(view.rows.length,1);assert.match(view.text,/NFL reviewed picks/);assert.equal(view.requests[0].url,'/api/dashboard?reviewedPicks=1&sport=NFL');
+ const summary=view.rows[0].querySelector('summary').textContent;
+ assert.match(summary,/Bo Nix/);assert.match(summary,/Under 214\.5 passing yards/);assert.match(summary,/Nov 26, 2026/);assert.match(summary,/1:00 PM CST/);
+ assert.match(summary,/Reported prior BUY/i);assert.match(summary,/Game started/i);assert.match(summary,/Original book and price unavailable/);
+ assert.match(summary,/Later review: AVOID at changed terms/);assert.match(view.text,/Original review time unavailable/);assert.match(view.text,/Captured Nov 27, 2026/);
+ assert.match(view.text,/199\.5–202\.5/);assert.match(view.count,/1 saved review · 0 upcoming BUYs/);assert.equal(view.mount.querySelectorAll('.reviewed-buy').length,0);
+ assert.equal(view.mount.querySelectorAll('.target-player-portrait').length,0);assert.equal(view.mount.querySelectorAll('.target-card-metrics').length,0);
+ assert.doesNotMatch(view.text,/REVIEWED BUY|Recorded decision: BUY|Original review: AVOID|REPORTED_SELECTION/);assert.equal(JSON.stringify(source),before);
+});
+
+test('NFL shows Sunday records in its window but only complete future BUY reviews count',async()=>{
+ const sunday='2026-11-29T18:00:00Z',source=nflFeed([reported({id:'future-history',startsAt:sunday}),reported({id:'future-complete',playerId:'JAYLEN_WARREN_1_NFL',playerName:'Jaylen Warren',marketType:'receiving_yards',side:'OVER',line:16.5,startsAt:sunday,historyOnly:false,reportedDecision:null,sourceLabel:'Manual review',decision:'BUY',issuedAt:new Date(now-600000).toISOString(),book:'draftkings',odds:-110,reviewUpdate:null})]);
+ const view=await widget(source,{sport:'NFL'});assert.equal(view.rows.length,2);assert.match(view.count,/2 saved reviews · 1 upcoming BUY/);
+ const historical=view.rows.find(row=>row.getAttribute('data-reviewed-pick')==='future-history');assert.match(historical.querySelector('summary').textContent,/Nov 29, 2026/);assert.match(historical.textContent,/Reported prior BUY/i);assert.doesNotMatch(historical.textContent,/REVIEWED BUY|GAME STARTED/);
+ assert.equal(view.mount.querySelectorAll('.reviewed-buy').length,1);assert.equal(view.mount.querySelectorAll('.target-player-portrait').length,0);
+});
+
+test('NFL saved history remains after errors and ages out at its Chicago calendar window boundary',async()=>{
+ const clock=Date.parse('2026-11-28T05:59:00Z'),source=nflFeed([reported({id:'oldest',startsAt:'2026-11-21T18:00:00Z'}),reported({id:'recent',startsAt:'2026-11-26T18:00:00Z'})],{generatedAt:new Date(clock).toISOString()}),view=await widget(source,{sport:'NFL',clock});
+ assert.equal(view.rows.length,2);view.rows[1].open=true;const detail=view.rows[1].querySelector('.target-research-details');detail.open=true;detail.querySelector('summary').focus();
+ await view.refresh(source,{error:true});assert.equal(view.rows.length,2);assert.match(view.text,/Saved review/i);assert.match(view.count,/unavailable/i);
+ view.tick(Date.parse('2026-11-28T06:00:00Z'));assert.deepEqual(view.rows.map(row=>row.getAttribute('data-reviewed-pick')),['recent']);
+ assert.equal(view.rows[0].open,true);assert.equal(view.rows[0].querySelector('.target-research-details').open,true);assert.equal(view.document.activeElement,view.rows[0].querySelector('.target-research-details').querySelector('summary'));
+ assert.match(view.text,/Reported prior BUY/i);assert.doesNotMatch(view.text,/REVIEWED BUY/);
+});
+
+test('NFL rejects an incomplete BUY or mismatched reported-history metadata instead of clearing it',async()=>{
+ const source=nflFeed();
+ for(const patch of [{historyOnly:false,sourceLabel:'Manual review',decision:'BUY'},{decision:'BUY'},{reportedDecision:null},{sourceLabel:'Manual review'},{book:'',odds:null},{issuedAt:'not a timestamp'},{reviewUpdate:{decision:'BUY',issuedAt:stamp,note:'Invented update'}},{reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-30000).toISOString(),note:'After capture'}},{issuedAt:new Date(now-180000).toISOString(),reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-240000).toISOString(),note:'Before original review'}}]){
+  const view=await widget(nflFeed([reported(patch)]),{sport:'NFL'});assert.equal(view.rows.length,0,JSON.stringify(patch));assert.match(view.count,/unavailable/i);
+ }
+ const view=await widget(source,{sport:'NFL'});await view.refresh(nflFeed([],{dateWindow:{fromDate:'2026-01-01',toDate:'2027-01-01'}}));assert.equal(view.rows.length,1);assert.match(view.count,/unavailable/i);
+ await view.refresh(feed());assert.equal(view.rows.length,1);assert.match(view.count,/unavailable/i);
+ const nba=await widget(feed([reported({sport:'NBA',startsAt:new Date(now+1000).toISOString()})]));assert.equal(nba.rows.length,0);assert.match(nba.count,/unavailable/i);
+});
+
+test('NFL reported-history refresh works while the model refresh button is disabled',async()=>{
+ const source=nflFeed(),view=await widget(source,{sport:'NFL'}),button=view.mount.querySelector('[data-reviewed-refresh]');
+ assert.ok(button);assert.match(button.getAttribute('aria-label'),/Refresh NFL reviewed picks/);view.refreshButton.disabled=true;
+ await view.reviewRefresh(source);assert.equal(view.calls,2);assert.match(view.text,/Reported prior BUY/i);
+ view.refreshButton.disabled=false;await view.manualRefresh(source);assert.equal(view.calls,3);
+});
+
+test('NFL later review notes are text and do not replace the reported original decision',async()=>{
+ const view=await widget(nflFeed([reported({reviewUpdate:{decision:'AVOID',issuedAt:new Date(now-120000).toISOString(),note:'<img src=x onerror=alert(1)>'}})]),{sport:'NFL'});
+ assert.match(view.text,/<img src=x onerror=alert\(1\)>/);assert.match(view.text,/Reported prior BUY/i);assert.match(view.text,/Later review: AVOID at changed terms/);
+ assert.equal(view.mount.querySelectorAll('img').filter(img=>img.src==='x').length,0);assert.equal(view.mount.querySelectorAll('.reviewed-buy').length,0);
+});
+
+test('NFL landing mounts review history above automated models and scopes research-only wording',()=>{
+ const html=readFileSync(new URL('../../sharp-service/nfl.html',import.meta.url),'utf8'),nav=readFileSync(new URL('../../sharp-service/edge-navigation.js',import.meta.url),'utf8');
+ assert.match(html,/id="reviewed-picks"[^>]*data-reviewed-picks-mount[^>]*data-reviewed-sport="NFL"/);assert.ok(html.indexOf('data-reviewed-picks-mount')<html.indexOf('NFL models</h2>'));assert.match(html,/src="\/reviewed-picks\.js"/);
+ assert.match(html,/No automated NFL recommendations are enabled/);assert.doesNotMatch(html,/Research only · no cleared NFL plays|No NFL recommendations are enabled/);assert.match(nav,/NFL reviewed picks','\/nfl\.html#reviewed-picks/);
 });
