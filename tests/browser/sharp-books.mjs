@@ -193,7 +193,9 @@ try{
  assert.equal(await page.locator('#cards > .research-market').count(),1);
  await page.getByLabel('Search',{exact:true}).fill('');
  assert.equal(await page.locator('#cards > .research-market').count(),1);assert.equal(await page.locator('#modeled').innerText(),'1');
- assert.match(await page.locator('#cards > .research-market').first().innerText(),/College Away @ College Home/);
+ const collegeMatchup=page.locator('#cards > .research-market').first().locator(':scope > summary .game-matchup');
+ assert.deepEqual(await collegeMatchup.locator('.team-name').allTextContents(),['College Away','College Home']);
+ assert.equal((await collegeMatchup.locator('.game-matchup-separator').textContent()).trim(),'at');
  await openResearch();assert.match(await page.locator('.comparison').first().innerText(),/50.0%/);
  await openResearch();await page.getByRole('button',{name:'Shortlist +'}).first().click();
  await page.getByRole('button',{name:'View shortlist'}).click();assert.equal(await page.locator('#cards > .research-market').count(),1);

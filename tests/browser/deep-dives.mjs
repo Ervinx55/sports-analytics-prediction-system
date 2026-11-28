@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {resolve,extname} from 'node:path';
 import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
+import {reviewedDateWindow,reviewedDay} from '../../sharp-service/reviewed-picks-contract.js';
 const require=createRequire(process.env.EDGE_LAB_BROWSER_PACKAGE||import.meta.url);
 const {chromium}=require('playwright');
 const root=resolve('sharp-service');
@@ -14,7 +15,24 @@ const now=new Date().toISOString(),future=new Date(Date.now()+3600000).toISOStri
 const live={contract:'nba-reviewed-live-v1',generatedAt:now,decisions:[{contract:'nba-reviewed-live-v1',eventID:'fixture',playerID:'TEST_PLAYER',playerName:'Test Player',market:'points',side:'over',line:20.5,book:'test-book',odds:-110,oppositeOdds:-110,status:'PASS',productionEligible:false,productionWeight:0,reason:'Missing current opposite-side price.',reasons:['QUOTE_NOT_CURRENT'],issuedAt:now,forecastAt:now,startsAt:future,validUntil:expires,modelProbability:.6,marketProbability:.5,evidence:{projectedMinutes:30,availability:{status:'Available',sourceUrl:'https://example.test/report',publishedAt:now}}}]};
 live.decisions[0].modelHash='baseline';live.decisions.push({...live.decisions[0],modelHash:'minutes'});
 const quotes={generatedAt:now,source:'Synthetic fixture',events:[{eventID:'fixture',startsAt:future,matchup:{away:{name:'Away'},home:{name:'Home'}},players:[{context:{features:{opponentDefensiveRating:{value:109,source:'Synthetic fixture',sampleCount:10,cutoff:now},defenseVsPosition:{value:18,source:'Synthetic fixture',sampleCount:20},expectedMinutes:{value:29,source:'Synthetic fixture',gameCount:10}}},prop:{playerID:'TEST_PLAYER',playerName:'Test Player',statID:'points',over:{books:{'test-book':{line:20.5,odds:-110,updatedAt:now}}},under:{books:{'test-book':{line:20.5,odds:-110,updatedAt:now}}}}}]}]};
-await page.route('**/api/**',async route=>{const url=new URL(route.request().url());let data;if(url.searchParams.has('nbaLive'))data=live;else if(url.pathname==='/api/nbaprops')data=quotes;else if(url.pathname==='/api/nflmodel')data={generatedAt:now,productionEligible:false,markets:[{eventID:'nfl-fixture',startsAt:future,away:'Away',home:'Home',marketType:'total',side:'over',line:44.5,modelProbability:.56,marketFairProbability:.51,reason:'Research only.'}]};else if(url.pathname==='/api/nflprops')data={generatedAt:now,candidates:[]};else if(url.pathname==='/api/dashboard'){const view=url.searchParams.get('view');dashboardViews.push(view);if(view==='calibration')await new Promise(r=>setTimeout(r,300));data={fetchedAt:now,summary:{grades:view==='results'?300:view==='calibration'?200:100},marketCard:{markets:[],summary:{}},games:[],system:{sourceHealth:{}},calibration:{}};}else data={};await route.fulfill({json:data});});
+await page.route('**/api/**',async route=>{
+ const url=new URL(route.request().url());let data;
+ if(url.searchParams.has('nbaLive'))data=live;
+ else if(url.pathname==='/api/nbaprops')data=quotes;
+ else if(url.pathname==='/api/nflmodel')data={generatedAt:now,productionEligible:false,markets:[{eventID:'nfl-fixture',startsAt:future,away:'Away',home:'Home',marketType:'total',side:'over',line:44.5,modelProbability:.56,marketFairProbability:.51,reason:'Research only.'}]};
+ else if(url.pathname==='/api/nflprops')data={generatedAt:now,candidates:[]};
+ else if(url.pathname==='/api/dashboard'&&url.searchParams.get('reviewedPicks')==='1'){
+  // NBA/NFL journal mounts use the dashboard endpoint, but are not dashboard
+  // module navigations and must not pollute the later request-order regression.
+  const sport=url.searchParams.get('sport');
+  data={contract:'edge-reviewed-picks-v1',sport,generatedAt:now,date:reviewedDay(now),dateWindow:reviewedDateWindow(sport,now),timezone:'America/Chicago',picks:[]};
+ }else if(url.pathname==='/api/dashboard'){
+  const view=url.searchParams.get('view');dashboardViews.push(view);
+  if(view==='calibration')await new Promise(r=>setTimeout(r,300));
+  data={fetchedAt:now,summary:{grades:view==='results'?300:view==='calibration'?200:100},marketCard:{markets:[],summary:{}},games:[],system:{sourceHealth:{}},calibration:{}};
+ }else data={};
+ await route.fulfill({json:data});
+});
 try{
  await page.goto('http://127.0.0.1:8787/nba.html');
  const liveBoard=page.locator('#nba-live-decisions');
@@ -26,10 +44,11 @@ try{
  assert.equal(await liveBoard.getByRole('searchbox',{name:'Search NBA decisions'}).isVisible(),false);
  await filterToggle.click();assert.equal(await filterToggle.getAttribute('aria-expanded'),'true');
  assert.equal(await liveBoard.getByRole('searchbox',{name:'Search NBA decisions'}).isVisible(),true);
- await liveBoard.getByLabel('Status',{exact:true}).selectOption('AVOID');
+ const statusFilter=liveBoard.getByRole('combobox',{name:/^Status\b/});
+ await statusFilter.selectOption('AVOID');
  assert.match(await filterOptions.locator('.filter-caption').innerText(),/1 active/);
  assert.equal(await liveBoard.locator('[data-player-market]').count(),1);
- await liveBoard.getByLabel('Status',{exact:true}).selectOption('');
+ await statusFilter.selectOption('');
  await filterToggle.click();assert.equal(await filterToggle.getAttribute('aria-expanded'),'false');
  const playerRow=liveBoard.locator('[data-player-market]').first();assert.equal(await playerRow.getAttribute('open'),null);
  await playerRow.locator(':scope > summary').focus();await page.keyboard.press('Enter');assert.equal(await playerRow.getAttribute('open'),'');

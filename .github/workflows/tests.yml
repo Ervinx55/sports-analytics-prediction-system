@@ -54,3 +54,6 @@ jobs:
 
       - name: Verify team scoring context on desktop and mobile
         run: node tests/browser/team-scoring.mjs
+
+      - name: Verify shared card disclosures and mobile layout
+        run: node tests/browser/deep-dives.mjs
