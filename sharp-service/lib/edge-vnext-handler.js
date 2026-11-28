@@ -2,6 +2,7 @@ import { buildEdgeBoard } from "./edge-vnext-board.js";
 import { parseEspnScoreboard, projectNbaGames } from "./nba-vnext-baseline.js";
 import { backtestNbaBaseline } from "./nba-vnext-backtest.js";
 import { buildTeamScoringContext } from "./team-scoring-context.js";
+import nbaPropScenariosHandler from '../handlers/nba-prop-scenarios.js';
 import { poissonMass, thresholdProbability, priceKalshi, priceAmerican,
   comboProbability, summarizePositions } from "./edge-vnext.js";
 
@@ -113,6 +114,7 @@ function finiteInput(value, max=1e6) {
 export default async function handler(req,res) {
   if(req.method!=="GET") {res.setHeader("Allow","GET");return respond(res,405,{error:"GET only"});}
   const mode = String(req.query?.mode || "board");
+  if(mode==="nba-prop-scenarios")return nbaPropScenariosHandler(req,res);
   if(mode==="alt") {
     const lambda=finiteInput(req.query.mean,200), threshold=finiteInput(req.query.threshold,1000);
     const direction=String(req.query.direction||"at_least");
