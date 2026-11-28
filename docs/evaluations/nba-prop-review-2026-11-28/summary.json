@@ -1,0 +1,181 @@
+{
+  "contract": "nba-prop-review-evidence-summary-v1",
+  "reviewStatus": "DESCRIPTIVE_ONLY",
+  "asOf": "2026-11-28T14:26:10Z",
+  "scope": {
+    "sport": "NBA",
+    "centralGameDate": "2026-11-27",
+    "timezone": "America/Chicago",
+    "startsAtFrom": "2026-11-27T06:00:00Z",
+    "startsAtBefore": "2026-11-28T06:00:00Z"
+  },
+  "completeness": {
+    "savedForecastRowsCompleteForQueriedScope": true,
+    "basis": "COUNT_QUERY_AND_PAGINATED_EXPORT_COUNTS_MATCHED; UNIQUE_MODEL_HASH_AND_IDENTITY_CHECKED",
+    "forecastPageSize": 80,
+    "forecastPages": 2,
+    "outcomeQueryLimit": 1000,
+    "fullScheduledSlateCoverageEstablished": false,
+    "scheduledSlateGameCount": null,
+    "sourceSnapshot": "READ_ONLY_MULTI_QUERY_EXPORT; NOT_A_TRANSACTION_SNAPSHOT"
+  },
+  "digests": {
+    "inputSha256": "18335d134a67273ef6035c87fcc86c9c922ff41b767ff39eb1a7d9cb77a556e2",
+    "reportSha256": "4809d94c8f60de31e7368d010614ae5311ca5ae239d3ee86795a6b06fe2324f6",
+    "exportManifestSha256": "88256542cb2b9733c62ee5ce63c8f611261c24b42e4ded4d6e2bacbb12463ed3"
+  },
+  "counts": {
+    "forecastRows": 160,
+    "outcomeRows": 80,
+    "modelHashes": 2,
+    "uniqueForecastIdentities": 80,
+    "uniqueSourceEvents": 2,
+    "uniquePlayers": 12,
+    "uniqueSideLineSelections": 80,
+    "uniquePlayerMarketLinesIgnoringSide": 40,
+    "eligibleForecastRows": 160,
+    "excludedRowsOrSelections": 0
+  },
+  "forecastIssuance": {
+    "earliest": "2026-11-26T18:51:11.362Z",
+    "latest": "2026-11-26T21:36:17.276Z",
+    "interpretation": "EARLY_IMMUTABLE_SNAPSHOTS_FROM_PREVIOUS_CENTRAL_DAY; NOT_FINAL_PREGAME_CALLS"
+  },
+  "models": [
+    {
+      "modelHash": "31a5b080bdf88ff0ce6eb3b8c06c204e4bdd3e8693b1953cb919eb3a8aa2a0ce",
+      "meanModels": [
+        "LAST_TEN_SAME_TEAM_BASELINE"
+      ],
+      "forecastRows": 80,
+      "distinctSourceEvents": 2,
+      "pairedByMarket": [
+        {
+          "market": "assists",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 22,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.2226092513461638,
+          "marketBrier": 0.24141250144687662,
+          "brierDeltaModelMinusMarket": -0.01880325010071282,
+          "modelLogLoss": 0.6368986543060674,
+          "marketLogLoss": 0.6758554028598858,
+          "logLossDeltaModelMinusMarket": -0.038956748553818366,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        },
+        {
+          "market": "points",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 30,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.24678102027177537,
+          "marketBrier": 0.2524553745697652,
+          "brierDeltaModelMinusMarket": -0.00567435429798982,
+          "modelLogLoss": 0.6923751055723906,
+          "marketLogLoss": 0.6980562122570523,
+          "logLossDeltaModelMinusMarket": -0.0056811066846617075,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        },
+        {
+          "market": "rebounds",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 28,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.23506490291965895,
+          "marketBrier": 0.2341106249297185,
+          "brierDeltaModelMinusMarket": 0.0009542779899404386,
+          "modelLogLoss": 0.6618529719119303,
+          "marketLogLoss": 0.6611840329735228,
+          "logLossDeltaModelMinusMarket": 0.0006689389384074707,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        }
+      ],
+      "weightedDescriptiveBrier": {
+        "weighting": "EQUAL_WEIGHT_PER_RETAINED_SIDE_AND_LINE; DEPENDENT_ROWS",
+        "pairedRows": 80,
+        "model": 0.23603314274399145,
+        "recordedMarket": 0.24299792208695453,
+        "deltaModelMinusMarket": -0.006964779342963079
+      },
+      "superiorityEstablished": false,
+      "calibrationValidated": false
+    },
+    {
+      "modelHash": "880a76673cae94f50329671aaeb84254346348edaa6f4e7312a1f9910e442308",
+      "meanModels": [
+        "EWMA_MINUTES_TIMES_LAST_TEN_RATE"
+      ],
+      "forecastRows": 80,
+      "distinctSourceEvents": 2,
+      "pairedByMarket": [
+        {
+          "market": "assists",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 22,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.22829767940037493,
+          "marketBrier": 0.24141250144687662,
+          "brierDeltaModelMinusMarket": -0.01311482204650169,
+          "modelLogLoss": 0.647699071415272,
+          "marketLogLoss": 0.6758554028598858,
+          "logLossDeltaModelMinusMarket": -0.028156331444613714,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        },
+        {
+          "market": "points",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 30,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.2501703753207429,
+          "marketBrier": 0.2524553745697652,
+          "brierDeltaModelMinusMarket": -0.0022849992490223126,
+          "modelLogLoss": 0.6961990792906941,
+          "marketLogLoss": 0.6980562122570523,
+          "logLossDeltaModelMinusMarket": -0.0018571329663581437,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        },
+        {
+          "market": "rebounds",
+          "period": "FULL_GAME",
+          "pairedSideLineRows": 28,
+          "distinctSourceEvents": 2,
+          "modelBrier": 0.22707005130707508,
+          "marketBrier": 0.2341106249297185,
+          "brierDeltaModelMinusMarket": -0.007040573622643431,
+          "modelLogLoss": 0.6456864937926723,
+          "marketLogLoss": 0.6611840329735228,
+          "logLossDeltaModelMinusMarket": -0.015497539180850506,
+          "pushes": 0,
+          "excludedDecisiveSelections": 0
+        }
+      ],
+      "weightedDescriptiveBrier": {
+        "weighting": "EQUAL_WEIGHT_PER_RETAINED_SIDE_AND_LINE; DEPENDENT_ROWS",
+        "pairedRows": 80,
+        "model": 0.23607027053785795,
+        "recordedMarket": 0.24299792208695453,
+        "deltaModelMinusMarket": -0.006927651549096581
+      },
+      "superiorityEstablished": false,
+      "calibrationValidated": false
+    }
+  ],
+  "limitations": [
+    "Only two source events and twelve players are represented; complete saved-record export does not establish coverage of every scheduled game or available prop.",
+    "Both OVER and UNDER selections are recorded. Eighty side/line evaluations per model are not eighty bets or eighty independent outcomes.",
+    "Multiple markets, sides and players from the same game remain dependent; distinct source-event counts do not resolve unknown cross-provider aliases.",
+    "All retained forecasts were issued on the preceding day. This report does not grade final pregame refreshes or manually discussed recommendations.",
+    "Brier and log-loss differences are descriptive for this cohort. No superiority, calibrated probability, profitability or untouched confirmation claim is established.",
+    "Market figures are the same saved forecast rows\u2019 recorded market probabilities, not a newly fetched sharp benchmark.",
+    "Input cutoff and outcome metadata were validated as supplied; this offline review does not authenticate all underlying historical source receipts.",
+    "No model was fitted or promoted from these outcomes; no wager placement or profit/loss is inferred."
+  ],
+  "productionEligible": false,
+  "productionWeight": 0,
+  "automaticPromotion": false
+}

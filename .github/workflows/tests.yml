@@ -57,3 +57,6 @@ jobs:
 
       - name: Verify shared card disclosures and mobile layout
         run: node tests/browser/deep-dives.mjs
+
+      - name: Verify NBA statistical scenarios and mobile layout
+        run: node tests/browser/nba-scenarios.mjs
