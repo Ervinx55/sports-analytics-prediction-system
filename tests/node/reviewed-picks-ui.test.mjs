@@ -63,7 +63,9 @@ test('manual cards do not manufacture model probabilities or automatic approval'
 
 test('published team reviews use the matchup subject without inventing a player',async()=>{
  const view=await widget(feed([pick({playerId:null,playerName:null,marketType:'moneyline',side:'HOME',line:null})]));
- assert.equal(view.rows.length,1);assert.match(view.rows[0].querySelector('summary').textContent,/ATL vs BOS/);assert.match(view.text,/Home moneyline · Full game/);
+ assert.equal(view.rows.length,1);
+ assert.deepEqual(view.rows[0].querySelector('summary').querySelectorAll('.team-name').map(node=>node.textContent),['Atlanta Hawks','Boston Celtics']);
+ assert.match(view.rows[0].querySelector('summary').textContent,/vs/);assert.match(view.text,/Home moneyline · Full game/);
  assert.doesNotMatch(view.text,/Name unavailable/);assert.equal(view.mount.querySelectorAll('.target-player-portrait').length,0);
 });
 

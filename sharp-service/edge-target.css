@@ -207,9 +207,33 @@ body.el-theme.edge-shell-page {
 .el-theme .target-player-portrait { display: block; width: 64px; height: 64px; margin: 1px 0 0; border: 0; border-radius: 12px; background: #fff; object-fit: cover; }
 .el-theme .target-player-portrait[data-portrait-source="fallback"] { padding: 12px; background: #ddd; opacity: .65; }
 .el-theme .target-player-copy { min-width: 0; }
+/* Game cards have no player portrait. Their text must occupy the full track. */
+.el-theme .target-player-identity.is-game,
+.el-theme .target-player-identity.reviewed-game-identity { grid-template-columns: minmax(0, 1fr); }
+.el-theme .game-quote-card .target-card-meta { flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.el-theme .game-quote-card .target-card-meta .badge { max-width: 100%; white-space: normal; }
+.el-theme .game-quote-card .target-card-game { color: #bdbdc5; font-size: .9375rem; }
+.el-theme .game-matchup { display: grid; grid-template-columns: minmax(0, 1fr); gap: 4px; width: 100%; min-width: 0; }
+.el-theme .team-identity { display: grid; grid-template-columns: 40px minmax(0, 1fr); align-items: center; gap: 12px; min-width: 0; }
+.el-theme .team-logo-badge { display: grid; place-items: center; width: 40px; height: 40px; overflow: hidden; border: 1px solid #45454c; border-radius: 10px; background: #f4f4f6; }
+.el-theme .team-logo { grid-area: 1 / 1; display: block; width: 100%; height: 100%; padding: 4px; object-fit: contain; }
+.el-theme .team-logo[hidden], .el-theme .team-logo-fallback[hidden] { display: none !important; }
+.el-theme .team-logo-fallback { grid-area: 1 / 1; color: #292932; font-size: .75rem; font-weight: 800; letter-spacing: .02em; line-height: 1; }
+.el-theme .team-name { min-width: 0; color: #fff; white-space: normal; word-break: normal; overflow-wrap: break-word; line-height: 1.3; }
+.el-theme .game-matchup-separator { margin-left: 52px; color: #bdbdc5; font-size: .75rem; font-weight: 500; line-height: 1.2; letter-spacing: 0; }
+.el-theme .player-row-copy:has(.game-matchup),
+.el-theme .player-row-label:has(.game-matchup) { flex: 1; }
+.el-theme .game-matchup.game-matchup-compact { gap: 3px; font-size: 1.0625rem; }
+.el-theme .game-matchup-compact .team-identity { grid-template-columns: 30px minmax(0, 1fr); gap: 10px; }
+.el-theme .game-matchup-compact .team-logo-badge { width: 30px; height: 30px; border-radius: 8px; }
+.el-theme .game-matchup-compact .team-logo { padding: 3px; }
+.el-theme .game-matchup-compact .game-matchup-separator { margin-left: 40px; font-size: .6875rem; }
 .el-theme .target-player-card .player-name { display: block; margin: -5px 0 0; font-size: 22px; font-weight: 700; letter-spacing: -.4px; line-height: 1.2; color: #fff; overflow-wrap: break-word; word-break: normal; }
+.el-theme .target-player-card .player-name.game-matchup { display: grid; margin: 0; font-size: 1.375rem; }
 .el-theme .target-player-card .target-card-selection { margin: 7px 0 0; color: #fff; font-size: 17.5px; font-weight: 650; letter-spacing: -.2px; line-height: 1.25; }
 .el-theme .target-player-card .target-card-book { margin: 5px 0 0; padding: 0; border: 0; border-radius: 0; background: transparent; color: #afafaf; font-size: 13px; font-weight: 400; line-height: 1.3; }
+.el-theme .target-player-card.game-quote-card .target-card-selection { margin-top: 18px; font-size: 1.2rem; line-height: 1.45; overflow-wrap: break-word; }
+.el-theme .target-player-card.game-quote-card .target-card-book { margin-top: 8px; color: #bdbdc5; font-size: 1.066667rem; line-height: 1.45; }
 .el-theme .target-player-card .target-card-metrics {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -224,6 +248,7 @@ body.el-theme.edge-shell-page {
 .el-theme .target-player-card .target-card-metrics small { display: block; min-height: 0; color: #afafaf; font-size: 13px; font-weight: 400; line-height: 1.4; }
 .el-theme .target-player-card .target-card-metrics strong { display: block; margin-top: 8px; color: #fff; font-size: 20px; font-weight: 700; line-height: 1.3; letter-spacing: -.35px; font-variant-numeric: tabular-nums; }
 .el-theme .target-player-card .target-card-reason { margin: 0; padding: 8px; border: 0; border-radius: 8px; background: #25252c; color: #afafaf; font-size: 14px; font-weight: 400; line-height: 1.4; }
+.el-theme .target-player-card.game-quote-card .target-card-reason { padding: 12px; color: #c7c7cf; font-size: 1.066667rem; line-height: 1.5; overflow-wrap: break-word; }
 .el-theme .target-player-card .target-research-details { margin: 0; padding: 0; border: 0; }
 .el-theme .target-research-details > summary {
   position: relative;

@@ -5,6 +5,7 @@ import {appendDeepDive,preserveDeepDives} from './deep-dive.js';
 import {filterResearch,refreshResearchRow,latestResearchObservations,groupResearchRows,sortResearchGroups} from './research-data.js';
 import {formatCentralTime,formatProbability,displayPlayerName,shortReason} from './ui-format.js';
 import {applyPlayerPortrait} from './player-portraits.js';
+import {appendGameMatchup} from './game-card-view.js';
 
 import {createResearchLoader} from './research-loader.js';
 import {mountReviewedGames} from './reviewed-picks.js';
@@ -123,22 +124,23 @@ function renderShortlist(){
 }
 
 function quoteOption(parent,row,comparisons){
- const option=add(parent,'article',undefined,'target-player-card quote-option');option.dataset.quoteId=row.id;
+ const isGame=row.kind==='games';
+ const option=add(parent,'article',undefined,'target-player-card quote-option'+(isGame?' game-quote-card':''));option.dataset.quoteId=row.id;
  const unavailable=row.available===false||row.quoteConflict;
  const meta=add(option,'div',undefined,'target-card-meta');
- const match=add(meta,'span',`${row.sport==='NCAAF'?'CFB':row.sport} · ${row.away||'Away unavailable'} vs ${row.home||'Home unavailable'} · ${tipoff(row.startsAt)}`,'target-card-game');match.title=date(row.startsAt);
+ const match=add(meta,'span',[row.sport==='NCAAF'?'CFB':row.sport,isGame?null:`${row.away||'Away unavailable'} vs ${row.home||'Home unavailable'}`,tipoff(row.startsAt)].filter(Boolean).join(' · '),'target-card-game');match.title=date(row.startsAt);
  add(meta,'span',unavailable?'UNAVAILABLE':'NOT CLEARED','badge '+(unavailable?'unavailable':'neutral'));
- const identity=add(option,'div',undefined,'target-player-identity'+(row.kind==='games'?' is-game':''));
- if(row.kind!=='games'){const portrait=add(identity,'img',undefined,'target-player-portrait');applyPlayerPortrait(portrait,row.playerID);}
+ const identity=add(option,'div',undefined,'target-player-identity'+(isGame?' is-game':''));
+ if(!isGame){const portrait=add(identity,'img',undefined,'target-player-portrait');applyPlayerPortrait(portrait,row.playerID);}
  const copy=add(identity,'div',undefined,'target-player-copy');
- const title=row.kind==='games'?`${row.away||'Away'} vs ${row.home||'Home'}`:displayPlayerName(row.player,row.playerID).name;
- add(copy,'h3',title,'player-name');
+ if(isGame)appendGameMatchup(copy,{sport:row.sport,away:{name:row.away||'Away unavailable',id:row.awayID},home:{name:row.home||'Home unavailable',id:row.homeID}});
+ else add(copy,'h3',displayPlayerName(row.player,row.playerID).name,'player-name');
  const side=row.kind==='games'&&['HOME','AWAY'].includes(row.side)?row.player:label(row.side).toLowerCase().replace(/^./,c=>c.toUpperCase());
  add(copy,'p',`${side} ${row.line??(row.kind==='games'?'':'N/A')} ${label(row.marketType)}`.replace(/\s+/g,' ').trim(),'selection target-card-selection');
  add(copy,'p',`${bookLabel(row.book)} · ${unavailable?'Quote unavailable':priceLabel(row)}`,'quote target-card-book');
  const compare=add(option,'div',undefined,'comparison target-card-metrics');
  for(const [name,value,explanation] of [['Model',unavailable?'N/A':pct(row.model),'Experimental model chance; not approved for live plays'],['Market',unavailable?'N/A':pct(row.market),'Market-implied chance with margin removed (no vig)'],['Edge',unavailable?'N/A':difference(row),'Model minus market in percentage points; not expected profit']]){const cell=add(compare,'div');const heading=add(cell,'small',name);heading.title=explanation;add(cell,'strong',value);}
- add(option,'p',unavailable?(row.quoteConflict?'Conflicting observations; current price withheld.':'Latest quote unavailable.'):shortReason(row.reason,'Model approval and availability unverified.'),'target-card-reason');
+ add(option,'p',unavailable?(row.quoteConflict?'Conflicting observations; current price withheld.':'Latest quote unavailable.'):isGame?(row.reason||'Game quote comparison. Model approval and availability unverified.'):shortReason(row.reason,'Model approval and availability unverified.'),'target-card-reason');
  const research=add(option,'details',undefined,'target-research-details');research.dataset.researchGroup='quote:'+row.id;research.open=expandedGroups.has(research.dataset.researchGroup);
  const summary=add(research,'summary');summary.dataset.focusKey='research:'+row.id;add(summary,'span','Research & matchup details');icon(summary,'chevron-down','target-research-chevron');
  const content=add(research,'div',undefined,'target-research-content');
@@ -183,8 +185,8 @@ function render(){
   const sorted=[...group.rows].sort((a,b)=>(a.line??0)-(b.line??0)||bookLabel(a.book).localeCompare(bookLabel(b.book))||(['OVER','HOME'].includes(a.side)?0:1)-(['OVER','HOME'].includes(b.side)?0:1));
   const row=sorted[0],card=add(target,'details',undefined,'player-market-row research-market');card.dataset.marketKey=group.key;card.dataset.researchGroup='market:'+group.key;card.open=expandedGroups.has(card.dataset.researchGroup);
   const head=add(card,'summary',undefined,'player-row-summary');head.dataset.focusKey='market:'+group.key;
-  const heading=add(head,'span',undefined,'player-row-copy'),title=row.kind==='games'?`${row.away||'Away'} @ ${row.home||'Home'}`:displayPlayerName(row.player,row.playerID).name;
-  const name=add(heading,'span',title,'player-row-heading');name.setAttribute('role','heading');name.setAttribute('aria-level','3');
+  const heading=add(head,'span',undefined,'player-row-copy');
+  const name=row.kind==='games'?appendGameMatchup(heading,{sport:row.sport,away:{name:row.away||'Away unavailable',id:row.awayID},home:{name:row.home||'Home unavailable',id:row.homeID},separator:'at',compact:true,className:'player-row-heading',tag:'span'}):add(heading,'span',displayPlayerName(row.player,row.playerID).name,'player-row-heading');name.setAttribute('role','heading');name.setAttribute('aria-level','3');
   add(heading,'span',label(row.marketType).replace(/\b\w/g,c=>c.toUpperCase())+(group.period!=='game'?' · '+label(group.period):''),'player-row-market');add(head,'span',row.kind==='games'?'Back to markets':'Back to players','player-row-back');icon(head,'chevron-right','player-row-chevron');
   const content=add(card,'div',undefined,'player-market-content');quoteOption(content,row,comparisons);
   if(sorted.length>1){const more=add(content,'details',undefined,'more-quotes');more.dataset.researchGroup='quotes:'+group.key;more.open=expandedGroups.has(more.dataset.researchGroup)||sorted.slice(1).some(quote=>viewedQuotes.has(quote.id));const summary=add(more,'summary',`${sorted.length-1} more quote${sorted.length===2?'':'s'} · books & alternate lines`);summary.dataset.focusKey='quotes:'+group.key;const lines=new Set(sorted.map(r=>r.line)),books=new Set(sorted.map(r=>r.book));add(more,'p',`${books.size} platform${books.size===1?'':'s'} · ${lines.size} line${lines.size===1?'':'s'} · ${row.kind==='games'?'All outcomes and alternate lines':'Over/Under and alternate lines'} grouped together`,'group-summary');const rest=add(more,'div',undefined,'group-quotes');for(const quote of sorted.slice(1))quoteOption(rest,quote,comparisons);}

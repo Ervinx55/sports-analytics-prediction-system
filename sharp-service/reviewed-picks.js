@@ -1,6 +1,8 @@
 import {displayPlayerName,formatCentralTime} from './ui-format.js';
 import {bookLabel} from './book-catalog.js';
 import {applyPlayerPortrait} from './player-portraits.js';
+import {appendGameMatchup} from './game-card-view.js';
+import {getMatchupTeams} from './team-identity.js';
 import {reviewedDateWindow,reviewedDay as day} from './reviewed-picks-contract.js';
 
 const CONTRACT='edge-reviewed-picks-v1',STALE_MS=120000;
@@ -107,10 +109,11 @@ export function mountReviewedPicks({
   for(const pick of picks){
    const history=pick.historyOnly===true,started=timestamp(pick.startsAt)<=time,buy=!history&&current&&!started&&pick.decision==='BUY';
    const badge=history?'Reported prior '+pick.reportedDecision:started?'GAME STARTED':!current?'SAVED REVIEW':pick.decision==='BUY'?'REVIEWED BUY':'REVIEWED '+decisionLabel(pick.decision);
-   const matchup=matchupLabel(pick),isTeam=teamMarket(pick),name=isTeam?matchup||sport+' game':displayPlayerName(pick.playerName,pick.playerId).name;
+   const matchup=matchupLabel(pick),isTeam=teamMarket(pick),teams=isTeam?getMatchupTeams(pick.matchup):null,name=isTeam?matchup||sport+' game':displayPlayerName(pick.playerName,pick.playerId).name;
    const row=disclosure(list,pick.id,'player-market-row prop-card reviewed-pick-row');row.setAttribute('data-reviewed-pick',pick.id);
    const top=summary(row,undefined,pick.id,'player-row-summary'),copy=add(top,'span',undefined,'player-row-label');
-   add(copy,'h3',name,'player-row-heading');
+   if(teams)appendGameMatchup(copy,{sport,...teams,compact:true,className:'player-row-heading'});
+   else add(copy,'h3',name,'player-row-heading');
    add(copy,'span',selection(pick),'player-row-market');
    if(sport==='NFL')add(copy,'span',formatCentralTime(pick.startsAt),'reviewed-row-date');
    add(copy,'span',recordedPrice(pick),'reviewed-row-price');
@@ -118,13 +121,15 @@ export function mountReviewedPicks({
    if(history)add(copy,'span',[started?'Game started':null,!current?'Saved review':null,'Original review unverified'].filter(Boolean).join(' · '),'reviewed-row-context');
    if(pick.reviewUpdate)add(copy,'span','Later review: '+pick.reviewUpdate.decision+' at changed terms','reviewed-row-update');
    add(top,'span','Back to reviewed picks','player-row-back');const arrow=add(top,'img',undefined,'player-row-chevron');arrow.src='/assets/icons/chevron-right.svg';arrow.alt='';
-   const contents=add(row,'div',undefined,'player-market-content'),card=add(contents,'article',undefined,'target-player-card prop-selection reviewed-pick-card');
+   const contents=add(row,'div',undefined,'player-market-content'),card=add(contents,'article',undefined,'target-player-card prop-selection reviewed-pick-card'+(isTeam?' game-quote-card':''));
    const meta=add(card,'div',undefined,'target-card-meta');
-   const game=add(meta,'span',[sport,matchup,sport==='NFL'?formatCentralTime(pick.startsAt):centralTime.format(timestamp(pick.startsAt))+' CT'].filter(Boolean).join(' · '),'target-card-game');game.setAttribute('title',formatCentralTime(pick.startsAt));
+   const game=add(meta,'span',[sport,isTeam?null:matchup,sport==='NFL'?formatCentralTime(pick.startsAt):centralTime.format(timestamp(pick.startsAt))+' CT'].filter(Boolean).join(' · '),'target-card-game');game.setAttribute('title',formatCentralTime(pick.startsAt));
    add(meta,'span',badge,'badge '+(buy?'good':'neutral'));
    const showPortrait=!isTeam&&sport==='NBA',identity=add(card,'div',undefined,'target-player-identity'+(!showPortrait?' reviewed-game-identity':''));
    if(showPortrait){const portrait=add(identity,'img',undefined,'target-player-portrait');applyPlayerPortrait(portrait,pick.playerId);}
-   const player=add(identity,'div',undefined,'target-player-copy');add(player,'h3',name,'player-name');add(player,'p',selection(pick),'target-card-selection');add(player,'p',recordedPrice(pick),'target-card-book');
+   const player=add(identity,'div',undefined,'target-player-copy');
+   if(teams)appendGameMatchup(player,{sport,...teams});else add(player,'h3',name,'player-name');
+   add(player,'p',selection(pick),'target-card-selection');add(player,'p',recordedPrice(pick),'target-card-book');
    add(card,'p',`${pick.sourceLabel}${history?' · History only; original review unverified':''}${!current?' · Saved review':''}${started?' · Game started':''}${validOdds(pick.priceLimit)?' · Price limit: '+odds(pick.priceLimit)+' or better':''}`,'target-card-reason');
    if(pick.reviewUpdate)add(card,'p','Later review: '+pick.reviewUpdate.decision+' at changed terms','reviewed-card-update');
    const details=disclosure(card,pick.id+':details','target-research-details');summary(details,history?'Reported selection & later review':'Review & recorded price',pick.id+':details');

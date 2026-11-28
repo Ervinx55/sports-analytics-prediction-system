@@ -76,13 +76,22 @@ const nflGameReviews=gameReviews('NFL',[
  {...reviewedGame,id:'nfl-game',sport:'NFL',matchup:'Buffalo Bills at Kansas City Chiefs',line:3.5},
  {...reviewedProp,id:'nfl-prop',sport:'NFL',playerId:'BO_NIX_1_NFL',playerName:'Bo Nix',marketType:'passing_yards',line:214.5}
 ]);
-const gameQuotes=sport=>({fetchedAt:gameStamp,source:'SportsGameOdds',providerObservations:[{league:sport,provider:'SportsGameOdds',fetchedAt:gameStamp}],events:sport==='EPL'?[]:[{
- eventID:sport+'-games-fixture',league:sport,startsAt:gameStart,status:{},matchup:sport==='NBA'?{away:{id:'DEN',name:'Denver Nuggets'},home:{id:'UTA',name:'Utah Jazz'}}:{away:{id:'BUF',name:'Buffalo Bills'},home:{id:'KC',name:'Kansas City Chiefs'}},
- markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:{pinnacle:{odds:-110,line:null,available:true,updatedAt:gameStamp}}}]))}
-}]});
+const nbaMatchups=[
+ {away:{id:'ATLANTA_HAWKS_NBA',name:'Atlanta Hawks'},home:{id:'BOSTON_CELTICS_NBA',name:'Boston Celtics'}},
+ {away:{id:'OKLAHOMA_CITY_THUNDER_NBA',name:'Oklahoma City Thunder'},home:{id:'GOLDEN_STATE_WARRIORS_NBA',name:'Golden State Warriors'}}
+];
+const gameQuotes=sport=>({fetchedAt:gameStamp,source:'SportsGameOdds',providerObservations:[{league:sport,provider:'SportsGameOdds',fetchedAt:gameStamp}],events:sport==='EPL'?[]:(sport==='NBA'?nbaMatchups:[{away:{id:'BUFFALO_BILLS_NFL',name:'Buffalo Bills'},home:{id:'KANSAS_CITY_CHIEFS_NFL',name:'Kansas City Chiefs'}}]).map((matchup,index)=>({
+ eventID:sport+'-games-fixture-'+index,league:sport,startsAt:gameStart,status:{},matchup,
+ markets:{moneyline:Object.fromEntries(['home','away'].map(side=>[side,{oddID:`points-${side}-game-ml-${side}`,books:Object.fromEntries(['pinnacle','draftkings'].map(book=>[book,{odds:-110,line:null,available:true,updatedAt:gameStamp}]))}]))}
+}))});
+const propQuotes={contract:'nba-multibook-research-v1',source:'SportsGameOdds',generatedAt:gameStamp,events:[{
+ eventID:'sgo:portrait-fixture',provider:'SportsGameOdds',startsAt:gameStart,matchup:nbaMatchups[0],players:[{
+  prop:{playerID:'DERRICK_WHITE_1_NBA',playerName:'Derrick White',statID:'rebounds',over:{books:{draftkings:{line:3.5,odds:123,available:true,updatedAt:gameStamp}}},under:{books:{draftkings:{line:3.5,odds:-145,available:true,updatedAt:gameStamp}}}}
+ }]
+}]};
 
 let browser;
-let testingReviewedGames=false,holdGameQuotes=false,releaseGameQuotes;
+let testingReviewedGames=false,holdGameQuotes=false,releaseGameQuotes,failedTeamLogo=null;
 const errors=[],unexpectedRequests=[],reviewRequests=[];
 try{
  browser=await chromium.launch({headless:true,...(process.env.EDGE_LAB_CHROMIUM?{executablePath:process.env.EDGE_LAB_CHROMIUM}:{})});
@@ -93,11 +102,18 @@ try{
  // Unknown API paths and external requests fail closed; no provider quota is used.
  await page.route('**/*',async route=>{
   const url=new URL(route.request().url());
-  if(url.origin!==origin){unexpectedRequests.push(url.href);return route.abort();}
+  if(url.origin!==origin){
+   // Known remote NFL logos are the only external image requests in this fixture.
+   // Fail them deliberately to exercise the shipped text fallback, without network.
+   if(url.origin==='https://a.espncdn.com'&&/^\/i\/teamlogos\/nfl\/(?:500|500-dark)\/[a-z0-9]+\.png$/.test(url.pathname))return route.abort();
+   unexpectedRequests.push(url.href);return route.abort();
+  }
+  if(url.href===failedTeamLogo)return route.fulfill({status:404,body:''});
   if(url.pathname.startsWith('/api/')){
    let data;
    if(url.pathname==='/api/edge-vnext')data=url.searchParams.get('mode')==='nba'?nba:url.searchParams.get('mode')==='board'?board:null;
    else if(url.pathname==='/api/nflmodel')data=nfl;
+   else if(testingReviewedGames&&url.pathname==='/api/nbaprops'&&url.searchParams.get('view')==='research')data=propQuotes;
    else if(url.pathname==='/api/dashboard'&&url.searchParams.get('reviewedPicks')==='1'){
     const sport=url.searchParams.get('sport');reviewRequests.push(sport);
     if(testingReviewedGames&&sport==='NBA')data=nbaGameReviews;
@@ -118,7 +134,7 @@ try{
   const pathname=url.pathname==='/edge-vnext'?'/edge-vnext.html':url.pathname;
   const file=resolve(root,'.'+pathname);
   if(!file.startsWith(root+sep)){unexpectedRequests.push(url.href);return route.fulfill({status:404});}
-  try{return await route.fulfill({contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css'})[extname(file)]||'text/plain',body:await readFile(file)});}
+  try{return await route.fulfill({contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css','.png':'image/png','.svg':'image/svg+xml'})[extname(file)]||'text/plain',body:await readFile(file)});}
   catch{unexpectedRequests.push(url.href);return route.fulfill({status:404});}
  });
  async function noOverflow(label){
@@ -128,6 +144,28 @@ try{
   if(!process.env.EDGE_LAB_SCREENSHOT_DIR)return;
   const directory=resolve(process.env.EDGE_LAB_SCREENSHOT_DIR);await mkdir(directory,{recursive:true});
   await page.screenshot({path:resolve(directory,name+'.png'),fullPage:true});
+ }
+ async function readableGameCard(card,label){
+  const layout=await card.evaluate(element=>{
+   const identity=element.querySelector('.target-player-identity'),copy=identity.querySelector('.target-player-copy');
+   const heading=copy.querySelector('.player-name'),selection=copy.querySelector('.target-card-selection'),book=copy.querySelector('.target-card-book');
+   const box=node=>{const {x,y,width,height}=node.getBoundingClientRect();return {x,y,width,height};};
+   return {identity:box(identity),copy:box(copy),heading:box(heading),selection:box(selection),book:box(book),
+    text:heading.textContent,selectionText:selection.textContent,bookText:book.textContent,
+    fonts:{heading:parseFloat(getComputedStyle(heading).fontSize),selection:parseFloat(getComputedStyle(selection).fontSize),book:parseFloat(getComputedStyle(book).fontSize)},
+    clipped:[copy,heading,selection,book,...heading.querySelectorAll('.team-name')].some(node=>node.scrollWidth>node.clientWidth+1),
+    logos:heading.querySelectorAll('.team-logo-badge').length,portraits:identity.querySelectorAll('.target-player-portrait').length};
+  });
+  assert.ok(layout.identity.width>=180,label+' must reserve readable card space: '+JSON.stringify(layout));
+  assert.ok(layout.copy.width>=layout.identity.width-2,label+' game text must use the full identity width, including without a portrait: '+JSON.stringify(layout));
+  for(const key of ['heading','selection','book']){
+   assert.ok(layout[key].width>=layout.copy.width-2,label+' '+key+' must not inherit a fixed portrait track');
+   assert.ok(layout[key].x>=0&&layout[key].x+layout[key].width<=page.viewportSize().width+1,label+' '+key+' must stay inside the viewport');
+  }
+  assert.equal(layout.clipped,false,label+' game labels must wrap without clipping');
+  assert.equal(layout.logos,2,label+' needs a distinct identity for each team');
+  assert.equal(layout.portraits,0,label+' must not borrow a player portrait');
+  return layout;
  }
  async function checkScoring(block,{sparse=false}={}){
   await block.waitFor();
@@ -225,6 +263,11 @@ try{
   await screenshot('cfb-'+width);
   const researchMarket=page.locator('#cards > .research-market').first();
   await researchMarket.locator(':scope > summary').click();
+  const unknownGame=researchMarket.locator('.quote-option').first();
+  await readableGameCard(unknownGame,'Unmapped CFB game '+width);
+  assert.deepEqual(await unknownGame.locator('.player-name .team-name').allTextContents(),[awayName,homeName]);
+  for(const fallback of await unknownGame.locator('.player-name .team-logo-fallback').all())assert.equal(await fallback.isVisible(),true,'Unmapped teams need a visible fallback alongside their full names');
+  assert.equal(await unknownGame.locator('.player-name .team-logo:visible').count(),0,'Unmapped teams cannot borrow another team logo');
   await researchMarket.locator('.target-research-details > summary').first().click();
   await page.locator('#cards').getByRole('button',{name:'Why isn’t this cleared?'}).first().click();
   await checkScoring(page.locator('#detail-body .team-scoring'));
@@ -276,10 +319,84 @@ try{
  assert.match(await gameReviewSection.innerText(),/Buffalo Bills \+3\.5 · Full game/);
  assert.doesNotMatch(await gameReviewSection.innerText(),/Denver Nuggets|Jaden McDaniels|Bo Nix/);await noOverflow('Reviewed NFL Games 390');
  await page.locator('[data-sport="NBA"]').click();await denverReview.waitFor();assert.equal(await gameReviewSection.locator('[data-reviewed-pick]').count(),1);
+
+ // Reproduce the reported long-name layout at real mobile widths. Checking only
+ // page overflow misses the bug: all text fits by wrapping into a 54/64px column.
+ const atlantaMarket=page.locator('#cards > .research-market').filter({hasText:'Atlanta Hawks'});
+ const longMarket=page.locator('#cards > .research-market').filter({hasText:'Oklahoma City Thunder'});
+ await atlantaMarket.waitFor();await longMarket.waitFor();
+ for(const market of [atlantaMarket,longMarket])if(await market.getAttribute('open')===null)await market.locator(':scope > summary').click();
+ const moreQuotes=atlantaMarket.locator('.more-quotes');await moreQuotes.locator(':scope > summary').click();
+ if(await denverReview.getAttribute('open')===null)await denverReview.locator(':scope > summary').click();
+ const atlantaQuote=atlantaMarket.locator('.quote-option').first(),longQuote=longMarket.locator('.quote-option').first();
+ const baseFonts=(await readableGameCard(atlantaQuote,'NBA original text')).fonts;
+ const rootTextSize=await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize));
+ for(const width of [320,390,440])for(const scale of [1,2]){
+  await page.setViewportSize({width,height:900});
+  await page.evaluate(({scale,rootTextSize})=>{document.documentElement.style.fontSize=scale===1?'':rootTextSize*scale+'px';},{scale,rootTextSize});
+  const label='NBA games '+width+'px at '+scale*100+'% text';
+  const layout=await readableGameCard(atlantaQuote,label);
+  for(const [key,font] of Object.entries(baseFonts))assert.ok(Math.abs(layout.fonts[key]-font*scale)<.5,label+' fixture must actually double '+key+' text, not merely resize the viewport');
+  assert.deepEqual(await atlantaQuote.locator('.player-name .team-name').allTextContents(),['Atlanta Hawks','Boston Celtics']);
+  assert.match(layout.selectionText,/^(?:Atlanta Hawks|Boston Celtics) moneyline$/);
+  assert.match(layout.bookText,/(?:Pinnacle|DraftKings) · -110/);
+  assert.match(await atlantaQuote.locator('.target-card-reason').innerText(),/Game quote comparison only\. Use the cleared plays page for model decisions\./,'The explanation stays complete');
+  assert.match(await atlantaQuote.locator('.target-card-meta').innerText(),/NOT CLEARED/);
+  assert.equal(await atlantaQuote.locator('.target-card-metrics strong').first().innerText(),'N/A','Presentation cannot add an independent model probability');
+  await readableGameCard(atlantaMarket.locator('.group-quotes .quote-option').last(),label+' alternate quote');
+  await readableGameCard(longQuote,label+' long matchup');
+  await readableGameCard(denverReview.locator('.reviewed-pick-card'),label+' reviewed game');
+  const compact=longMarket.locator(':scope > summary .game-matchup'),summary=longMarket.locator(':scope > summary');
+  await summary.click(); // The compact identity is intentionally hidden while expanded.
+  const compactBox=await compact.boundingBox(),summaryBox=await summary.boundingBox();
+  assert.ok(compactBox.width>=summaryBox.width*.5,label+' compact matchup needs readable team-name space');
+  assert.deepEqual(await compact.locator('.team-name').allTextContents(),['Oklahoma City Thunder','Golden State Warriors']);
+  await summary.click();
+  await noOverflow(label);
+  await screenshot('game-team-layout-'+width+'-'+scale*100);
+ }
+ await page.evaluate(()=>{document.documentElement.style.fontSize='';});
+ await page.setViewportSize({width:390,height:844});
+ // First prove a bundled logo loaded; then make the same official request fail
+ // on reload. The actual image error handler must preserve both readable names.
+ await atlantaQuote.scrollIntoViewIfNeeded();
+ await page.waitForFunction(()=>[...document.querySelectorAll('#cards .quote-option .player-name .team-logo')].some(img=>img.complete&&img.naturalWidth>0));
+ const failedLogo=atlantaQuote.locator('.team-identity').filter({hasText:'Boston Celtics'}).locator('.team-logo');
+ failedTeamLogo=await failedLogo.evaluate(img=>img.src);
+ assert.match(new URL(failedTeamLogo).pathname,/^\/assets\/team-logos\//,'NBA logos are bundled assets');
+ await page.reload();await atlantaMarket.waitFor();
+ await atlantaMarket.locator(':scope > summary').click();await atlantaQuote.scrollIntoViewIfNeeded();
+ const failedIdentity=atlantaQuote.locator('.team-identity').filter({hasText:'Boston Celtics'});
+ await failedIdentity.locator('.team-logo-fallback').waitFor({state:'visible'});
+ assert.equal(await failedIdentity.locator('.team-logo').isVisible(),false,'Failed logos must not leave a broken image visible');
+ assert.equal(await failedIdentity.locator('.team-name').innerText(),'Boston Celtics');
+ await readableGameCard(atlantaQuote,'NBA failed-logo fallback');await noOverflow('NBA failed-logo fallback');
+ failedTeamLogo=null;
+
+ // Player cards keep the real portrait in the first track and readable text in
+ // the second. A fix to the shared identity selector must not remove headshots.
+ await page.goto(origin+'/research.html?kind=props&sport=NBA');
+ const propMarket=page.locator('#cards > .research-market').first();await propMarket.waitFor();
+ await propMarket.locator(':scope > summary').click();
+ const propCard=propMarket.locator('.quote-option').first(),portrait=propCard.locator('.target-player-portrait');
+ assert.equal(await portrait.getAttribute('src'),'/assets/players/derrick-white.png');
+ assert.equal(await portrait.getAttribute('alt'),'Derrick White portrait');
+ for(const width of [320,390,440]){
+  await page.setViewportSize({width,height:844});await portrait.scrollIntoViewIfNeeded();
+  await page.waitForFunction(()=>{const img=document.querySelector('#cards .target-player-portrait');return img.complete&&img.naturalWidth>0;});
+  const photoBox=await portrait.boundingBox(),copyBox=await propCard.locator('.target-player-copy').boundingBox();
+  assert.ok(photoBox.width>=50&&photoBox.width<=80,'Player portrait keeps its dedicated mobile track');
+  assert.ok(copyBox.x>=photoBox.x+photoBox.width,'Player text remains beside the headshot');
+  assert.ok(copyBox.width>=140,'Player name retains readable space at '+width+'px');
+  assert.equal(await propCard.locator('.player-name').innerText(),'Derrick White');
+  assert.equal(await propCard.locator('.game-matchup,.team-logo').count(),0,'Player cards must not acquire game identity markup');
+  await noOverflow('Player headshot '+width);
+ }
+
  const beforeUnsupported=reviewRequests.length;
  await page.goto(origin+'/research.html?kind=games&sport=EPL');await page.waitForFunction(()=>!document.querySelector('#refresh').disabled);
  assert.equal(await page.locator('#reviewed-games').isVisible(),false);assert.equal(await page.locator('#reviewed-games [data-reviewed-pick]').count(),0);
  assert.equal(reviewRequests.length,beforeUnsupported,'unsupported game leagues cannot call the reviewed-picks feed');
  assert.deepEqual(errors,[]);assert.deepEqual(unexpectedRequests,[]);
- console.log('PASS: team scoring on NBA/NFL Probability Lab, NFL cards and CFB cards/details at desktop and 390px; reported NFL history; reviewed Games BUYs, game-only counts, sport switching, independent refresh and unsupported leagues; no overflow, unchanged probabilities and research-only states. All requests mocked.');
+ console.log('PASS: team scoring and reviewed Games, including sport switching and refresh; full-width game text at 320/390/440px with normal/200% text; long matchups, loaded/failed/unmapped logos, alternate quotes, and unchanged player headshots. Probabilities remain research-only. All requests mocked.');
 }finally{await browser?.close();}

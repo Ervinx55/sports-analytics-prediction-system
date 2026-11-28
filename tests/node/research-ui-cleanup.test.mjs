@@ -3,10 +3,50 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {formatCentralTime} from '../../sharp-service/ui-format.js';
 import {normalizeResearch,latestResearchObservations,groupResearchRows,sortResearchGroups,filterResearch,refreshResearchRow} from '../../sharp-service/research-data.js';
+import {appendGameMatchup} from '../../sharp-service/game-card-view.js';
 const now=Date.parse('2026-11-27T17:00:00Z'),stamp=new Date(now-1000).toISOString(),older=new Date(now-60000).toISOString(),start=new Date(now+3600000).toISOString();
 const q=(patch={})=>({line:3.5,odds:-110,available:true,updatedAt:stamp,...patch});
 function body(players){return {contract:'nba-multibook-research-v1',source:'SportsGameOdds',generatedAt:stamp,events:[{eventID:'sgo:test',provider:'SportsGameOdds',startsAt:start,matchup:{away:{name:'Hawks'},home:{name:'Celtics'}},players}]};}
 function player(patch={}){return {prop:{playerID:'DERRICK_WHITE_1_NBA',statID:'rebounds',over:{books:{draftkings:q()}},under:{books:{draftkings:q()}},...patch}};}
+function matchupDocument(){
+ const doc={createElement(tag){
+  const node={tagName:tag.toUpperCase(),ownerDocument:doc,children:[],attributes:{},dataset:{},value:'',
+   append(...children){this.children.push(...children);},appendChild(child){this.children.push(child);return child;},
+   setAttribute(name,value){this.attributes[name]=String(value);}};
+  Object.defineProperty(node,'textContent',{get(){return this.value+this.children.map(child=>child.textContent).join('');},set(value){this.value=String(value);this.children=[];}});
+  return node;
+ }};
+ return doc;
+}
+const visibleText=node=>node.hidden||node.attributes['aria-hidden']==='true'?'':node.value+node.children.map(visibleText).join('');
+test('game matchup presentation preserves team order and uses two team identities without player portraits',()=>{
+ const doc=matchupDocument(),parent=doc.createElement('div');
+ const options={sport:'NBA',away:{name:'Atlanta Hawks',id:'ATLANTA_HAWKS_NBA'},home:{name:'Boston Celtics',id:'BOSTON_CELTICS_NBA'}},before=structuredClone(options);
+ const heading=appendGameMatchup(parent,options);
+ assert.equal(heading.tagName,'H3');assert.equal(parent.children[0],heading);
+ assert.equal(visibleText(heading),'Atlanta Hawks vs Boston Celtics');
+ assert.deepEqual(heading.children.map(child=>child.className),['team-identity','game-matchup-separator','team-identity']);
+ assert.equal(heading.children[0].children[0].children[0].src,'/assets/team-logos/nba/atl.png');
+ assert.equal(heading.children[2].children[0].children[0].src,'/assets/team-logos/nba/bos.png');
+ assert.deepEqual(options,before,'Presentation cannot rewrite provider team identity or order');
+});
+test('compact game matchup stays inline and retains the supplied at/versus distinction',()=>{
+ const doc=matchupDocument(),parent=doc.createElement('span');
+ const heading=appendGameMatchup(parent,{sport:'NBA',away:'Oklahoma City Thunder',home:'Golden State Warriors',separator:'at',compact:true,tag:'span',className:'player-row-heading'});
+ assert.equal(heading.tagName,'SPAN');assert.ok(heading.children.every(child=>child.tagName==='SPAN'));
+ assert.match(heading.className,/game-matchup-compact/);
+ assert.equal(visibleText(heading),'Oklahoma City Thunder at Golden State Warriors');
+});
+test('unresolved and markup-like team names remain full literal names with no image request',()=>{
+ const doc=matchupDocument(),parent=doc.createElement('div'),name='<img src=x onerror=alert(1)> Home';
+ const heading=appendGameMatchup(parent,{sport:'NBA',away:'Unknown visiting team',home:name});
+ assert.equal(visibleText(heading),'Unknown visiting team vs '+name);
+ for(const identity of [heading.children[0],heading.children[2]]){
+  assert.equal(identity.children[0].children.some(child=>child.tagName==='IMG'),false);
+  assert.equal(identity.children[0].children[0].hidden,false);
+  assert.equal(identity.children[1].tagName,'SPAN');
+ }
+});
 test('provider ID fallback creates readable name without changing roster identity',()=>{
  const rows=normalizeResearch(body([player()]),'NBA',now);
  assert.ok(rows.every(row=>row.player==='Derrick White'&&row.nameSource==='provider-id'));
